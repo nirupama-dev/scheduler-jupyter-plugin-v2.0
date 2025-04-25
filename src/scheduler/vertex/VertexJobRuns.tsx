@@ -43,7 +43,9 @@ const VertexJobRuns = ({
   setIsLoading,
   isLoading,
   vertexScheduleRunsList,
-  setVertexScheduleRunsList
+  setVertexScheduleRunsList,
+  abortControllers,
+  abortApiCall
 }: {
   region: string;
   schedulerData: ISchedulerData | undefined;
@@ -64,6 +66,8 @@ const VertexJobRuns = ({
   isLoading: boolean;
   vertexScheduleRunsList: IVertexScheduleRunList[];
   setVertexScheduleRunsList: (value: IVertexScheduleRunList[]) => void;
+  abortControllers: any;
+  abortApiCall: () => void;
 }): JSX.Element => {
   const [jobDownloadLoading, setJobDownloadLoading] = useState(false);
   const [
@@ -296,13 +300,18 @@ const VertexJobRuns = ({
         data.jobRunId,
         data.fileName,
         setIsLoading,
-        setFileExists
+        setFileExists,
+        abortControllers
       );
     };
     useEffect(() => {
       if (data.state === 'failed') {
         outPutFileExistsApi();
       }
+
+      return () => {
+        abortApiCall();
+      };
     }, []);
 
     return (
@@ -352,7 +361,8 @@ const VertexJobRuns = ({
       setOrangeListDates,
       setRedListDates,
       setGreenListDates,
-      setDarkGreenListDates
+      setDarkGreenListDates,
+      abortControllers
     );
   };
 

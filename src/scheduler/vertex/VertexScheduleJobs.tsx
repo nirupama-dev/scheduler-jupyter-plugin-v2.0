@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { SchedulerWidget } from '../../controls/SchedulerWidget';
 import { JupyterLab } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
@@ -108,6 +108,7 @@ const VertexScheduleJobs = ({
     useState<boolean>(false);
   const [schedulerData, setScheduleData] = useState<ISchedulerData>();
   const [scheduleName, setScheduleName] = useState('');
+  const abortControllers = useRef<any>([]); // Array of API signals to abort
 
   /**
    * Handles the back button click event.
@@ -115,6 +116,7 @@ const VertexScheduleJobs = ({
   const handleBackButton = () => {
     setShowExecutionHistory(false);
     setExecutionPageFlag(true);
+    abortApiCall();
   };
 
   /**
@@ -128,6 +130,11 @@ const VertexScheduleJobs = ({
     setScheduleData(schedulerData);
   };
 
+  const abortApiCall = () => {
+    abortControllers.current.forEach((controller: any) => controller.abort());
+    abortControllers.current = [];
+  };
+
   return (
     <>
       {showExecutionHistory ? (
@@ -139,6 +146,8 @@ const VertexScheduleJobs = ({
           handleBackButton={handleBackButton}
           setExecutionPageFlag={setExecutionPageFlag}
           setExecutionPageListFlag={setExecutionPageListFlag}
+          abortControllers={abortControllers}
+          abortApiCall={abortApiCall}
         />
       ) : (
         <ListVertexScheduler
@@ -175,6 +184,8 @@ const VertexScheduleJobs = ({
           handleDagIdSelection={handleDagIdSelection}
           setIsApiError={setIsApiError}
           setApiError={setApiError}
+          abortControllers={abortControllers}
+          abortApiCall={abortApiCall}
         />
       )}
     </>

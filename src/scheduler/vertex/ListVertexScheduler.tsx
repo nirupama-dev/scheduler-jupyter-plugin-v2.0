@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTable, usePagination } from 'react-table';
 import TableData from '../../utils/TableData';
 import { PaginationComponent } from '../../utils/PaginationComponent';
@@ -80,7 +80,9 @@ function ListVertexScheduler({
   setGcsPath,
   handleDagIdSelection,
   setIsApiError,
-  setApiError
+  setApiError,
+  abortControllers,
+  abortApiCall
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -121,6 +123,8 @@ function ListVertexScheduler({
   handleDagIdSelection: (scheduleId: any, scheduleName: string) => void;
   setIsApiError: (value: boolean) => void;
   setApiError: (value: string) => void;
+  abortControllers: any;
+  abortApiCall: () => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -152,7 +156,6 @@ function ListVertexScheduler({
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [fetchPreviousPage, setFetchPreviousPage] = useState<boolean>(false);
   const [fetchCurrentPage, setFetchCurrentPage] = useState<boolean>(false);
-  const abortControllers = useRef<any>([]); // Array of API signals to abort
 
   const columns = useMemo(
     () => [
@@ -362,14 +365,16 @@ function ListVertexScheduler({
         scheduleId,
         region,
         displayName,
-        setResumeLoading
+        setResumeLoading,
+        abortControllers
       );
     } else {
       await VertexServices.handleUpdateSchedulerResumeAPIService(
         scheduleId,
         region,
         displayName,
-        setResumeLoading
+        setResumeLoading,
+        abortControllers
       );
     }
     handleCurrentPageRefresh();
@@ -390,9 +395,12 @@ function ListVertexScheduler({
         region,
         scheduleId,
         displayName,
-        setTriggerLoading
+        setTriggerLoading,
+        abortControllers
       );
     }
+
+    handleCurrentPageRefresh();
   };
 
   /**
@@ -461,6 +469,7 @@ function ListVertexScheduler({
     event: React.MouseEvent,
     displayName: string
   ) => {
+    abortApiCall();
     const job_id = event.currentTarget.getAttribute('data-jobid');
     if (job_id) {
       setJobId(job_id);
@@ -493,7 +502,8 @@ function ListVertexScheduler({
         setMaxRuns,
         setEditMode,
         setJobNameSelected,
-        setGcsPath
+        setGcsPath,
+        abortControllers
       );
     }
   };
@@ -690,7 +700,8 @@ function ListVertexScheduler({
           {...cell.getCellProps()}
           className="clusters-table-data table-cell-overflow"
         >
-          {cell.row.original.status === 'COMPLETED' ? (
+          {cell.row.original.status === 'COMPLETED' ||
+          cell.row.original.status === 'PAUSED' ? (
             <iconDash.react tag="div" />
           ) : (
             dayjs(cell.row.original.nextRunTime).format('lll')
@@ -914,11 +925,6 @@ function ListVertexScheduler({
         console.error(error);
       });
   }, [projectId]);
-
-  const abortApiCall = () => {
-    abortControllers.current.forEach((controller: any) => controller.abort());
-    abortControllers.current = [];
-  };
 
   return (
     <div>
