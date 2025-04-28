@@ -838,7 +838,7 @@ const CreateVertexScheduler = ({
         option => option === DEFAULT_CLOUD_STORAGE_BUCKET
       ) || null
     );
-  }, []);
+  }, [cloudStorageList]);
 
   useEffect(() => {
     const machineTypeOptions = machineTypeList.map(item => item.machineType);

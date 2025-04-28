@@ -17,7 +17,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTable, useGlobalFilter } from 'react-table';
 import { CircularProgress } from '@mui/material';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import TableData from '../../utils/TableData';
 import { ICellProps } from '../../utils/Config';
 import { iconDownload } from '../../utils/Icons';
@@ -223,6 +223,15 @@ const VertexJobRuns = ({
           {cell.render('Cell')}
         </td>;
       }
+    } else if (cell.column.Header === 'Date') {
+      return (
+        <td
+          {...cell.getCellProps()}
+          className="clusters-table-data table-cell-overflow"
+        >
+          {dayjs(cell.value).format('lll')}
+        </td>
+      );
     }
     return (
       <td {...cell.getCellProps()} className="notebook-template-table-data">
