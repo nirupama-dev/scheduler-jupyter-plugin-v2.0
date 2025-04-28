@@ -48,6 +48,12 @@ export function RegionDropdown(props: Props) {
     loaderRegion,
     regionsList
   } = props;
+  // const [regionStrList, setRegionStrList] = useState<string[]>([]);
+
+  // console.log('regionsList', regionsList);
+
+  // if (!regionsList) {
+  //   console.log('inside if');
   const regions = useRegion(projectId);
 
   const regionStrList = useMemo(
@@ -55,9 +61,16 @@ export function RegionDropdown(props: Props) {
     [regions]
   );
 
+  // const regionStrListFromApi = regions.map(region => region.name);
+
+  //   setRegionStrList(regionStrListFromApi);
+  // }
+
   return (
     <Autocomplete
-      value={region}
+      value={
+        regionsList ? (regionsList?.includes(region) ? region : '') : region
+      }
       options={regionsList ? regionsList : regionStrList}
       onChange={(_, value) => onRegionChange(value ?? '')}
       PaperComponent={(props: PaperProps) => <Paper elevation={8} {...props} />}
