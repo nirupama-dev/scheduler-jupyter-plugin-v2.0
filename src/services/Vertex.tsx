@@ -732,7 +732,7 @@ export class VertexServices {
               endDate: jobRun.updateTime,
               gcsUrl: jobRun.gcsOutputUri,
               state: jobRun.jobState.split('_')[2].toLowerCase(),
-              date: new Date(jobRun.createTime).toDateString(),
+              date: new Date(jobRun.createTime),
               fileName: jobRun.gcsNotebookSource.uri.split('/').pop(),
               time: `${minutes} min ${seconds} sec`,
               code:
