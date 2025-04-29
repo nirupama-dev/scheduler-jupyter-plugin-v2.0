@@ -48,23 +48,16 @@ export function RegionDropdown(props: Props) {
     loaderRegion,
     regionsList
   } = props;
-  // const [regionStrList, setRegionStrList] = useState<string[]>([]);
+  let regionStrList: string[] = [];
 
-  // console.log('regionsList', regionsList);
+  if (!regionsList) {
+    const regions = useRegion(projectId);
 
-  // if (!regionsList) {
-  //   console.log('inside if');
-  const regions = useRegion(projectId);
-
-  const regionStrList = useMemo(
-    () => regions.map(region => region.name),
-    [regions]
-  );
-
-  // const regionStrListFromApi = regions.map(region => region.name);
-
-  //   setRegionStrList(regionStrListFromApi);
-  // }
+    regionStrList = useMemo(
+      () => regions.map(region => region.name),
+      [regions]
+    );
+  }
 
   return (
     <Autocomplete
