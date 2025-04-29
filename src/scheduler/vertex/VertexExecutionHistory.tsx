@@ -35,7 +35,9 @@ const VertexExecutionHistory = ({
   scheduleName,
   handleBackButton,
   setExecutionPageFlag,
-  setExecutionPageListFlag
+  setExecutionPageListFlag,
+  abortControllers,
+  abortApiCall
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -44,6 +46,8 @@ const VertexExecutionHistory = ({
   handleBackButton: () => void;
   setExecutionPageFlag: (value: boolean) => void;
   setExecutionPageListFlag: (value: boolean) => void;
+  abortControllers: any;
+  abortApiCall: () => void;
 }): JSX.Element => {
   const today = dayjs();
 
@@ -83,6 +87,7 @@ const VertexExecutionHistory = ({
 
     return () => {
       setExecutionPageListFlag(false);
+      abortApiCall();
     };
   }, []);
 
@@ -304,9 +309,7 @@ const VertexExecutionHistory = ({
           <div className="execution-history-main-wrapper">
             <div
               className={
-                isLoading
-                  ? 'execution-history-left-wrapper execution-wrapper-border-none'
-                  : 'execution-history-left-wrapper text-enable-warning execution-wrapper-border-none'
+                'execution-history-left-wrapper calender-top execution-wrapper-border-none'
               }
             >
               <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -351,6 +354,8 @@ const VertexExecutionHistory = ({
                 isLoading={isLoading}
                 vertexScheduleRunsList={vertexScheduleRunsList}
                 setVertexScheduleRunsList={setVertexScheduleRunsList}
+                abortControllers={abortControllers}
+                abortApiCall={abortApiCall}
               />
             </div>
           </div>
