@@ -515,15 +515,14 @@ const CreateVertexScheduler = ({
   ) => {
     const newValue = (event.target as HTMLInputElement).value;
     if (newValue === 'userFriendly') {
-      setScheduleValue(scheduleValueExpression);
+      const cronValue =
+        scheduleField === '' ? scheduleValueExpression : scheduleField;
+      setScheduleValue(cronValue);
     }
     if (newValue === 'cronFormat') {
-      setScheduleField('');
+      setScheduleField(scheduleValue);
     }
     setInternalScheduleMode(newValue as internalScheduleMode);
-    setStartDate(null);
-    setEndDate(null);
-    setMaxRuns('');
   };
 
   /**
