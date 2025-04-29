@@ -758,15 +758,20 @@ function ListVertexScheduler({
         cell.row.original.status === 'COMPLETED';
 
       const { status, lastScheduledRunResponse } = cell.row.original;
-      const runResponse = lastScheduledRunResponse ? lastScheduledRunResponse.runResponse: "";
+      const runResponse = lastScheduledRunResponse
+        ? lastScheduledRunResponse.runResponse
+        : '';
 
       const getStatusIcon = () => {
-
         type StatusKey = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
-        const allowedStatuses: ReadonlyArray < StatusKey > = ['ACTIVE', 'PAUSED', 'COMPLETED'];
+        const allowedStatuses: ReadonlyArray<StatusKey> = [
+          'ACTIVE',
+          'PAUSED',
+          'COMPLETED'
+        ];
         const iconMap: {
-          [key in StatusKey | 'default']: () => React.ReactElement
-      } = {
+          [key in StatusKey | 'default']: () => React.ReactElement;
+        } = {
           ACTIVE: () => (
             <iconActive.react
               tag="div"
@@ -822,10 +827,12 @@ function ListVertexScheduler({
                 className="icon-white logo-alignment-style success_icon icon-size"
               />
             </div>
-          ),
+          )
         };
 
-      return (allowedStatuses.includes(status as StatusKey) ? iconMap[status as StatusKey]() : iconMap.default());
+        return allowedStatuses.includes(status as StatusKey)
+          ? iconMap[status as StatusKey]()
+          : iconMap.default();
       };
 
       return (
