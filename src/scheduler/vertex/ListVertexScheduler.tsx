@@ -34,7 +34,7 @@ import {
   iconEditDag,
   iconEditNotebook,
   iconFailed,
-  iconListComplete,
+  iconListCompleteWithError,
   iconListPause,
   iconPause,
   iconPlay,
@@ -768,25 +768,83 @@ function ListVertexScheduler({
         cell.row.original.status === 'PAUSED' ||
         cell.row.original.status === 'COMPLETED';
 
-      let pauseTitle = '';
+      const { status, lastScheduledRunResponse } = cell.row.original;
+      const runResponse = lastScheduledRunResponse
+        ? lastScheduledRunResponse.runResponse
+        : '';
 
-      if (
-        cell.row.original.status === 'ACTIVE' &&
-        cell.row.original.lastScheduledRunResponse &&
-        cell.row.original.lastScheduledRunResponse.runResponse &&
-        cell.row.original.lastScheduledRunResponse.runResponse === 'OK'
-      ) {
-        pauseTitle = 'ACTIVE';
-      }
+      const getStatusIcon = () => {
+        type StatusKey = 'ACTIVE' | 'PAUSED' | 'COMPLETED';
+        const allowedStatuses: ReadonlyArray<StatusKey> = [
+          'ACTIVE',
+          'PAUSED',
+          'COMPLETED'
+        ];
+        const iconMap: {
+          [key in StatusKey | 'default']: () => React.ReactElement;
+        } = {
+          ACTIVE: () => (
+            <iconActive.react
+              tag="div"
+              title="ACTIVE"
+              className="icon-white logo-alignment-style success_icon icon-size-status"
+            />
+          ),
+          PAUSED: () => (
+            <iconListPause.react
+              tag="div"
+              title="PAUSE"
+              className="icon-white logo-alignment-style success_icon icon-size"
+            />
+          ),
+          COMPLETED: () => {
+            if (!lastScheduledRunResponse) {
+              return (
+                <div>
+                  <iconSuccess.react
+                    tag="div"
+                    title="COMPLETED"
+                    className="icon-white logo-alignment-style success_icon icon-size icon-completed"
+                  />
+                </div>
+              );
+            }
+            if (runResponse !== 'OK') {
+              return (
+                <div>
+                  <iconListCompleteWithError.react
+                    tag="div"
+                    title={runResponse}
+                    className="icon-white logo-alignment-style success_icon icon-size-status"
+                  />
+                </div>
+              );
+            }
+            return (
+              <div>
+                <iconSuccess.react
+                  tag="div"
+                  title="COMPLETED"
+                  className="icon-white logo-alignment-style success_icon icon-size icon-completed"
+                />
+              </div>
+            );
+          },
+          default: () => (
+            <div>
+              <iconFailed.react
+                tag="div"
+                title={!lastScheduledRunResponse ? 'Not started' : runResponse}
+                className="icon-white logo-alignment-style success_icon icon-size"
+              />
+            </div>
+          )
+        };
 
-      if (
-        cell.row.original.status === 'PAUSED' &&
-        cell.row.original.lastScheduledRunResponse &&
-        cell.row.original.lastScheduledRunResponse.runResponse &&
-        cell.row.original.lastScheduledRunResponse.runResponse === 'OK'
-      ) {
-        pauseTitle = 'PAUSED';
-      }
+        return allowedStatuses.includes(status as StatusKey)
+          ? iconMap[status as StatusKey]()
+          : iconMap.default();
+      };
 
       return (
         <td
@@ -800,73 +858,7 @@ function ListVertexScheduler({
           {cell.column.Header === 'Status' ? (
             <>
               <div className="execution-history-main-wrapper">
-                {cell.row.original.lastScheduledRunResponse === null ? (
-                  cell.row.original.status === 'ACTIVE' ? (
-                    <iconActive.react
-                      tag="div"
-                      title="ACTIVE"
-                      className="icon-white logo-alignment-style success_icon icon-size-status"
-                    />
-                  ) : (
-                    <iconListPause.react
-                      tag="div"
-                      title="PAUSE"
-                      className="icon-white logo-alignment-style success_icon icon-size"
-                    />
-                  )
-                ) : cell.row.original.lastScheduledRunResponse &&
-                  cell.row.original.lastScheduledRunResponse.runResponse ? (
-                  cell.row.original.status === 'COMPLETED' ? (
-                    cell.row.original.lastScheduledRunResponse.runResponse ===
-                    'OK' ? (
-                      <div>
-                        <iconSuccess.react
-                          tag="div"
-                          title="Done !"
-                          className="icon-white logo-alignment-style success_icon icon-size icon-completed"
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <iconListComplete.react
-                          tag="div"
-                          title={
-                            cell.row.original.lastScheduledRunResponse &&
-                            cell.row.original.lastScheduledRunResponse
-                              .runResponse
-                          }
-                          className="icon-white logo-alignment-style success_icon icon-size-status"
-                        />
-                      </div>
-                    )
-                  ) : cell.row.original.status === 'ACTIVE' ? (
-                    <iconActive.react
-                      tag="div"
-                      title={pauseTitle}
-                      className="icon-white logo-alignment-style success_icon icon-size-status"
-                    />
-                  ) : (
-                    <iconListPause.react
-                      tag="div"
-                      title={pauseTitle}
-                      className="icon-white logo-alignment-style success_icon icon-size"
-                    />
-                  )
-                ) : (
-                  <div>
-                    <iconFailed.react
-                      tag="div"
-                      title={
-                        !cell.row.original.lastScheduledRunResponse
-                          ? 'Not started'
-                          : cell.row.original.lastScheduledRunResponse &&
-                            cell.row.original.lastScheduledRunResponse
-                              .runResponse
-                      }
-                      className="icon-white logo-alignment-style success_icon icon-size"
-                    />
-                  </div>
-                )}
+                {getStatusIcon()}
                 <div className={alignIcon ? 'text-icon' : ''}>
                   {cell.render('Cell')}
                 </div>

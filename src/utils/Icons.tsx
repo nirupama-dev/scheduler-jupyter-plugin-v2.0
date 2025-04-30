@@ -29,7 +29,7 @@ import ActiveIcon from '../../style/icons/list_active_icon.svg';
 import EditIconDisable from '../../style/icons/scheduler_edit_dag.svg';
 import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
 import FailedIcon from '../../style/icons/list_error_icon.svg';
-import ListCompleteIcon from '../../style/icons/list_completed_with_error.svg';
+import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_error.svg';
 import ListPauseIcon from '../../style/icons/list_pause_icon.svg';
 import pauseIcon from '../../style/icons/scheduler_pause.svg';
 import playIcon from '../../style/icons/scheduler_play.svg';
@@ -106,9 +106,9 @@ export const iconFailed = new LabIcon({
   svgstr: FailedIcon
 });
 
-export const iconListComplete = new LabIcon({
+export const iconListCompleteWithError = new LabIcon({
   name: 'launcher:list-complete-icon',
-  svgstr: ListCompleteIcon
+  svgstr: ListCompleteWithErrorIcon
 });
 
 export const iconListPause = new LabIcon({

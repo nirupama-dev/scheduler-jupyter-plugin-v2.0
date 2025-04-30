@@ -551,6 +551,10 @@ function listNotebookScheduler({
   }, []);
 
   useEffect(() => {
+    if (composerList.length === 0) {
+      setComposerSelectedList('');
+      setDagList([]);
+    }
     if (
       composerList.length > 0 &&
       backselectedEnvironment === '' &&

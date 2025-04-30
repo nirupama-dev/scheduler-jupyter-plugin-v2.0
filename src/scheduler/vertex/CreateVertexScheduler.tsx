@@ -39,7 +39,7 @@ import tzdata from 'tzdata';
 import dayjs from 'dayjs';
 import { Input } from '../../controls/MuiWrappedInput';
 import { RegionDropdown } from '../../controls/RegionDropdown';
-import { authApi } from '../../utils/Config';
+import { authApi, currentTime } from '../../utils/Config';
 import {
   CORN_EXP_DOC_URL,
   DEFAULT_CLOUD_STORAGE_BUCKET,
@@ -457,8 +457,11 @@ const CreateVertexScheduler = ({
    * @param {string | null | any} val Start date selected
    */
   const handleStartDate = (val: string | null | any) => {
-    const startDateValue = dayjs(val.$d); // Ensure it's a dayjs object
-    setStartDate(startDateValue);
+    if (val) {
+      const newDateTime = currentTime(val);
+      setStartDate(newDateTime);
+    }
+
     if (val && endDate && dayjs(endDate).isBefore(dayjs(val))) {
       setEndDateError(true);
     } else {
@@ -471,7 +474,11 @@ const CreateVertexScheduler = ({
    * @param {string | null | any} val End date selected
    */
   const handleEndDate = (val: string | null | any) => {
-    const endDateValue = dayjs(val.$d);
+    if (val) {
+      const endDateValue = currentTime(val);
+      setEndDate(endDateValue);
+    }
+
     if (
       startDate &&
       (dayjs(val).isBefore(dayjs(startDate)) ||
@@ -481,7 +488,6 @@ const CreateVertexScheduler = ({
     } else {
       setEndDateError(false);
     }
-    setEndDate(endDateValue);
   };
 
   /**
@@ -515,15 +521,14 @@ const CreateVertexScheduler = ({
   ) => {
     const newValue = (event.target as HTMLInputElement).value;
     if (newValue === 'userFriendly') {
-      setScheduleValue(scheduleValueExpression);
+      const cronValue =
+        scheduleField === '' ? scheduleValueExpression : scheduleField;
+      setScheduleValue(cronValue);
     }
     if (newValue === 'cronFormat') {
-      setScheduleField('');
+      setScheduleField(scheduleValue);
     }
     setInternalScheduleMode(newValue as internalScheduleMode);
-    setStartDate(null);
-    setEndDate(null);
-    setMaxRuns('');
   };
 
   /**
