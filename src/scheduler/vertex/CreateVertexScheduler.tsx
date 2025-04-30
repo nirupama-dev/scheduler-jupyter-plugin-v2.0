@@ -838,11 +838,13 @@ const CreateVertexScheduler = ({
   }, [primaryNetworkList, networkSelected]);
 
   useEffect(() => {
-    setCloudStorage(
-      cloudStorageList.find(
-        option => option === DEFAULT_CLOUD_STORAGE_BUCKET
-      ) || null
-    );
+    if (!isCreatingNewBucket) {
+      setCloudStorage(
+        cloudStorageList.find(
+          option => option === DEFAULT_CLOUD_STORAGE_BUCKET
+        ) || null
+      );
+    }
   }, [cloudStorageList]);
 
   useEffect(() => {
