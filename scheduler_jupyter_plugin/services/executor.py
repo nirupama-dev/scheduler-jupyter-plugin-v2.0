@@ -21,6 +21,7 @@ from google.cloud import storage
 from google.api_core.exceptions import NotFound
 import google.oauth2.credentials as oauth2
 import aiofiles
+import json
 
 import aiohttp
 import pendulum
@@ -35,6 +36,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     PACKAGE_NAME,
     WRAPPER_PAPPERMILL_FILE,
     UTF8,
+    PAYLOAD_JSON_FILE_PATH,
 )
 from scheduler_jupyter_plugin.models.models import DescribeJob
 from scheduler_jupyter_plugin.services import airflow
@@ -290,8 +292,7 @@ class Client:
             else:
                 decoded_output = stdout.decode(UTF8)
                 installed_packages = set(
-                    line.split()[0].lower()
-                    for line in decoded_output.splitlines()[2:]
+                    line.split()[0].lower() for line in decoded_output.splitlines()[2:]
                 )
                 for package in packages:
                     if package.lower() not in installed_packages:
@@ -302,7 +303,6 @@ class Client:
         except Exception as error:
             self.log.exception(f"Error checking packages: {error}")
             raise IOError(f"Error checking packages: {error}")
-
 
     async def install_to_composer_environment(
         self, local_kernel, composer_environment_name, packages_to_install
@@ -320,9 +320,7 @@ class Client:
                         stderr=subprocess.PIPE,
                         shell=True,
                     )
-                    install_stdout, install_stderr = (
-                        install_process.communicate()
-                    )
+                    install_stdout, install_stderr = install_process.communicate()
                     if install_process.returncode == 0:
                         self.log.info(f"{package} installed successfully.")
                     else:
@@ -337,6 +335,14 @@ class Client:
         except Exception as e:
             self.log.exception(f"error installing {package}: {install_stderr}")
             return {"error": str(e)}
+
+    def create_payload(self, file_path, project_id, region, input_data):
+        payload = {"projectId": project_id, "region": region, "job": input_data}
+
+        with open(file_path, "w") as f:
+            json.dump(payload, f, indent=4)
+
+        print(f"Created {file_path} successfully.")
 
     async def execute(self, input_data, project_id=None, region_id=None):
         try:
@@ -354,7 +360,9 @@ class Client:
 
             if job.packages_to_install != None:
                 install_packages = await self.install_to_composer_environment(
-                    job.local_kernel, job.composer_environment_name, job.packages_to_install
+                    job.local_kernel,
+                    job.composer_environment_name,
+                    job.packages_to_install,
                 )
             if install_packages and install_packages.get("error"):
                 raise Exception(install_packages)
@@ -374,12 +382,25 @@ class Client:
                 print(
                     f"The file gs://{gcs_dag_bucket}/{wrapper_pappermill_file_path} does not exist."
                 )
+            # uploading input file while creating the job
             if not job.input_filename.startswith(GCS):
                 await self.upload_to_gcs(
                     gcs_dag_bucket,
                     file_path=f"./{job.input_filename}",
                     destination_dir=f"dataproc-notebooks/{job_name}/input_notebooks",
                 )
+            # creating a json file for payload
+            self.create_payload(
+                PAYLOAD_JSON_FILE_PATH, project_id, region_id, input_data
+            )
+
+            # uploading payload JSON file to GCS
+            await self.upload_to_gcs(
+                gcs_dag_bucket,
+                file_path=PAYLOAD_JSON_FILE_PATH,
+                destination_dir=f"dataproc-notebooks/{job_name}/dag_details",
+            )
+
             file_path = self.prepare_dag(job, gcs_dag_bucket, dag_file)
             await self.upload_to_gcs(
                 gcs_dag_bucket, file_path=file_path, destination_dir="dags"

@@ -14,6 +14,7 @@
 
 
 import aiohttp
+import json
 from cron_descriptor import get_description
 
 import google.oauth2.credentials as oauth2
@@ -88,10 +89,17 @@ class Client:
         blob = bucket.blob(blob_name)
         blob.upload_from_filename(file_path)
 
+        # creating json file containing the input file path
+        metadata = {"inputFilePath": f"gs://{bucket_name}/{blob_name}"}
+        json_file_name = f"{job_name}.json"
+
+        with open(json_file_name, "w") as f:
+            json.dump(metadata, f, indent=4)
+
         # uploading json file containing the input file path
-        json_blob_name = f"{job_name}/{job_name}.json"
+        json_blob_name = f"{job_name}/{json_file_name}"
         json_blob = bucket.blob(json_blob_name)
-        json_blob.upload_from_string(f"gs://{bucket_name}/{blob_name}")
+        json_blob.upload_from_filename(json_file_name)
 
         self.log.info(f"File {input_notebook} uploaded to gcs successfully")
         return blob_name
@@ -248,10 +256,10 @@ class Client:
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
         try:
             result = {}
-            
+
             if next_page_token:
                 api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}"
-                
+
             else:
                 api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}"
 
