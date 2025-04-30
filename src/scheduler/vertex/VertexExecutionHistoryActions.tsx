@@ -12,8 +12,7 @@ const VertexExecutionHistoryActions = ({
   gcsUrl,
   fileName,
   scheduleName,
-  abortControllers,
-  abortApiCall
+  abortControllers
 }: {
   data: { id: string; status: string };
   jobRunId?: string;
@@ -22,7 +21,6 @@ const VertexExecutionHistoryActions = ({
   fileName?: string;
   scheduleName: string;
   abortControllers: any;
-  abortApiCall: () => void;
 }) => {
   const [jobDownloadLoading, setJobDownloadLoading] = useState(false);
   const [
@@ -78,10 +76,6 @@ const VertexExecutionHistoryActions = ({
     if (state === 'failed') {
       outPutFileExistsApi();
     }
-
-    return () => {
-      abortApiCall();
-    };
   }, []);
 
   return (

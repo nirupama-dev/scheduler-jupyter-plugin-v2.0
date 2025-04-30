@@ -152,7 +152,6 @@ const VertexJobRuns = ({
             fileName={cell.row.original.fileName}
             scheduleName={scheduleName}
             abortControllers={abortControllers}
-            abortApiCall={abortApiCall}
           />
         </td>
       );
@@ -287,6 +286,12 @@ const VertexJobRuns = ({
       scheduleRunsList();
     }
   }, [selectedMonth]);
+
+  useEffect(() => {
+    return () => {
+      abortApiCall();
+    };
+  }, []);
 
   return (
     <div>
