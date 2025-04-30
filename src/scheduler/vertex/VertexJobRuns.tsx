@@ -313,14 +313,11 @@ const VertexJobRuns = ({
         abortControllers
       );
     };
+
     useEffect(() => {
       if (data.state === 'failed') {
         outPutFileExistsApi();
       }
-
-      return () => {
-        abortApiCall();
-      };
     }, []);
 
     return (
@@ -380,6 +377,12 @@ const VertexJobRuns = ({
       scheduleRunsList();
     }
   }, [selectedMonth]);
+
+  useEffect(() => {
+    return () => {
+      abortApiCall();
+    };
+  }, [])
 
   return (
     <div>
