@@ -342,8 +342,6 @@ class Client:
         with open(file_path, "w") as f:
             json.dump(payload, f, indent=4)
 
-        print(f"Created {file_path} successfully.")
-
     async def execute(self, input_data, project_id=None, region_id=None):
         try:
             job = DescribeJob(**input_data)
