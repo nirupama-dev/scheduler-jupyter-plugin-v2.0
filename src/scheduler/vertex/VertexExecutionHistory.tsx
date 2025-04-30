@@ -316,7 +316,7 @@ const VertexExecutionHistory = ({
                 <DateCalendar
                   minDate={dayjs(schedulerData?.createTime)}
                   maxDate={dayjs(currentDate)}
-                  defaultValue={today}
+                  referenceDate={today}
                   onChange={newValue => handleDateSelection(newValue)}
                   onMonthChange={handleMonthChange}
                   slots={{
