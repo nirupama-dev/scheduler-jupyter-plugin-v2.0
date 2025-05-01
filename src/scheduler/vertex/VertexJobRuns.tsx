@@ -14,17 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useTable, useGlobalFilter } from 'react-table';
 import { CircularProgress } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import TableData from '../../utils/TableData';
-import { ICellProps } from '../../utils/Config';
-import { iconDownload } from '../../utils/Icons';
 import { IVertexScheduleRunList, ISchedulerData } from './VertexInterfaces';
 import { VertexServices } from '../../services/Vertex';
-import { StorageServices } from '../../services/Storage';
 import { iconDash } from '../../utils/Icons';
+import VertexExecutionHistoryActions from './VertexExecutionHistoryActions';
+import { IVertexExecutionHistoryCellProps } from '../../utils/Config';
 
 const VertexJobRuns = ({
   region,
@@ -69,12 +68,6 @@ const VertexJobRuns = ({
   abortControllers: any;
   abortApiCall: () => void;
 }): JSX.Element => {
-  const [jobDownloadLoading, setJobDownloadLoading] = useState(false);
-  const [
-    downloadOutputVertexScheduleRunId,
-    setDownloadOutputVertexScheduleRunId
-  ] = useState<string | undefined>('');
-
   /**
    * Filters vertex schedule runs list based on the selected date.
    */
@@ -144,14 +137,22 @@ const VertexJobRuns = ({
     useGlobalFilter
   );
 
-  const tableDataCondition = (cell: ICellProps) => {
+  const tableDataCondition = (cell: IVertexExecutionHistoryCellProps) => {
     if (cell.column.Header === 'Actions') {
       return (
         <td
           {...cell.getCellProps()}
           className="clusters-table-data sub-title-heading"
         >
-          {renderActions(cell.row.original)}
+          <VertexExecutionHistoryActions
+            data={cell.row.original}
+            jobRunId={cell.row.original.jobRunId}
+            state={cell.row.original.state}
+            gcsUrl={cell.row.original.gcsUrl}
+            fileName={cell.row.original.fileName}
+            scheduleName={scheduleName}
+            abortControllers={abortControllers}
+          />
         </td>
       );
     } else if (cell.column.Header === 'State') {
@@ -262,98 +263,6 @@ const VertexJobRuns = ({
       setJobRunId(data.jobRunId);
     }
   };
-  /**
-   * Handles the download of a job's output by triggering the download API service.
-   * @param {Object} data - The data related to the job run and output.
-   * @param {string} data.id - The optional ID of the job run.
-   * @param {string} data.status - The optional status of the job run.
-   * @param {string} data.jobRunId - The optional job run ID associated with the job output.
-   * @param {string} data.state - The optional state of the job run.
-   * @param {string} data.gcsUrl - The URL of the output file in Google Cloud Storage (GCS).
-   * @param {string} data.fileName - The name of the file to be downloaded.
-   */
-  const handleDownloadOutput = async (data: {
-    id?: string;
-    status?: string;
-    jobRunId?: string;
-    state?: string;
-    gcsUrl?: string;
-    fileName?: string;
-  }) => {
-    setDownloadOutputVertexScheduleRunId(data.jobRunId);
-    await StorageServices.downloadJobAPIService(
-      data.gcsUrl,
-      data.fileName,
-      data.jobRunId,
-      setJobDownloadLoading,
-      scheduleName
-    );
-  };
-
-  const renderActions = (data: {
-    id?: string;
-    status?: string;
-    jobRunId?: string;
-    state?: string;
-    gcsUrl?: string;
-    fileName?: string;
-  }) => {
-    const [isLoading, setIsLoading] = useState<boolean>(
-      data.state === 'failed' ? true : false
-    );
-    const [fileExists, setFileExists] = useState<boolean>(false);
-    const bucketName = data.gcsUrl?.split('//')[1];
-    const outPutFileExistsApi = async () => {
-      await VertexServices.outputFileExists(
-        bucketName,
-        data.jobRunId,
-        data.fileName,
-        setIsLoading,
-        setFileExists,
-        abortControllers
-      );
-    };
-
-    useEffect(() => {
-      if (data.state === 'failed') {
-        outPutFileExistsApi();
-      }
-    }, []);
-
-    return (
-      <div className="action-btn-execution">
-        {isLoading ||
-        (jobDownloadLoading &&
-          data.jobRunId === downloadOutputVertexScheduleRunId) ? (
-          <div className="icon-buttons-style">
-            <CircularProgress
-              size={18}
-              aria-label="Loading Spinner"
-              data-testid="loader"
-            />
-          </div>
-        ) : (
-          <div
-            role="button"
-            className={
-              data.state === 'succeeded' || fileExists
-                ? 'icon-buttons-style sub-title-heading'
-                : 'icon-buttons-style-disable sub-title-heading'
-            }
-            title="Download Output"
-            data-dag-run-id={data}
-            onClick={
-              data.state === 'succeeded' || fileExists
-                ? e => handleDownloadOutput(data)
-                : undefined
-            }
-          >
-            <iconDownload.react tag="div" />
-          </div>
-        )}
-      </div>
-    );
-  };
 
   const scheduleRunsList = async () => {
     await VertexServices.executionHistoryServiceList(
@@ -382,7 +291,7 @@ const VertexJobRuns = ({
     return () => {
       abortApiCall();
     };
-  }, [])
+  }, []);
 
   return (
     <div>
