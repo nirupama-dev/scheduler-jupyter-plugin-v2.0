@@ -487,12 +487,14 @@ function listNotebookScheduler({
       );
     } else if (cell.column.Header === 'Job Name') {
       return (
-        <td
-          {...cell.getCellProps()}
-          className="clusters-table-data"
-          onClick={() => handleDagIdSelection(composerSelectedList, cell.value)}
-        >
-          {cell.value}
+        <td {...cell.getCellProps()} className="clusters-table-data">
+          <span
+            onClick={() =>
+              handleDagIdSelection(composerSelectedList, cell.value)
+            }
+          >
+            {cell.value}
+          </span>
         </td>
       );
     } else {
