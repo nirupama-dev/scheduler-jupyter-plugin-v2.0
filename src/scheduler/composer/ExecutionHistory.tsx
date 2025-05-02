@@ -219,8 +219,7 @@ const ExecutionHistory = ({
                 ></div>
               )}
               <DateCalendar
-                // minDate={dayjs().year(2024).startOf('year')}
-                minDate={dayjs(currentDate)}
+                minDate={dayjs().year(2024).startOf('year')}
                 maxDate={dayjs(currentDate)}
                 referenceDate={dayjs(currentDate)}
                 onChange={newValue => handleDateSelection(newValue)}
