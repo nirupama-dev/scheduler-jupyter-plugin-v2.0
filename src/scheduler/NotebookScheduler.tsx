@@ -182,7 +182,10 @@ const NotebookSchedulerComponent = ({
               />
             </div>
             {jobNameSelected === '' && !editMode && (
-              <ErrorMessage message="Job name is required" />
+              <ErrorMessage
+                message="Job name is required"
+                showIcon={notebookSelector === 'composer' ? true : false}
+              />
             )}
             {jobNameSpecialValidation && jobNameValidation && !editMode && (
               <ErrorMessage message="Name must contain only letters, numbers, hyphens, and underscores" />
