@@ -252,7 +252,10 @@ export const showToast = (message: string, id?: string) => {
  */
 export const currentTime = (val: any) => {
   const currentDate = dayjs(val);
-  const currentTime = dayjs();
+  let currentTime = dayjs();
+  if (val.hour() !== 0 || val.minute() !== 0) {
+    currentTime = dayjs(val);
+  }
 
   // Combine the selected date with the current time
   const newDateTime = currentDate

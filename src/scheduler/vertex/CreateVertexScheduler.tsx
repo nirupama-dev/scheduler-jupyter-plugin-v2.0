@@ -192,6 +192,8 @@ const CreateVertexScheduler = ({
   const [jobId, setJobId] = useState<string>('');
   const [gcsPath, setGcsPath] = useState('');
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
+  const [isPastStartDate, setIsPastStartDate] = useState<boolean>(false);
+  const [isPastEndDate, setIsPastEndDate] = useState<boolean>(false);
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -467,6 +469,12 @@ const CreateVertexScheduler = ({
     } else {
       setEndDateError(false);
     }
+
+    if (val && dayjs(val).isBefore(dayjs())) {
+      setIsPastStartDate(true);
+    } else {
+      setIsPastStartDate(false);
+    }
   };
 
   /**
@@ -487,6 +495,12 @@ const CreateVertexScheduler = ({
       setEndDateError(true);
     } else {
       setEndDateError(false);
+    }
+
+    if (val && dayjs(val).isBefore(dayjs())) {
+      setIsPastEndDate(true);
+    } else {
+      setIsPastEndDate(false);
     }
   };
 
@@ -1401,6 +1415,9 @@ const CreateVertexScheduler = ({
                       disablePast
                       closeOnSelect={true}
                     />
+                    {isPastStartDate && (
+                      <ErrorMessage message="Start date should be greater than current date" />
+                    )}
                   </div>
                   <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
                     <DateTimePicker
@@ -1428,6 +1445,9 @@ const CreateVertexScheduler = ({
                     />
                     {endDateError && (
                       <ErrorMessage message="End date should be greater than Start date" />
+                    )}
+                    {isPastEndDate && (
+                      <ErrorMessage message="End date should be greater than current date" />
                     )}
                   </div>
                 </LocalizationProvider>
