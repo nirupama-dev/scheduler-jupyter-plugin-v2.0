@@ -432,12 +432,6 @@
   padding-top: 4px;
 }
 
-.log-btn {
-  display: flex;
-  justify-content: flex-end;
-  padding: 15px;
-}
-
 .icon-size-status {
   width: 12px;
 }
@@ -682,4 +676,31 @@
 
 .calender-top {
   padding-top: 30px;
+}
+
+.table-execution-history-vertex {
+  height: calc(100vh - 212px);
+}
+
+.scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color1);
+  z-index: 1;
+}
+
+body[data-jp-theme-light='true'].scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color0);
+}
+
+.table-main-execution {
+  padding-right: 15px;
+}
+
+.log-btn {
+  padding: 15px;
+  margin-left: auto;
+  width: 17%;
 }
