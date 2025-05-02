@@ -327,14 +327,24 @@ const VertexExecutionHistory = ({
               </LocalizationProvider>
             </div>
             <div className="execution-history-right-wrapper execution-wrapper-border-none">
-              <div role="button" className="log-btn" onClick={handleLogs}>
-                <div className="create-icon log-icon cursor-icon">
-                  <iconCreateCluster.react
-                    tag="div"
-                    className="logo-alignment-style"
-                  />
+              <div>
+                <div className="log-btn">
+                  <div
+                    className="execution-history-main-wrapper"
+                    role="button"
+                    onClick={handleLogs}
+                  >
+                    <div className="create-icon log-icon cursor-icon">
+                      <iconCreateCluster.react
+                        tag="div"
+                        className="logo-alignment-style"
+                      />
+                    </div>
+                    <div className="create-text cursor-icon">
+                      VIEW CLOUD LOGS
+                    </div>
+                  </div>
                 </div>
-                <div className="create-text cursor-icon">VIEW CLOUD LOGS</div>
               </div>
               <VertexJobRuns
                 region={region}

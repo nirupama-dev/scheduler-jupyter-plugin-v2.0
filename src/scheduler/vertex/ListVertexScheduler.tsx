@@ -952,7 +952,7 @@ function ListVertexScheduler({
 
       {vertexScheduleList.length > 0 || nextPageToken ? (
         <>
-          <div className="notebook-templates-list-table-parent">
+          <div className="notebook-templates-list-tabl e-parent clusters-list-table-parent">
             <TableData
               getTableProps={getTableProps}
               headerGroups={headerGroups}

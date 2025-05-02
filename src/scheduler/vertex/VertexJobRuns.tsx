@@ -297,8 +297,8 @@ const VertexJobRuns = ({
     <div>
       <>
         {!isLoading && filteredData && filteredData.length > 0 ? (
-          <div>
-            <div className="dag-runs-list-table-parent">
+          <div className="table-main-execution">
+            <div className="dag-runs-list-table-parent table-execution-history-vertex">
               <TableData
                 getTableProps={getTableProps}
                 headerGroups={headerGroups}
