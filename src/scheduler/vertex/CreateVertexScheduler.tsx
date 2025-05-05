@@ -1041,7 +1041,9 @@ const CreateVertexScheduler = ({
               clearIcon={false}
             />
           </div>
-          {!kernelSelected && <ErrorMessage message="Kernel is required" />}
+          {!kernelSelected && (
+            <ErrorMessage message="Kernel is required" showIcon={false} />
+          )}
 
           <div className="create-scheduler-form-element">
             <Autocomplete
@@ -1186,7 +1188,10 @@ const CreateVertexScheduler = ({
             />
           </div>
           {!serviceAccountSelected && (
-            <ErrorMessage message="Service account is required" />
+            <ErrorMessage
+              message="Service account is required"
+              showIcon={false}
+            />
           )}
 
           <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
