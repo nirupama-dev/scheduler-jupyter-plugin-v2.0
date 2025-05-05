@@ -188,10 +188,16 @@ const NotebookSchedulerComponent = ({
               />
             )}
             {jobNameSpecialValidation && jobNameValidation && !editMode && (
-              <ErrorMessage message="Name must contain only letters, numbers, hyphens, and underscores" />
+              <ErrorMessage
+                message="Name must contain only letters, numbers, hyphens, and underscores"
+                showIcon={notebookSelector === 'composer' ? true : false}
+              />
             )}
             {!jobNameUniqueValidation && !editMode && (
-              <ErrorMessage message="Job name must be unique for the selected environment" />
+              <ErrorMessage
+                message="Job name must be unique for the selected environment"
+                showIcon={notebookSelector === 'composer' ? true : false}
+              />
             )}
 
             <div className="create-scheduler-form-element-input-file">
