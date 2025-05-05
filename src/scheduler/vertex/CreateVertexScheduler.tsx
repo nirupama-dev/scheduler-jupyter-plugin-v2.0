@@ -142,6 +142,7 @@ const CreateVertexScheduler = ({
   const [cloudStorage, setCloudStorage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [isCreatingNewBucket, setIsCreatingNewBucket] = useState(false);
+  const [newBucketOption, setNewBucketOption] = useState(false);
   const [bucketError, setBucketError] = useState<string>('');
   const [diskTypeSelected, setDiskTypeSelected] = useState<string | null>(
     DISK_TYPE_VALUE[0]
@@ -339,6 +340,7 @@ const CreateVertexScheduler = ({
   const handleCloudStorageSelected = (value: string | null) => {
     setBucketError('');
     if (value === `Create and Select "${searchValue}"`) {
+      setNewBucketOption(true);
       createNewBucket();
     } else {
       setCloudStorage(value);
@@ -852,7 +854,7 @@ const CreateVertexScheduler = ({
   }, [primaryNetworkList, networkSelected]);
 
   useEffect(() => {
-    if (!isCreatingNewBucket) {
+    if (!newBucketOption) {
       setCloudStorage(
         cloudStorageList.find(
           option => option === DEFAULT_CLOUD_STORAGE_BUCKET
