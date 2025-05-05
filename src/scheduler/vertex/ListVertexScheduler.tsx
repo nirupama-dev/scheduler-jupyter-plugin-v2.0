@@ -680,9 +680,12 @@ function ListVertexScheduler({
         <td
           {...cell.getCellProps()}
           className="clusters-table-data table-cell-overflow"
-          onClick={() => handleDagIdSelection(cell.row.original, cell.value)}
         >
-          {cell.value}
+          <span
+            onClick={() => handleDagIdSelection(cell.row.original, cell.value)}
+          >
+            {cell.value}
+          </span>
         </td>
       );
     } else if (cell.column.Header === 'Created') {
