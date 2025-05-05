@@ -46,6 +46,7 @@ import {
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_PRIMARY_NETWORK,
+  DEFAULT_SERVICE_ACCOUNT,
   DISK_TYPE_VALUE,
   internalScheduleMode,
   KERNEL_VALUE,
@@ -772,7 +773,17 @@ const CreateVertexScheduler = ({
   };
 
   useEffect(() => {
-    setServiceAccountSelected(serviceAccountList[0]);
+    if (!editMode) {
+      const defaultServiceAccount = serviceAccountList?.find(option => {
+        if (option.email.split('-').includes(DEFAULT_SERVICE_ACCOUNT)) {
+          return {
+            displaName: option.displayName,
+            email: option.displayName
+          };
+        }
+      });
+      setServiceAccountSelected(defaultServiceAccount!);
+    }
   }, [serviceAccountList.length > 0]);
 
   useEffect(() => {
