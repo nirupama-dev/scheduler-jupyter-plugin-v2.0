@@ -83,7 +83,9 @@ const CreateVertexScheduler = ({
   setApiError,
   jobNameSpecialValidation,
   setExecutionPageListFlag,
-  apiError
+  apiError,
+  setApiEnableUrl,
+  isApiError
 }: {
   themeManager: IThemeManager;
   app: JupyterLab;
@@ -103,6 +105,8 @@ const CreateVertexScheduler = ({
   jobNameSpecialValidation: boolean;
   setExecutionPageListFlag: React.Dispatch<React.SetStateAction<boolean>>;
   apiError: string;
+  setApiEnableUrl: any;
+  isApiError: boolean;
 }) => {
   const [parameterDetail, setParameterDetail] = useState<string[]>([]);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState<
@@ -585,7 +589,8 @@ const CreateVertexScheduler = ({
       setMachineTypeList,
       setMachineTypeLoading,
       setIsApiError,
-      setApiError
+      setApiError,
+      setApiEnableUrl
     );
   };
 
@@ -989,7 +994,7 @@ const CreateVertexScheduler = ({
             <ErrorMessage message="Machine type is required" showIcon={false} />
           )}
 
-          {!machineTypeSelected && apiError && (
+          {!machineTypeSelected && apiError && !isApiError && (
             <ErrorMessage message={apiError} showIcon={false} />
           )}
 

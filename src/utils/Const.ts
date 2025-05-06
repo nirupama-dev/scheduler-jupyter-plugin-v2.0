@@ -111,5 +111,3 @@ export const VERTEX_REGIONS = [
 ];
 
 export const DEFAULT_SERVICE_ACCOUNT = 'compute@developer.gserviceaccount.com';
-
-export const PERMISSION_FLAG = 'Permission denied on resource project';

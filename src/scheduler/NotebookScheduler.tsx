@@ -36,7 +36,6 @@ import {
 import CreateVertexScheduler from './vertex/CreateVertexScheduler';
 import EnableNotifyMessage from './common/EnableNotifyMessage';
 import { iconError } from '../utils/Icons';
-import { PERMISSION_FLAG } from '../utils/Const';
 
 const NotebookSchedulerComponent = ({
   themeManager,
@@ -70,6 +69,7 @@ const NotebookSchedulerComponent = ({
   const [executionPageListFlag, setExecutionPageListFlag] =
     useState<boolean>(false);
   const abortControllerRef = useRef<any>(null);
+  const [apiEnableUrl, setApiEnableUrl] = useState<any>(null);
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -252,11 +252,11 @@ const NotebookSchedulerComponent = ({
             </FormControl>
           </div>
           <div>
-            {isApiError && !apiError.includes(PERMISSION_FLAG) && (
+            {isApiError && (
               <div className="error-key-parent enable-error-text-label">
                 <iconError.react tag="div" className="logo-alignment-style" />
                 <div className="error-key-missing">
-                  <EnableNotifyMessage message={apiError} />
+                  <EnableNotifyMessage message={apiError} url={apiEnableUrl} />
                 </div>
               </div>
             )}
@@ -312,6 +312,8 @@ const NotebookSchedulerComponent = ({
           jobNameSpecialValidation={jobNameSpecialValidation}
           setExecutionPageListFlag={setExecutionPageListFlag}
           apiError={apiError}
+          setApiEnableUrl={setApiEnableUrl}
+          isApiError={isApiError}
         />
       )}
     </div>
