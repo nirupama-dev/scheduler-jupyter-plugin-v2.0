@@ -82,7 +82,10 @@ const CreateVertexScheduler = ({
   setIsApiError,
   setApiError,
   jobNameSpecialValidation,
-  setExecutionPageListFlag
+  setExecutionPageListFlag,
+  apiError,
+  setApiEnableUrl,
+  isApiError
 }: {
   themeManager: IThemeManager;
   app: JupyterLab;
@@ -101,6 +104,9 @@ const CreateVertexScheduler = ({
   setApiError: React.Dispatch<React.SetStateAction<string>>;
   jobNameSpecialValidation: boolean;
   setExecutionPageListFlag: React.Dispatch<React.SetStateAction<boolean>>;
+  apiError: string;
+  setApiEnableUrl: any;
+  isApiError: boolean;
 }) => {
   const [parameterDetail, setParameterDetail] = useState<string[]>([]);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState<
@@ -196,6 +202,13 @@ const CreateVertexScheduler = ({
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const [isPastStartDate, setIsPastStartDate] = useState<boolean>(false);
   const [isPastEndDate, setIsPastEndDate] = useState<boolean>(false);
+  const [errorMessageBucket, setErrorMessageBucket] = useState<string>('');
+  const [errrorMessageServiceAccount, setErrorMessageServiceAccount] =
+    useState<string>('');
+  const [errorMessagePrimaryNetwork, setErrorMessagePrimaryNetwork] =
+    useState<string>('');
+  const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
+    useState<string>('');
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -343,6 +356,7 @@ const CreateVertexScheduler = ({
     if (value === `Create and Select "${searchValue}"`) {
       setNewBucketOption(true);
       createNewBucket();
+      setErrorMessageBucket('');
     } else {
       setCloudStorage(value);
     }
@@ -575,7 +589,8 @@ const CreateVertexScheduler = ({
       setMachineTypeList,
       setMachineTypeLoading,
       setIsApiError,
-      setApiError
+      setApiError,
+      setApiEnableUrl
     );
   };
 
@@ -585,7 +600,8 @@ const CreateVertexScheduler = ({
   const cloudStorageAPI = async () => {
     await StorageServices.cloudStorageAPIService(
       setCloudStorageList,
-      setCloudStorageLoading
+      setCloudStorageLoading,
+      setErrorMessageBucket
     );
   };
 
@@ -606,7 +622,8 @@ const CreateVertexScheduler = ({
   const serviceAccountAPI = async () => {
     await IamServices.serviceAccountAPIService(
       setServiceAccountList,
-      setServiceAccountLoading
+      setServiceAccountLoading,
+      setErrorMessageServiceAccount
     );
   };
 
@@ -616,7 +633,8 @@ const CreateVertexScheduler = ({
   const primaryNetworkAPI = async () => {
     await ComputeServices.primaryNetworkAPIService(
       setPrimaryNetworkList,
-      setPrimaryNetworkLoading
+      setPrimaryNetworkLoading,
+      setErrorMessagePrimaryNetwork
     );
   };
 
@@ -628,7 +646,8 @@ const CreateVertexScheduler = ({
       region,
       primaryNetwork,
       setSubNetworkList,
-      setSubNetworkLoading
+      setSubNetworkLoading,
+      setErrorMessageSubnetworkNetwork
     );
   };
 
@@ -971,8 +990,12 @@ const CreateVertexScheduler = ({
             />
           </div>
 
-          {!machineTypeSelected && (
+          {!machineTypeSelected && !apiError && (
             <ErrorMessage message="Machine type is required" showIcon={false} />
+          )}
+
+          {!machineTypeSelected && apiError && !isApiError && (
+            <ErrorMessage message={apiError} showIcon={false} />
           )}
 
           {machineTypeList.length > 0 &&
@@ -987,7 +1010,7 @@ const CreateVertexScheduler = ({
                   item.acceleratorConfigs !== null)
               ) {
                 return (
-                  <div className="execution-history-main-wrapper">
+                  <div className="execution-history-1main-wrapper">
                     <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
                       <Autocomplete
                         className="create-scheduler-style create-scheduler-form-element-input-fl"
@@ -1103,7 +1126,7 @@ const CreateVertexScheduler = ({
               disabled={isCreatingNewBucket}
             />
           </div>
-          {!cloudStorage && (
+          {!cloudStorage && !errorMessageBucket && (
             <ErrorMessage
               message="Cloud storage bucket is required"
               showIcon={false}
@@ -1111,9 +1134,13 @@ const CreateVertexScheduler = ({
           )}
 
           <span className="tab-description tab-text-sub-cl">
-            {bucketError &&
-            bucketError !== '' &&
-            !cloudStorageList.includes(cloudStorage!) ? (
+            {errorMessageBucket ? (
+              <div className="error-message-warn error-key-missing">
+                {errorMessageBucket}
+              </div>
+            ) : bucketError &&
+              bucketError !== '' &&
+              !cloudStorageList.includes(cloudStorage!) ? (
               <span className="error-message">{bucketError}</span>
             ) : (
               <span>Select an existing bucket or create a new one.</span>
@@ -1198,11 +1225,17 @@ const CreateVertexScheduler = ({
               )}
             />
           </div>
-          {!serviceAccountSelected && (
+          {!serviceAccountSelected && !errrorMessageServiceAccount && (
             <ErrorMessage
               message="Service account is required"
               showIcon={false}
             />
+          )}
+
+          {errrorMessageServiceAccount && (
+            <span className="error-message-warn error-key-missing">
+              {errrorMessageServiceAccount}
+            </span>
           )}
 
           <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
@@ -1286,7 +1319,11 @@ const CreateVertexScheduler = ({
                   />
                   {!primaryNetworkSelected && (
                     <ErrorMessage
-                      message="Primary network is required"
+                      message={
+                        errorMessagePrimaryNetwork
+                          ? errorMessagePrimaryNetwork
+                          : 'Primary network is required'
+                      }
                       showIcon={false}
                     />
                   )}
@@ -1311,7 +1348,11 @@ const CreateVertexScheduler = ({
                   />
                   {!subNetworkSelected && (
                     <ErrorMessage
-                      message="Sub network is required"
+                      message={
+                        errorMessageSubnetworkNetwork
+                          ? errorMessageSubnetworkNetwork
+                          : 'Sub network is required'
+                      }
                       showIcon={false}
                     />
                   )}
@@ -1341,7 +1382,10 @@ const CreateVertexScheduler = ({
                 />
               </div>
               {Object.keys(hostProject).length === 0 && (
-                <ErrorMessage message="No shared subnetworks are available in this region." />
+                <ErrorMessage
+                  message="No shared subnetworks are available in this region."
+                  showIcon={false}
+                />
               )}
             </>
           )}

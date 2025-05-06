@@ -23,13 +23,17 @@ import path from 'path';
 export class StorageServices {
   static cloudStorageAPIService = async (
     setCloudStorageList: (value: string[]) => void,
-    setCloudStorageLoading: (value: boolean) => void
+    setCloudStorageLoading: (value: boolean) => void,
+    setErrorMessageBucket: (value: string) => void
   ) => {
     try {
       setCloudStorageLoading(true);
       const formattedResponse: any = await requestAPI('api/storage/listBucket');
       if (formattedResponse.length > 0) {
         setCloudStorageList(formattedResponse);
+      } else if (formattedResponse.error) {
+        setErrorMessageBucket(formattedResponse.error);
+        setCloudStorageList([]);
       } else {
         setCloudStorageList([]);
       }

@@ -38,7 +38,8 @@ export class VertexServices {
     setMachineTypeList: (value: IMachineType[]) => void,
     setMachineTypeLoading: (value: boolean) => void,
     setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void
+    setApiError: (value: string) => void,
+    setApiEnableUrl: any
   ) => {
     try {
       setMachineTypeLoading(true);
@@ -50,8 +51,18 @@ export class VertexServices {
       } else if (formattedResponse.length === undefined) {
         try {
           if (formattedResponse.error.code === 403) {
-            setIsApiError(true);
-            setApiError(formattedResponse.error.message);
+            // Pattern to check whether string contains link
+            const pattern =
+              // eslint-disable-next-line
+              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+            const url = formattedResponse.error.message.match(pattern);
+            if (url && url.length > 0) {
+              setIsApiError(true);
+              setApiError(formattedResponse.error.message);
+              setApiEnableUrl(url);
+            } else {
+              setApiError(formattedResponse.error.message);
+            }
           }
         } catch (error) {
           showToast(

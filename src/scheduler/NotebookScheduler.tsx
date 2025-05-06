@@ -69,6 +69,7 @@ const NotebookSchedulerComponent = ({
   const [executionPageListFlag, setExecutionPageListFlag] =
     useState<boolean>(false);
   const abortControllerRef = useRef<any>(null);
+  const [apiEnableUrl, setApiEnableUrl] = useState<any>(null);
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -255,7 +256,7 @@ const NotebookSchedulerComponent = ({
               <div className="error-key-parent enable-error-text-label">
                 <iconError.react tag="div" className="logo-alignment-style" />
                 <div className="error-key-missing">
-                  <EnableNotifyMessage message={apiError} />
+                  <EnableNotifyMessage message={apiError} url={apiEnableUrl} />
                 </div>
               </div>
             )}
@@ -310,6 +311,9 @@ const NotebookSchedulerComponent = ({
           setApiError={setApiError}
           jobNameSpecialValidation={jobNameSpecialValidation}
           setExecutionPageListFlag={setExecutionPageListFlag}
+          apiError={apiError}
+          setApiEnableUrl={setApiEnableUrl}
+          isApiError={isApiError}
         />
       )}
     </div>
