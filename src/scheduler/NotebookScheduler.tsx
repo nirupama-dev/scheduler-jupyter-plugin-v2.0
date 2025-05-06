@@ -36,6 +36,7 @@ import {
 import CreateVertexScheduler from './vertex/CreateVertexScheduler';
 import EnableNotifyMessage from './common/EnableNotifyMessage';
 import { iconError } from '../utils/Icons';
+import { PERMISSION_FLAG } from '../utils/Const';
 
 const NotebookSchedulerComponent = ({
   themeManager,
@@ -251,7 +252,7 @@ const NotebookSchedulerComponent = ({
             </FormControl>
           </div>
           <div>
-            {isApiError && (
+            {isApiError && !apiError.includes(PERMISSION_FLAG) && (
               <div className="error-key-parent enable-error-text-label">
                 <iconError.react tag="div" className="logo-alignment-style" />
                 <div className="error-key-missing">
@@ -310,6 +311,7 @@ const NotebookSchedulerComponent = ({
           setApiError={setApiError}
           jobNameSpecialValidation={jobNameSpecialValidation}
           setExecutionPageListFlag={setExecutionPageListFlag}
+          apiError={apiError}
         />
       )}
     </div>

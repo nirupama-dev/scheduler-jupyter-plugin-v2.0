@@ -43,7 +43,8 @@ export class ComputeServices {
   };
   static primaryNetworkAPIService = async (
     setPrimaryNetworkList: (value: { name: string; link: string }[]) => void,
-    setPrimaryNetworkLoading: (value: boolean) => void
+    setPrimaryNetworkLoading: (value: boolean) => void,
+    setErrorMessagePrimaryNetwork: (value: string) => void
   ) => {
     try {
       setPrimaryNetworkLoading(true);
@@ -55,9 +56,13 @@ export class ComputeServices {
         }));
         primaryNetworkList.sort();
         setPrimaryNetworkList(primaryNetworkList);
+      } else if (formattedResponse.error) {
+        setErrorMessagePrimaryNetwork(formattedResponse.error);
+        setPrimaryNetworkList([]);
       } else {
         setPrimaryNetworkList([]);
       }
+
       setPrimaryNetworkLoading(false);
     } catch (error) {
       setPrimaryNetworkList([]);
@@ -74,7 +79,8 @@ export class ComputeServices {
     region: string,
     primaryNetworkSelected: string | undefined,
     setSubNetworkList: (value: { name: string; link: string }[]) => void,
-    setSubNetworkLoading: (value: boolean) => void
+    setSubNetworkLoading: (value: boolean) => void,
+    setErrorMessageSubnetworkNetwork: (value: string) => void
   ) => {
     try {
       setSubNetworkLoading(true);
@@ -88,6 +94,9 @@ export class ComputeServices {
         }));
         subNetworkList.sort();
         setSubNetworkList(subNetworkList);
+      } else if (formattedResponse.error) {
+        setErrorMessageSubnetworkNetwork(formattedResponse.error);
+        setSubNetworkList([]);
       } else {
         setSubNetworkList([]);
       }

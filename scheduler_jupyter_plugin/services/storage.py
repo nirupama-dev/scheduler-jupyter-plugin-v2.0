@@ -71,7 +71,7 @@ class Client:
 
         except Exception as e:
             self.log.exception(f"Error fetching cloud storage buckets: {str(e)}")
-            return {"Error fetching cloud storage buckets": str(e)}
+            return {"error": str(e)}
 
     async def output_file_exists(self, bucket_name, file_name, job_run_id):
         try:

@@ -704,3 +704,8 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   margin-left: auto;
   width: 17%;
 }
+
+.error-message-warn {
+  max-width: 500px;
+  padding-top: 10px;
+}
