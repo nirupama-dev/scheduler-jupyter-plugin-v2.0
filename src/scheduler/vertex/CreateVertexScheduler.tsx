@@ -39,13 +39,14 @@ import tzdata from 'tzdata';
 import dayjs from 'dayjs';
 import { Input } from '../../controls/MuiWrappedInput';
 import { RegionDropdown } from '../../controls/RegionDropdown';
-import { authApi } from '../../utils/Config';
+import { authApi, currentTime } from '../../utils/Config';
 import {
   CORN_EXP_DOC_URL,
   DEFAULT_CLOUD_STORAGE_BUCKET,
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_PRIMARY_NETWORK,
+  DEFAULT_SERVICE_ACCOUNT,
   DISK_TYPE_VALUE,
   internalScheduleMode,
   KERNEL_VALUE,
@@ -142,6 +143,7 @@ const CreateVertexScheduler = ({
   const [cloudStorage, setCloudStorage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [isCreatingNewBucket, setIsCreatingNewBucket] = useState(false);
+  const [newBucketOption, setNewBucketOption] = useState(false);
   const [bucketError, setBucketError] = useState<string>('');
   const [diskTypeSelected, setDiskTypeSelected] = useState<string | null>(
     DISK_TYPE_VALUE[0]
@@ -192,6 +194,8 @@ const CreateVertexScheduler = ({
   const [jobId, setJobId] = useState<string>('');
   const [gcsPath, setGcsPath] = useState('');
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
+  const [isPastStartDate, setIsPastStartDate] = useState<boolean>(false);
+  const [isPastEndDate, setIsPastEndDate] = useState<boolean>(false);
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -337,6 +341,7 @@ const CreateVertexScheduler = ({
   const handleCloudStorageSelected = (value: string | null) => {
     setBucketError('');
     if (value === `Create and Select "${searchValue}"`) {
+      setNewBucketOption(true);
       createNewBucket();
     } else {
       setCloudStorage(value);
@@ -457,12 +462,21 @@ const CreateVertexScheduler = ({
    * @param {string | null | any} val Start date selected
    */
   const handleStartDate = (val: string | null | any) => {
-    const startDateValue = dayjs(val.$d); // Ensure it's a dayjs object
-    setStartDate(startDateValue);
+    if (val) {
+      const newDateTime = currentTime(val);
+      setStartDate(newDateTime);
+    }
+
     if (val && endDate && dayjs(endDate).isBefore(dayjs(val))) {
       setEndDateError(true);
     } else {
       setEndDateError(false);
+    }
+
+    if (val && dayjs(val).isBefore(dayjs())) {
+      setIsPastStartDate(true);
+    } else {
+      setIsPastStartDate(false);
     }
   };
 
@@ -471,7 +485,11 @@ const CreateVertexScheduler = ({
    * @param {string | null | any} val End date selected
    */
   const handleEndDate = (val: string | null | any) => {
-    const endDateValue = dayjs(val.$d);
+    if (val) {
+      const endDateValue = currentTime(val);
+      setEndDate(endDateValue);
+    }
+
     if (
       startDate &&
       (dayjs(val).isBefore(dayjs(startDate)) ||
@@ -481,7 +499,12 @@ const CreateVertexScheduler = ({
     } else {
       setEndDateError(false);
     }
-    setEndDate(endDateValue);
+
+    if (val && dayjs(val).isBefore(dayjs())) {
+      setIsPastEndDate(true);
+    } else {
+      setIsPastEndDate(false);
+    }
   };
 
   /**
@@ -515,15 +538,14 @@ const CreateVertexScheduler = ({
   ) => {
     const newValue = (event.target as HTMLInputElement).value;
     if (newValue === 'userFriendly') {
-      setScheduleValue(scheduleValueExpression);
+      const cronValue =
+        scheduleField === '' ? scheduleValueExpression : scheduleField;
+      setScheduleValue(cronValue);
     }
     if (newValue === 'cronFormat') {
-      setScheduleField('');
+      setScheduleField(scheduleValue);
     }
     setInternalScheduleMode(newValue as internalScheduleMode);
-    setStartDate(null);
-    setEndDate(null);
-    setMaxRuns('');
   };
 
   /**
@@ -751,7 +773,17 @@ const CreateVertexScheduler = ({
   };
 
   useEffect(() => {
-    setServiceAccountSelected(serviceAccountList[0]);
+    if (!editMode) {
+      const defaultServiceAccount = serviceAccountList?.find(option => {
+        if (option.email.split('-').includes(DEFAULT_SERVICE_ACCOUNT)) {
+          return {
+            displaName: option.displayName,
+            email: option.displayName
+          };
+        }
+      });
+      setServiceAccountSelected(defaultServiceAccount!);
+    }
   }, [serviceAccountList.length > 0]);
 
   useEffect(() => {
@@ -833,12 +865,14 @@ const CreateVertexScheduler = ({
   }, [primaryNetworkList, networkSelected]);
 
   useEffect(() => {
-    setCloudStorage(
-      cloudStorageList.find(
-        option => option === DEFAULT_CLOUD_STORAGE_BUCKET
-      ) || null
-    );
-  }, []);
+    if (!newBucketOption) {
+      setCloudStorage(
+        cloudStorageList.find(
+          option => option === DEFAULT_CLOUD_STORAGE_BUCKET
+        ) || null
+      );
+    }
+  }, [cloudStorageList]);
 
   useEffect(() => {
     const machineTypeOptions = machineTypeList.map(item => item.machineType);
@@ -1018,7 +1052,9 @@ const CreateVertexScheduler = ({
               clearIcon={false}
             />
           </div>
-          {!kernelSelected && <ErrorMessage message="Kernel is required" />}
+          {!kernelSelected && (
+            <ErrorMessage message="Kernel is required" showIcon={false} />
+          )}
 
           <div className="create-scheduler-form-element">
             <Autocomplete
@@ -1163,7 +1199,10 @@ const CreateVertexScheduler = ({
             />
           </div>
           {!serviceAccountSelected && (
-            <ErrorMessage message="Service account is required" />
+            <ErrorMessage
+              message="Service account is required"
+              showIcon={false}
+            />
           )}
 
           <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
@@ -1394,6 +1433,9 @@ const CreateVertexScheduler = ({
                       disablePast
                       closeOnSelect={true}
                     />
+                    {isPastStartDate && (
+                      <ErrorMessage message="Start date should be greater than current date" />
+                    )}
                   </div>
                   <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
                     <DateTimePicker
@@ -1421,6 +1463,9 @@ const CreateVertexScheduler = ({
                     />
                     {endDateError && (
                       <ErrorMessage message="End date should be greater than Start date" />
+                    )}
+                    {isPastEndDate && (
+                      <ErrorMessage message="End date should be greater than current date" />
                     )}
                   </div>
                 </LocalizationProvider>

@@ -257,13 +257,21 @@ export class VertexServices {
     scheduleId: string,
     region: string,
     displayName: string,
-    setResumeLoading: (value: string) => void
+    setResumeLoading: (value: string) => void,
+    abortControllers: any
   ) => {
     setResumeLoading(scheduleId);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const serviceURL = 'api/vertex/pauseSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`
+        serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`,
+        { signal }
       );
       if (Object.keys(formattedResponse).length === 0) {
         toast.success(
@@ -278,8 +286,14 @@ export class VertexServices {
       }
     } catch (error) {
       setResumeLoading('');
-      SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
-      toast.error(`Failed to pause schedule : ${error}`, toastifyCustomStyle);
+      if (typeof error === 'object' && error !== null) {
+        if (error instanceof TypeError) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
+        toast.error(`Failed to pause schedule : ${error}`, toastifyCustomStyle);
+      }
     }
   };
 
@@ -287,13 +301,21 @@ export class VertexServices {
     scheduleId: string,
     region: string,
     displayName: string,
-    setResumeLoading: (value: string) => void
+    setResumeLoading: (value: string) => void,
+    abortControllers: any
   ) => {
     setResumeLoading(scheduleId);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const serviceURL = 'api/vertex/resumeSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`
+        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
+        { signal }
       );
       if (Object.keys(formattedResponse).length === 0) {
         toast.success(
@@ -311,8 +333,20 @@ export class VertexServices {
       }
     } catch (error) {
       setResumeLoading('');
-      SchedulerLoggingService.log('Error in resume schedule', LOG_LEVEL.ERROR);
-      toast.error(`Failed to resume schedule : ${error}`, toastifyCustomStyle);
+      if (typeof error === 'object' && error !== null) {
+        if (error instanceof TypeError) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          'Error in resume schedule',
+          LOG_LEVEL.ERROR
+        );
+        toast.error(
+          `Failed to resume schedule : ${error}`,
+          toastifyCustomStyle
+        );
+      }
     }
   };
 
@@ -320,13 +354,21 @@ export class VertexServices {
     region: string,
     scheduleId: string,
     displayName: string,
-    setTriggerLoading: (value: string) => void
+    setTriggerLoading: (value: string) => void,
+    abortControllers: any
   ) => {
     setTriggerLoading(scheduleId);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const serviceURL = 'api/vertex/triggerSchedule';
       const data: ITriggerSchedule = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`
+        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
+        { signal }
       );
       if (data.name) {
         setTriggerLoading('');
@@ -340,10 +382,16 @@ export class VertexServices {
       }
     } catch (reason) {
       setTriggerLoading('');
-      toast.error(
-        `Failed to Trigger ${displayName} : ${reason}`,
-        toastifyCustomStyle
-      );
+      if (typeof reason === 'object' && reason !== null) {
+        if (reason instanceof TypeError) {
+          return;
+        }
+      } else {
+        toast.error(
+          `Failed to Trigger ${displayName} : ${reason}`,
+          toastifyCustomStyle
+        );
+      }
     }
   };
 
@@ -467,13 +515,20 @@ export class VertexServices {
     setMaxRuns: (value: string) => void,
     setEditMode: (value: boolean) => void,
     setJobNameSelected: (value: string) => void,
-    setGcsPath: (value: string) => void
+    setGcsPath: (value: string) => void,
+    abortControllers: any
   ) => {
     setEditDagLoading(job_id);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
     try {
       const serviceURL = 'api/vertex/getSchedule';
       const formattedResponse: any = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${job_id}`
+        serviceURL + `?region_id=${region}&schedule_id=${job_id}`,
+        { signal }
       );
 
       if (formattedResponse && Object.keys(formattedResponse).length > 0) {
@@ -603,10 +658,16 @@ export class VertexServices {
       }
     } catch (reason) {
       setEditDagLoading('');
-      toast.error(
-        `Error in updating notebook.\n${reason}`,
-        toastifyCustomStyle
-      );
+      if (typeof reason === 'object' && reason !== null) {
+        if (reason instanceof TypeError) {
+          return;
+        }
+      } else {
+        toast.error(
+          `Error in updating notebook.\n${reason}`,
+          toastifyCustomStyle
+        );
+      }
     }
   };
 
@@ -621,15 +682,23 @@ export class VertexServices {
     setOrangeListDates: (value: string[]) => void,
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
-    setDarkGreenListDates: (value: string[]) => void
+    setDarkGreenListDates: (value: string[]) => void,
+    abortControllers: any
   ) => {
     setIsLoading(true);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     const selected_month = selectedMonth && selectedMonth.toISOString();
     const schedule_id = schedulerData?.name.split('/').pop();
     const serviceURL = 'api/vertex/listNotebookExecutionJobs';
     const formattedResponse: any = await requestAPI(
       serviceURL +
-        `?region_id=${region}&schedule_id=${schedule_id}&start_date=${selected_month}&order_by=createTime desc`
+        `?region_id=${region}&schedule_id=${schedule_id}&start_date=${selected_month}&order_by=createTime desc`,
+      { signal }
     );
     try {
       let transformDagRunListDataCurrent = [];
@@ -657,7 +726,7 @@ export class VertexServices {
               endDate: jobRun.updateTime,
               gcsUrl: jobRun.gcsOutputUri,
               state: jobRun.jobState.split('_')[2].toLowerCase(),
-              date: new Date(jobRun.createTime).toDateString(),
+              date: new Date(jobRun.createTime),
               fileName: jobRun.gcsNotebookSource.uri.split('/').pop(),
               time: `${minutes} min ${seconds} sec`,
               code:
@@ -734,10 +803,16 @@ export class VertexServices {
       setDarkGreenListDates(darkGreenList);
       setVertexScheduleRunsList(transformDagRunListDataCurrent);
     } catch (error) {
-      toast.error(
-        'Error in fetching the execution history',
-        toastifyCustomStyle
-      );
+      if (typeof error === 'object' && error !== null) {
+        if (error instanceof TypeError) {
+          return;
+        }
+      } else {
+        toast.error(
+          'Error in fetching the execution history',
+          toastifyCustomStyle
+        );
+      }
     }
     setIsLoading(false);
   };
@@ -748,19 +823,32 @@ export class VertexServices {
     jobRunId: string | undefined,
     fileName: string | undefined,
     setIsLoading: Dispatch<SetStateAction<boolean>>,
-    setFileExists: Dispatch<SetStateAction<boolean>>
+    setFileExists: Dispatch<SetStateAction<boolean>>,
+    abortControllers: any
   ) => {
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const formattedResponse = await requestAPI(
-        `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${jobRunId}&file_name=${fileName}`
+        `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${jobRunId}&file_name=${fileName}`,
+        { signal }
       );
       setFileExists(formattedResponse === 'true' ? true : false);
       setIsLoading(false);
     } catch (lastRunError: any) {
-      SchedulerLoggingService.log(
-        'Error checking output file',
-        LOG_LEVEL.ERROR
-      );
+      if (typeof lastRunError === 'object' && lastRunError !== null) {
+        if (lastRunError instanceof TypeError) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          'Error checking output file',
+          LOG_LEVEL.ERROR
+        );
+      }
     }
   };
 }

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import dayjs from 'dayjs';
 import { IAuthCredentials } from '../login/LoginInterfaces';
 import { AuthenticationService } from '../services/AuthenticationService';
 import { SchedulerLoggingService } from '../services/LoggingService';
@@ -196,6 +197,25 @@ export interface ICellProps {
   render: (value: string) => React.ReactNode;
 }
 
+export interface IVertexExecutionHistoryCellProps {
+  getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
+  value: string | any;
+  column: {
+    Header: string;
+  };
+  row: {
+    original: {
+      id: string;
+      status: string;
+      jobRunId: string;
+      state: string;
+      gcsUrl: string;
+      fileName: string;
+    };
+  };
+  render: (value: string) => React.ReactNode;
+}
+
 export interface IVertexCellProps {
   getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
   value: string | any;
@@ -222,4 +242,26 @@ export const showToast = (message: string, id?: string) => {
   if (!id || !toast.isActive(id)) {
     toast.error(message, { toastId: id, ...toastifyCustomStyle });
   }
+};
+
+/**
+ * Wraps a fetch call with initial authentication to pass credentials to the request
+ *
+ * @param val date object"
+ * @returns new date
+ */
+export const currentTime = (val: any) => {
+  const currentDate = dayjs(val);
+  let currentTime = dayjs();
+  if (val.hour() !== 0 || val.minute() !== 0) {
+    currentTime = dayjs(val);
+  }
+
+  // Combine the selected date with the current time
+  const newDateTime = currentDate
+    .set('hour', currentTime.hour())
+    .set('minute', currentTime.minute())
+    .set('second', currentTime.second());
+
+  return newDateTime;
 };

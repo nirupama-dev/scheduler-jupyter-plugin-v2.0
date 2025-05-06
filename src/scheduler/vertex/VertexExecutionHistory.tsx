@@ -35,7 +35,9 @@ const VertexExecutionHistory = ({
   scheduleName,
   handleBackButton,
   setExecutionPageFlag,
-  setExecutionPageListFlag
+  setExecutionPageListFlag,
+  abortControllers,
+  abortApiCall
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -44,6 +46,8 @@ const VertexExecutionHistory = ({
   handleBackButton: () => void;
   setExecutionPageFlag: (value: boolean) => void;
   setExecutionPageListFlag: (value: boolean) => void;
+  abortControllers: any;
+  abortApiCall: () => void;
 }): JSX.Element => {
   const today = dayjs();
 
@@ -83,6 +87,7 @@ const VertexExecutionHistory = ({
 
     return () => {
       setExecutionPageListFlag(false);
+      abortApiCall();
     };
   }, []);
 
@@ -304,16 +309,14 @@ const VertexExecutionHistory = ({
           <div className="execution-history-main-wrapper">
             <div
               className={
-                isLoading
-                  ? 'execution-history-left-wrapper execution-wrapper-border-none'
-                  : 'execution-history-left-wrapper text-enable-warning execution-wrapper-border-none'
+                'execution-history-left-wrapper calender-top execution-wrapper-border-none'
               }
             >
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DateCalendar
                   minDate={dayjs(schedulerData?.createTime)}
                   maxDate={dayjs(currentDate)}
-                  defaultValue={today}
+                  referenceDate={today}
                   onChange={newValue => handleDateSelection(newValue)}
                   onMonthChange={handleMonthChange}
                   slots={{
@@ -324,14 +327,24 @@ const VertexExecutionHistory = ({
               </LocalizationProvider>
             </div>
             <div className="execution-history-right-wrapper execution-wrapper-border-none">
-              <div role="button" className="log-btn" onClick={handleLogs}>
-                <div className="create-icon log-icon cursor-icon">
-                  <iconCreateCluster.react
-                    tag="div"
-                    className="logo-alignment-style"
-                  />
+              <div>
+                <div className="log-btn">
+                  <div
+                    className="execution-history-main-wrapper"
+                    role="button"
+                    onClick={handleLogs}
+                  >
+                    <div className="create-icon log-icon cursor-icon">
+                      <iconCreateCluster.react
+                        tag="div"
+                        className="logo-alignment-style"
+                      />
+                    </div>
+                    <div className="create-text cursor-icon">
+                      VIEW CLOUD LOGS
+                    </div>
+                  </div>
                 </div>
-                <div className="create-text cursor-icon">VIEW CLOUD LOGS</div>
               </div>
               <VertexJobRuns
                 region={region}
@@ -351,6 +364,8 @@ const VertexExecutionHistory = ({
                 isLoading={isLoading}
                 vertexScheduleRunsList={vertexScheduleRunsList}
                 setVertexScheduleRunsList={setVertexScheduleRunsList}
+                abortControllers={abortControllers}
+                abortApiCall={abortApiCall}
               />
             </div>
           </div>

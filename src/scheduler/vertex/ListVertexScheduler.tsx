@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useTable, usePagination } from 'react-table';
 import TableData from '../../utils/TableData';
 import { PaginationComponent } from '../../utils/PaginationComponent';
@@ -80,7 +80,9 @@ function ListVertexScheduler({
   setGcsPath,
   handleScheduleIdSelection: handleDagIdSelection,
   setIsApiError,
-  setApiError
+  setApiError,
+  abortControllers,
+  abortApiCall
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -121,6 +123,8 @@ function ListVertexScheduler({
   handleScheduleIdSelection: (scheduleId: any, scheduleName: string) => void;
   setIsApiError: (value: boolean) => void;
   setApiError: (value: string) => void;
+  abortControllers: any;
+  abortApiCall: () => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -364,14 +368,16 @@ function ListVertexScheduler({
         scheduleId,
         region,
         displayName,
-        setResumeLoading
+        setResumeLoading,
+        abortControllers
       );
     } else {
       await VertexServices.handleUpdateSchedulerResumeAPIService(
         scheduleId,
         region,
         displayName,
-        setResumeLoading
+        setResumeLoading,
+        abortControllers
       );
     }
     handleCurrentPageRefresh();
@@ -392,9 +398,12 @@ function ListVertexScheduler({
         region,
         scheduleId,
         displayName,
-        setTriggerLoading
+        setTriggerLoading,
+        abortControllers
       );
     }
+
+    handleCurrentPageRefresh();
   };
 
   /**
@@ -463,6 +472,7 @@ function ListVertexScheduler({
     event: React.MouseEvent,
     displayName: string
   ) => {
+    abortApiCall();
     const job_id = event.currentTarget.getAttribute('data-jobid');
     if (job_id) {
       setJobId(job_id);
@@ -495,7 +505,8 @@ function ListVertexScheduler({
         setMaxRuns,
         setEditMode,
         setJobNameSelected,
-        setGcsPath
+        setGcsPath,
+        abortControllers
       );
     }
   };
@@ -672,9 +683,12 @@ function ListVertexScheduler({
         <td
           {...cell.getCellProps()}
           className="clusters-table-data table-cell-overflow"
-          onClick={() => handleDagIdSelection(cell.row.original, cell.value)}
         >
-          {cell.value}
+          <span
+            onClick={() => handleDagIdSelection(cell.row.original, cell.value)}
+          >
+            {cell.value}
+          </span>
         </td>
       );
     } else if (cell.column.Header === 'Created') {
@@ -692,7 +706,8 @@ function ListVertexScheduler({
           {...cell.getCellProps()}
           className="clusters-table-data table-cell-overflow"
         >
-          {cell.row.original.status === 'COMPLETED' ? (
+          {cell.row.original.status === 'COMPLETED' ||
+          cell.row.original.status === 'PAUSED' ? (
             <iconDash.react tag="div" />
           ) : (
             dayjs(cell.row.original.nextRunTime).format('lll')
@@ -909,11 +924,6 @@ function ListVertexScheduler({
       });
   }, [projectId]);
 
-  const abortApiCall = () => {
-    abortControllers.current.forEach((controller: any) => controller.abort());
-    abortControllers.current = [];
-  };
-
   return (
     <div>
       <div className="select-text-overlay-scheduler">
@@ -948,7 +958,7 @@ function ListVertexScheduler({
 
       {vertexScheduleList.length > 0 || nextPageToken ? (
         <>
-          <div className="notebook-templates-list-table-parent">
+          <div className="notebook-templates-list-tabl e-parent clusters-list-table-parent">
             <TableData
               getTableProps={getTableProps}
               headerGroups={headerGroups}
