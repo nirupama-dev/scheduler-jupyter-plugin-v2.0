@@ -122,12 +122,11 @@ const VertexScheduleJobs = ({
    * @param {any} schedulerData - The data related to the selected scheduler.
    * @param {string} scheduleName - The name of the selected schedule.
    */
-  const handleDagIdSelection = (schedulerData: any, scheduleName: string) => {
+  const handleScheduleIdSelection = (schedulerData: any, scheduleName: string) => {
     setShowExecutionHistory(true);
     setScheduleName(scheduleName);
     setScheduleData(schedulerData);
   };
-
   return (
     <>
       {showExecutionHistory ? (
@@ -172,7 +171,7 @@ const VertexScheduleJobs = ({
           setEditMode={setEditMode}
           setJobNameSelected={setJobNameSelected!}
           setGcsPath={setGcsPath}
-          handleDagIdSelection={handleDagIdSelection}
+          handleScheduleIdSelection={handleScheduleIdSelection}
           setIsApiError={setIsApiError}
           setApiError={setApiError}
         />
