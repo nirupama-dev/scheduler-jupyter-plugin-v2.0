@@ -18,8 +18,6 @@
 import { requestAPI } from '../handler/Handler';
 import { IAuthCredentials } from '../login/LoginInterfaces';
 import { LOGIN_STATE, STATUS_SUCCESS } from '../utils/Const';
-import { authApi } from '../utils/Config';
-import { showLoginDialog } from '../utils/LoginPopUp';
 
 export class AuthenticationService {
   static loginAPI = async (
@@ -42,9 +40,7 @@ export class AuthenticationService {
     }
   };
 
-  static authCredentialsAPI = async (
-    checkApiEnabled: boolean = true
-  ): Promise<IAuthCredentials | undefined> => {
+  static authCredentialsAPI = async () => {
     try {
       const data = await requestAPI('credentials');
       if (typeof data === 'object' && data !== null) {
@@ -55,27 +51,9 @@ export class AuthenticationService {
           config_error: (data as { config_error: number }).config_error,
           login_error: (data as { login_error: number }).login_error
         };
-        if (checkApiEnabled) {
-          if (credentials.login_error || credentials.config_error) {
-            try {
-              const dialogResult = await showLoginDialog({
-                loginError: credentials.login_error === 1,
-                configError: credentials.config_error === 1
-              });
-              if (dialogResult) {
-                return await authApi();
-              } else {
-                console.log('cance', dialogResult);
-                return credentials;
-              }
-            } catch (dialogError) {
-              console.error('Dialog was cancelled or failed:', dialogError);
-              return credentials;
-            }
-          } else {
-            console.error('Invalid data format.');
-          }
-        }
+        return credentials;
+      } else {
+        console.error('Invalid data format.');
       }
     } catch (reason) {
       console.error(`Error on GET credentials.\n${reason}`);

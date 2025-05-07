@@ -17,6 +17,8 @@
 
 import { LabIcon } from '@jupyterlab/ui-components';
 import clusterIcon from '../../style/icons/cluster_icon.svg';
+import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
+import googleCloudIcon from '../../style/icons/google-cloud.svg';
 import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.svg';
 import LeftArrowIcon from '../../style/icons/left_arrow_icon.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
@@ -44,6 +46,16 @@ import NextIcon from '../../style/icons/next_page.svg';
 export const iconCluster = new LabIcon({
   name: 'launcher:clusters-icon',
   svgstr: clusterIcon
+});
+
+export const IconsigninGoogle = new LabIcon({
+  name: 'launcher:signin_google_icon',
+  svgstr: signinGoogleIcon
+});
+
+export const IconGoogleCloud = new LabIcon({
+  name: 'launcher:google_cloud_icon',
+  svgstr: googleCloudIcon
 });
 
 export const iconScheduledNotebooks = new LabIcon({
