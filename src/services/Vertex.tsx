@@ -225,14 +225,9 @@ export class VertexServices {
         setVertexScheduleList(schedules);
 
         // Handle pagination
-        if (nextPageToken) {
-          setNextPageToken(nextPageToken);
-          setHasNextPageToken(true);
-        } else {
-          setNextPageToken(null);
-          setHasNextPageToken(false);
-        }
-
+        nextPageToken
+          ? setNextPageToken(nextPageToken)
+          : setNextPageToken(null);
         // Adding a slight delay for DOM refresh
         await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -246,7 +241,6 @@ export class VertexServices {
             abortControllers
           );
         });
-
         setIsLoading(false); // Stop loading after everything is complete
       } else {
         setVertexScheduleList([]);
