@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTable, usePagination } from 'react-table';
 import TableData from '../../utils/TableData';
 import { PaginationComponent } from '../../utils/PaginationComponent';
@@ -156,7 +156,6 @@ function ListVertexScheduler({
   const [nextPageToken, setNextPageToken] = useState<string | null>(null);
   const [fetchPreviousPage, setFetchPreviousPage] = useState<boolean>(false);
   const [resetToCurrentPage, setResetToCurrentPage] = useState<boolean>(false);
-  const abortControllers = useRef<any>([]); // Array of API signals to abort
   const previousScheduleList = useRef(vertexScheduleList);
   const previousNextPageToken = useRef(nextPageToken);
 
