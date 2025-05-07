@@ -24,11 +24,12 @@ import {
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { MainAreaWidget, IThemeManager } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
-import { iconCluster, iconScheduledNotebooks } from './utils/Icons';
-import { AuthLogin } from './login/AuthLogin';
+// import { iconCluster, iconScheduledNotebooks } from './utils/Icons';
+// import { AuthLogin } from './login/AuthLogin';
 import { NotebookScheduler } from './scheduler/NotebookScheduler';
 import { NotebookButtonExtension } from './controls/NotebookButtonExtension';
 import { TITLE_LAUNCHER_CATEGORY } from './utils/Const';
+import { iconScheduledNotebooks } from './utils/Icons';
 
 /**
  * Initialization data for the scheduler-jupyter-plugin extension.
@@ -48,23 +49,23 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     const { commands } = app;
 
-    const createAuthLoginComponentCommand =
-      'cloud-scheduler-settings:configure';
-    commands.addCommand(createAuthLoginComponentCommand, {
-      label: 'Google Scheduler Settings',
-      execute: () => {
-        const content = new AuthLogin(
-          app as JupyterLab,
-          launcher as ILauncher,
-          settingRegistry as ISettingRegistry,
-          themeManager
-        );
-        const widget = new MainAreaWidget<AuthLogin>({ content });
-        widget.title.label = 'Config Setup';
-        widget.title.icon = iconCluster;
-        app.shell.add(widget, 'main');
-      }
-    });
+    // const createAuthLoginComponentCommand =
+    //   'cloud-scheduler-settings:configure';
+    // commands.addCommand(createAuthLoginComponentCommand, {
+    //   label: 'Google Scheduler Settings',
+    //   execute: () => {
+    //     const content = new AuthLogin(
+    //       app as JupyterLab,
+    //       launcher as ILauncher,
+    //       settingRegistry as ISettingRegistry,
+    //       themeManager
+    //     );
+    //     const widget = new MainAreaWidget<AuthLogin>({ content });
+    //     widget.title.label = 'Config Setup';
+    //     widget.title.icon = iconCluster;
+    //     app.shell.add(widget, 'main');
+    //   }
+    // });
 
     const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';
     commands.addCommand(createNotebookJobsComponentCommand, {

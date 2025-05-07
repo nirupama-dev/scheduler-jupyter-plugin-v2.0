@@ -15,10 +15,6 @@
  * limitations under the License.
  */
 
-import { JupyterLab } from '@jupyterlab/application';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ILauncher } from '@jupyterlab/launcher';
-
 export interface IAuthCredentials {
   access_token?: string;
   project_id?: string;
@@ -27,24 +23,8 @@ export interface IAuthCredentials {
   login_error?: number;
 }
 
-export interface IConfigSelectionProps {
+export interface LoginDialogProps {
+  loginError: boolean;
   configError: boolean;
-  setConfigError: (error: boolean) => void;
-  app: JupyterLab;
-  launcher: ILauncher;
-  settingRegistry: ISettingRegistry;
-}
-
-export interface IUserInfoResponse {
-  error: {
-    code: number;
-    message: string;
-  };
-  email: string;
-  picture: string;
-}
-
-export interface ISaveConfig {
-  projectId: string;
-  region: string;
+  onLoginSuccess?: () => void;
 }
