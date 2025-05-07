@@ -694,7 +694,9 @@ const CreateVertexScheduler = ({
         internalScheduleMode === 'cronFormat' &&
         scheduleField === '') ||
       inputFileSelected === '' ||
-      endDateError
+      endDateError ||
+      isPastEndDate ||
+      isPastStartDate
     );
   };
 
