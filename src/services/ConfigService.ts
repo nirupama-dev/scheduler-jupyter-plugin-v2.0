@@ -16,10 +16,52 @@
  */
 
 import { requestAPI } from '../handler/Handler';
+import { ISaveConfig } from '../login/LoginInterfaces';
+import { toastifyCustomStyle } from '../utils/CustomStyle';
+import { eventEmitter } from '../utils/SignalEmitter';
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { IGcpUrlResponseData } from '../utils/SchedulerJupyterInterfaces';
 
 export class ConfigService {
+  static saveConfig = async (
+    dataToSend: ISaveConfig,
+    setIsSaving: (value: boolean) => void
+  ) => {
+    console.log('datasend from services', dataToSend);
+    try {
+      const data = await requestAPI('configuration', {
+        body: JSON.stringify(dataToSend),
+        method: 'POST'
+      });
+      if (typeof data === 'object' && data !== null) {
+        const configStatus = (data as { config: string }).config;
+        if (configStatus && !toast.isActive('custom-toast')) {
+          if (configStatus.includes('Failed')) {
+            toast.error(configStatus, toastifyCustomStyle);
+          } else {
+            toast.success(
+              `${configStatus} - You will need to restart Jupyter in order for the new project and region to fully take effect.`,
+              toastifyCustomStyle
+            );
+            // Emit signal after toast success
+            eventEmitter.emit(
+              'schedulerConfigChange',
+              `${configStatus} - Configuration updated successfully.`
+            );
+          }
+        }
+      }
+    } catch (reason) {
+      toast.error(
+        `Error on POST {dataToSend}.\n${reason}`,
+        toastifyCustomStyle
+      );
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   static gcpServiceUrlsAPI = async () => {
     const data = (await requestAPI('getGcpServiceUrls')) as IGcpUrlResponseData;
     const storage_url = new URL(data.storage_url);
