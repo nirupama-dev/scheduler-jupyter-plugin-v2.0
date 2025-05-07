@@ -694,7 +694,9 @@ const CreateVertexScheduler = ({
         internalScheduleMode === 'cronFormat' &&
         scheduleField === '') ||
       inputFileSelected === '' ||
-      endDateError
+      endDateError ||
+      isPastEndDate ||
+      isPastStartDate
     );
   };
 
@@ -1478,7 +1480,10 @@ const CreateVertexScheduler = ({
                       closeOnSelect={true}
                     />
                     {isPastStartDate && (
-                      <ErrorMessage message="Start date should be greater than current date" showIcon={false} />
+                      <ErrorMessage
+                        message="Start date should be greater than current date"
+                        showIcon={false}
+                      />
                     )}
                   </div>
                   <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
@@ -1506,10 +1511,16 @@ const CreateVertexScheduler = ({
                       closeOnSelect={true}
                     />
                     {endDateError && (
-                      <ErrorMessage message="End date should be greater than Start date" showIcon={false} />
+                      <ErrorMessage
+                        message="End date should be greater than Start date"
+                        showIcon={false}
+                      />
                     )}
                     {isPastEndDate && (
-                      <ErrorMessage message="End date should be greater than current date" showIcon={false} />
+                      <ErrorMessage
+                        message="End date should be greater than current date"
+                        showIcon={false}
+                      />
                     )}
                   </div>
                 </LocalizationProvider>
@@ -1527,7 +1538,10 @@ const CreateVertexScheduler = ({
                     Label="Schedule*"
                   />
                   {scheduleField === '' && (
-                    <ErrorMessage message="Schedule field is required" showIcon={false} />
+                    <ErrorMessage
+                      message="Schedule field is required"
+                      showIcon={false}
+                    />
                   )}
                   <div>
                     <span className="tab-description tab-text-sub-cl">
