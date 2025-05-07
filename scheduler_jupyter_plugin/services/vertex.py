@@ -183,18 +183,19 @@ class Client:
             raise Exception(f"Error creating schedule: {str(e)}")
 
     async def create_job_schedule(self, input_data):
+        vertex_storage_bucket = f"{VERTEX_STORAGE_BUCKET}-{self.project_id}"
         try:
             job = DescribeVertexJob(**input_data)
-            if await self.check_bucket_exists(VERTEX_STORAGE_BUCKET):
+            if await self.check_bucket_exists(vertex_storage_bucket):
                 print("The bucket exists")
             else:
-                await self.create_gcs_bucket(VERTEX_STORAGE_BUCKET)
+                await self.create_gcs_bucket(vertex_storage_bucket)
                 print("The bucket is created")
 
             file_path = await self.upload_to_gcs(
-                VERTEX_STORAGE_BUCKET, job.input_filename, job.display_name
+                vertex_storage_bucket, job.input_filename, job.display_name
             )
-            res = await self.create_schedule(job, file_path, VERTEX_STORAGE_BUCKET)
+            res = await self.create_schedule(job, file_path, vertex_storage_bucket)
             return res
         except Exception as e:
             return {"error": str(e)}
