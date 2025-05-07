@@ -16,7 +16,6 @@
  */
 
 import React from 'react';
-import { CircularProgress } from '@mui/material';
 import { iconPrevious, iconNext } from './Icons';
 import { IPaginationViewProps } from '../scheduler/vertex/VertexInterfaces';
 
@@ -32,20 +31,10 @@ export const PaginationComponent = ({
 }: IPaginationViewProps) => {
   return (
     <div className="pagination-parent-view">
-      {isLoading ? (
-        <div className="icon-buttons-style">
-          <CircularProgress
-            size={18}
-            aria-label="Loading Spinner"
-            data-testid="loader"
-          />
-        </div>
-      ) : (
-        <div className="pagination-numbers">
-          {currentStartIndex} - {currentLastIndex} of{' '}
-          {totalCount !== 0 ? totalCount : 'many'}
-        </div>
-      )}
+      <div className="pagination-numbers" aria-disabled={isLoading}>
+        {currentStartIndex} - {currentLastIndex} of{' '}
+        {totalCount !== 0 ? totalCount : 'many'}
+      </div>
 
       <div
         role={!canPreviousPage || isLoading ? undefined : 'button'}
@@ -74,7 +63,7 @@ export const PaginationComponent = ({
         }
         aria-disabled={!canNextPage || isLoading}
       >
-        {canNextPage && !isLoading ? (
+        {(canNextPage && !isLoading) || !isLoading ? (
           <iconNext.react
             tag="div"
             className="logo-alignment-style cursor-icon"

@@ -76,25 +76,28 @@ function TableData({
       </thead>
       <tbody
         {...getTableBodyProps()}
-        className={'clusters-table-body'}
+        className={isLoading ? 'table-loading-ht clusters-table-body' : 'clusters-table-body'}
         style={fromPage === 'Dag Runs' ? { maxHeight: listDagRunHeight } : null}
       >
         {isLoading ? (
-          <div
-            className={
-              fromPage === 'Preview'
-                ? 'spin-loader-preview-data'
-                : 'spin-loader'
-            }
-          >
-            <CircularProgress
-              className="spin-loader-custom-style"
-              size={18}
-              aria-label="Loading Spinner"
-              data-testid="loader"
-            />
-            Loading {fromPage}
-          </div>
+        <tr>
+          <td colSpan={7} className="loader-table">
+            <div>
+              <div
+                className='spin-loader spin-loader-table'
+              >
+                <CircularProgress
+                  className="spin-loader-custom-style"
+                  size={18}
+                  aria-label="Loading Spinner"
+                  data-testid="loader"
+                />
+                Loading {fromPage}
+              </div>
+            </div>
+          </td>
+        </tr>
+
         ) : (
           displayData.map((row: Row, index: number) => {
             prepareRow(row);
