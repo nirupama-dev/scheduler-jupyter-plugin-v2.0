@@ -941,6 +941,7 @@ const CreateVertexScheduler = ({
           setIsApiError={setIsApiError}
           setApiError={setApiError}
           setExecutionPageListFlag={setExecutionPageListFlag}
+          setTimeZoneSelected={setTimeZoneSelected}
         />
       ) : (
         <div className="submit-job-container text-enable-warning">
