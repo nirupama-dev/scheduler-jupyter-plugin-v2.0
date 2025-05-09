@@ -82,7 +82,8 @@ function ListVertexScheduler({
   setIsApiError,
   setApiError,
   abortControllers,
-  abortApiCall
+  abortApiCall,
+  setTimeZoneSelected
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -125,6 +126,7 @@ function ListVertexScheduler({
   setApiError: (value: string) => void;
   abortControllers: any;
   abortApiCall: () => void;
+  setTimeZoneSelected: (value: any) => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -505,7 +507,8 @@ function ListVertexScheduler({
         setEditMode,
         setJobNameSelected,
         setGcsPath,
-        abortControllers
+        abortControllers,
+        setTimeZoneSelected
       );
     }
   };

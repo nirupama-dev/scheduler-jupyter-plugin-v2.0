@@ -60,7 +60,8 @@ const VertexScheduleJobs = ({
   setExecutionPageFlag,
   setIsApiError,
   setApiError,
-  setExecutionPageListFlag
+  setExecutionPageListFlag,
+  setTimeZoneSelected
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -103,6 +104,7 @@ const VertexScheduleJobs = ({
   setIsApiError: (value: boolean) => void;
   setApiError: (value: string) => void;
   setExecutionPageListFlag: (value: boolean) => void;
+  setTimeZoneSelected: (value: any) => void;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] =
     useState<boolean>(false);
@@ -186,6 +188,7 @@ const VertexScheduleJobs = ({
           setApiError={setApiError}
           abortControllers={abortControllers}
           abortApiCall={abortApiCall}
+          setTimeZoneSelected={setTimeZoneSelected}
         />
       )}
     </>
@@ -232,6 +235,7 @@ export class NotebookJobs extends SchedulerWidget {
   setIsApiError: (value: boolean) => void;
   setApiError: (value: string) => void;
   setExecutionPageListFlag: (value: boolean) => void;
+  setTimeZoneSelected: () => void;
 
   constructor(
     app: JupyterLab,
@@ -275,6 +279,7 @@ export class NotebookJobs extends SchedulerWidget {
     setIsApiError: (value: boolean) => void,
     setApiError: (value: string) => void,
     setExecutionPageListFlag: (value: boolean) => void,
+    setTimeZoneSelected: () => void,
     setJobNameSelected?: (value: string) => void
   ) {
     super(themeManager);
@@ -312,6 +317,7 @@ export class NotebookJobs extends SchedulerWidget {
     this.setApiError = setApiError;
     this.setGcsPath = setGcsPath;
     this.setExecutionPageListFlag = setExecutionPageListFlag;
+    this.setTimeZoneSelected = setTimeZoneSelected;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -349,6 +355,7 @@ export class NotebookJobs extends SchedulerWidget {
         setIsApiError={this.setIsApiError}
         setApiError={this.setApiError}
         setExecutionPageListFlag={this.setExecutionPageListFlag}
+        setTimeZoneSelected={this.setTimeZoneSelected}
       />
     );
   }
