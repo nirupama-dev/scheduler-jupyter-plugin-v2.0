@@ -491,6 +491,9 @@ class Client:
             if data.end_time:
                 payload["endTime"] = data.end_time
 
+            if data.max_run_count:
+                payload['maxRunCount'] = data.max_run_count
+
             keys = payload.keys()
             keys_to_filter = ["displayName", "maxConcurrentRunCount"]
             filtered_keys = [
