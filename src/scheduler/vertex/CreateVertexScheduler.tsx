@@ -1014,7 +1014,7 @@ const CreateVertexScheduler = ({
                   item.acceleratorConfigs !== null)
               ) {
                 return (
-                  <div className="execution-history-1main-wrapper">
+                  <div className="execution-history-main-wrapper">
                     <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
                       <Autocomplete
                         className="create-scheduler-style create-scheduler-form-element-input-fl"
