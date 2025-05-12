@@ -64,6 +64,7 @@ import { StorageServices } from '../../services/Storage';
 import { IAcceleratorConfig, IMachineType } from './VertexInterfaces';
 import { toast } from 'react-toastify';
 import VertexScheduleJobs from './VertexScheduleJobs';
+import { renderTimeViewClock } from '@mui/x-date-pickers';
 
 const CreateVertexScheduler = ({
   themeManager,
@@ -941,6 +942,7 @@ const CreateVertexScheduler = ({
           setIsApiError={setIsApiError}
           setApiError={setApiError}
           setExecutionPageListFlag={setExecutionPageListFlag}
+          setTimeZoneSelected={setTimeZoneSelected}
         />
       ) : (
         <div className="submit-job-container text-enable-warning">
@@ -1478,6 +1480,11 @@ const CreateVertexScheduler = ({
                       }}
                       disablePast
                       closeOnSelect={true}
+                      viewRenderers={{
+                        hours: renderTimeViewClock,
+                        minutes: renderTimeViewClock,
+                        seconds: renderTimeViewClock
+                      }}
                     />
                     {isPastStartDate && (
                       <ErrorMessage
@@ -1509,6 +1516,11 @@ const CreateVertexScheduler = ({
                       }}
                       disablePast
                       closeOnSelect={true}
+                      viewRenderers={{
+                        hours: renderTimeViewClock,
+                        minutes: renderTimeViewClock,
+                        seconds: renderTimeViewClock
+                      }}
                     />
                     {endDateError && (
                       <ErrorMessage

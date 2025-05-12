@@ -54,20 +54,6 @@ class Client:
             "Authorization": f"Bearer {self._access_token}",
         }
 
-    async def check_bucket_exists(self, bucket_name):
-        try:
-            if not bucket_name:
-                raise ValueError("Bucket name cannot be empty")
-            cloud_storage_buckets = []
-            storage_client = storage.Client()
-            buckets = storage_client.list_buckets()
-            for bucket in buckets:
-                cloud_storage_buckets.append(bucket.name)
-            return bucket_name in cloud_storage_buckets
-        except Exception as error:
-            self.log.exception(f"Error checking Bucket: {error}")
-            raise IOError(f"Error checking Bucket: {error}")
-
     async def create_gcs_bucket(self, bucket_name):
         try:
             if not bucket_name:
@@ -183,19 +169,14 @@ class Client:
             raise Exception(f"Error creating schedule: {str(e)}")
 
     async def create_job_schedule(self, input_data):
-        vertex_storage_bucket = f"{VERTEX_STORAGE_BUCKET}-{self.project_id}"
         try:
-            job = DescribeVertexJob(**input_data)
-            if await self.check_bucket_exists(vertex_storage_bucket):
-                print("The bucket exists")
-            else:
-                await self.create_gcs_bucket(vertex_storage_bucket)
-                print("The bucket is created")
+            job = DescribeVertexJob(**input_data)            
+            storage_bucket = job.cloud_storage_bucket.split("//")[-1]
 
             file_path = await self.upload_to_gcs(
-                vertex_storage_bucket, job.input_filename, job.display_name
+                storage_bucket, job.input_filename, job.display_name
             )
-            res = await self.create_schedule(job, file_path, vertex_storage_bucket)
+            res = await self.create_schedule(job, file_path, storage_bucket)
             return res
         except Exception as e:
             return {"error": str(e)}
