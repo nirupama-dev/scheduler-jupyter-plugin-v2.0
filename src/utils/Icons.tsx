@@ -153,6 +153,7 @@ export const iconPrevious = new LabIcon({
   name: 'launcher:previous-icon',
   svgstr: PreviousIcon
 });
+
 export const iconNext = new LabIcon({
   name: 'launcher:next-icon',
   svgstr: NextIcon

@@ -42,6 +42,12 @@ export class AuthenticationService {
     }
   };
 
+  /**
+   * Authentication
+   * @param checkApiEnabled
+   * @returns credentials
+   */
+
   static authCredentialsAPI = async (
     checkApiEnabled: boolean = true
   ): Promise<IAuthCredentials | undefined> => {
@@ -65,7 +71,6 @@ export class AuthenticationService {
               if (dialogResult) {
                 return await authApi();
               } else {
-                console.log('cance', dialogResult);
                 return credentials;
               }
             } catch (dialogError) {
@@ -73,7 +78,7 @@ export class AuthenticationService {
               return credentials;
             }
           } else {
-            console.error('Invalid data format.');
+            return credentials;
           }
         }
       }

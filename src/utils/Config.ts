@@ -27,6 +27,11 @@ import {
 } from './Const';
 import { ToastOptions, toast } from 'react-toastify';
 
+/**
+ * Authentication function
+ * @param checkApiEnabled 
+ * @returns credentials
+ */
 export const authApi = async (
   checkApiEnabled: boolean = true
 ): Promise<IAuthCredentials | undefined> => {
@@ -105,9 +110,10 @@ export const authenticatedFetch = async (config: {
   method: HTTP_METHOD;
   regionIdentifier?: 'regions' | 'locations' | 'global';
   queryParams?: URLSearchParams;
+  checkApiEnabled?: boolean;
 }) => {
-  const { baseUrl, uri, method, regionIdentifier, queryParams } = config;
-  const credentials = await authApi(false);
+  const { baseUrl, uri, method, regionIdentifier, queryParams, checkApiEnabled } = config;
+  const credentials = await authApi(checkApiEnabled);
   // If there is an issue with getting credentials, there is no point continuing the request.
   if (!credentials) {
     throw new Error('Error during authentication');

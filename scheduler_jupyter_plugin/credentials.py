@@ -66,7 +66,7 @@ async def get_cached():
     except Exception as ex:
         credentials["config_error"] = 1
 
-    if not credentials["access_token"] or not credentials["project_number"]:
+    if not credentials["login_error"]:
         # These will only be set if the user is logged in to gcloud with
         # an account that has the appropriate permissions on the configured
         # project.

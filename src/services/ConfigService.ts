@@ -30,6 +30,7 @@ export class ConfigService {
       storage_url.pathname === '' ||
       storage_url.pathname === '/'
     ) {
+      
       // If the overwritten  storage_url doesn't contain a path, add it.
       storage_url.pathname = 'storage/v1/';
     }
