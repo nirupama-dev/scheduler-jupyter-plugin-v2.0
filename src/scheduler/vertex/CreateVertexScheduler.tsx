@@ -46,6 +46,7 @@ import {
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_PRIMARY_NETWORK,
+  DEFAULT_SERVICE_ACCOUNT,
   DISK_TYPE_VALUE,
   internalScheduleMode,
   KERNEL_VALUE,
@@ -63,6 +64,7 @@ import { StorageServices } from '../../services/Storage';
 import { IAcceleratorConfig, IMachineType } from './VertexInterfaces';
 import { toast } from 'react-toastify';
 import VertexScheduleJobs from './VertexScheduleJobs';
+import { renderTimeViewClock } from '@mui/x-date-pickers';
 
 const CreateVertexScheduler = ({
   themeManager,
@@ -81,7 +83,10 @@ const CreateVertexScheduler = ({
   setIsApiError,
   setApiError,
   jobNameSpecialValidation,
-  setExecutionPageListFlag
+  setExecutionPageListFlag,
+  apiError,
+  setApiEnableUrl,
+  isApiError
 }: {
   themeManager: IThemeManager;
   app: JupyterLab;
@@ -100,6 +105,9 @@ const CreateVertexScheduler = ({
   setApiError: React.Dispatch<React.SetStateAction<string>>;
   jobNameSpecialValidation: boolean;
   setExecutionPageListFlag: React.Dispatch<React.SetStateAction<boolean>>;
+  apiError: string;
+  setApiEnableUrl: any;
+  isApiError: boolean;
 }) => {
   const [parameterDetail, setParameterDetail] = useState<string[]>([]);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState<
@@ -142,6 +150,7 @@ const CreateVertexScheduler = ({
   const [cloudStorage, setCloudStorage] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState<string>('');
   const [isCreatingNewBucket, setIsCreatingNewBucket] = useState(false);
+  const [newBucketOption, setNewBucketOption] = useState(false);
   const [bucketError, setBucketError] = useState<string>('');
   const [diskTypeSelected, setDiskTypeSelected] = useState<string | null>(
     DISK_TYPE_VALUE[0]
@@ -194,6 +203,13 @@ const CreateVertexScheduler = ({
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const [isPastStartDate, setIsPastStartDate] = useState<boolean>(false);
   const [isPastEndDate, setIsPastEndDate] = useState<boolean>(false);
+  const [errorMessageBucket, setErrorMessageBucket] = useState<string>('');
+  const [errrorMessageServiceAccount, setErrorMessageServiceAccount] =
+    useState<string>('');
+  const [errorMessagePrimaryNetwork, setErrorMessagePrimaryNetwork] =
+    useState<string>('');
+  const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
+    useState<string>('');
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -339,7 +355,9 @@ const CreateVertexScheduler = ({
   const handleCloudStorageSelected = (value: string | null) => {
     setBucketError('');
     if (value === `Create and Select "${searchValue}"`) {
+      setNewBucketOption(true);
       createNewBucket();
+      setErrorMessageBucket('');
     } else {
       setCloudStorage(value);
     }
@@ -572,7 +590,8 @@ const CreateVertexScheduler = ({
       setMachineTypeList,
       setMachineTypeLoading,
       setIsApiError,
-      setApiError
+      setApiError,
+      setApiEnableUrl
     );
   };
 
@@ -582,7 +601,8 @@ const CreateVertexScheduler = ({
   const cloudStorageAPI = async () => {
     await StorageServices.cloudStorageAPIService(
       setCloudStorageList,
-      setCloudStorageLoading
+      setCloudStorageLoading,
+      setErrorMessageBucket
     );
   };
 
@@ -603,7 +623,8 @@ const CreateVertexScheduler = ({
   const serviceAccountAPI = async () => {
     await IamServices.serviceAccountAPIService(
       setServiceAccountList,
-      setServiceAccountLoading
+      setServiceAccountLoading,
+      setErrorMessageServiceAccount
     );
   };
 
@@ -613,7 +634,8 @@ const CreateVertexScheduler = ({
   const primaryNetworkAPI = async () => {
     await ComputeServices.primaryNetworkAPIService(
       setPrimaryNetworkList,
-      setPrimaryNetworkLoading
+      setPrimaryNetworkLoading,
+      setErrorMessagePrimaryNetwork
     );
   };
 
@@ -625,7 +647,8 @@ const CreateVertexScheduler = ({
       region,
       primaryNetwork,
       setSubNetworkList,
-      setSubNetworkLoading
+      setSubNetworkLoading,
+      setErrorMessageSubnetworkNetwork
     );
   };
 
@@ -672,7 +695,9 @@ const CreateVertexScheduler = ({
         internalScheduleMode === 'cronFormat' &&
         scheduleField === '') ||
       inputFileSelected === '' ||
-      endDateError
+      endDateError ||
+      isPastEndDate ||
+      isPastStartDate
     );
   };
 
@@ -770,7 +795,17 @@ const CreateVertexScheduler = ({
   };
 
   useEffect(() => {
-    setServiceAccountSelected(serviceAccountList[0]);
+    if (!editMode) {
+      const defaultServiceAccount = serviceAccountList?.find(option => {
+        if (option.email.split('-').includes(DEFAULT_SERVICE_ACCOUNT)) {
+          return {
+            displaName: option.displayName,
+            email: option.displayName
+          };
+        }
+      });
+      setServiceAccountSelected(defaultServiceAccount!);
+    }
   }, [serviceAccountList.length > 0]);
 
   useEffect(() => {
@@ -852,7 +887,7 @@ const CreateVertexScheduler = ({
   }, [primaryNetworkList, networkSelected]);
 
   useEffect(() => {
-    if (!isCreatingNewBucket) {
+    if (!newBucketOption) {
       setCloudStorage(
         cloudStorageList.find(
           option => option === DEFAULT_CLOUD_STORAGE_BUCKET
@@ -907,6 +942,7 @@ const CreateVertexScheduler = ({
           setIsApiError={setIsApiError}
           setApiError={setApiError}
           setExecutionPageListFlag={setExecutionPageListFlag}
+          setTimeZoneSelected={setTimeZoneSelected}
         />
       ) : (
         <div className="submit-job-container text-enable-warning">
@@ -958,8 +994,12 @@ const CreateVertexScheduler = ({
             />
           </div>
 
-          {!machineTypeSelected && (
+          {!machineTypeSelected && !apiError && (
             <ErrorMessage message="Machine type is required" showIcon={false} />
+          )}
+
+          {!machineTypeSelected && apiError && !isApiError && (
+            <ErrorMessage message={apiError} showIcon={false} />
           )}
 
           {machineTypeList.length > 0 &&
@@ -974,7 +1014,7 @@ const CreateVertexScheduler = ({
                   item.acceleratorConfigs !== null)
               ) {
                 return (
-                  <div className="execution-history-main-wrapper">
+                  <div className="execution-history-1main-wrapper">
                     <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
                       <Autocomplete
                         className="create-scheduler-style create-scheduler-form-element-input-fl"
@@ -1090,7 +1130,7 @@ const CreateVertexScheduler = ({
               disabled={isCreatingNewBucket}
             />
           </div>
-          {!cloudStorage && (
+          {!cloudStorage && !errorMessageBucket && (
             <ErrorMessage
               message="Cloud storage bucket is required"
               showIcon={false}
@@ -1098,9 +1138,13 @@ const CreateVertexScheduler = ({
           )}
 
           <span className="tab-description tab-text-sub-cl">
-            {bucketError &&
-            bucketError !== '' &&
-            !cloudStorageList.includes(cloudStorage!) ? (
+            {errorMessageBucket ? (
+              <div className="error-message-warn error-key-missing">
+                {errorMessageBucket}
+              </div>
+            ) : bucketError &&
+              bucketError !== '' &&
+              !cloudStorageList.includes(cloudStorage!) ? (
               <span className="error-message">{bucketError}</span>
             ) : (
               <span>Select an existing bucket or create a new one.</span>
@@ -1185,11 +1229,17 @@ const CreateVertexScheduler = ({
               )}
             />
           </div>
-          {!serviceAccountSelected && (
+          {!serviceAccountSelected && !errrorMessageServiceAccount && (
             <ErrorMessage
               message="Service account is required"
               showIcon={false}
             />
+          )}
+
+          {errrorMessageServiceAccount && (
+            <span className="error-message-warn error-key-missing">
+              {errrorMessageServiceAccount}
+            </span>
           )}
 
           <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
@@ -1273,7 +1323,11 @@ const CreateVertexScheduler = ({
                   />
                   {!primaryNetworkSelected && (
                     <ErrorMessage
-                      message="Primary network is required"
+                      message={
+                        errorMessagePrimaryNetwork
+                          ? errorMessagePrimaryNetwork
+                          : 'Primary network is required'
+                      }
                       showIcon={false}
                     />
                   )}
@@ -1298,7 +1352,11 @@ const CreateVertexScheduler = ({
                   />
                   {!subNetworkSelected && (
                     <ErrorMessage
-                      message="Sub network is required"
+                      message={
+                        errorMessageSubnetworkNetwork
+                          ? errorMessageSubnetworkNetwork
+                          : 'Sub network is required'
+                      }
                       showIcon={false}
                     />
                   )}
@@ -1328,7 +1386,10 @@ const CreateVertexScheduler = ({
                 />
               </div>
               {Object.keys(hostProject).length === 0 && (
-                <ErrorMessage message="No shared subnetworks are available in this region." />
+                <ErrorMessage
+                  message="No shared subnetworks are available in this region."
+                  showIcon={false}
+                />
               )}
             </>
           )}
@@ -1419,9 +1480,17 @@ const CreateVertexScheduler = ({
                       }}
                       disablePast
                       closeOnSelect={true}
+                      viewRenderers={{
+                        hours: renderTimeViewClock,
+                        minutes: renderTimeViewClock,
+                        seconds: renderTimeViewClock
+                      }}
                     />
                     {isPastStartDate && (
-                      <ErrorMessage message="Start date should be greater than current date" />
+                      <ErrorMessage
+                        message="Start date should be greater than current date"
+                        showIcon={false}
+                      />
                     )}
                   </div>
                   <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
@@ -1447,12 +1516,23 @@ const CreateVertexScheduler = ({
                       }}
                       disablePast
                       closeOnSelect={true}
+                      viewRenderers={{
+                        hours: renderTimeViewClock,
+                        minutes: renderTimeViewClock,
+                        seconds: renderTimeViewClock
+                      }}
                     />
                     {endDateError && (
-                      <ErrorMessage message="End date should be greater than Start date" />
+                      <ErrorMessage
+                        message="End date should be greater than Start date"
+                        showIcon={false}
+                      />
                     )}
                     {isPastEndDate && (
-                      <ErrorMessage message="End date should be greater than current date" />
+                      <ErrorMessage
+                        message="End date should be greater than current date"
+                        showIcon={false}
+                      />
                     )}
                   </div>
                 </LocalizationProvider>
@@ -1470,7 +1550,10 @@ const CreateVertexScheduler = ({
                     Label="Schedule*"
                   />
                   {scheduleField === '' && (
-                    <ErrorMessage message="Schedule field is required" />
+                    <ErrorMessage
+                      message="Schedule field is required"
+                      showIcon={false}
+                    />
                   )}
                   <div>
                     <span className="tab-description tab-text-sub-cl">

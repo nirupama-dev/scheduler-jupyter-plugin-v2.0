@@ -704,3 +704,22 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   margin-left: auto;
   width: 17%;
 }
+
+.error-message-warn {
+  max-width: 500px;
+  padding-top: 10px;
+}
+
+.loader-table {
+  text-align: center;
+  padding: 50px;
+}
+
+.table-loading-ht {
+  height: calc(100vh - 368px);
+}
+
+.spin-loader-table {
+  width: 29%;
+  margin: 0 auto;
+}

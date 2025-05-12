@@ -82,7 +82,7 @@ class Client:
 
         except Exception as e:
             self.log.exception(f"Error fetching network: {str(e)}")
-            return {"Error fetching network": str(e)}
+            return {"error": str(e)}
 
     async def get_subnetwork(self, region_id, network_id):
         try:
@@ -107,7 +107,7 @@ class Client:
 
         except Exception as e:
             self.log.exception(f"Error fetching sub network: {str(e)}")
-            return {"Error fetching sub network": str(e)}
+            return {"error": str(e)}
 
     async def get_shared_network(self, project_id, region_id):
         try:

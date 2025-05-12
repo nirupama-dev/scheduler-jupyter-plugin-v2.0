@@ -69,6 +69,7 @@ const NotebookSchedulerComponent = ({
   const [executionPageListFlag, setExecutionPageListFlag] =
     useState<boolean>(false);
   const abortControllerRef = useRef<any>(null);
+  const [apiEnableUrl, setApiEnableUrl] = useState<any>(null);
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -188,10 +189,16 @@ const NotebookSchedulerComponent = ({
               />
             )}
             {jobNameSpecialValidation && jobNameValidation && !editMode && (
-              <ErrorMessage message="Name must contain only letters, numbers, hyphens, and underscores" />
+              <ErrorMessage
+                message="Name must contain only letters, numbers, hyphens, and underscores"
+                showIcon={notebookSelector === 'composer' ? true : false}
+              />
             )}
             {!jobNameUniqueValidation && !editMode && (
-              <ErrorMessage message="Job name must be unique for the selected environment" />
+              <ErrorMessage
+                message="Job name must be unique for the selected environment"
+                showIcon={notebookSelector === 'composer' ? true : false}
+              />
             )}
 
             <div className="create-scheduler-form-element-input-file">
@@ -249,7 +256,7 @@ const NotebookSchedulerComponent = ({
               <div className="error-key-parent enable-error-text-label">
                 <iconError.react tag="div" className="logo-alignment-style" />
                 <div className="error-key-missing">
-                  <EnableNotifyMessage message={apiError} />
+                  <EnableNotifyMessage message={apiError} url={apiEnableUrl} />
                 </div>
               </div>
             )}
@@ -304,6 +311,9 @@ const NotebookSchedulerComponent = ({
           setApiError={setApiError}
           jobNameSpecialValidation={jobNameSpecialValidation}
           setExecutionPageListFlag={setExecutionPageListFlag}
+          apiError={apiError}
+          setApiEnableUrl={setApiEnableUrl}
+          isApiError={isApiError}
         />
       )}
     </div>

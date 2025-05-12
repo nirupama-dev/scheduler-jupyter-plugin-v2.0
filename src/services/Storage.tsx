@@ -23,13 +23,17 @@ import path from 'path';
 export class StorageServices {
   static cloudStorageAPIService = async (
     setCloudStorageList: (value: string[]) => void,
-    setCloudStorageLoading: (value: boolean) => void
+    setCloudStorageLoading: (value: boolean) => void,
+    setErrorMessageBucket: (value: string) => void
   ) => {
     try {
       setCloudStorageLoading(true);
       const formattedResponse: any = await requestAPI('api/storage/listBucket');
       if (formattedResponse.length > 0) {
         setCloudStorageList(formattedResponse);
+      } else if (formattedResponse.error) {
+        setErrorMessageBucket(formattedResponse.error);
+        setCloudStorageList([]);
       } else {
         setCloudStorageList([]);
       }
@@ -65,11 +69,7 @@ export class StorageServices {
         toast.success('Bucket created successfully', toastifyCustomStyle);
         setBucketError('');
       } else if (formattedResponse?.error) {
-        let errorMessage = '400: Bucket not created.';
-        if (formattedResponse.error.includes('false')) {
-          errorMessage = `${errorMessage} ${formattedResponse.error.split('false:')[1]}`;
-        }
-        setBucketError(errorMessage);
+        setBucketError(formattedResponse.error);
       }
       setIsCreatingNewBucket(false);
     } catch (error) {

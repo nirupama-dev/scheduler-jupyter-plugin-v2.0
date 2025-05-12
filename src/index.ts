@@ -27,7 +27,6 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { NotebookScheduler } from './scheduler/NotebookScheduler';
 import { NotebookButtonExtension } from './controls/NotebookButtonExtension';
 import { TITLE_LAUNCHER_CATEGORY } from './utils/Const';
-import { iconScheduledNotebooks } from './utils/Icons';
 
 /**
  * Initialization data for the scheduler-jupyter-plugin extension.

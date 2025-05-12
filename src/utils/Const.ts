@@ -106,3 +106,7 @@ export const VERTEX_REGIONS = [
   'us-west1',
   'us-west4'
 ];
+
+export const DEFAULT_SERVICE_ACCOUNT = 'compute@developer.gserviceaccount.com';
+
+export const DEFAULT_TIME_ZONE = 'UTC';

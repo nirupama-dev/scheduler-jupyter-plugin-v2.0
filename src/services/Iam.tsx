@@ -24,7 +24,8 @@ export class IamServices {
     setServiceAccountList: (
       value: { displayName: string; email: string }[]
     ) => void,
-    setServiceAccountLoading: (value: boolean) => void
+    setServiceAccountLoading: (value: boolean) => void,
+    setErrorMessage: (value: string) => void
   ) => {
     try {
       setServiceAccountLoading(true);
@@ -38,6 +39,9 @@ export class IamServices {
         }));
         serviceAccountList.sort();
         setServiceAccountList(serviceAccountList);
+      } else if (formattedResponse.error) {
+        setErrorMessage(formattedResponse.error);
+        setServiceAccountList([]);
       } else {
         setServiceAccountList([]);
       }

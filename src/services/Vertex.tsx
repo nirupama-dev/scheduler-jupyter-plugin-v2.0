@@ -29,7 +29,7 @@ import {
   IUpdateSchedulerAPIResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
-import { scheduleMode } from '../utils/Const';
+import { DEFAULT_TIME_ZONE, scheduleMode } from '../utils/Const';
 import { Dispatch, SetStateAction } from 'react';
 
 export class VertexServices {
@@ -38,7 +38,8 @@ export class VertexServices {
     setMachineTypeList: (value: IMachineType[]) => void,
     setMachineTypeLoading: (value: boolean) => void,
     setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void
+    setApiError: (value: string) => void,
+    setApiEnableUrl: any
   ) => {
     try {
       setMachineTypeLoading(true);
@@ -50,8 +51,18 @@ export class VertexServices {
       } else if (formattedResponse.length === undefined) {
         try {
           if (formattedResponse.error.code === 403) {
-            setIsApiError(true);
-            setApiError(formattedResponse.error.message);
+            // Pattern to check whether string contains link
+            const pattern =
+              // eslint-disable-next-line
+              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+            const url = formattedResponse.error.message.match(pattern);
+            if (url && url.length > 0) {
+              setIsApiError(true);
+              setApiError(formattedResponse.error.message);
+              setApiEnableUrl(url);
+            } else {
+              setApiError(formattedResponse.error.message);
+            }
           }
         } catch (error) {
           showToast(
@@ -214,14 +225,9 @@ export class VertexServices {
         setVertexScheduleList(schedules);
 
         // Handle pagination
-        if (nextPageToken) {
-          setNextPageToken(nextPageToken);
-          setHasNextPageToken(true);
-        } else {
-          setNextPageToken(null);
-          setHasNextPageToken(false);
-        }
-
+        nextPageToken
+          ? setNextPageToken(nextPageToken)
+          : setNextPageToken(null);
         // Adding a slight delay for DOM refresh
         await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -235,7 +241,6 @@ export class VertexServices {
             abortControllers
           );
         });
-
         setIsLoading(false); // Stop loading after everything is complete
       } else {
         setVertexScheduleList([]);
@@ -522,7 +527,8 @@ export class VertexServices {
     setEditMode: (value: boolean) => void,
     setJobNameSelected: (value: string) => void,
     setGcsPath: (value: string) => void,
-    abortControllers: any
+    abortControllers: any,
+    setTimeZoneSelected: (value: any) => void
   ) => {
     setEditDagLoading(job_id);
 
@@ -651,7 +657,19 @@ export class VertexServices {
         } else {
           setScheduleMode('runSchedule');
         }
-        setScheduleField(formattedResponse.cron);
+        
+        if(formattedResponse.cron.includes('TZ')) {
+          // Remove time zone from cron string. ex: TZ=America/New_York * * * * * to * * * * *
+          const firstSpaceIndex = formattedResponse.cron.indexOf(' ');
+          const timeZone = formattedResponse.cron.substring(0, firstSpaceIndex);
+          setTimeZoneSelected(timeZone.split('=')[1]);
+          const cron = formattedResponse.cron.substring(firstSpaceIndex + 1);
+          setScheduleField(cron);
+        } else {
+          setTimeZoneSelected(DEFAULT_TIME_ZONE)
+          setScheduleField(formattedResponse.cron);
+        }
+        
         const start_time = formattedResponse.startTime;
         const end_time = formattedResponse.endTime;
         setStartDate(start_time ? dayjs(start_time) : null);
