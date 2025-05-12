@@ -279,12 +279,12 @@ class Client:
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
                             cron_value = (
-                                cron.split(" ", 1)[1] if ("TZ" in cron) else cron
+                                cron.split(" ", 1)[1] if (cron and "TZ" in cron) else cron
                             )
                             if max_run_count == "1" and cron_value == "* * * * *":
                                 schedule_value = "run once"
                             else:
-                                schedule_value = get_description(cron)
+                                schedule_value = get_description(expression=cron)
 
                             formatted_schedule = {
                                 "name": schedule.get("name"),

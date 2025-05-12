@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import aiohttp
 from google.cloud import jupyter_config
 
@@ -85,3 +86,32 @@ def patch_mocks(monkeypatch):
     monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(jupyter_config, "async_get_gcloud_config", mock_config)
     monkeypatch.setattr(aiohttp, "ClientSession", MockClientSession)
+
+
+class MockGetScheduleClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse({"key1": "value1", "key2": "value2"})
+
+
+class MockListSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {
+                "schedules": [
+                    {"key1": "value1", "key2": "value2"},
+                    {"key1": "value12", "key2": "value22"},
+                ]
+            }
+        )
