@@ -23,7 +23,7 @@ import ListVertexScheduler from '../vertex/ListVertexScheduler';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { scheduleMode } from '../../utils/Const';
 import dayjs from 'dayjs';
-import { ISchedulerData } from './VertexInterfaces';
+import { IActivePaginationVariables, ISchedulerData } from './VertexInterfaces';
 import VertexExecutionHistory from './VertexExecutionHistory';
 
 const VertexScheduleJobs = ({
@@ -111,27 +111,51 @@ const VertexScheduleJobs = ({
   const [schedulerData, setScheduleData] = useState<ISchedulerData>();
   const [scheduleName, setScheduleName] = useState('');
   const abortControllers = useRef<any>([]); // Array of API signals to abort
+  const [activePaginationVariables, setActivePaginationVariables] = useState<
+    IActivePaginationVariables | null | undefined
+  >();
 
   /**
    * Handles the back button click event.
+   * @param paginationVariables
+   * @param region
    */
-  const handleBackButton = () => {
+  const handleBackButton = (
+    paginationVariables: React.SetStateAction<
+      IActivePaginationVariables | null | undefined
+    >,
+    regionToLoad: string
+  ) => {
     setShowExecutionHistory(false);
     setExecutionPageFlag(true);
+    setActivePaginationVariables(paginationVariables);
+    setRegion(regionToLoad);
     abortApiCall();
   };
 
   /**
    * Handles the selection of a DAG ID and updates the state with the selected scheduler data.
-   * @param {any} schedulerData - The data related to the selected scheduler.
-   * @param {string} scheduleName - The name of the selected schedule.
+   * @param schedulerData
+   * @param scheduleName
+   * @param paginationVariables
+   * @param region
    */
-  const handleScheduleIdSelection = (schedulerData: any, scheduleName: string) => {
+  const handleScheduleIdSelection = (
+    schedulerData: any,
+    scheduleName: string,
+    paginationVariables: IActivePaginationVariables | null | undefined,
+    regionToLoad: string
+  ) => {
     setShowExecutionHistory(true);
     setScheduleName(scheduleName);
     setScheduleData(schedulerData);
+    setActivePaginationVariables(paginationVariables);
+    setRegion(regionToLoad);
   };
 
+  /**
+   * Abort Api calls while moving away from page.
+   */
   const abortApiCall = () => {
     abortControllers.current.forEach((controller: any) => controller.abort());
     abortControllers.current = [];
@@ -150,6 +174,7 @@ const VertexScheduleJobs = ({
           setExecutionPageListFlag={setExecutionPageListFlag}
           abortControllers={abortControllers}
           abortApiCall={abortApiCall}
+          activePaginationVariables={activePaginationVariables}
         />
       ) : (
         <ListVertexScheduler
@@ -189,6 +214,8 @@ const VertexScheduleJobs = ({
           abortControllers={abortControllers}
           abortApiCall={abortApiCall}
           setTimeZoneSelected={setTimeZoneSelected}
+          activePaginationVariables={activePaginationVariables}
+          setActivePaginationVariables={setActivePaginationVariables}
         />
       )}
     </>

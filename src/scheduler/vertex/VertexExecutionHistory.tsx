@@ -24,7 +24,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import { authApi } from '../../utils/Config';
 import VertexJobRuns from './VertexJobRuns';
 import { iconLeftArrow, iconCreateCluster } from '../../utils/Icons';
-import { ISchedulerData, IVertexScheduleRunList } from './VertexInterfaces';
+import {
+  IActivePaginationVariables,
+  ISchedulerData,
+  IVertexScheduleRunList
+} from './VertexInterfaces';
 import { LOG_EXPLORER_BASE_URL } from '../../utils/Const';
 import { toast } from 'react-toastify';
 
@@ -37,17 +41,22 @@ const VertexExecutionHistory = ({
   setExecutionPageFlag,
   setExecutionPageListFlag,
   abortControllers,
-  abortApiCall
+  abortApiCall,
+  activePaginationVariables
 }: {
   region: string;
   setRegion: (value: string) => void;
   schedulerData: ISchedulerData | undefined;
   scheduleName: string;
-  handleBackButton: () => void;
+  handleBackButton: (
+    value: IActivePaginationVariables | undefined | null,
+    region: string
+  ) => void;
   setExecutionPageFlag: (value: boolean) => void;
   setExecutionPageListFlag: (value: boolean) => void;
   abortControllers: any;
   abortApiCall: () => void;
+  activePaginationVariables: IActivePaginationVariables | null | undefined;
 }): JSX.Element => {
   const today = dayjs();
 
@@ -74,7 +83,7 @@ const VertexExecutionHistory = ({
     authApi()
       .then(credentials => {
         if (credentials && credentials?.region_id && credentials.project_id) {
-          setRegion(credentials.region_id);
+          region ? null : setRegion(credentials.region_id);
         }
       })
       .catch(error => {
@@ -280,7 +289,7 @@ const VertexExecutionHistory = ({
           <div
             role="button"
             className="scheduler-back-arrow-icon"
-            onClick={() => handleBackButton()}
+            onClick={() => handleBackButton(activePaginationVariables, region)}
           >
             <iconLeftArrow.react
               tag="div"
