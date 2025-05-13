@@ -35,7 +35,7 @@ const ExpandToastMessage: React.FC<ExpandableToastProps> = ({
         <span className="expand-btn"> ...</span>
       )}
       {showExpandButton && isExpanded && (
-        <span className="expand-btn"> Less</span>
+        <div className="expand-btn"> Less</div>
       )}
     </div>
   );
