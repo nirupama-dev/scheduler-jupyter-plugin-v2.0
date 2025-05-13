@@ -31,6 +31,8 @@ import {
 import dayjs, { Dayjs } from 'dayjs';
 import { DEFAULT_TIME_ZONE, scheduleMode } from '../utils/Const';
 import { Dispatch, SetStateAction } from 'react';
+import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
+import React from 'react';
 
 export class VertexServices {
   static machineTypeAPIService = async (
@@ -95,7 +97,10 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        toast.error(data.error, toastifyCustomStyle);
+        toast.error(
+          <ExpandToastMessage message={data.error} />,
+          toastifyCustomStyle
+        );
         setCreatingVertexScheduler(false);
       } else {
         toast.success(
