@@ -210,7 +210,6 @@ const CreateVertexScheduler = ({
     useState<string>('');
   const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
     useState<string>('');
-
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
    * @param {string} value selected region
@@ -354,6 +353,7 @@ const CreateVertexScheduler = ({
    */
   const handleCloudStorageSelected = (value: string | null) => {
     setBucketError('');
+
     if (value === `Create and Select "${searchValue}"`) {
       setNewBucketOption(true);
       createNewBucket();
@@ -390,7 +390,13 @@ const CreateVertexScheduler = ({
     );
 
     // If no match found, add the "Create new bucket" option
-    if (filteredOptions.length === 0 && state.inputValue.trim() !== '') {
+    if (
+      (filteredOptions.length === 0 ||
+        options.filter(
+          option => option.toLowerCase() !== state.inputValue.toLowerCase()
+        )) &&
+      state.inputValue.trim() !== ''
+    ) {
       filteredOptions.push(`Create and Select "${searchValue}"`);
     }
 
