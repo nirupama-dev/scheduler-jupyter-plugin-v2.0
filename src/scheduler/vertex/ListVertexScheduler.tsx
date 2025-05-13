@@ -1042,7 +1042,7 @@ function ListVertexScheduler({
               regionsList={VERTEX_REGIONS}
             />
             {!isLoading && !region && (
-              <ErrorMessage message="Region is required" />
+              <ErrorMessage message="Region is required" showIcon={false} />
             )}
           </div>
         </div>
