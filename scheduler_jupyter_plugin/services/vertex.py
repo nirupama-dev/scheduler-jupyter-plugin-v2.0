@@ -162,7 +162,7 @@ class Client:
                 else:
                     self.log.exception("Error creating the schedule")
                     raise Exception(
-                        f"Error creating the schedule: {response.reason} {await response.text()}"
+                        f"{response.reason} {await response.text()}"
                     )
         except Exception as e:
             self.log.exception(f"Error creating schedule: {str(e)}")
