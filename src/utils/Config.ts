@@ -23,13 +23,15 @@ import {
   API_HEADER_BEARER,
   API_HEADER_CONTENT_TYPE,
   HTTP_METHOD,
+  STATUS_SUCCESS,
   gcpServiceUrls
 } from './Const';
 import { ToastOptions, toast } from 'react-toastify';
+import { requestAPI } from '../handler/Handler';
 
 /**
  * Authentication function
- * @param checkApiEnabled 
+ * @param checkApiEnabled
  * @returns credentials
  */
 export const authApi = async (
@@ -39,30 +41,16 @@ export const authApi = async (
   return authService;
 };
 
-// export const checkConfig = async (
-//   setLoginState: React.Dispatch<React.SetStateAction<boolean>>,
-//   setConfigError: React.Dispatch<React.SetStateAction<boolean>>,
-//   setLoginError: React.Dispatch<React.SetStateAction<boolean>>
-// ): Promise<void> => {
-//   const credentials: IAuthCredentials | undefined = await authApi();
-//   if (credentials) {
-//     if (credentials.access_token === '') {
-//       localStorage.removeItem('loginState');
-//       if (credentials.config_error === 1) {
-//         setConfigError(true);
-//       }
-//       if (credentials.login_error === 1) {
-//         setLoginError(true);
-//       }
-//     }
-
-//     if (credentials.config_error === 1) {
-//       setConfigError(true);
-//     } else {
-//       setLoginState(true);
-//     }
-//   }
-// };
+export const checkConfig = async (
+  setLoginError: React.Dispatch<React.SetStateAction<boolean>>
+): Promise<void> => {
+  const credentials: IAuthCredentials | undefined = await authApi();
+  if (credentials) {
+    if (credentials.login_error === 1) {
+      setLoginError(true);
+    }
+  }
+};
 
 /**
  * Helper method that wraps fetch and logs the request uri and status codes to
@@ -112,7 +100,14 @@ export const authenticatedFetch = async (config: {
   queryParams?: URLSearchParams;
   checkApiEnabled?: boolean;
 }) => {
-  const { baseUrl, uri, method, regionIdentifier, queryParams, checkApiEnabled } = config;
+  const {
+    baseUrl,
+    uri,
+    method,
+    regionIdentifier,
+    queryParams,
+    checkApiEnabled
+  } = config;
   const credentials = await authApi(checkApiEnabled);
   // If there is an issue with getting credentials, there is no point continuing the request.
   if (!credentials) {
@@ -276,4 +271,20 @@ export const currentTime = (val: any) => {
     .set('second', currentTime.second());
 
   return newDateTime;
+};
+
+export const login = async (
+  setLoginError: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  const data = await requestAPI('login', {
+    method: 'POST'
+  });
+  if (typeof data === 'object' && data !== null) {
+    const loginStatus = (data as { login: string }).login;
+    if (loginStatus === STATUS_SUCCESS) {
+      setLoginError(false);
+    } else {
+      setLoginError(true);
+    }
+  }
 };

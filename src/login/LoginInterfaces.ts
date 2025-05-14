@@ -28,3 +28,9 @@ export interface LoginDialogProps {
   configError: boolean;
   onLoginSuccess?: () => void;
 }
+
+export interface LoginErrorProps {
+  loginError?: boolean;
+  configError?: boolean;
+  setLoginError: React.Dispatch<React.SetStateAction<boolean>>;
+}

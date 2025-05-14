@@ -40,6 +40,7 @@ import dashIcon from '../../style/icons/dash_icon_jupyter.svg';
 import pendingIcon from '../../style/icons/pending_icon.svg';
 import PreviousIcon from '../../style/icons/previous_page.svg';
 import NextIcon from '../../style/icons/next_page.svg';
+import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
 
 export const iconCluster = new LabIcon({
   name: 'launcher:clusters-icon',
@@ -157,4 +158,9 @@ export const iconPrevious = new LabIcon({
 export const iconNext = new LabIcon({
   name: 'launcher:next-icon',
   svgstr: NextIcon
+});
+
+export const IconsigninGoogle = new LabIcon({
+  name: 'launcher:signin_google_icon',
+  svgstr: signinGoogleIcon
 });
