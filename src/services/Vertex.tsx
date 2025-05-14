@@ -95,13 +95,8 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        if (data.error.includes(':')) {
-          toast.error(data.error.split(':')[0], toastifyCustomStyle);
-          setCreatingVertexScheduler(false);
-        } else {
-          toast.error(data.error, toastifyCustomStyle);
-          setCreatingVertexScheduler(false);
-        }
+        toast.error(data.error, toastifyCustomStyle);
+        setCreatingVertexScheduler(false);
       } else {
         toast.success(
           `Job ${payload.display_name} successfully created`,
@@ -657,8 +652,8 @@ export class VertexServices {
         } else {
           setScheduleMode('runSchedule');
         }
-        
-        if(formattedResponse.cron.includes('TZ')) {
+
+        if (formattedResponse.cron.includes('TZ')) {
           // Remove time zone from cron string. ex: TZ=America/New_York * * * * * to * * * * *
           const firstSpaceIndex = formattedResponse.cron.indexOf(' ');
           const timeZone = formattedResponse.cron.substring(0, firstSpaceIndex);
@@ -666,10 +661,10 @@ export class VertexServices {
           const cron = formattedResponse.cron.substring(firstSpaceIndex + 1);
           setScheduleField(cron);
         } else {
-          setTimeZoneSelected(DEFAULT_TIME_ZONE)
+          setTimeZoneSelected(DEFAULT_TIME_ZONE);
           setScheduleField(formattedResponse.cron);
         }
-        
+
         const start_time = formattedResponse.startTime;
         const end_time = formattedResponse.endTime;
         setStartDate(start_time ? dayjs(start_time) : null);
