@@ -43,7 +43,10 @@ import {
   iconPending
 } from '../../utils/Icons';
 import { VertexServices } from '../../services/Vertex';
-import { IVertexScheduleList } from './VertexInterfaces';
+import {
+  IVertexScheduleList,
+  IActivePaginationVariables
+} from './VertexInterfaces';
 import dayjs from 'dayjs';
 import ErrorMessage from '../common/ErrorMessage';
 
@@ -78,12 +81,14 @@ function ListVertexScheduler({
   setEditMode,
   setJobNameSelected,
   setGcsPath,
-  handleScheduleIdSelection: handleDagIdSelection,
+  handleScheduleIdSelection: handleScheduleIdSelection,
   setIsApiError,
   setApiError,
   abortControllers,
   abortApiCall,
-  setTimeZoneSelected
+  setTimeZoneSelected,
+  activePaginationVariables,
+  setActivePaginationVariables
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -121,12 +126,21 @@ function ListVertexScheduler({
   setEditMode: (value: boolean) => void;
   setJobNameSelected: (value: string) => void;
   setGcsPath: (value: string) => void;
-  handleScheduleIdSelection: (scheduleId: any, scheduleName: string) => void;
+  handleScheduleIdSelection: (
+    scheduleId: any,
+    scheduleName: string,
+    activePaginationVariables: IActivePaginationVariables | null | undefined,
+    region: string
+  ) => void;
   setIsApiError: (value: boolean) => void;
   setApiError: (value: string) => void;
   abortControllers: any;
   abortApiCall: () => void;
   setTimeZoneSelected: (value: any) => void;
+  activePaginationVariables: IActivePaginationVariables | null | undefined;
+  setActivePaginationVariables: (
+    value: IActivePaginationVariables | null | undefined
+  ) => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -146,7 +160,8 @@ function ListVertexScheduler({
   const [scheduleDisplayName, setScheduleDisplayName] = useState<string>('');
   const isPreview = false;
 
-  const [scheduleListPageLength] = useState<number>(25); // size of each page with pagination
+  const [scheduleListPageLength, setScheduleListPageLength] =
+    useState<number>(25); // size of each page with pagination
   const [currentStartIndex, setCurrentStartIndex] = useState<number>(1); // Track current page start index
   const [currentLastIndex, setCurrentLastIndex] = useState<number>(
     scheduleListPageLength
@@ -160,6 +175,7 @@ function ListVertexScheduler({
   const [resetToCurrentPage, setResetToCurrentPage] = useState<boolean>(false);
   const previousScheduleList = useRef(vertexScheduleList);
   const previousNextPageToken = useRef(nextPageToken);
+  const [regionDisable, setRegionDisable] = useState<boolean>(false);
 
   const columns = useMemo(
     () => [
@@ -214,7 +230,7 @@ function ListVertexScheduler({
       setCanNextPage,
       abortControllers
     );
-
+    setRegionDisable(false);
     setIsLoading(false);
   };
 
@@ -234,6 +250,7 @@ function ListVertexScheduler({
         previousNextPageToken.current = nextPageToken;
       }
     }
+    setActivePaginationVariables(null); // reset once api has loaded the active pagination variables on return back
   }, [nextPageToken, vertexScheduleList, scheduleListPageLength]);
 
   /**
@@ -241,6 +258,7 @@ function ListVertexScheduler({
    */
   const setPaginationVariables = () => {
     let updatedPageTokenList = [...pageTokenList];
+    let resetFlag = resetToCurrentPage;
 
     if (fetchPreviousPage) {
       // True only in case of clicking for previous page
@@ -254,6 +272,7 @@ function ListVertexScheduler({
         updatedPageTokenList = updatedPageTokenList.slice(0, -1); // remove nextpage's token if not in last page
       }
       setResetToCurrentPage(false); // to make sure ttoken list is not refreshed again.
+      resetFlag = false;
     }
     let hasNextPage = false;
 
@@ -263,19 +282,16 @@ function ListVertexScheduler({
       if (
         !updatedPageTokenList.includes(nextPageToken) &&
         previousNextPageToken.current !== nextPageToken &&
-        !resetToCurrentPage
+        !resetFlag
       ) {
         // to make sure the token is added only once and is not the one deleted during refresh.
         updatedPageTokenList = [...updatedPageTokenList, nextPageToken]; // set paginated token list and the new token list.
       }
     }
     setCanNextPage(hasNextPage);
-
     const hasPreviousPage = updatedPageTokenList.length > 1; // true only if not in first page
     setCanPreviousPage(hasPreviousPage); // false only on first page
-
     setPageTokenList([...updatedPageTokenList]); // set the updated token list after pagination
-
     let startIndex = 1;
     if (hasPreviousPage) {
       // change start index if navigating to next page and remains as 1 if on the 1st page.
@@ -338,18 +354,39 @@ function ListVertexScheduler({
     }
   };
 
-  // API call for refresh
-  const handleCurrentPageRefresh = async () => {
+  /**
+   *
+   * @param pageTokenListToLoad available only in case navigating  back from another screen
+   * @param nextPageTokenToLoad available only in case navigating back from another screen
+   */
+  const handleCurrentPageRefresh = async (
+    pageTokenListToLoad: string[] | undefined | null,
+    nextPageTokenToLoad: string | null | undefined
+  ) => {
+    setRegionDisable(true);
     abortApiCall(); //Abort last run execution api call
     setResetToCurrentPage(true);
     //fetching the current page token from token list: on the last page its the last element, null if on first page, 2nd last element on other pages.
-    let currentPageToken = nextPageToken
-      ? pageTokenList.length > 1
-        ? pageTokenList[pageTokenList.length - 2]
-        : null
-      : pageTokenList.length > 0
-        ? pageTokenList[pageTokenList.length - 1]
-        : null;
+    let currentPageToken = null;
+    if (pageTokenListToLoad) {
+      // if navigating back, load the same page.
+      currentPageToken = nextPageTokenToLoad
+        ? pageTokenListToLoad.length > 1
+          ? pageTokenListToLoad[pageTokenListToLoad.length - 2]
+          : null
+        : pageTokenListToLoad.length > 0
+          ? pageTokenListToLoad[pageTokenListToLoad.length - 1]
+          : null;
+    } else {
+      // in case of a simple same page refresh.
+      currentPageToken = nextPageToken
+        ? pageTokenList.length > 1
+          ? pageTokenList[pageTokenList.length - 2]
+          : null
+        : pageTokenList.length > 0
+          ? pageTokenList[pageTokenList.length - 1]
+          : null;
+    }
     listVertexScheduleInfoAPI(currentPageToken);
   };
   /**
@@ -381,7 +418,7 @@ function ListVertexScheduler({
         abortControllers
       );
     }
-    handleCurrentPageRefresh();
+    handleCurrentPageRefresh(null, null);
   };
 
   /**
@@ -404,7 +441,7 @@ function ListVertexScheduler({
       );
     }
 
-    handleCurrentPageRefresh();
+    handleCurrentPageRefresh(null, null);
   };
 
   /**
@@ -511,6 +548,37 @@ function ListVertexScheduler({
         setTimeZoneSelected
       );
     }
+  };
+  /**
+   * Function that redirects to Job Execution History
+   * @param schedulerData schedule data to be retrieved
+   * @param scheduleName name of the schedule
+   * @param paginationVariables current page details (to be restored when user clicks back to Schedule Listing)
+   * @param region selected region for the job (to be reatianed when user clicks back to Schedule Listing)
+   */
+  const handleScheduleIdSelectionFromList = (
+    schedulerData: any,
+    scheduleName: string
+  ) => {
+    abortApiCall();
+    handleScheduleIdSelection(
+      schedulerData,
+      scheduleName,
+      saveActivePaginationVariables(),
+      region
+    );
+  };
+  /**
+   * Function that stores all paginationtion related data for future restoration.
+   */
+  const saveActivePaginationVariables = () => {
+    let currentPaginationVariables: IActivePaginationVariables | undefined = {
+      scheduleListPageLength: scheduleListPageLength,
+      totalCount: totalCount,
+      pageTokenList: pageTokenList,
+      nextPageToken: nextPageToken
+    };
+    return currentPaginationVariables;
   };
 
   const {
@@ -687,7 +755,9 @@ function ListVertexScheduler({
           className="clusters-table-data table-cell-overflow"
         >
           <span
-            onClick={() => handleDagIdSelection(cell.row.original, cell.value)}
+            onClick={() =>
+              handleScheduleIdSelectionFromList(cell.row.original, cell.value)
+            }
           >
             {cell.value}
           </span>
@@ -906,8 +976,15 @@ function ListVertexScheduler({
 
   useEffect(() => {
     if (region !== '') {
-      resetPaginationVariables(true);
-      listVertexScheduleInfoAPI(null);
+      if (activePaginationVariables) {
+        setBackPaginationVariables();
+      } else {
+        resetPaginationVariables(true);
+      }
+      handleCurrentPageRefresh(
+        activePaginationVariables?.pageTokenList,
+        activePaginationVariables?.nextPageToken
+      );
     }
   }, [region]);
 
@@ -915,7 +992,7 @@ function ListVertexScheduler({
     authApi()
       .then(credentials => {
         if (credentials && credentials?.region_id && credentials.project_id) {
-          if (!createCompleted) {
+          if (!createCompleted && !activePaginationVariables) {
             setRegion(credentials.region_id);
           }
           setProjectId(credentials.project_id);
@@ -925,6 +1002,35 @@ function ListVertexScheduler({
         console.error(error);
       });
   }, [projectId]);
+
+  /**
+   * Setting back pagination variables.
+   */
+  const setBackPaginationVariables = () => {
+    setScheduleListPageLength(
+      activePaginationVariables?.scheduleListPageLength ??
+        scheduleListPageLength
+    );
+    setTotalCount(activePaginationVariables?.totalCount ?? totalCount);
+    setPageTokenList(activePaginationVariables?.pageTokenList ?? pageTokenList);
+    setNextPageToken(activePaginationVariables?.nextPageToken ?? nextPageToken);
+  };
+
+  /**
+   *
+   * @param reloadPagination parameter specifies if the page has to refresh.
+   * Function resets all variables except nextPageToken and last index
+   * which would be automatically taken care during rendering.
+   */
+  const resetPaginationVariables = (reloadPagination: boolean) => {
+    setIsLoading(true);
+    setResetToCurrentPage(reloadPagination);
+    setCanPreviousPage(false);
+    setCanNextPage(false);
+    setCurrentStartIndex(1);
+    setTotalCount(0);
+    setPageTokenList([]);
+  };
 
   return (
     <div>
@@ -936,9 +1042,10 @@ function ListVertexScheduler({
               region={region}
               onRegionChange={region => setRegion(region)}
               regionsList={VERTEX_REGIONS}
+              regionDisable={regionDisable}
             />
             {!isLoading && !region && (
-              <ErrorMessage message="Region is required" />
+              <ErrorMessage message="Region is required" showIcon={false} />
             )}
           </div>
         </div>
@@ -950,7 +1057,7 @@ function ListVertexScheduler({
             variant="outlined"
             aria-label="cancel Batch"
             onClick={() => {
-              handleCurrentPageRefresh();
+              handleCurrentPageRefresh(null, null);
             }}
           >
             <div>REFRESH</div>
@@ -1015,22 +1122,6 @@ function ListVertexScheduler({
       )}
     </div>
   );
-
-  /**
-   *
-   * @param reloadPagination parameter specifies if the page has to refresh.
-   * Function resets all variables except nextPageToken and last index
-   * which would be automatically taken care during rendering.
-   */
-  function resetPaginationVariables(reloadPagination: boolean) {
-    setIsLoading(true);
-    setResetToCurrentPage(reloadPagination);
-    setCanPreviousPage(false);
-    setCanNextPage(false);
-    setCurrentStartIndex(1);
-    setTotalCount(0);
-    setPageTokenList([]);
-  }
 }
 
 export default ListVertexScheduler;

@@ -723,3 +723,12 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   width: 29%;
   margin: 0 auto;
 }
+
+.expanded-toast {
+  width: 50%;
+}
+
+.expand-btn {
+  color: #3367d6;
+  font-weight: bold;
+}

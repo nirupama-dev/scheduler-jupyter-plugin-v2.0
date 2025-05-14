@@ -52,6 +52,7 @@ export interface IVertexScheduleList {
   schedule: string;
   status: string;
   jobState?: any[];
+  region: string;
 }
 export interface IUpdateSchedulerAPIResponse {
   status: number;
@@ -90,6 +91,7 @@ export interface ILastScheduledRunResponse {
   scheduledRunTime: string;
   runResponse: string;
 }
+
 export interface IPaginationViewProps {
   canPreviousPage: boolean;
   canNextPage: boolean;
@@ -99,4 +101,11 @@ export interface IPaginationViewProps {
   handlePreviousPage: () => void;
   isLoading: boolean;
   totalCount: number;
+}
+
+export interface IActivePaginationVariables {
+  scheduleListPageLength: number;
+  totalCount: number; // size of each page with pagination
+  pageTokenList: string[];
+  nextPageToken: string | null;
 }

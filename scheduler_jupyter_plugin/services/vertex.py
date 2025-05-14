@@ -162,7 +162,7 @@ class Client:
                 else:
                     self.log.exception("Error creating the schedule")
                     raise Exception(
-                        f"Error creating the schedule: {response.reason} {await response.text()}"
+                        f"{response.reason} {await response.text()}"
                     )
         except Exception as e:
             self.log.exception(f"Error creating schedule: {str(e)}")
@@ -490,6 +490,9 @@ class Client:
                 payload["startTime"] = data.start_time
             if data.end_time:
                 payload["endTime"] = data.end_time
+
+            if data.max_run_count:
+                payload['maxRunCount'] = data.max_run_count
 
             keys = payload.keys()
             keys_to_filter = ["displayName", "maxConcurrentRunCount"]
