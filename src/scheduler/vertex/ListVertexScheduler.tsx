@@ -175,6 +175,7 @@ function ListVertexScheduler({
   const [resetToCurrentPage, setResetToCurrentPage] = useState<boolean>(false);
   const previousScheduleList = useRef(vertexScheduleList);
   const previousNextPageToken = useRef(nextPageToken);
+  const [regionDisable, setRegionDisable] = useState<boolean>(false);
 
   const columns = useMemo(
     () => [
@@ -229,7 +230,7 @@ function ListVertexScheduler({
       setCanNextPage,
       abortControllers
     );
-
+    setRegionDisable(false);
     setIsLoading(false);
   };
 
@@ -362,6 +363,7 @@ function ListVertexScheduler({
     pageTokenListToLoad: string[] | undefined | null,
     nextPageTokenToLoad: string | null | undefined
   ) => {
+    setRegionDisable(true);
     abortApiCall(); //Abort last run execution api call
     setResetToCurrentPage(true);
     //fetching the current page token from token list: on the last page its the last element, null if on first page, 2nd last element on other pages.
@@ -1040,6 +1042,7 @@ function ListVertexScheduler({
               region={region}
               onRegionChange={region => setRegion(region)}
               regionsList={VERTEX_REGIONS}
+              regionDisable={regionDisable}
             />
             {!isLoading && !region && (
               <ErrorMessage message="Region is required" showIcon={false} />
