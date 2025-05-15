@@ -34,6 +34,7 @@ type Props = {
   loaderRegion?: boolean;
   /** List of Regions */
   regionsList?: Array<string>;
+  regionDisable?: boolean;
 };
 
 /**
@@ -46,7 +47,8 @@ export function RegionDropdown(props: Props) {
     onRegionChange,
     editMode,
     loaderRegion,
-    regionsList
+    regionsList,
+    regionDisable
   } = props;
   let regionStrList: string[] = [];
 
@@ -89,7 +91,7 @@ export function RegionDropdown(props: Props) {
         />
       )}
       loading={!(regionStrList.length > 0)}
-      disabled={editMode}
+      disabled={editMode || regionDisable}
       disableClearable={loaderRegion && !region}
     />
   );
