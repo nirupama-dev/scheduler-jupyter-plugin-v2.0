@@ -129,7 +129,7 @@ const CreateVertexScheduler = ({
   const [subNetworkLoading, setSubNetworkLoading] = useState<boolean>(false);
   const [sharedNetworkLoading, setSharedNetworkLoading] =
     useState<boolean>(false);
-  const [hostProject, setHostProject] = useState<string>('');
+  const [hostProject, setHostProject] = useState<any>({});
   const [region, setRegion] = useState<string>('');
   const [projectId, setProjectId] = useState<string>('');
   const [kernelSelected, setKernelSelected] = useState<string | null>(
@@ -1290,7 +1290,7 @@ const CreateVertexScheduler = ({
                   label={
                     <Typography sx={{ fontSize: 13 }}>
                       Network shared from host project
-                      {`${Object.keys(hostProject).length !== 0 ? `"${hostProject}"` : ''}`}
+                      {`${Object.keys(hostProject).length !== 0 ? `"${hostProject?.name}"` : ''}`}
                     </Typography>
                   }
                 />
@@ -1344,8 +1344,8 @@ const CreateVertexScheduler = ({
                     options={subNetworkList}
                     getOptionLabel={option => option.name}
                     value={
-                      subNetworkList.find(
-                        option => option.name === subNetworkSelected?.name
+                      subNetworkList?.find(
+                        option => option?.name === subNetworkSelected?.name
                       ) || null
                     }
                     onChange={(_event, val) => handleSubNetwork(val)}

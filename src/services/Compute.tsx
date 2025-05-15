@@ -88,12 +88,15 @@ export class ComputeServices {
         `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkSelected}`
       );
       if (formattedResponse.length > 0) {
-        const subNetworkList = formattedResponse.map((network: any) => ({
-          name: network.name,
-          link: network.selfLink
-        }));
+        const subNetworkList = formattedResponse
+          .filter((network: any) => network.privateIpGoogleAccess === true)
+          .map((network: any) => ({
+            name: network.name,
+            link: network.link
+          }));
         subNetworkList.sort();
         setSubNetworkList(subNetworkList);
+        setErrorMessageSubnetworkNetwork('');
       } else if (formattedResponse.error) {
         setErrorMessageSubnetworkNetwork(formattedResponse.error);
         setSubNetworkList([]);
