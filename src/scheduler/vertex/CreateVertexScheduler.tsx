@@ -52,6 +52,7 @@ import {
   KERNEL_VALUE,
   scheduleMode,
   scheduleValueExpression,
+  SHARED_NETWORK_DOC_URL,
   VERTEX_REGIONS
 } from '../../utils/Const';
 import LabelProperties from '../../jobs/LabelProperties';
@@ -664,7 +665,9 @@ const CreateVertexScheduler = ({
   const sharedNetworkAPI = async () => {
     await ComputeServices.sharedNetworkAPIService(
       setSharedNetworkList,
-      setSharedNetworkLoading
+      setSharedNetworkLoading,
+      hostProject?.name,
+      region
     );
   };
 
@@ -886,11 +889,24 @@ const CreateVertexScheduler = ({
     if (!editMode) {
       const primaryNetwork = primaryNetworkList[0];
       setPrimaryNetworkSelected(primaryNetwork);
-      if (primaryNetwork) {
+      if (
+        region &&
+        primaryNetwork &&
+        networkSelected === 'networkInThisProject'
+      ) {
         subNetworkAPI(DEFAULT_PRIMARY_NETWORK);
       }
     }
   }, [primaryNetworkList, networkSelected]);
+
+  useEffect(() => {
+    if (
+      networkSelected === 'networkShared' &&
+      Object.keys(hostProject).length !== 0
+    ) {
+      sharedNetworkAPI();
+    }
+  }, [networkSelected, region]);
 
   useEffect(() => {
     if (!newBucketOption) {
@@ -1273,15 +1289,6 @@ const CreateVertexScheduler = ({
                     </Typography>
                   }
                 />
-                <div>
-                  <span className="sub-para tab-text-sub-cl">
-                    Choose a shared VPC network from the project that is
-                    different from the clusters project
-                  </span>
-                  <div className="learn-more-a-tag learn-more-url">
-                    <LearnMore />
-                  </div>
-                </div>
                 <FormControlLabel
                   value="networkShared"
                   className="create-scheduler-label-style"
@@ -1290,7 +1297,7 @@ const CreateVertexScheduler = ({
                   label={
                     <Typography sx={{ fontSize: 13 }}>
                       Network shared from host project
-                      {`${Object.keys(hostProject).length !== 0 ? `"${hostProject?.name}"` : ''}`}
+                      {` ${Object.keys(hostProject).length !== 0 ? `"${hostProject?.name}"` : ''}`}
                     </Typography>
                   }
                 />
@@ -1299,7 +1306,7 @@ const CreateVertexScheduler = ({
                   from the clusters project
                 </span>
                 <div className="learn-more-a-tag learn-more-url">
-                  <LearnMore />
+                  <LearnMore path={SHARED_NETWORK_DOC_URL} />
                 </div>
               </RadioGroup>
             </FormControl>
@@ -1321,10 +1328,27 @@ const CreateVertexScheduler = ({
                     }
                     onChange={(_event, val) => handlePrimaryNetwork(val)}
                     renderInput={params => (
-                      <TextField {...params} label="Primary network*" />
+                      <TextField
+                        {...params}
+                        label="Primary network*"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {primaryNetworkLoading ? (
+                                <CircularProgress
+                                  aria-label="Loading Spinner"
+                                  data-testid="loader"
+                                  size={18}
+                                />
+                              ) : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          )
+                        }}
+                      />
                     )}
                     clearIcon={false}
-                    loading={primaryNetworkLoading}
                     disabled={editMode}
                   />
                   {!primaryNetworkSelected && (
@@ -1350,10 +1374,27 @@ const CreateVertexScheduler = ({
                     }
                     onChange={(_event, val) => handleSubNetwork(val)}
                     renderInput={params => (
-                      <TextField {...params} label="Sub network*" />
+                      <TextField
+                        {...params}
+                        label="Sub network*"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {subNetworkLoading ? (
+                                <CircularProgress
+                                  aria-label="Loading Spinner"
+                                  data-testid="loader"
+                                  size={18}
+                                />
+                              ) : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          )
+                        }}
+                      />
                     )}
                     clearIcon={false}
-                    loading={subNetworkLoading}
                     disabled={editMode}
                   />
                   {!subNetworkSelected && (
@@ -1361,7 +1402,7 @@ const CreateVertexScheduler = ({
                       message={
                         errorMessageSubnetworkNetwork
                           ? errorMessageSubnetworkNetwork
-                          : 'Sub network is required'
+                          : 'No Subnetworks found with Google Private Access - ON'
                       }
                       showIcon={false}
                     />
