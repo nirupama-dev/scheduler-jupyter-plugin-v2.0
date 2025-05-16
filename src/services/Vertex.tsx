@@ -612,6 +612,9 @@ export class VertexServices {
           );
           setParameterDetail(parameterList);
           setParameterDetailUpdated(parameterList);
+        } else {
+          setParameterDetail([]);
+          setParameterDetailUpdated([]);
         }
 
         setServiceAccountSelected({
