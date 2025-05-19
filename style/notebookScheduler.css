@@ -400,6 +400,11 @@
   cursor: pointer;
 }
 
+.learn-more-url {
+  display: flex;
+  justify-content: flex-start;
+}
+
 .content-pd-space {
   padding: 0 0 22px 22px;
   width: 370px !important;
