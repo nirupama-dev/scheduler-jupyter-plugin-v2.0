@@ -90,7 +90,7 @@ export class ComputeServices {
           .filter((network: any) => network.privateIpGoogleAccess === true)
           .map((network: any) => ({
             name: network.name,
-            link: network.link
+            link: network.selfLink
           }));
         subNetworkList.sort();
         setSubNetworkList(subNetworkList);
