@@ -95,7 +95,7 @@ class ScheduleListController(APIHandler):
 
 class SchedulePauseController(APIHandler):
     @tornado.web.authenticated
-    async def get(self):
+    async def post(self):
         """Pauses the schedule"""
         try:
             region_id = self.get_argument("region_id")
@@ -113,7 +113,7 @@ class SchedulePauseController(APIHandler):
 
 class ScheduleResumeController(APIHandler):
     @tornado.web.authenticated
-    async def get(self):
+    async def post(self):
         """Resumes the paused schedule"""
         try:
             region_id = self.get_argument("region_id")
@@ -151,7 +151,7 @@ class ScheduleDeleteController(APIHandler):
 
 class ScheduleTriggerController(APIHandler):
     @tornado.web.authenticated
-    async def get(self):
+    async def post(self):
         """Trigger the schedule"""
         try:
             region_id = self.get_argument("region_id")

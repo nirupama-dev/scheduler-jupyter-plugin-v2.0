@@ -280,7 +280,10 @@ export class VertexServices {
       const serviceURL = 'api/vertex/pauseSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`,
-        { signal }
+        {
+          method: 'POST',
+          signal
+        }
       );
       if (Object.keys(formattedResponse).length === 0) {
         toast.success(
@@ -324,7 +327,10 @@ export class VertexServices {
       const serviceURL = 'api/vertex/resumeSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
-        { signal }
+        {
+          method: 'POST',
+          signal
+        }
       );
       if (Object.keys(formattedResponse).length === 0) {
         toast.success(
@@ -377,7 +383,7 @@ export class VertexServices {
       const serviceURL = 'api/vertex/triggerSchedule';
       const data: ITriggerSchedule = await requestAPI(
         serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
-        { signal }
+        { method: 'POST', signal }
       );
       if (data.name) {
         setTriggerLoading('');

@@ -115,3 +115,36 @@ class MockListSchedulesClientSession:
                 ]
             }
         )
+
+
+class MockPostClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def post(self, api_endpoint, headers=None):
+        return MockResponse({})
+
+
+class MockDeleteSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def delete(self, api_endpoint, headers=None):
+        return MockResponse({"name": "mock-name", "done": True})
+
+
+class MockTriggerSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def post(self, api_endpoint, headers=None):
+        return MockResponse({"name": "mock-name"})
