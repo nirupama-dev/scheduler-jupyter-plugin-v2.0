@@ -1432,7 +1432,8 @@ const CreateVertexScheduler = ({
                   disabled={Object.keys(hostProject).length === 0}
                 />
               </div>
-              {Object.keys(hostProject).length === 0 && (
+              {(Object.keys(hostProject).length === 0 ||
+                sharedNetworkList.length === 0) && (
                 <ErrorMessage
                   message="No shared subnetworks are available in this region."
                   showIcon={false}
