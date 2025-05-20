@@ -15,16 +15,15 @@
 import json
 import aiohttp
 
-import cron_descriptor
 import pytest
 
 from scheduler_jupyter_plugin.services import vertex
 from scheduler_jupyter_plugin.tests.mocks import (
     MockDeleteSchedulesClientSession,
     MockGetScheduleClientSession,
-    MockListSchedulesClientSession,
+    MockListNotebookExecutionJobsClientSession,
+    MockListUIConfigClientSession,
     MockPostClientSession,
-    MockTriggerSchedulesClientSession,
 )
 
 
@@ -45,35 +44,6 @@ async def test_get_schedule(monkeypatch, returncode, expected_result, jp_fetch):
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload == expected_result
-
-
-# @pytest.mark.parametrize(
-#     "returncode, expected_result",
-#     [
-#         (
-#             0,
-#             [
-#                 {"key1": "value1", "key2": "value2"},
-#                 {"key1": "value12", "key2": "value22"},
-#             ],
-#         )
-#     ],
-# )
-# async def test_list_schedules(monkeypatch, returncode, expected_result, jp_fetch):
-#     monkeypatch.setattr(vertex, "get_description", "Every 5 minutes")
-#     monkeypatch.setattr(aiohttp, "ClientSession", MockListSchedulesClientSession)
-
-#     mock_region_id = "mock-region-id"
-#     mock_page_size = "mock-page-size"
-
-#     response = await jp_fetch(
-#         "scheduler-plugin",
-#         "api/vertex/listSchedules",
-#         params={"region_id": mock_region_id, "page_size": mock_page_size},
-#     )
-#     assert response.code == 200
-#     payload = json.loads(response.body)
-#     assert payload == expected_result
 
 
 @pytest.mark.parametrize("returncode, expected_result", [(0, {})])
@@ -134,22 +104,68 @@ async def test_delete_schedule(monkeypatch, returncode, expected_result, jp_fetc
     assert payload == expected_result
 
 
-# @pytest.mark.parametrize(
-#     "returncode, expected_result", [(0, {"name": "mock-name"})]
-# )
-# async def test_trigger_schedule(monkeypatch, returncode, expected_result, jp_fetch):
-#     monkeypatch.setattr(aiohttp, "ClientSession", MockTriggerSchedulesClientSession)
+@pytest.mark.parametrize(
+    "returncode, expected_result",
+    [
+        (
+            0,
+            [
+                {
+                    "machineType": "value1 (2 CPUs, 206.16 GB RAM)",
+                    "acceleratorConfigs": [],
+                },
+                {
+                    "machineType": "value12 (1 CPUs, 1005.02 GB RAM)",
+                    "acceleratorConfigs": [],
+                },
+            ],
+        )
+    ],
+)
+async def test_list_uiconfig(monkeypatch, returncode, expected_result, jp_fetch):
+    monkeypatch.setattr(aiohttp, "ClientSession", MockListUIConfigClientSession)
 
-#     mock_region_id = "mock-region-id"
-#     mock_schedule_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
 
-#     response = await jp_fetch(
-#         "scheduler-plugin",
-#         "api/vertex/triggerSchedule",
-#         method="POST",
-#         allow_nonstandard_methods=True,
-#         params={"region_id": mock_region_id, "schedule_id": mock_schedule_id},
-#     )
-#     assert response.code == 200
-#     payload = json.loads(response.body)
-#     assert payload == expected_result
+    response = await jp_fetch(
+        "scheduler-plugin",
+        "api/vertex/uiConfig",
+        params={"region_id": mock_region_id},
+    )
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload == expected_result
+
+
+@pytest.mark.parametrize(
+    "returncode, expected_result",
+    [
+        (
+            0,
+            [{"name": "mock-name"}, {"name": "mock-name1"}],
+        )
+    ],
+)
+async def list_notebook_execution_jobs(
+    monkeypatch, returncode, expected_result, jp_fetch
+):
+    monkeypatch.setattr(
+        aiohttp, "ClientSession", MockListNotebookExecutionJobsClientSession
+    )
+
+    mock_region_id = "mock-region-id"
+    mock_schedule_id = "mock-project-id"
+    mock_order_by = "mock-order-by"
+
+    response = await jp_fetch(
+        "scheduler-plugin",
+        "api/vertex/listNotebookExecutionJobs",
+        params={
+            "region_id": mock_region_id,
+            "schedule_id": mock_schedule_id,
+            "order_by": mock_order_by,
+        },
+    )
+    assert response.code == 200
+    payload = json.loads(response.body)
+    assert payload == expected_result

@@ -99,24 +99,6 @@ class MockGetScheduleClientSession:
         return MockResponse({"key1": "value1", "key2": "value2"})
 
 
-class MockListSchedulesClientSession:
-    async def __aenter__(self):
-        return self
-
-    async def __aexit__(self, *args, **kwargs):
-        return
-
-    def get(self, api_endpoint, headers=None):
-        return MockResponse(
-            {
-                "schedules": [
-                    {"key1": "value1", "key2": "value2"},
-                    {"key1": "value12", "key2": "value22"},
-                ]
-            }
-        )
-
-
 class MockPostClientSession:
     async def __aenter__(self):
         return self
@@ -139,12 +121,44 @@ class MockDeleteSchedulesClientSession:
         return MockResponse({"name": "mock-name", "done": True})
 
 
-class MockTriggerSchedulesClientSession:
+class MockListUIConfigClientSession:
     async def __aenter__(self):
         return self
 
     async def __aexit__(self, *args, **kwargs):
         return
 
-    def post(self, api_endpoint, headers=None):
-        return MockResponse({"name": "mock-name"})
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {
+                "notebookRuntimeConfig": {
+                    "machineConfigs": [
+                        {
+                            "machineType": "value1",
+                            "acceleratorConfigs": [],
+                            "ramBytes": 206158430208,
+                            "cpuCount": 2,
+                        },
+                        {
+                            "machineType": "value12",
+                            "acceleratorConfigs": [],
+                            "ramBytes": 1005022347264,
+                            "cpuCount": 1,
+                        },
+                    ]
+                }
+            }
+        )
+
+
+class MockListNotebookExecutionJobsClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {"notebookExecutionJobs": [{"name": "mock-name"}, {"name": "mock-name1"}]}
+        )
