@@ -113,3 +113,5 @@ export const VERTEX_REGIONS = [
 export const DEFAULT_SERVICE_ACCOUNT = 'compute@developer.gserviceaccount.com';
 
 export const DEFAULT_TIME_ZONE = 'UTC';
+
+export const SHARED_NETWORK_DOC_URL = "https://cloud.google.com/vpc/docs/shared-vpc";

@@ -21,16 +21,14 @@ import { toastifyCustomStyle } from '../utils/Config';
 
 export class ComputeServices {
   static getParentProjectAPIService = async (
-    setHostProject: (value: string) => void
+    setHostProject: (value: any) => void
   ) => {
     try {
       const formattedResponse: any = await requestAPI('api/compute/getXpnHost');
-      if (formattedResponse.length > 0) {
-        if (formattedResponse) {
-          setHostProject(formattedResponse);
-        }
+      if (Object.keys(formattedResponse).length !== 0) {
+        setHostProject(formattedResponse);
       } else {
-        setHostProject('');
+        setHostProject({});
       }
     } catch (error) {
       SchedulerLoggingService.log(
@@ -88,12 +86,15 @@ export class ComputeServices {
         `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkSelected}`
       );
       if (formattedResponse.length > 0) {
-        const subNetworkList = formattedResponse.map((network: any) => ({
-          name: network.name,
-          link: network.selfLink
-        }));
+        const subNetworkList = formattedResponse
+          .filter((network: any) => network.privateIpGoogleAccess === true)
+          .map((network: any) => ({
+            name: network.name,
+            link: network.selfLink
+          }));
         subNetworkList.sort();
         setSubNetworkList(subNetworkList);
+        setErrorMessageSubnetworkNetwork('');
       } else if (formattedResponse.error) {
         setErrorMessageSubnetworkNetwork(formattedResponse.error);
         setSubNetworkList([]);
@@ -116,16 +117,18 @@ export class ComputeServices {
     setSharedNetworkList: (
       value: { name: string; network: string; subnetwork: string }[]
     ) => void,
-    setSharedNetworkLoading: (value: boolean) => void
+    setSharedNetworkLoading: (value: boolean) => void,
+    hostProject: string,
+    region: string
   ) => {
     try {
       setSharedNetworkLoading(true);
       const formattedResponse: any = await requestAPI(
-        'api/compute/sharedNetwork'
+        `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
       );
       if (formattedResponse.length > 0) {
         const sharedNetworkList = formattedResponse.map((network: any) => ({
-          name: network.network.split('/').pop(),
+          name: network.subnetwork.split('/').pop(),
           network: network.network,
           subnetwork: network.subnetwork
         }));
