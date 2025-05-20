@@ -397,6 +397,12 @@
 
 .learn-more-a-tag {
   padding-left: 27px;
+  cursor: pointer;
+}
+
+.learn-more-url {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .content-pd-space {

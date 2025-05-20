@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { ToastOptions } from 'react-toastify';
+import { ToastOptions } from "react-toastify";
 
 export interface IPayload {
   input_filename: string;
