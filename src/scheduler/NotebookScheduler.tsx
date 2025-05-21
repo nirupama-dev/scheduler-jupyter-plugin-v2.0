@@ -27,6 +27,7 @@ import { Input } from '../controls/MuiWrappedInput';
 import CreateNotebookScheduler from './composer/CreateNotebookScheduler';
 import ErrorMessage from './common/ErrorMessage';
 import {
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Radio,
@@ -36,6 +37,8 @@ import {
 import CreateVertexScheduler from './vertex/CreateVertexScheduler';
 import EnableNotifyMessage from './common/EnableNotifyMessage';
 import { iconError } from '../utils/Icons';
+import { checkConfig } from '../utils/Config';
+import LoginErrorComponent from '../utils/LoginErrorComponent';
 
 const NotebookSchedulerComponent = ({
   themeManager,
@@ -70,6 +73,8 @@ const NotebookSchedulerComponent = ({
     useState<boolean>(false);
   const abortControllerRef = useRef<any>(null);
   const [apiEnableUrl, setApiEnableUrl] = useState<any>(null);
+  const [loginError, setLoginError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -94,6 +99,7 @@ const NotebookSchedulerComponent = ({
 
   useEffect(() => {
     getKernelDetails();
+    checkConfig(setLoginError, setIsLoading);
   }, []);
 
   const handleJobNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -146,179 +152,217 @@ const NotebookSchedulerComponent = ({
   };
 
   return (
-    <div
-      className={
-        executionPageListFlag
-          ? 'component-level container-main-page'
-          : 'component-level'
-      }
-    >
-      {!createCompleted ? (
-        <>
-          <div className="cluster-details-header">
-            <div
-              role="button"
-              className="back-arrow-icon"
-              onClick={handleCancel}
-            >
-              <iconLeftArrow.react
-                tag="div"
-                className="icon-white logo-alignment-style"
-              />
-            </div>
-            <div className="create-job-scheduler-title">
-              {editMode ? 'Update A Scheduled Job' : 'Create A Scheduled Job'}
-            </div>
+    <>
+      <div className="component-level">
+        {isLoading ? (
+          <div className="spin-loader-main">
+            <CircularProgress
+              className="spin-loader-custom-style"
+              size={18}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+            Loading...
           </div>
-          <div className="common-fields">
-            <div className="create-scheduler-form-element">
-              <Input
-                className="create-scheduler-style"
-                value={jobNameSelected}
-                onChange={e => handleJobNameChange(e)}
-                type="text"
-                placeholder=""
-                Label="Job name*"
-                disabled={editMode}
-              />
-            </div>
-            {jobNameSelected === '' && !editMode && (
-              <ErrorMessage
-                message="Job name is required"
-                showIcon={notebookSelector === 'composer' ? true : false}
-              />
-            )}
-            {jobNameSpecialValidation && jobNameValidation && !editMode && (
-              <ErrorMessage
-                message="Name must contain only letters, numbers, hyphens, and underscores"
-                showIcon={notebookSelector === 'composer' ? true : false}
-              />
-            )}
-            {!jobNameUniqueValidation && !editMode && (
-              <ErrorMessage
-                message="Job name must be unique for the selected environment"
-                showIcon={notebookSelector === 'composer' ? true : false}
-              />
-            )}
+        ) : loginError && !isLoading ? (
+          <div className="login-error login-error-main">
+            <LoginErrorComponent
+              setLoginError={setLoginError}
+              loginError={loginError}
+            />
+          </div>
+        ) : (
+          <div
+            className={
+              executionPageListFlag
+                ? 'component-level container-main-page'
+                : 'component-level'
+            }
+          >
+            {!createCompleted ? (
+              <>
+                <div className="cluster-details-header">
+                  <div
+                    role="button"
+                    className="back-arrow-icon"
+                    onClick={handleCancel}
+                  >
+                    <iconLeftArrow.react
+                      tag="div"
+                      className="icon-white logo-alignment-style"
+                    />
+                  </div>
+                  <div className="create-job-scheduler-title">
+                    {editMode
+                      ? 'Update A Scheduled Job'
+                      : 'Create A Scheduled Job'}
+                  </div>
+                </div>
+                <div className="common-fields">
+                  <div className="create-scheduler-form-element">
+                    <Input
+                      className="create-scheduler-style"
+                      value={jobNameSelected}
+                      onChange={e => handleJobNameChange(e)}
+                      type="text"
+                      placeholder=""
+                      Label="Job name*"
+                      disabled={editMode}
+                    />
+                  </div>
+                  {jobNameSelected === '' && !editMode && (
+                    <ErrorMessage
+                      message="Job name is required"
+                      showIcon={notebookSelector === 'composer' ? true : false}
+                    />
+                  )}
+                  {jobNameSpecialValidation &&
+                    jobNameValidation &&
+                    !editMode && (
+                      <ErrorMessage
+                        message="Name must contain only letters, numbers, hyphens, and underscores"
+                        showIcon={
+                          notebookSelector === 'composer' ? true : false
+                        }
+                      />
+                    )}
+                  {!jobNameUniqueValidation && !editMode && (
+                    <ErrorMessage
+                      message="Job name must be unique for the selected environment"
+                      showIcon={notebookSelector === 'composer' ? true : false}
+                    />
+                  )}
 
-            <div className="create-scheduler-form-element-input-file">
-              <Input
-                className="create-scheduler-style"
-                value={inputFileSelected}
-                Label="Input file*"
-                disabled={true}
-              />
-            </div>
-          </div>
-        </>
-      ) : (
-        executionPageFlag && (
-          <div className="clusters-list-overlay" role="tab">
-            <div className="cluster-details-title">Scheduled Jobs</div>
-          </div>
-        )
-      )}
-      {executionPageFlag && (
-        <div>
-          <div className="create-scheduler-form-element sub-para">
-            <FormControl>
-              <RadioGroup
-                className="schedule-radio-btn"
-                aria-labelledby="demo-controlled-radio-buttons-group"
-                name="controlled-radio-buttons-group"
-                value={notebookSelector}
-                onChange={handleSchedulerModeChange}
-              >
-                <FormControlLabel
-                  value="vertex"
-                  className="create-scheduler-label-style"
-                  control={<Radio size="small" />}
-                  disabled={
-                    schedulerBtnDisable ||
-                    (editMode && notebookSelector === 'composer')
-                  }
-                  label={<Typography sx={{ fontSize: 13 }}>Vertex</Typography>}
-                />
-                <FormControlLabel
-                  value="composer"
-                  className="create-scheduler-label-style"
-                  control={<Radio size="small" />}
-                  disabled={editMode && notebookSelector === 'vertex'}
-                  label={
-                    <Typography sx={{ fontSize: 13 }}>Composer</Typography>
-                  }
-                />
-              </RadioGroup>
-            </FormControl>
-          </div>
-          <div>
-            {isApiError && (
-              <div className="error-key-parent enable-error-text-label">
-                <iconError.react tag="div" className="logo-alignment-style" />
-                <div className="error-key-missing">
-                  <EnableNotifyMessage message={apiError} url={apiEnableUrl} />
+                  <div className="create-scheduler-form-element-input-file">
+                    <Input
+                      className="create-scheduler-style"
+                      value={inputFileSelected}
+                      Label="Input file*"
+                      disabled={true}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              executionPageFlag && (
+                <div className="clusters-list-overlay" role="tab">
+                  <div className="cluster-details-title">Scheduled Jobs</div>
+                </div>
+              )
+            )}
+            {executionPageFlag && (
+              <div>
+                <div className="create-scheduler-form-element sub-para">
+                  <FormControl>
+                    <RadioGroup
+                      className="schedule-radio-btn"
+                      aria-labelledby="demo-controlled-radio-buttons-group"
+                      name="controlled-radio-buttons-group"
+                      value={notebookSelector}
+                      onChange={handleSchedulerModeChange}
+                    >
+                      <FormControlLabel
+                        value="vertex"
+                        className="create-scheduler-label-style"
+                        control={<Radio size="small" />}
+                        disabled={
+                          schedulerBtnDisable ||
+                          (editMode && notebookSelector === 'composer')
+                        }
+                        label={
+                          <Typography sx={{ fontSize: 13 }}>Vertex</Typography>
+                        }
+                      />
+                      <FormControlLabel
+                        value="composer"
+                        className="create-scheduler-label-style"
+                        control={<Radio size="small" />}
+                        disabled={editMode && notebookSelector === 'vertex'}
+                        label={
+                          <Typography sx={{ fontSize: 13 }}>
+                            Composer
+                          </Typography>
+                        }
+                      />
+                    </RadioGroup>
+                  </FormControl>
+                </div>
+                <div>
+                  {isApiError && (
+                    <div className="error-key-parent enable-error-text-label">
+                      <iconError.react
+                        tag="div"
+                        className="logo-alignment-style"
+                      />
+                      <div className="error-key-missing">
+                        <EnableNotifyMessage
+                          message={apiError}
+                          url={apiEnableUrl}
+                        />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
 
-      {notebookSelector === 'composer' ? (
-        <CreateNotebookScheduler
-          themeManager={themeManager}
-          app={app}
-          context={context}
-          settingRegistry={settingRegistry}
-          createCompleted={createCompleted}
-          setCreateCompleted={setCreateCompleted}
-          jobNameSelected={jobNameSelected}
-          setJobNameSelected={setJobNameSelected}
-          inputFileSelected={inputFileSelected}
-          setInputFileSelected={setInputFileSelected}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          jobNameValidation={jobNameValidation}
-          jobNameSpecialValidation={jobNameSpecialValidation}
-          jobNameUniqueValidation={jobNameUniqueValidation}
-          setJobNameUniqueValidation={setJobNameUniqueValidation}
-          setIsApiError={setIsApiError}
-          setApiError={setApiError}
-          setExecutionPageFlag={setExecutionPageFlag}
-          isLocalKernel={isLocalKernel}
-          setIsLocalKernel={setIsLocalKernel}
-          packageEditFlag={packageEditFlag}
-          setPackageEditFlag={setPackageEditFlag}
-          setSchedulerBtnDisable={setSchedulerBtnDisable}
-          abortControllerRef={abortControllerRef}
-          setApiEnableUrl={setApiEnableUrl}
-          isApiError={isApiError}
-        />
-      ) : (
-        <CreateVertexScheduler
-          themeManager={themeManager}
-          app={app}
-          context={context}
-          settingRegistry={settingRegistry}
-          createCompleted={createCompleted}
-          setCreateCompleted={setCreateCompleted}
-          jobNameSelected={jobNameSelected}
-          setJobNameSelected={setJobNameSelected}
-          inputFileSelected={inputFileSelected}
-          setInputFileSelected={setInputFileSelected}
-          editMode={editMode}
-          setEditMode={setEditMode}
-          setExecutionPageFlag={setExecutionPageFlag}
-          setIsApiError={setIsApiError}
-          setApiError={setApiError}
-          jobNameSpecialValidation={jobNameSpecialValidation}
-          setExecutionPageListFlag={setExecutionPageListFlag}
-          apiError={apiError}
-          setApiEnableUrl={setApiEnableUrl}
-          isApiError={isApiError}
-        />
-      )}
-    </div>
+            {notebookSelector === 'composer' ? (
+              <CreateNotebookScheduler
+                themeManager={themeManager}
+                app={app}
+                context={context}
+                settingRegistry={settingRegistry}
+                createCompleted={createCompleted}
+                setCreateCompleted={setCreateCompleted}
+                jobNameSelected={jobNameSelected}
+                setJobNameSelected={setJobNameSelected}
+                inputFileSelected={inputFileSelected}
+                setInputFileSelected={setInputFileSelected}
+                editMode={editMode}
+                setEditMode={setEditMode}
+                jobNameValidation={jobNameValidation}
+                jobNameSpecialValidation={jobNameSpecialValidation}
+                jobNameUniqueValidation={jobNameUniqueValidation}
+                setJobNameUniqueValidation={setJobNameUniqueValidation}
+                setIsApiError={setIsApiError}
+                setApiError={setApiError}
+                setExecutionPageFlag={setExecutionPageFlag}
+                isLocalKernel={isLocalKernel}
+                setIsLocalKernel={setIsLocalKernel}
+                packageEditFlag={packageEditFlag}
+                setPackageEditFlag={setPackageEditFlag}
+                setSchedulerBtnDisable={setSchedulerBtnDisable}
+                abortControllerRef={abortControllerRef}
+                setApiEnableUrl={setApiEnableUrl}
+              />
+            ) : (
+              <CreateVertexScheduler
+                themeManager={themeManager}
+                app={app}
+                context={context}
+                settingRegistry={settingRegistry}
+                createCompleted={createCompleted}
+                setCreateCompleted={setCreateCompleted}
+                jobNameSelected={jobNameSelected}
+                setJobNameSelected={setJobNameSelected}
+                inputFileSelected={inputFileSelected}
+                setInputFileSelected={setInputFileSelected}
+                editMode={editMode}
+                setEditMode={setEditMode}
+                setExecutionPageFlag={setExecutionPageFlag}
+                setIsApiError={setIsApiError}
+                setApiError={setApiError}
+                jobNameSpecialValidation={jobNameSpecialValidation}
+                setExecutionPageListFlag={setExecutionPageListFlag}
+                apiError={apiError}
+                setApiEnableUrl={setApiEnableUrl}
+                isApiError={isApiError}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

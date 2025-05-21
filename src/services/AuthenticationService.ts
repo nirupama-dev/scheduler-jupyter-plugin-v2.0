@@ -40,7 +40,15 @@ export class AuthenticationService {
     }
   };
 
-  static authCredentialsAPI = async () => {
+  /**
+   * Authentication
+   * @param checkApiEnabled
+   * @returns credentials
+   */
+
+  static authCredentialsAPI = async (
+    checkApiEnabled: boolean = true
+  ): Promise<IAuthCredentials | undefined> => {
     try {
       const data = await requestAPI('credentials');
       if (typeof data === 'object' && data !== null) {
@@ -52,8 +60,6 @@ export class AuthenticationService {
           login_error: (data as { login_error: number }).login_error
         };
         return credentials;
-      } else {
-        console.error('Invalid data format.');
       }
     } catch (reason) {
       console.error(`Error on GET credentials.\n${reason}`);

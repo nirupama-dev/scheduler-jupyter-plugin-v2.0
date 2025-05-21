@@ -13,11 +13,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
-
-import { JupyterLab } from '@jupyterlab/application';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { ILauncher } from '@jupyterlab/launcher';
 
 export interface IAuthCredentials {
   access_token?: string;
@@ -26,25 +23,8 @@ export interface IAuthCredentials {
   config_error?: number;
   login_error?: number;
 }
-
-export interface IConfigSelectionProps {
-  configError: boolean;
-  setConfigError: (error: boolean) => void;
-  app: JupyterLab;
-  launcher: ILauncher;
-  settingRegistry: ISettingRegistry;
-}
-
-export interface IUserInfoResponse {
-  error: {
-    code: number;
-    message: string;
-  };
-  email: string;
-  picture: string;
-}
-
-export interface ISaveConfig {
-  projectId: string;
-  region: string;
+export interface LoginErrorProps {
+  loginError?: boolean;
+  configError?: boolean;
+  setLoginError: React.Dispatch<React.SetStateAction<boolean>>;
 }

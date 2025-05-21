@@ -317,10 +317,19 @@
 .login-error {
   align-items: center;
   justify-content: center;
-  display: flex;
+  display: grid;
   font-size: 20px;
   font-weight: 600;
   padding: 50px;
+}
+
+.login-error-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 63vh;
 }
 
 .no-data-style {

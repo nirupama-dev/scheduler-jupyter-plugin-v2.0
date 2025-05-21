@@ -17,8 +17,6 @@
 
 import { LabIcon } from '@jupyterlab/ui-components';
 import clusterIcon from '../../style/icons/cluster_icon.svg';
-import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
-import googleCloudIcon from '../../style/icons/google-cloud.svg';
 import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.svg';
 import LeftArrowIcon from '../../style/icons/left_arrow_icon.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
@@ -42,20 +40,11 @@ import dashIcon from '../../style/icons/dash_icon_jupyter.svg';
 import pendingIcon from '../../style/icons/pending_icon.svg';
 import PreviousIcon from '../../style/icons/previous_page.svg';
 import NextIcon from '../../style/icons/next_page.svg';
+import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
 
 export const iconCluster = new LabIcon({
   name: 'launcher:clusters-icon',
   svgstr: clusterIcon
-});
-
-export const IconsigninGoogle = new LabIcon({
-  name: 'launcher:signin_google_icon',
-  svgstr: signinGoogleIcon
-});
-
-export const IconGoogleCloud = new LabIcon({
-  name: 'launcher:google_cloud_icon',
-  svgstr: googleCloudIcon
 });
 
 export const iconScheduledNotebooks = new LabIcon({
@@ -165,7 +154,13 @@ export const iconPrevious = new LabIcon({
   name: 'launcher:previous-icon',
   svgstr: PreviousIcon
 });
+
 export const iconNext = new LabIcon({
   name: 'launcher:next-icon',
   svgstr: NextIcon
+});
+
+export const IconsigninGoogle = new LabIcon({
+  name: 'launcher:signin_google_icon',
+  svgstr: signinGoogleIcon
 });
