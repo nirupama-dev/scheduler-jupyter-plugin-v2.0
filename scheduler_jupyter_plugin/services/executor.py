@@ -289,6 +289,11 @@ class Client:
             stdout, stderr = process.communicate()
             if stderr:
                 self.log.info(f"Error fetching list of packages: {stderr}")
+                # decoding bytes class to string and taking out the error part
+                decoded_message = stderr.decode("utf-8")
+                start_index = decoded_message.find("ERROR")
+                error = decoded_message[start_index:]
+                raise Exception(error)
             else:
                 decoded_output = stdout.decode(UTF8)
                 installed_packages = set(
