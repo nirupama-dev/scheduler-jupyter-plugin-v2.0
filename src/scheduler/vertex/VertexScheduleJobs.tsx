@@ -41,7 +41,8 @@ const VertexScheduleJobs = ({
   setIsApiError,
   setApiError,
   setExecutionPageListFlag,
-  setVertexScheduleDetails
+  setVertexScheduleDetails,
+  setApiEnableUrl
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -57,6 +58,7 @@ const VertexScheduleJobs = ({
   setApiError: (value: string) => void;
   setExecutionPageListFlag: (value: boolean) => void;
   setVertexScheduleDetails: (value: ICreatePayload) => void;
+  setApiEnableUrl: any;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] =
     useState<boolean>(false);
@@ -145,6 +147,7 @@ const VertexScheduleJobs = ({
           abortApiCall={abortApiCall}
           activePaginationVariables={activePaginationVariables}
           setActivePaginationVariables={setActivePaginationVariables}
+          setApiEnableUrl={setApiEnableUrl}
           setVertexScheduleDetails={setVertexScheduleDetails}
         />
       )}
@@ -165,6 +168,7 @@ export class NotebookJobs extends SchedulerWidget {
   setApiError: (value: string) => void;
   setExecutionPageListFlag: (value: boolean) => void;
   setVertexScheduleDetails: (value: ICreatePayload) => void;
+  setApiEnableUrl: any;
 
   constructor(
     app: JupyterLab,
@@ -179,7 +183,8 @@ export class NotebookJobs extends SchedulerWidget {
     setIsApiError: (value: boolean) => void,
     setApiError: (value: string) => void,
     setExecutionPageListFlag: (value: boolean) => void,
-    setVertexScheduleDetails: (value: ICreatePayload) => void
+    setVertexScheduleDetails: (value: ICreatePayload) => void,
+    setApiEnableUrl: any
   ) {
     super(themeManager);
     this.app = app;
@@ -195,12 +200,12 @@ export class NotebookJobs extends SchedulerWidget {
     this.setApiError = setApiError;
     this.setExecutionPageListFlag = setExecutionPageListFlag;
     this.setVertexScheduleDetails = setVertexScheduleDetails;
+    this.setApiEnableUrl = setApiEnableUrl;
   }
   renderInternal(): React.JSX.Element {
     return (
       <VertexScheduleJobs
         app={this.app}
-        // settingRegistry={this.settingRegistry}
         themeManager={this.themeManager}
         setCreateCompleted={this.setCreateCompleted}
         region={this.region}
@@ -212,6 +217,7 @@ export class NotebookJobs extends SchedulerWidget {
         setApiError={this.setApiError}
         setExecutionPageListFlag={this.setExecutionPageListFlag}
         setVertexScheduleDetails={this.setVertexScheduleDetails}
+        setApiEnableUrl={this.setApiEnableUrl}
       />
     );
   }

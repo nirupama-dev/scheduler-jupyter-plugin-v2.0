@@ -110,7 +110,8 @@ function listNotebookScheduler({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerSelected
+  composerSelected,
+  setApiEnableUrl
 }: {
   app: JupyterFrontEnd;
   settingRegistry: ISettingRegistry;
@@ -150,6 +151,7 @@ function listNotebookScheduler({
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   composerSelected?: string;
+  setApiEnableUrl: any;
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [composerList, setComposerList] = useState<string[]>([]);
@@ -330,6 +332,7 @@ function listNotebookScheduler({
       region,
       setIsApiError,
       setApiError,
+      setApiEnableUrl,
       setIsLoading
     );
   };

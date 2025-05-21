@@ -114,4 +114,10 @@ export const DEFAULT_SERVICE_ACCOUNT = 'compute@developer.gserviceaccount.com';
 
 export const DEFAULT_TIME_ZONE = 'UTC';
 
-export const SHARED_NETWORK_DOC_URL = "https://cloud.google.com/vpc/docs/shared-vpc";
+export const SHARED_NETWORK_DOC_URL =
+  'https://cloud.google.com/vpc/docs/shared-vpc';
+
+// Pattern to check whether string contains link
+export const pattern =
+  // eslint-disable-next-line
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string

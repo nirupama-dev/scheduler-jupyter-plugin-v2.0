@@ -29,7 +29,7 @@ import {
   IUpdateSchedulerAPIResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
-import { DEFAULT_TIME_ZONE } from '../utils/Const';
+import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
 import { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import React from 'react';
@@ -179,6 +179,7 @@ export class VertexServices {
     newPageToken: string | null | undefined, // token of page to be fetched
     pageLength: number = 50, // number of items to be fetched
     setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
+    setApiEnableUrl: any,
     abortControllers?: any
   ) => {
     setIsLoading(true);
@@ -214,8 +215,15 @@ export class VertexServices {
 
       // Handle API error
       if (error?.code === 403) {
-        setIsApiError(true);
-        setApiError(error.message);
+        const url = error.message.match(pattern);
+        if (url && url.length > 0) {
+          setIsApiError(true);
+          setApiError(error.message);
+          setApiEnableUrl(url);
+        } else {
+          setApiError(error.message);
+        }
+
         return;
       }
 
@@ -420,7 +428,8 @@ export class VertexServices {
     setNextPageToken: (value: string | null) => void,
     newPageToken: string | null | undefined,
     pageLength: number = 50,
-    hasNextPage: (value: boolean) => void
+    hasNextPage: (value: boolean) => void,
+    setApiEnableUrl: any
   ) => {
     try {
       const serviceURL = 'api/vertex/deleteSchedule';
@@ -438,7 +447,8 @@ export class VertexServices {
           setNextPageToken,
           newPageToken,
           pageLength,
-          hasNextPage
+          hasNextPage,
+          setApiEnableUrl
         );
         toast.success(
           `Deleted job ${displayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
