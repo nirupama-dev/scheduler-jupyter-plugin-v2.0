@@ -161,16 +161,14 @@ class Client:
                     return resp
                 else:
                     self.log.exception("Error creating the schedule")
-                    raise Exception(
-                        f"{response.reason} {await response.text()}"
-                    )
+                    raise Exception(f"{response.reason} {await response.text()}")
         except Exception as e:
             self.log.exception(f"Error creating schedule: {str(e)}")
             raise Exception(f"Error creating schedule: {str(e)}")
 
     async def create_job_schedule(self, input_data):
         try:
-            job = DescribeVertexJob(**input_data)            
+            job = DescribeVertexJob(**input_data)
             storage_bucket = job.cloud_storage_bucket.split("//")[-1]
 
             file_path = await self.upload_to_gcs(
@@ -235,6 +233,9 @@ class Client:
             self.log.exception(f"Error fetching ui config: {str(e)}")
             return {"Error fetching ui config": str(e)}
 
+    def parse_schedule(self, cron):
+        return get_description(cron)
+
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
         try:
             result = {}
@@ -260,12 +261,14 @@ class Client:
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
                             cron_value = (
-                                cron.split(" ", 1)[1] if ("TZ" in cron) else cron
+                                cron.split(" ", 1)[1]
+                                if (cron and "TZ" in cron)
+                                else cron
                             )
                             if max_run_count == "1" and cron_value == "* * * * *":
                                 schedule_value = "run once"
                             else:
-                                schedule_value = get_description(cron)
+                                schedule_value = self.parse_schedule(cron)
 
                             formatted_schedule = {
                                 "name": schedule.get("name"),
@@ -492,7 +495,7 @@ class Client:
                 payload["endTime"] = data.end_time
 
             if data.max_run_count:
-                payload['maxRunCount'] = data.max_run_count
+                payload["maxRunCount"] = data.max_run_count
 
             keys = payload.keys()
             keys_to_filter = ["displayName", "maxConcurrentRunCount"]

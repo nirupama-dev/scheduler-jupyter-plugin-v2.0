@@ -84,7 +84,9 @@ class ScheduleListController(APIHandler):
                 client = vertex.Client(
                     await credentials.get_cached(), self.log, client_session
                 )
-                schedules = await client.list_schedules(region_id, page_size, next_page_token)
+                schedules = await client.list_schedules(
+                    region_id, page_size, next_page_token
+                )
                 self.finish(json.dumps(schedules))
         except Exception as e:
             self.log.exception(f"Error fetching list of schedules: {str(e)}")
@@ -93,7 +95,7 @@ class ScheduleListController(APIHandler):
 
 class SchedulePauseController(APIHandler):
     @tornado.web.authenticated
-    async def get(self):
+    async def post(self):
         """Pauses the schedule"""
         try:
             region_id = self.get_argument("region_id")
@@ -111,7 +113,7 @@ class SchedulePauseController(APIHandler):
 
 class ScheduleResumeController(APIHandler):
     @tornado.web.authenticated
-    async def get(self):
+    async def post(self):
         """Resumes the paused schedule"""
         try:
             region_id = self.get_argument("region_id")
@@ -149,7 +151,7 @@ class ScheduleDeleteController(APIHandler):
 
 class ScheduleTriggerController(APIHandler):
     @tornado.web.authenticated
-    async def get(self):
+    async def post(self):
         """Trigger the schedule"""
         try:
             region_id = self.get_argument("region_id")

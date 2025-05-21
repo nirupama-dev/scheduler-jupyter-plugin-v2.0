@@ -35,8 +35,10 @@ class DownloadOutputController(APIHandler):
             self.finish(
                 json.dumps(
                     {
-                        "status": download_result["status"],
-                        "downloaded_filename": download_result["downloaded_filename"],
+                        "status": download_result.get("status"),
+                        "downloaded_filename": download_result.get(
+                            "downloaded_filename"
+                        ),
                     }
                 )
             )

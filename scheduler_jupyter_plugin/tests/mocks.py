@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
 import aiohttp
 from google.cloud import jupyter_config
 
@@ -85,3 +86,113 @@ def patch_mocks(monkeypatch):
     monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(jupyter_config, "async_get_gcloud_config", mock_config)
     monkeypatch.setattr(aiohttp, "ClientSession", MockClientSession)
+
+
+class MockGetScheduleClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {"createNotebookExecutionJobRequest": {"notebookExecutionJob": {}}}
+        )
+
+
+class MockPostClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def post(self, api_endpoint, headers=None):
+        return MockResponse({})
+
+
+class MockDeleteSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def delete(self, api_endpoint, headers=None):
+        return MockResponse({"name": "mock-name", "done": True})
+
+
+class MockListUIConfigClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {
+                "notebookRuntimeConfig": {
+                    "machineConfigs": [
+                        {
+                            "machineType": "value1",
+                            "acceleratorConfigs": [],
+                            "ramBytes": 206158430208,
+                            "cpuCount": 2,
+                        },
+                        {
+                            "machineType": "value12",
+                            "acceleratorConfigs": [],
+                            "ramBytes": 1005022347264,
+                            "cpuCount": 1,
+                        },
+                    ]
+                }
+            }
+        )
+
+
+class MockListNotebookExecutionJobsClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {"notebookExecutionJobs": [{"name": "mock-name"}, {"name": "mock-name1"}]}
+        )
+
+
+class MockListSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {
+                "schedules": [
+                    {
+                        "createNotebookExecutionJobRequest": {
+                            "notebookExecutionJob": {"gcsNotebookSource": ""}
+                        }
+                    },
+                ]
+            }
+        )
+
+
+class MockTriggerSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def post(self, api_endpoint, headers=None, json={}):
+        return MockResponse({"name": "mock-name"})
