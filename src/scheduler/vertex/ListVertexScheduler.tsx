@@ -23,8 +23,7 @@ import { IVertexCellProps } from '../../utils/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CircularProgress, Button } from '@mui/material';
 import DeletePopup from '../../utils/DeletePopup';
-import { scheduleMode, VERTEX_REGIONS } from '../../utils/Const';
-import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { VERTEX_REGIONS } from '../../utils/Const';
 import { RegionDropdown } from '../../controls/RegionDropdown';
 import { iconDash } from '../../utils/Icons';
 import { authApi } from '../../utils/Config';
@@ -45,7 +44,8 @@ import {
 import { VertexServices } from '../../services/Vertex';
 import {
   IVertexScheduleList,
-  IActivePaginationVariables
+  IActivePaginationVariables,
+  ICreatePayload
 } from './VertexInterfaces';
 import dayjs from 'dayjs';
 import ErrorMessage from '../common/ErrorMessage';
@@ -54,78 +54,27 @@ function ListVertexScheduler({
   region,
   setRegion,
   app,
-  setJobId,
-  settingRegistry,
   createCompleted,
   setCreateCompleted,
-  setInputFileSelected,
-  setMachineTypeSelected,
-  setAcceleratedCount,
-  setAcceleratorType,
-  setKernelSelected,
-  setCloudStorage,
-  setDiskTypeSelected,
-  setDiskSize,
-  setParameterDetail,
-  setParameterDetailUpdated,
-  setServiceAccountSelected,
-  setPrimaryNetworkSelected,
-  setSubNetworkSelected,
   setSubNetworkList,
-  setSharedNetworkSelected,
-  setScheduleMode,
-  setScheduleField,
-  setStartDate,
-  setEndDate,
-  setMaxRuns,
   setEditMode,
-  setJobNameSelected,
-  setGcsPath,
-  handleScheduleIdSelection: handleScheduleIdSelection,
+  handleScheduleIdSelection,
   setIsApiError,
   setApiError,
   abortControllers,
   abortApiCall,
-  setTimeZoneSelected,
   activePaginationVariables,
-  setActivePaginationVariables
+  setActivePaginationVariables,
+  setVertexScheduleDetails
 }: {
   region: string;
   setRegion: (value: string) => void;
   app: JupyterFrontEnd;
-  setJobId: (value: string) => void;
-  settingRegistry: ISettingRegistry;
   createCompleted?: boolean;
   setCreateCompleted: (value: boolean) => void;
-  setInputFileSelected: (value: string) => void;
-  setMachineTypeSelected: (value: string | null) => void;
-  setAcceleratedCount: (value: string | null) => void;
-  setAcceleratorType: (value: string | null) => void;
-  setKernelSelected: (value: string | null) => void;
-  setCloudStorage: (value: string | null) => void;
-  setDiskTypeSelected: (value: string | null) => void;
-  setDiskSize: (value: string) => void;
-  setParameterDetail: (value: string[]) => void;
-  setParameterDetailUpdated: (value: string[]) => void;
-  setServiceAccountSelected: (
-    value: { displayName: string; email: string } | null
-  ) => void;
-  setPrimaryNetworkSelected: (
-    value: { name: string; link: string } | null
-  ) => void;
-  setSubNetworkSelected: (value: { name: string; link: string } | null) => void;
   setSubNetworkList: (value: { name: string; link: string }[]) => void;
-  setSharedNetworkSelected: (
-    value: { name: string; network: string; subnetwork: string } | null
-  ) => void;
-  setScheduleMode: (value: scheduleMode) => void;
-  setScheduleField: (value: string) => void;
-  setStartDate: (value: dayjs.Dayjs | null) => void;
-  setEndDate: (value: dayjs.Dayjs | null) => void;
-  setMaxRuns: (value: string) => void;
   setEditMode: (value: boolean) => void;
   setJobNameSelected: (value: string) => void;
-  setGcsPath: (value: string) => void;
   handleScheduleIdSelection: (
     scheduleId: any,
     scheduleName: string,
@@ -136,11 +85,11 @@ function ListVertexScheduler({
   setApiError: (value: string) => void;
   abortControllers: any;
   abortApiCall: () => void;
-  setTimeZoneSelected: (value: any) => void;
   activePaginationVariables: IActivePaginationVariables | null | undefined;
   setActivePaginationVariables: (
     value: IActivePaginationVariables | null | undefined
   ) => void;
+  setVertexScheduleDetails: (value: ICreatePayload) => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -148,7 +97,7 @@ function ListVertexScheduler({
   );
   const data = vertexScheduleList;
   const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
-  const [editDagLoading, setEditDagLoading] = useState('');
+  const [editScheduleLoading, setEditScehduleLoading] = useState('');
   const [triggerLoading, setTriggerLoading] = useState('');
   const [resumeLoading, setResumeLoading] = useState('');
   const [inputNotebookFilePath, setInputNotebookFilePath] =
@@ -512,40 +461,18 @@ function ListVertexScheduler({
   ) => {
     abortApiCall();
     const job_id = event.currentTarget.getAttribute('data-jobid');
-    if (job_id) {
-      setJobId(job_id);
-    }
+
     if (job_id !== null) {
       await VertexServices.editVertexSJobService(
         job_id,
         region,
-        setEditDagLoading,
+        setEditScehduleLoading,
         setCreateCompleted,
-        setInputFileSelected,
         setRegion,
-        setMachineTypeSelected,
-        setAcceleratedCount,
-        setAcceleratorType,
-        setKernelSelected,
-        setCloudStorage,
-        setDiskTypeSelected,
-        setDiskSize,
-        setParameterDetail,
-        setParameterDetailUpdated,
-        setServiceAccountSelected,
-        setPrimaryNetworkSelected,
-        setSubNetworkSelected,
         setSubNetworkList,
-        setScheduleMode,
-        setScheduleField,
-        setStartDate,
-        setEndDate,
-        setMaxRuns,
         setEditMode,
-        setJobNameSelected,
-        setGcsPath,
         abortControllers,
-        setTimeZoneSelected
+        setVertexScheduleDetails
       );
     }
   };
@@ -678,7 +605,7 @@ function ListVertexScheduler({
             tag="div"
             className="icon-buttons-style-disable"
           />
-        ) : data.name === editDagLoading ? (
+        ) : data.name === editScheduleLoading ? (
           <div className="icon-buttons-style">
             <CircularProgress
               size={18}

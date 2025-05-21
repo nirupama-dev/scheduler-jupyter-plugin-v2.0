@@ -62,7 +62,11 @@ import { VertexServices } from '../../services/Vertex';
 import { ComputeServices } from '../../services/Compute';
 import { IamServices } from '../../services/Iam';
 import { StorageServices } from '../../services/Storage';
-import { IAcceleratorConfig, IMachineType } from './VertexInterfaces';
+import {
+  IAcceleratorConfig,
+  ICreatePayload,
+  IMachineType
+} from './VertexInterfaces';
 import { toast } from 'react-toastify';
 import VertexScheduleJobs from './VertexScheduleJobs';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
@@ -71,7 +75,6 @@ const CreateVertexScheduler = ({
   themeManager,
   app,
   context,
-  settingRegistry,
   createCompleted,
   setCreateCompleted,
   jobNameSelected,
@@ -110,6 +113,8 @@ const CreateVertexScheduler = ({
   setApiEnableUrl: any;
   isApiError: boolean;
 }) => {
+  const [vertexSchedulerDetails, setVertexSchedulerDetails] =
+    useState<ICreatePayload | null>();
   const [parameterDetail, setParameterDetail] = useState<string[]>([]);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState<
     string[]
@@ -196,8 +201,10 @@ const CreateVertexScheduler = ({
     Intl.DateTimeFormat().resolvedOptions().timeZone
   );
   const timezones = Object.keys(tzdata.zones).sort();
-  const [startDate, setStartDate] = useState<dayjs.Dayjs | null>(dayjs());
-  const [endDate, setEndDate] = useState<dayjs.Dayjs | null>(dayjs());
+  const [startDate, setStartDate] = useState<dayjs.Dayjs | string | null>(
+    dayjs()
+  );
+  const [endDate, setEndDate] = useState<dayjs.Dayjs | string | null>(dayjs());
   const [endDateError, setEndDateError] = useState<boolean>(false);
   const [jobId, setJobId] = useState<string>('');
   const [gcsPath, setGcsPath] = useState('');
@@ -236,13 +243,6 @@ const CreateVertexScheduler = ({
    */
   const handleDiskType = (diskValue: React.SetStateAction<string | null>) => {
     setDiskTypeSelected(diskValue);
-  };
-
-  /**
-   * Setting the default value for Disk type when this field is empty
-   */
-  const handleDefaultDiskType = () => {
-    setDiskTypeSelected(DISK_TYPE_VALUE[0]);
   };
 
   /**
@@ -735,16 +735,17 @@ const CreateVertexScheduler = ({
    * Create a job schedule
    */
   const handleCreateJobScheduler = async () => {
-    const payload: any = {
+    const payload: ICreatePayload = {
       input_filename: inputFileSelected,
       display_name: jobNameSelected,
       machine_type: machineTypeSelected,
       kernel_name: kernelSelected,
       schedule_value: getScheduleValues(),
       time_zone: timeZoneSelected,
-      max_run_count: scheduleMode === 'runNow' ? 1 : maxRuns,
+      max_run_count: scheduleMode === 'runNow' ? '1' : maxRuns,
       region: region,
       cloud_storage_bucket: `gs://${cloudStorage}`,
+      network_option: networkSelected,
       parameters: parameterDetailUpdated,
       service_account: serviceAccountSelected?.email,
       network:
@@ -769,7 +770,6 @@ const CreateVertexScheduler = ({
       payload.accelerator_type = acceleratorType;
       payload.accelerator_count = acceleratedCount;
     }
-
     if (editMode) {
       await VertexServices.editVertexJobSchedulerService(
         jobId,
@@ -801,6 +801,7 @@ const CreateVertexScheduler = ({
       setCreateCompleted(true);
     }
     setEditMode(false);
+    setVertexSchedulerDetails(null); // reset the values once loaded so as to accept new values.
   };
 
   useEffect(() => {
@@ -853,13 +854,53 @@ const CreateVertexScheduler = ({
   }, [projectId]);
 
   useEffect(() => {
-    if (editMode && machineTypeSelected) {
-      const matchedMachine = machineTypeList.find(item =>
-        item.machineType.includes(machineTypeSelected)
-      );
-      if (matchedMachine) {
-        setMachineTypeSelected(matchedMachine.machineType);
+    if (editMode && vertexSchedulerDetails) {
+      setJobId(vertexSchedulerDetails.job_id ?? '');
+      setInputFileSelected(vertexSchedulerDetails.input_filename);
+      setJobNameSelected(vertexSchedulerDetails.display_name);
+      if (vertexSchedulerDetails?.machine_type) {
+        const matchedMachine = machineTypeList.find(item =>
+          item.machineType.includes(vertexSchedulerDetails?.machine_type ?? '')
+        );
+        if (matchedMachine) {
+          setMachineTypeSelected(matchedMachine.machineType);
+        }
       }
+      setKernelSelected(vertexSchedulerDetails.kernel_name);
+      setAcceleratorType(vertexSchedulerDetails.accelerator_type ?? null);
+      setAcceleratedCount(vertexSchedulerDetails.accelerator_count ?? null);
+      setMaxRuns(vertexSchedulerDetails.max_run_count ?? '');
+      setCloudStorage(vertexSchedulerDetails.cloud_storage_bucket);
+      setRegion(vertexSchedulerDetails.region);
+      setServiceAccountSelected(vertexSchedulerDetails.service_account);
+      setPrimaryNetworkSelected(vertexSchedulerDetails.network);
+      setSubNetworkSelected(vertexSchedulerDetails.subnetwork);
+      setSharedNetworkSelected(vertexSchedulerDetails.shared_network);
+      setStartDate(vertexSchedulerDetails.start_time);
+      setEndDate(vertexSchedulerDetails.end_time);
+      setScheduleField(vertexSchedulerDetails.cron ?? '');
+      setScheduleValue(vertexSchedulerDetails.cron ?? '');
+      setTimeZoneSelected(
+        vertexSchedulerDetails.time_zone ??
+          Intl.DateTimeFormat().resolvedOptions().timeZone
+      );
+      setScheduleMode(vertexSchedulerDetails.scheduleMode ?? 'runNow');
+      setDiskTypeSelected(vertexSchedulerDetails.disk_type);
+      setDiskSize(vertexSchedulerDetails.disk_size);
+      setGcsPath(vertexSchedulerDetails.gcs_notebook_source ?? '');
+      setParameterDetail(vertexSchedulerDetails.parameters ?? []);
+      setParameterDetailUpdated(vertexSchedulerDetails.parameters ?? []);
+
+      const primaryNetworkLink = vertexSchedulerDetails.network.link;
+      const projectInNetwork = primaryNetworkLink.match(/projects\/([^\/]+)/);
+      if (projectInNetwork && projectInNetwork[1]) {
+        if (projectInNetwork[1] === projectId) {
+          setNetworkSelected('networkInThisProject');
+        } else {
+          setNetworkSelected('networkShared');
+        }
+      }
+      setVertexSchedulerDetails(null); // reset the values once loaded so as to accept new values.
     }
   }, [editMode]);
 
@@ -931,40 +972,18 @@ const CreateVertexScheduler = ({
         <VertexScheduleJobs
           app={app}
           themeManager={themeManager}
-          settingRegistry={settingRegistry}
-          setJobId={setJobId}
           createCompleted={createCompleted}
           setCreateCompleted={setCreateCompleted}
-          setInputFileSelected={setInputFileSelected}
           region={region}
           setRegion={setRegion}
-          setMachineTypeSelected={setMachineTypeSelected}
-          setAcceleratedCount={setAcceleratedCount}
-          setAcceleratorType={setAcceleratorType}
-          setKernelSelected={setKernelSelected}
-          setCloudStorage={setCloudStorage}
-          setDiskTypeSelected={setDiskTypeSelected}
-          setDiskSize={setDiskSize}
-          setParameterDetail={setParameterDetail}
-          setParameterDetailUpdated={setParameterDetailUpdated}
-          setServiceAccountSelected={setServiceAccountSelected}
-          setPrimaryNetworkSelected={setPrimaryNetworkSelected}
-          setSubNetworkSelected={setSubNetworkSelected}
           setSubNetworkList={setSubNetworkList}
-          setSharedNetworkSelected={setSharedNetworkSelected}
-          setScheduleMode={setScheduleMode}
-          setScheduleField={setScheduleField}
-          setStartDate={setStartDate}
-          setEndDate={setEndDate}
-          setMaxRuns={setMaxRuns}
           setEditMode={setEditMode}
           setJobNameSelected={setJobNameSelected}
-          setGcsPath={setGcsPath}
           setExecutionPageFlag={setExecutionPageFlag}
           setIsApiError={setIsApiError}
           setApiError={setApiError}
           setExecutionPageListFlag={setExecutionPageListFlag}
-          setTimeZoneSelected={setTimeZoneSelected}
+          setVertexScheduleDetails={setVertexSchedulerDetails}
         />
       ) : (
         <div className="submit-job-container text-enable-warning">
@@ -1182,7 +1201,6 @@ const CreateVertexScheduler = ({
                 renderInput={params => (
                   <TextField {...params} label="Disk Type" />
                 )}
-                onBlur={() => handleDefaultDiskType()}
                 clearIcon={false}
               />
             </div>
@@ -1402,7 +1420,7 @@ const CreateVertexScheduler = ({
                       message={
                         errorMessageSubnetworkNetwork
                           ? errorMessageSubnetworkNetwork
-                          : 'No Subnetworks found with Google Private Access - ON'
+                          : 'No Subnetworks found with Google Private Access- ON'
                       }
                       showIcon={false}
                     />
