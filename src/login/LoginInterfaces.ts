@@ -23,12 +23,6 @@ export interface IAuthCredentials {
   config_error?: number;
   login_error?: number;
 }
-export interface LoginDialogProps {
-  loginError: boolean;
-  configError: boolean;
-  onLoginSuccess?: () => void;
-}
-
 export interface LoginErrorProps {
   loginError?: boolean;
   configError?: boolean;
