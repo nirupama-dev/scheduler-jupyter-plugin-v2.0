@@ -641,7 +641,6 @@ export class VertexServices {
         const end_time = formattedResponse.endTime;
         scheduleDetails.start_time = start_time ? dayjs(start_time) : null;
         scheduleDetails.end_time = start_time ? dayjs(end_time) : null;
-        // scheduleDetails.max_run_count = formattedResponse.maxRunCount;
         setVertexScheduleDetails(scheduleDetails);
         setEditMode(true);
       } else {
