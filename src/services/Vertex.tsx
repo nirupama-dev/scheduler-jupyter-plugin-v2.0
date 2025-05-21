@@ -29,7 +29,7 @@ import {
   IUpdateSchedulerAPIResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
-import { DEFAULT_TIME_ZONE, scheduleMode } from '../utils/Const';
+import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
 import { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import React from 'react';
@@ -85,6 +85,7 @@ export class VertexServices {
       toast.error('Failed to fetch machine type list', toastifyCustomStyle);
     }
   };
+
   static createVertexSchedulerService = async (
     payload: ICreatePayload,
     setCreateCompleted: (value: boolean) => void,
@@ -132,7 +133,6 @@ export class VertexServices {
     if (gcsPath) {
       payload.gcs_notebook_source = gcsPath;
     }
-
     try {
       const data: any = await requestAPI(
         `api/vertex/updateSchedule?region_id=${region}&schedule_id=${jobId}`,
@@ -164,6 +164,7 @@ export class VertexServices {
       );
     }
   };
+
   static listVertexSchedules = async (
     setVertexScheduleList: (
       value:
@@ -178,6 +179,7 @@ export class VertexServices {
     newPageToken: string | null | undefined, // token of page to be fetched
     pageLength: number = 50, // number of items to be fetched
     setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
+    setApiEnableUrl: any,
     abortControllers?: any
   ) => {
     setIsLoading(true);
@@ -213,8 +215,15 @@ export class VertexServices {
 
       // Handle API error
       if (error?.code === 403) {
-        setIsApiError(true);
-        setApiError(error.message);
+        const url = error.message.match(pattern);
+        if (url && url.length > 0) {
+          setIsApiError(true);
+          setApiError(error.message);
+          setApiEnableUrl(url);
+        } else {
+          setApiError(error.message);
+        }
+
         return;
       }
 
@@ -419,7 +428,8 @@ export class VertexServices {
     setNextPageToken: (value: string | null) => void,
     newPageToken: string | null | undefined,
     pageLength: number = 50,
-    hasNextPage: (value: boolean) => void
+    hasNextPage: (value: boolean) => void,
+    setApiEnableUrl: any
   ) => {
     try {
       const serviceURL = 'api/vertex/deleteSchedule';
@@ -437,7 +447,8 @@ export class VertexServices {
           setNextPageToken,
           newPageToken,
           pageLength,
-          hasNextPage
+          hasNextPage,
+          setApiEnableUrl
         );
         toast.success(
           `Deleted job ${displayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
@@ -492,44 +503,17 @@ export class VertexServices {
   };
 
   static editVertexSJobService = async (
-    job_id: string,
+    jobId: string,
     region: string,
-    setEditDagLoading: (value: string) => void,
+    setEditScheduleLoading: (value: string) => void,
     setCreateCompleted: (value: boolean) => void,
-    setInputFileSelected: (value: string) => void,
     setRegion: (value: string) => void,
-    setMachineTypeSelected: (value: string | null) => void,
-    setAcceleratedCount: (value: string | null) => void,
-    setAcceleratorType: (value: string | null) => void,
-    setKernelSelected: (value: string | null) => void,
-    setCloudStorage: (value: string | null) => void,
-    setDiskTypeSelected: (value: string | null) => void,
-    setDiskSize: (value: string) => void,
-    setParameterDetail: (value: string[]) => void,
-    setParameterDetailUpdated: (value: string[]) => void,
-    setServiceAccountSelected: (
-      value: { displayName: string; email: string } | null
-    ) => void,
-    setPrimaryNetworkSelected: (
-      value: { name: string; link: string } | null
-    ) => void,
-    setSubNetworkSelected: (
-      value: { name: string; link: string } | null
-    ) => void,
     setSubNetworkList: (value: { name: string; link: string }[]) => void,
-    setScheduleMode: (value: scheduleMode) => void,
-    setScheduleField: (value: string) => void,
-    setStartDate: (value: dayjs.Dayjs | null) => void,
-    setEndDate: (value: dayjs.Dayjs | null) => void,
-    setMaxRuns: (value: string) => void,
     setEditMode: (value: boolean) => void,
-    setJobNameSelected: (value: string) => void,
-    setGcsPath: (value: string) => void,
     abortControllers: any,
-    setTimeZoneSelected: (value: any) => void
+    setVertexScheduleDetails: (value: ICreatePayload) => void
   ) => {
-    setEditDagLoading(job_id);
-
+    setEditScheduleLoading(jobId);
     // setting controller to abort pending api call
     const controller = new AbortController();
     abortControllers.current.push(controller);
@@ -537,7 +521,7 @@ export class VertexServices {
     try {
       const serviceURL = 'api/vertex/getSchedule';
       const formattedResponse: any = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${job_id}`,
+        serviceURL + `?region_id=${region}&schedule_id=${jobId}`,
         { signal }
       );
 
@@ -546,51 +530,79 @@ export class VertexServices {
           formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.gcsNotebookSource.uri.split(
             '/'
           );
-        setInputFileSelected(inputFileName[inputFileName.length - 1]);
+        const primaryNetwork =
+          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.network.split(
+            '/'
+          );
+        const subnetwork =
+          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork.split(
+            '/'
+          );
+        let scheduleDetails: ICreatePayload = {
+          job_id: jobId,
+          input_filename: inputFileName[inputFileName.length - 1],
+          display_name: formattedResponse.displayName,
+          machine_type:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.machineSpec
+              .machineType,
+          accelerator_count:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.machineSpec
+              .acceleratorCount,
+          accelerator_type:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.machineSpec
+              .acceleratorType,
+          kernel_name:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.kernelName,
+          schedule_value: undefined,
+          max_run_count: formattedResponse.maxRunCount,
+          region: region,
+          cloud_storage_bucket:
+            formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.gcsOutputUri.replace(
+              'gs://',
+              ''
+            ),
+          service_account: {
+            displayName: '',
+            email:
+              formattedResponse.createNotebookExecutionJobRequest
+                .notebookExecutionJob.serviceAccount
+          },
+          network_option: '',
+          network: {
+            name: primaryNetwork[primaryNetwork.length - 1],
+            link: formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.networkSpec.network
+          },
+          subnetwork: {
+            name: subnetwork[subnetwork.length - 1],
+            link: formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork
+          },
+          start_time: null,
+          end_time: null,
+          scheduleMode:
+            formattedResponse.cron === '* * * * *' &&
+            formattedResponse.maxRunCount === '1'
+              ? 'runNow'
+              : 'runSchedule',
+          disk_type:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
+              .diskType,
+          disk_size:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
+              .diskSizeGb,
+          gcs_notebook_source:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.gcsNotebookSource.uri
+        };
         setCreateCompleted(false);
         setRegion(region);
-        setJobNameSelected(formattedResponse.displayName);
-        setGcsPath(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.gcsNotebookSource.uri
-        );
-
-        // Machine type selection
-        setMachineTypeSelected(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.machineSpec.machineType
-        );
-        setAcceleratedCount(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.machineSpec
-            .acceleratorCount
-        );
-        setAcceleratorType(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.machineSpec
-            .acceleratorType
-        );
-
-        setKernelSelected(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.kernelName
-        );
-        setCloudStorage(
-          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.gcsOutputUri.replace(
-            'gs://',
-            ''
-          )
-        );
-        setDiskTypeSelected(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
-            .diskType
-        );
-        setDiskSize(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
-            .diskSizeGb
-        );
 
         // Parameters
         if (
@@ -610,39 +622,11 @@ export class VertexServices {
               formattedResponse.createNotebookExecutionJobRequest
                 .notebookExecutionJob.parameters[key]
           );
-          setParameterDetail(parameterList);
-          setParameterDetailUpdated(parameterList);
+
+          scheduleDetails.parameters = parameterList;
         } else {
-          setParameterDetail([]);
-          setParameterDetailUpdated([]);
+          scheduleDetails.parameters = [];
         }
-
-        setServiceAccountSelected({
-          displayName: '',
-          email:
-            formattedResponse.createNotebookExecutionJobRequest
-              .notebookExecutionJob.serviceAccount
-        });
-
-        // Network
-        const primaryNetwork =
-          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.network.split(
-            '/'
-          );
-        setPrimaryNetworkSelected({
-          name: primaryNetwork[primaryNetwork.length - 1],
-          link: formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.networkSpec.network
-        });
-        const subnetwork =
-          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork.split(
-            '/'
-          );
-        setSubNetworkSelected({
-          name: subnetwork[subnetwork.length - 1],
-          link: formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork
-        });
 
         setSubNetworkList([
           {
@@ -650,39 +634,31 @@ export class VertexServices {
             link: subnetwork[subnetwork.length - 1]
           }
         ]);
-        if (
-          formattedResponse.cron === '* * * * *' &&
-          formattedResponse.maxRunCount === '1'
-        ) {
-          setScheduleMode('runNow');
-        } else {
-          setScheduleMode('runSchedule');
-        }
 
         if (formattedResponse.cron.includes('TZ')) {
           // Remove time zone from cron string. ex: TZ=America/New_York * * * * * to * * * * *
           const firstSpaceIndex = formattedResponse.cron.indexOf(' ');
           const timeZone = formattedResponse.cron.substring(0, firstSpaceIndex);
-          setTimeZoneSelected(timeZone.split('=')[1]);
+          scheduleDetails.time_zone = timeZone.split('=')[1];
           const cron = formattedResponse.cron.substring(firstSpaceIndex + 1);
-          setScheduleField(cron);
+          scheduleDetails.cron = cron;
         } else {
-          setTimeZoneSelected(DEFAULT_TIME_ZONE);
-          setScheduleField(formattedResponse.cron);
+          scheduleDetails.time_zone = DEFAULT_TIME_ZONE;
+          scheduleDetails.cron = formattedResponse.cron;
         }
 
         const start_time = formattedResponse.startTime;
         const end_time = formattedResponse.endTime;
-        setStartDate(start_time ? dayjs(start_time) : null);
-        setEndDate(end_time ? dayjs(end_time) : null);
-        setMaxRuns(formattedResponse.maxRunCount);
+        scheduleDetails.start_time = start_time ? dayjs(start_time) : null;
+        scheduleDetails.end_time = start_time ? dayjs(end_time) : null;
+        setVertexScheduleDetails(scheduleDetails);
         setEditMode(true);
       } else {
-        setEditDagLoading('');
+        setEditScheduleLoading('');
         toast.error('File path not found', toastifyCustomStyle);
       }
     } catch (reason) {
-      setEditDagLoading('');
+      setEditScheduleLoading('');
       if (typeof reason === 'object' && reason !== null) {
         if (reason instanceof TypeError) {
           return;

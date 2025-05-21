@@ -154,8 +154,7 @@ const NotebookSchedulerComponent = ({
   return (
     <>
       <div className="component-level">
-        {
-        isLoading ? (
+        {isLoading ? (
           <div className="spin-loader-main">
             <CircularProgress
               className="spin-loader-custom-style"
@@ -165,8 +164,7 @@ const NotebookSchedulerComponent = ({
             />
             Loading...
           </div>
-        ) : 
-        loginError && !isLoading ? (
+        ) : loginError && !isLoading ? (
           <div className="login-error login-error-main">
             <LoginErrorComponent
               setLoginError={setLoginError}
@@ -335,6 +333,7 @@ const NotebookSchedulerComponent = ({
                 setPackageEditFlag={setPackageEditFlag}
                 setSchedulerBtnDisable={setSchedulerBtnDisable}
                 abortControllerRef={abortControllerRef}
+                setApiEnableUrl={setApiEnableUrl}
               />
             ) : (
               <CreateVertexScheduler

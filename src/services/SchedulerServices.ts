@@ -19,7 +19,7 @@ import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { showToast, toastifyCustomStyle } from '../utils/Config';
 import { JupyterLab } from '@jupyterlab/application';
-import { scheduleMode } from '../utils/Const';
+import { pattern, scheduleMode } from '../utils/Const';
 import {
   IClusterAPIResponse,
   IComposerAPIResponse,
@@ -178,6 +178,7 @@ export class SchedulerService {
     setIsApiError: (value: boolean) => void,
     setApiError: (value: string) => void,
     setEnvApiFlag: (value: boolean) => void,
+    setApiEnableUrl: any,
     setIsLoading?: (value: boolean) => void
   ) => {
     setEnvApiFlag(true);
@@ -200,8 +201,15 @@ export class SchedulerService {
         try {
           setComposerList([]);
           if (formattedResponse.error.code === 403) {
-            setIsApiError(true);
-            setApiError(formattedResponse.error.message);
+            const url = formattedResponse.error.message.match(pattern);
+            if (url && url.length > 0) {
+              setIsApiError(true);
+              setApiError(formattedResponse.error.message);
+              setApiEnableUrl(url);
+            } else {
+              setApiError(formattedResponse.error.message);
+            }
+
             if (setIsLoading) {
               setIsLoading(false);
             }
