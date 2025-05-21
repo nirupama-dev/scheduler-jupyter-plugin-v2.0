@@ -233,6 +233,9 @@ class Client:
             self.log.exception(f"Error fetching ui config: {str(e)}")
             return {"Error fetching ui config": str(e)}
 
+    def parse_schedule(self, cron):
+        return get_description(cron)
+
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
         try:
             result = {}
@@ -265,7 +268,7 @@ class Client:
                             if max_run_count == "1" and cron_value == "* * * * *":
                                 schedule_value = "run once"
                             else:
-                                schedule_value = get_description(cron)
+                                schedule_value = self.parse_schedule(cron)
 
                             formatted_schedule = {
                                 "name": schedule.get("name"),

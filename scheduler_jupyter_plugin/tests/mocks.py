@@ -96,7 +96,9 @@ class MockGetScheduleClientSession:
         return
 
     def get(self, api_endpoint, headers=None):
-        return MockResponse({"key1": "value1", "key2": "value2"})
+        return MockResponse(
+            {"createNotebookExecutionJobRequest": {"notebookExecutionJob": {}}}
+        )
 
 
 class MockPostClientSession:
@@ -162,3 +164,35 @@ class MockListNotebookExecutionJobsClientSession:
         return MockResponse(
             {"notebookExecutionJobs": [{"name": "mock-name"}, {"name": "mock-name1"}]}
         )
+
+
+class MockListSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def get(self, api_endpoint, headers=None):
+        return MockResponse(
+            {
+                "schedules": [
+                    {
+                        "createNotebookExecutionJobRequest": {
+                            "notebookExecutionJob": {"gcsNotebookSource": ""}
+                        }
+                    },
+                ]
+            }
+        )
+
+
+class MockTriggerSchedulesClientSession:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args, **kwargs):
+        return
+
+    def post(self, api_endpoint, headers=None, json={}):
+        return MockResponse({"name": "mock-name"})
