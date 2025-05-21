@@ -178,6 +178,7 @@ export class SchedulerService {
     setIsApiError: (value: boolean) => void,
     setApiError: (value: string) => void,
     setEnvApiFlag: (value: boolean) => void,
+    setApiEnableUrl: any,
     setIsLoading?: (value: boolean) => void
   ) => {
     setEnvApiFlag(true);
@@ -200,8 +201,19 @@ export class SchedulerService {
         try {
           setComposerList([]);
           if (formattedResponse.error.code === 403) {
-            setIsApiError(true);
-            setApiError(formattedResponse.error.message);
+            // Pattern to check whether string contains link
+            const pattern =
+              // eslint-disable-next-line
+              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+            const url = formattedResponse.error.message.match(pattern);
+            if (url && url.length > 0) {
+              setIsApiError(true);
+              setApiError(formattedResponse.error.message);
+              setApiEnableUrl(url);
+            } else {
+              setApiError(formattedResponse.error.message);
+            }
+            
             if (setIsLoading) {
               setIsLoading(false);
             }

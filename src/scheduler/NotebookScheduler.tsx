@@ -291,6 +291,8 @@ const NotebookSchedulerComponent = ({
           setPackageEditFlag={setPackageEditFlag}
           setSchedulerBtnDisable={setSchedulerBtnDisable}
           abortControllerRef={abortControllerRef}
+          setApiEnableUrl={setApiEnableUrl}
+          isApiError={isApiError}
         />
       ) : (
         <CreateVertexScheduler
