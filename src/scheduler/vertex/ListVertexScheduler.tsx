@@ -945,6 +945,8 @@ function ListVertexScheduler({
     setTotalCount(activePaginationVariables?.totalCount ?? totalCount);
     setPageTokenList(activePaginationVariables?.pageTokenList ?? pageTokenList);
     setNextPageToken(activePaginationVariables?.nextPageToken ?? nextPageToken);
+    previousNextPageToken.current =
+      activePaginationVariables?.nextPageToken ?? nextPageToken;
   };
 
   /**
