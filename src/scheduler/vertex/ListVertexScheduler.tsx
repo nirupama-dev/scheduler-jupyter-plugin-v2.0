@@ -88,7 +88,8 @@ function ListVertexScheduler({
   abortApiCall,
   setTimeZoneSelected,
   activePaginationVariables,
-  setActivePaginationVariables
+  setActivePaginationVariables,
+  setApiEnableUrl
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -141,6 +142,7 @@ function ListVertexScheduler({
   setActivePaginationVariables: (
     value: IActivePaginationVariables | null | undefined
   ) => void;
+  setApiEnableUrl: any;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -228,6 +230,7 @@ function ListVertexScheduler({
       nextToken,
       scheduleListPageLength,
       setCanNextPage,
+      setApiEnableUrl,
       abortControllers
     );
     setRegionDisable(false);
@@ -480,7 +483,8 @@ function ListVertexScheduler({
       setNextPageToken,
       newPageToken,
       scheduleListPageLength,
-      setCanNextPage
+      setCanNextPage,
+      setApiEnableUrl
     );
     setDeletePopupOpen(false);
     setDeletingSchedule(false);

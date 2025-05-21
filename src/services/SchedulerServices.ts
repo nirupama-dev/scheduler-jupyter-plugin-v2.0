@@ -19,7 +19,7 @@ import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { showToast, toastifyCustomStyle } from '../utils/Config';
 import { JupyterLab } from '@jupyterlab/application';
-import { scheduleMode } from '../utils/Const';
+import { pattern, scheduleMode } from '../utils/Const';
 import {
   IClusterAPIResponse,
   IComposerAPIResponse,
@@ -201,10 +201,6 @@ export class SchedulerService {
         try {
           setComposerList([]);
           if (formattedResponse.error.code === 403) {
-            // Pattern to check whether string contains link
-            const pattern =
-              // eslint-disable-next-line
-              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
             const url = formattedResponse.error.message.match(pattern);
             if (url && url.length > 0) {
               setIsApiError(true);
@@ -213,7 +209,7 @@ export class SchedulerService {
             } else {
               setApiError(formattedResponse.error.message);
             }
-            
+
             if (setIsLoading) {
               setIsLoading(false);
             }

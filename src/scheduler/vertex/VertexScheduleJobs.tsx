@@ -61,7 +61,8 @@ const VertexScheduleJobs = ({
   setIsApiError,
   setApiError,
   setExecutionPageListFlag,
-  setTimeZoneSelected
+  setTimeZoneSelected,
+  setApiEnableUrl
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -105,6 +106,7 @@ const VertexScheduleJobs = ({
   setApiError: (value: string) => void;
   setExecutionPageListFlag: (value: boolean) => void;
   setTimeZoneSelected: (value: any) => void;
+  setApiEnableUrl: any;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] =
     useState<boolean>(false);
@@ -216,6 +218,7 @@ const VertexScheduleJobs = ({
           setTimeZoneSelected={setTimeZoneSelected}
           activePaginationVariables={activePaginationVariables}
           setActivePaginationVariables={setActivePaginationVariables}
+          setApiEnableUrl={setApiEnableUrl}
         />
       )}
     </>
@@ -263,6 +266,7 @@ export class NotebookJobs extends SchedulerWidget {
   setApiError: (value: string) => void;
   setExecutionPageListFlag: (value: boolean) => void;
   setTimeZoneSelected: () => void;
+  setApiEnableUrl: any;
 
   constructor(
     app: JupyterLab,
@@ -307,6 +311,7 @@ export class NotebookJobs extends SchedulerWidget {
     setApiError: (value: string) => void,
     setExecutionPageListFlag: (value: boolean) => void,
     setTimeZoneSelected: () => void,
+    setApiEnableUrl: any,
     setJobNameSelected?: (value: string) => void
   ) {
     super(themeManager);
@@ -345,6 +350,7 @@ export class NotebookJobs extends SchedulerWidget {
     this.setGcsPath = setGcsPath;
     this.setExecutionPageListFlag = setExecutionPageListFlag;
     this.setTimeZoneSelected = setTimeZoneSelected;
+    this.setApiEnableUrl = setApiEnableUrl;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -383,6 +389,7 @@ export class NotebookJobs extends SchedulerWidget {
         setApiError={this.setApiError}
         setExecutionPageListFlag={this.setExecutionPageListFlag}
         setTimeZoneSelected={this.setTimeZoneSelected}
+        setApiEnableUrl={this.setApiEnableUrl}
       />
     );
   }

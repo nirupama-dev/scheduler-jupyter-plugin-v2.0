@@ -80,7 +80,8 @@ const CreateNotebookScheduler = ({
   setPackageEditFlag,
   setSchedulerBtnDisable,
   abortControllerRef,
-  setApiEnableUrl
+  setApiEnableUrl,
+  isApiError
 }: {
   themeManager: IThemeManager;
   app: JupyterLab;
@@ -108,6 +109,7 @@ const CreateNotebookScheduler = ({
   setSchedulerBtnDisable: React.Dispatch<React.SetStateAction<boolean>>;
   abortControllerRef: any;
   setApiEnableUrl: any;
+  isApiError: boolean;
 }): JSX.Element => {
   const [composerList, setComposerList] = useState<string[]>([]);
   const [composerSelected, setComposerSelected] = useState<string>('');
@@ -188,8 +190,8 @@ const CreateNotebookScheduler = ({
       region,
       setIsApiError,
       setApiError,
-      setApiEnableUrl,
-      setEnvApiFlag
+      setEnvApiFlag,
+      setApiEnableUrl
     );
   };
 

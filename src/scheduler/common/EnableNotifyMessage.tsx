@@ -32,7 +32,7 @@ const EnableNotifyMessage = ({
         href={url[0]}
         target="_blank"
         rel="noopener noreferrer"
-        className="error-schedule-link"
+        className="cursor-icon"
       >
         Click here
       </a>{' '}
