@@ -323,6 +323,15 @@
   padding: 50px;
 }
 
+.login-error-main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 63vh;
+}
+
 .no-data-style {
   margin: 10px 15px;
 }

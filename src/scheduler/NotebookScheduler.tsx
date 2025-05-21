@@ -27,6 +27,7 @@ import { Input } from '../controls/MuiWrappedInput';
 import CreateNotebookScheduler from './composer/CreateNotebookScheduler';
 import ErrorMessage from './common/ErrorMessage';
 import {
+  CircularProgress,
   FormControl,
   FormControlLabel,
   Radio,
@@ -72,7 +73,8 @@ const NotebookSchedulerComponent = ({
     useState<boolean>(false);
   const abortControllerRef = useRef<any>(null);
   const [apiEnableUrl, setApiEnableUrl] = useState<any>(null);
-  const [loginError, setLoginError] = useState(false);
+  const [loginError, setLoginError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -97,7 +99,7 @@ const NotebookSchedulerComponent = ({
 
   useEffect(() => {
     getKernelDetails();
-    checkConfig(setLoginError);
+    checkConfig(setLoginError, setIsLoading);
   }, []);
 
   const handleJobNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,13 +154,25 @@ const NotebookSchedulerComponent = ({
   return (
     <>
       <div className="component-level">
-        {(loginError) ? (
-        <div className="login-error">
-          <LoginErrorComponent
-            setLoginError={setLoginError}
-            loginError={loginError}
-          />
-        </div>
+        {
+        isLoading ? (
+          <div className="spin-loader-main">
+            <CircularProgress
+              className="spin-loader-custom-style"
+              size={18}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+            Loading...
+          </div>
+        ) : 
+        loginError && !isLoading ? (
+          <div className="login-error login-error-main">
+            <LoginErrorComponent
+              setLoginError={setLoginError}
+              loginError={loginError}
+            />
+          </div>
         ) : (
           <div
             className={
