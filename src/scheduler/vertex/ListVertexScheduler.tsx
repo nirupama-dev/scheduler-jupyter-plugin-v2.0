@@ -97,7 +97,7 @@ function ListVertexScheduler({
   );
   const data = vertexScheduleList;
   const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
-  const [editDagLoading, setEditDagLoading] = useState('');
+  const [editScheduleLoading, setEditScehduleLoading] = useState('');
   const [triggerLoading, setTriggerLoading] = useState('');
   const [resumeLoading, setResumeLoading] = useState('');
   const [inputNotebookFilePath, setInputNotebookFilePath] =
@@ -466,7 +466,7 @@ function ListVertexScheduler({
       await VertexServices.editVertexSJobService(
         job_id,
         region,
-        setEditDagLoading,
+        setEditScehduleLoading,
         setCreateCompleted,
         setRegion,
         setSubNetworkList,
@@ -605,7 +605,7 @@ function ListVertexScheduler({
             tag="div"
             className="icon-buttons-style-disable"
           />
-        ) : data.name === editDagLoading ? (
+        ) : data.name === editScheduleLoading ? (
           <div className="icon-buttons-style">
             <CircularProgress
               size={18}

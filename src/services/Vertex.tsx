@@ -503,6 +503,7 @@ export class VertexServices {
     abortControllers: any,
     setVertexScheduleDetails: (value: ICreatePayload) => void
   ) => {
+    setEditScheduleLoading(jobId);
     // setting controller to abort pending api call
     const controller = new AbortController();
     abortControllers.current.push(controller);
