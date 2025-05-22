@@ -1439,7 +1439,7 @@ const CreateVertexScheduler = ({
                 data-testid={
                   scheduleMode === 'runNow'
                     ? 'runNow-selected'
-                    : 'networkShared-selected'
+                    : 'runSchedule-selected'
                 }
               >
                 <FormControlLabel
