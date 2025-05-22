@@ -804,6 +804,11 @@ const CreateNotebookScheduler = ({
                       value={selectedMode}
                       onChange={handleSelectedModeChange}
                       row={true}
+                      data-testid={
+                        selectedMode === 'cluster'
+                          ? 'cluster-selected'
+                          : 'serverless-selected'
+                      }
                     >
                       <FormControlLabel
                         value="cluster"
@@ -992,6 +997,11 @@ const CreateNotebookScheduler = ({
                   name="controlled-radio-buttons-group"
                   value={scheduleMode}
                   onChange={handleSchedulerModeChange}
+                  data-testid={
+                    selectedMode === 'runNow'
+                      ? 'runNow-selected'
+                      : 'runSchedule-selected'
+                  }
                 >
                   <FormControlLabel
                     value="runNow"
