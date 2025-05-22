@@ -1437,6 +1437,7 @@ const CreateVertexScheduler = ({
                   className="create-scheduler-label-style"
                   control={<Radio size="small" />}
                   label={<Typography sx={{ fontSize: 13 }}>Run now</Typography>}
+                  disabled={editMode && scheduleMode === 'runSchedule'}
                 />
                 <FormControlLabel
                   value="runSchedule"
@@ -1447,6 +1448,7 @@ const CreateVertexScheduler = ({
                       Run on a schedule
                     </Typography>
                   }
+                  disabled={editMode && scheduleMode === 'runNow'}
                 />
               </RadioGroup>
             </FormControl>
