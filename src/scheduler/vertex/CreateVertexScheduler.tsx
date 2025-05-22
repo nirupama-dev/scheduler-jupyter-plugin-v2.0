@@ -1257,6 +1257,11 @@ const CreateVertexScheduler = ({
                 name="controlled-radio-buttons-group"
                 value={networkSelected}
                 onChange={handleNetworkSelection}
+                data-testid={
+                  networkSelected === 'networkInThisProject'
+                    ? 'networkInThisProject-selected'
+                    : 'networkShared-selected'
+                }
               >
                 <FormControlLabel
                   value="networkInThisProject"
@@ -1431,6 +1436,11 @@ const CreateVertexScheduler = ({
                 name="controlled-radio-buttons-group"
                 value={scheduleMode}
                 onChange={handleSchedulerModeChange}
+                data-testid={
+                  scheduleMode === 'runNow'
+                    ? 'runNow-selected'
+                    : 'runSchedule-selected'
+                }
               >
                 <FormControlLabel
                   value="runNow"
@@ -1462,6 +1472,11 @@ const CreateVertexScheduler = ({
                     name="controlled-radio-buttons-group"
                     value={internalScheduleMode}
                     onChange={handleInternalSchedulerModeChange}
+                    data-testid={
+                      internalScheduleMode === 'cronFormat'
+                        ? 'cronFormat-selected'
+                        : 'userFriendly-selected'
+                    }
                   >
                     <FormControlLabel
                       value="cronFormat"

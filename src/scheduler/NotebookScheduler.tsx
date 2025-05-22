@@ -260,6 +260,11 @@ const NotebookSchedulerComponent = ({
                       name="controlled-radio-buttons-group"
                       value={notebookSelector}
                       onChange={handleSchedulerModeChange}
+                      data-testid={
+                        notebookSelector === 'vertex'
+                          ? 'vertex-selected'
+                          : 'composer-selected'
+                      }
                     >
                       <FormControlLabel
                         value="vertex"
