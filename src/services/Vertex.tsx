@@ -610,7 +610,7 @@ export class VertexServices {
         setCreateCompleted(false);
         setRegion(region);
 
-        // Parameters
+        // Parameters for future scope
         if (
           Object.prototype.hasOwnProperty.call(
             formattedResponse.createNotebookExecutionJobRequest
