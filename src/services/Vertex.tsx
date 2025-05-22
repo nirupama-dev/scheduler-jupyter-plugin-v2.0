@@ -544,7 +544,7 @@ export class VertexServices {
           formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork.split(
             '/'
           );
-        let scheduleDetails: ICreatePayload = {
+        const scheduleDetails: ICreatePayload = {
           job_id: jobId,
           input_filename: inputFileName[inputFileName.length - 1],
           display_name: formattedResponse.displayName,

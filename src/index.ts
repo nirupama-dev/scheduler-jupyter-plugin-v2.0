@@ -46,7 +46,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     console.log('JupyterLab extension scheduler-jupyter-plugin is activated!');
 
     const { commands } = app;
-    
+
     const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';
     commands.addCommand(createNotebookJobsComponentCommand, {
       caption: 'Scheduled Jobs',

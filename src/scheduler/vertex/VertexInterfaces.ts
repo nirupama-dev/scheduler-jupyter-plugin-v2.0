@@ -29,11 +29,10 @@ export interface IAcceleratorConfig {
 }
 
 export interface ICreatePayload {
-  
   job_id?: string;
   input_filename: string;
   display_name: string;
-  machine_type: string |null;
+  machine_type: string | null;
   accelerator_type?: string;
   accelerator_count?: string | null;
   kernel_name: string | null;
@@ -42,17 +41,17 @@ export interface ICreatePayload {
   parameters?: string[];
   service_account: any | undefined;
   network_option: any | undefined;
-  network: any |undefined;
+  network: any | undefined;
   subnetwork: any | undefined;
   shared_network?: any;
   scheduleMode?: scheduleMode;
-  start_time: dayjs.Dayjs | string| null;
-  end_time: dayjs.Dayjs |string| null;
+  start_time: dayjs.Dayjs | string | null;
+  end_time: dayjs.Dayjs | string | null;
   schedule_value: string | undefined;
   time_zone?: string;
-  cron?: string| null,
+  cron?: string | null;
   max_run_count: string;
-  disk_type:string|null ;
+  disk_type: string | null;
   disk_size: string;
   gcs_notebook_source?: string;
 }

@@ -503,7 +503,7 @@ function ListVertexScheduler({
    * Function that stores all paginationtion related data for future restoration.
    */
   const saveActivePaginationVariables = () => {
-    let currentPaginationVariables: IActivePaginationVariables | undefined = {
+    const currentPaginationVariables: IActivePaginationVariables | undefined = {
       scheduleListPageLength: scheduleListPageLength,
       totalCount: totalCount,
       pageTokenList: pageTokenList,
