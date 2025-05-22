@@ -55,7 +55,6 @@ import {
   SHARED_NETWORK_DOC_URL,
   VERTEX_REGIONS
 } from '../../utils/Const';
-import LabelProperties from '../../jobs/LabelProperties';
 import LearnMore from '../common/LearnMore';
 import ErrorMessage from '../common/ErrorMessage';
 import { VertexServices } from '../../services/Vertex';
@@ -115,13 +114,6 @@ const CreateVertexScheduler = ({
 }) => {
   const [vertexSchedulerDetails, setVertexSchedulerDetails] =
     useState<ICreatePayload | null>();
-  const [parameterDetail, setParameterDetail] = useState<string[]>([]);
-  const [parameterDetailUpdated, setParameterDetailUpdated] = useState<
-    string[]
-  >([]);
-  const [keyValidation, setKeyValidation] = useState(-1);
-  const [valueValidation, setValueValidation] = useState(-1);
-  const [duplicateKeyError, setDuplicateKeyError] = useState(-1);
   const [creatingVertexScheduler, setCreatingVertexScheduler] =
     useState<boolean>(false);
 
@@ -218,6 +210,7 @@ const CreateVertexScheduler = ({
     useState<string>('');
   const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
     useState<string>('');
+
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
    * @param {string} value selected region
@@ -689,12 +682,6 @@ const CreateVertexScheduler = ({
       kernelSelected === null ||
       cloudStorage === null ||
       serviceAccountSelected === null ||
-      parameterDetailUpdated.some(
-        item =>
-          item.length === 1 ||
-          (item.split(':')[0].length > 0 && item.split(':')[1].length === 0) ||
-          (item.split(':')[0].length === 0 && item.split(':')[1].length > 0)
-      ) ||
       (networkSelected === 'networkInThisProject' &&
         (primaryNetworkSelected === null ||
           subNetworkSelected === null ||
@@ -746,7 +733,6 @@ const CreateVertexScheduler = ({
       region: region,
       cloud_storage_bucket: `gs://${cloudStorage}`,
       network_option: networkSelected,
-      parameters: parameterDetailUpdated,
       service_account: serviceAccountSelected?.email,
       network:
         networkSelected === 'networkInThisProject'
@@ -763,7 +749,8 @@ const CreateVertexScheduler = ({
       start_time: startDate,
       end_time: endDate,
       disk_type: diskTypeSelected,
-      disk_size: diskSize
+      disk_size: diskSize,
+      parameters: [] // Parameters for future scope
     };
 
     if (acceleratorType && acceleratedCount) {
@@ -817,16 +804,6 @@ const CreateVertexScheduler = ({
       setServiceAccountSelected(defaultServiceAccount!);
     }
   }, [serviceAccountList.length > 0]);
-
-  useEffect(() => {
-    if (parameterDetail.length > 0) {
-      setParameterDetail(prevDetails => [...prevDetails, ...parameterDetail]);
-      setParameterDetailUpdated(prevDetails => [
-        ...prevDetails,
-        ...parameterDetailUpdated
-      ]);
-    }
-  }, [createCompleted]);
 
   useEffect(() => {
     setLoaderRegion(true);
@@ -888,8 +865,6 @@ const CreateVertexScheduler = ({
       setDiskTypeSelected(vertexSchedulerDetails.disk_type);
       setDiskSize(vertexSchedulerDetails.disk_size);
       setGcsPath(vertexSchedulerDetails.gcs_notebook_source ?? '');
-      setParameterDetail(vertexSchedulerDetails.parameters ?? []);
-      setParameterDetailUpdated(vertexSchedulerDetails.parameters ?? []);
 
       const primaryNetworkLink = vertexSchedulerDetails.network.link;
 
@@ -1221,22 +1196,6 @@ const CreateVertexScheduler = ({
               />
             </div>
           </div>
-          <div className="create-job-scheduler-title sub-title-heading ">
-            Parameters
-          </div>
-          <LabelProperties
-            labelDetail={parameterDetail}
-            setLabelDetail={setParameterDetail}
-            labelDetailUpdated={parameterDetailUpdated}
-            setLabelDetailUpdated={setParameterDetailUpdated}
-            buttonText="ADD PARAMETER"
-            keyValidation={keyValidation}
-            setKeyValidation={setKeyValidation}
-            valueValidation={valueValidation}
-            setValueValidation={setValueValidation}
-            duplicateKeyError={duplicateKeyError}
-            setDuplicateKeyError={setDuplicateKeyError}
-          />
 
           <div className="create-scheduler-form-element panel-margin footer-text">
             <Autocomplete
