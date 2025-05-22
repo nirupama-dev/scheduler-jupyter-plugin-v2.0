@@ -17,12 +17,12 @@
 
 import React from 'react';
 import { login } from './Config';
-import { LoginErrorProps } from '../login/LoginInterfaces';
+import { ILoginErrorProps } from '../login/LoginInterfaces';
 import { IconsigninGoogle } from './Icons';
 
-const LoginErrorComponent: React.FC<LoginErrorProps> = ({ 
-  loginError = false, 
-  setLoginError 
+const LoginErrorComponent: React.FC<ILoginErrorProps> = ({
+  loginError = false,
+  setLoginError
 }) => {
   if (loginError) {
     return (
@@ -31,7 +31,7 @@ const LoginErrorComponent: React.FC<LoginErrorProps> = ({
         <div style={{ alignItems: 'center' }}>
           <div
             role="button"
-            className='signin-google-icon'
+            className="signin-google-icon"
             onClick={() => login(setLoginError)}
           >
             <IconsigninGoogle.react

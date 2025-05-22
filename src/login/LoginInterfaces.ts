@@ -23,7 +23,7 @@ export interface IAuthCredentials {
   config_error?: number;
   login_error?: number;
 }
-export interface LoginErrorProps {
+export interface ILoginErrorProps {
   loginError?: boolean;
   configError?: boolean;
   setLoginError: React.Dispatch<React.SetStateAction<boolean>>;

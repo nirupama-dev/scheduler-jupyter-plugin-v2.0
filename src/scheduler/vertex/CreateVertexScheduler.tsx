@@ -892,6 +892,8 @@ const CreateVertexScheduler = ({
       setParameterDetailUpdated(vertexSchedulerDetails.parameters ?? []);
 
       const primaryNetworkLink = vertexSchedulerDetails.network.link;
+
+      // eslint-disable-next-line no-useless-escape
       const projectInNetwork = primaryNetworkLink.match(/projects\/([^\/]+)/);
       if (projectInNetwork && projectInNetwork[1]) {
         if (projectInNetwork[1] === projectId) {
