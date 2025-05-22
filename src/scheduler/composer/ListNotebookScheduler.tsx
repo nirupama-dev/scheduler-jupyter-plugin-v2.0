@@ -172,6 +172,8 @@ function listNotebookScheduler({
   const [projectId, setProjectId] = useState('');
   const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
+  const [triggerLoading, setTriggerLoading] = useState('');
+  const [updateLoading, setUpdateLoading] = useState('');
 
   const columns = React.useMemo(
     () => [
@@ -233,7 +235,8 @@ function listNotebookScheduler({
       is_status_paused,
       setDagList,
       setIsLoading,
-      setBucketName
+      setBucketName,
+      setUpdateLoading
     );
   };
   const handleDeletePopUp = (dag_id: string) => {
@@ -254,7 +257,11 @@ function listNotebookScheduler({
   const handleTriggerDag = async (event: React.MouseEvent) => {
     const jobid = event.currentTarget.getAttribute('data-jobid');
     if (jobid !== null) {
-      await SchedulerService.triggerDagService(jobid, composerSelectedList);
+      await SchedulerService.triggerDagService(
+        jobid,
+        composerSelectedList,
+        setTriggerLoading
+      );
     }
   };
   const handleEditDags = async (event: React.MouseEvent) => {
@@ -383,44 +390,66 @@ function listNotebookScheduler({
     const is_status_paused = data.status === 'Paused';
     return (
       <div className="actions-icon-btn">
-        <div
-          role="button"
-          className="icon-buttons-style"
-          title={is_status_paused ? 'Unpause' : 'Pause'}
-          onClick={e => handleUpdateScheduler(data.jobid, is_status_paused)}
-        >
-          {is_status_paused ? (
-            <iconPlay.react
+        {data.jobid === updateLoading ? (
+          <div className="icon-buttons-style">
+            <CircularProgress
+              size={18}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+          </div>
+        ) : (
+          <div
+            role="button"
+            className="icon-buttons-style"
+            title={is_status_paused ? 'Unpause' : 'Pause'}
+            onClick={e => handleUpdateScheduler(data.jobid, is_status_paused)}
+          >
+            {is_status_paused ? (
+              <iconPlay.react
+                tag="div"
+                className="icon-white logo-alignment-style"
+              />
+            ) : (
+              <iconPause.react
+                tag="div"
+                className="icon-white logo-alignment-style"
+              />
+            )}
+          </div>
+        )}
+        {data.jobid === triggerLoading ? (
+          <div className="icon-buttons-style">
+            <CircularProgress
+              size={18}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+          </div>
+        ) : (
+          <div
+            role="button"
+            className={
+              !is_status_paused
+                ? 'icon-buttons-style'
+                : 'icon-buttons-style-disable '
+            }
+            title={
+              !is_status_paused
+                ? 'Trigger the job'
+                : " Can't Trigger Paused job"
+            }
+            data-jobid={data.jobid}
+            onClick={e => {
+              !is_status_paused ? handleTriggerDag(e) : null;
+            }}
+          >
+            <iconTrigger.react
               tag="div"
               className="icon-white logo-alignment-style"
             />
-          ) : (
-            <iconPause.react
-              tag="div"
-              className="icon-white logo-alignment-style"
-            />
-          )}
-        </div>
-        <div
-          role="button"
-          className={
-            !is_status_paused
-              ? 'icon-buttons-style'
-              : 'icon-buttons-style-disable '
-          }
-          title={
-            !is_status_paused ? 'Trigger the job' : " Can't Trigger Paused job"
-          }
-          data-jobid={data.jobid}
-          onClick={e => {
-            !is_status_paused ? handleTriggerDag(e) : null;
-          }}
-        >
-          <iconTrigger.react
-            tag="div"
-            className="icon-white logo-alignment-style"
-          />
-        </div>
+          </div>
+        )}
         {data.jobid === editDagLoading ? (
           <div className="icon-buttons-style">
             <CircularProgress
