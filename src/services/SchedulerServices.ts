@@ -805,8 +805,10 @@ export class SchedulerService {
     is_status_paused: boolean,
     setDagList: (value: IDagList[]) => void,
     setIsLoading: (value: boolean) => void,
-    setBucketName: (value: string) => void
+    setBucketName: (value: string) => void,
+    setUpdateLoading: (value: string) => void
   ) => {
+    setUpdateLoading(dag_id);
     try {
       const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}`;
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
@@ -830,7 +832,9 @@ export class SchedulerService {
           toastifyCustomStyle
         );
       }
+      setUpdateLoading('');
     } catch (error) {
+      setUpdateLoading('');
       SchedulerLoggingService.log('Error in Update api', LOG_LEVEL.ERROR);
       toast.error(
         `Error in pausing the schedule : ${error}`,
@@ -929,8 +933,10 @@ export class SchedulerService {
 
   static triggerDagService = async (
     dagId: string,
-    composerSelectedList: string
+    composerSelectedList: string,
+    setTriggerLoading: (value: string) => void
   ) => {
+    setTriggerLoading(dagId);
     try {
       const data: any = await requestAPI(
         `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}`,
@@ -970,7 +976,9 @@ export class SchedulerService {
       } else {
         toast.success(`${dagId} triggered successfully `, toastifyCustomStyle);
       }
+      setTriggerLoading('');
     } catch (reason) {
+      setTriggerLoading('');
       toast.error(
         `Failed to trigger ${dagId} : ${reason}`,
         toastifyCustomStyle
