@@ -71,6 +71,3 @@ async def test_list_service_account(monkeypatch, returncode, expected_result, jp
     payload = json.loads(response.body)
     assert payload == expected_result
 
-    # mock_iam_client.list_service_accounts.assert_called_once_with(
-    #     request={"name": "projects/credentials-project"}
-    # )
