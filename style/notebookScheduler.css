@@ -756,3 +756,12 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   /* Add some padding around the component */
   padding: 0.5rem;
 }
+
+.scroll-list {
+  overflow: auto;
+  height: calc(100vh - 298px);
+}
+
+.list-level-component {
+  max-height: 0;
+}

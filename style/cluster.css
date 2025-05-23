@@ -357,3 +357,7 @@
 .actions-icon-btn {
   display: flex;
 }
+
+.spin-loader-listing {
+  margin: 10%;
+}

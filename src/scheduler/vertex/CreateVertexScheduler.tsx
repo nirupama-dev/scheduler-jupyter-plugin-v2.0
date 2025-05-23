@@ -89,7 +89,8 @@ const CreateVertexScheduler = ({
   setExecutionPageListFlag,
   apiError,
   setApiEnableUrl,
-  isApiError
+  isApiError,
+  setListingScreenFlag
 }: {
   themeManager: IThemeManager;
   app: JupyterLab;
@@ -111,6 +112,7 @@ const CreateVertexScheduler = ({
   apiError: string;
   setApiEnableUrl: any;
   isApiError: boolean;
+  setListingScreenFlag: React.Dispatch<React.SetStateAction<boolean>>;
 }) => {
   const [vertexSchedulerDetails, setVertexSchedulerDetails] =
     useState<ICreatePayload | null>();
@@ -962,6 +964,7 @@ const CreateVertexScheduler = ({
           setExecutionPageListFlag={setExecutionPageListFlag}
           setVertexScheduleDetails={setVertexSchedulerDetails}
           setApiEnableUrl={setApiEnableUrl}
+          setListingScreenFlag={setListingScreenFlag}
         />
       ) : (
         <div className="submit-job-container text-enable-warning">
