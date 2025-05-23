@@ -75,6 +75,7 @@ const NotebookSchedulerComponent = ({
   const [apiEnableUrl, setApiEnableUrl] = useState<any>(null);
   const [loginError, setLoginError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [listingScreenFlag, setListingScreenFlag] = useState<boolean>(false);
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -153,7 +154,7 @@ const NotebookSchedulerComponent = ({
 
   return (
     <>
-      <div className="component-level">
+      <div className={listingScreenFlag ? "list-level-component" : "component-level"}>
         {isLoading ? (
           <div className="spin-loader-main">
             <CircularProgress
@@ -362,6 +363,7 @@ const NotebookSchedulerComponent = ({
                 apiError={apiError}
                 setApiEnableUrl={setApiEnableUrl}
                 isApiError={isApiError}
+                setListingScreenFlag={setListingScreenFlag}
               />
             )}
           </div>

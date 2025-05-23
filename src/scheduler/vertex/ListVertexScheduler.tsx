@@ -66,7 +66,8 @@ function ListVertexScheduler({
   activePaginationVariables,
   setActivePaginationVariables,
   setApiEnableUrl,
-  setVertexScheduleDetails
+  setVertexScheduleDetails,
+  setListingScreenFlag
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -92,6 +93,7 @@ function ListVertexScheduler({
   ) => void;
   setApiEnableUrl: any;
   setVertexScheduleDetails: (value: ICreatePayload) => void;
+  setListingScreenFlag: (value: boolean) => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -874,7 +876,7 @@ function ListVertexScheduler({
               </div>
             </>
           ) : (
-            <>{cell.render('Cell')}</>
+            <div className='cell-width-listing'>{cell.render('Cell')}</div>
           )}
         </td>
       );
@@ -899,9 +901,11 @@ function ListVertexScheduler({
   }, [inputNotebookFilePath]);
 
   useEffect(() => {
+    setListingScreenFlag(true);
     window.scrollTo(0, 0);
     return () => {
       abortApiCall(); // Abort any ongoing requests on component unmount
+      setListingScreenFlag(false);
     };
   }, []);
 
@@ -1000,7 +1004,7 @@ function ListVertexScheduler({
 
       {vertexScheduleList.length > 0 || nextPageToken ? (
         <>
-          <div className="notebook-templates-list-tabl e-parent clusters-list-table-parent">
+          <div className="notebook-templates-list-tabl e-parent clusters-list-table-parent table-space-around scroll-list">
             <TableData
               getTableProps={getTableProps}
               headerGroups={headerGroups}
@@ -1038,7 +1042,7 @@ function ListVertexScheduler({
       ) : (
         <div>
           {isLoading && (
-            <div className="spin-loader-main">
+            <div className="spin-loader-main spin-loader-listing">
               <CircularProgress
                 className="spin-loader-custom-style"
                 size={18}

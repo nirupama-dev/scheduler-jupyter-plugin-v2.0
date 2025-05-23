@@ -42,7 +42,8 @@ const VertexScheduleJobs = ({
   setApiError,
   setExecutionPageListFlag,
   setVertexScheduleDetails,
-  setApiEnableUrl
+  setApiEnableUrl,
+  setListingScreenFlag
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -59,6 +60,7 @@ const VertexScheduleJobs = ({
   setExecutionPageListFlag: (value: boolean) => void;
   setVertexScheduleDetails: (value: ICreatePayload) => void;
   setApiEnableUrl: any;
+  setListingScreenFlag: (value: boolean) => void;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] =
     useState<boolean>(false);
@@ -149,6 +151,7 @@ const VertexScheduleJobs = ({
           setActivePaginationVariables={setActivePaginationVariables}
           setApiEnableUrl={setApiEnableUrl}
           setVertexScheduleDetails={setVertexScheduleDetails}
+          setListingScreenFlag={setListingScreenFlag}
         />
       )}
     </>
@@ -169,6 +172,7 @@ export class NotebookJobs extends SchedulerWidget {
   setExecutionPageListFlag: (value: boolean) => void;
   setVertexScheduleDetails: (value: ICreatePayload) => void;
   setApiEnableUrl: any;
+  setListingScreenFlag: (value: boolean) => void;
 
   constructor(
     app: JupyterLab,
@@ -184,7 +188,8 @@ export class NotebookJobs extends SchedulerWidget {
     setApiError: (value: string) => void,
     setExecutionPageListFlag: (value: boolean) => void,
     setVertexScheduleDetails: (value: ICreatePayload) => void,
-    setApiEnableUrl: any
+    setApiEnableUrl: any,
+    setListingScreenFlag: (value: boolean) => void
   ) {
     super(themeManager);
     this.app = app;
@@ -201,6 +206,7 @@ export class NotebookJobs extends SchedulerWidget {
     this.setExecutionPageListFlag = setExecutionPageListFlag;
     this.setVertexScheduleDetails = setVertexScheduleDetails;
     this.setApiEnableUrl = setApiEnableUrl;
+    this.setListingScreenFlag = setListingScreenFlag;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -218,6 +224,7 @@ export class NotebookJobs extends SchedulerWidget {
         setExecutionPageListFlag={this.setExecutionPageListFlag}
         setVertexScheduleDetails={this.setVertexScheduleDetails}
         setApiEnableUrl={this.setApiEnableUrl}
+        setListingScreenFlag={this.setListingScreenFlag}
       />
     );
   }
