@@ -876,7 +876,7 @@ function ListVertexScheduler({
               </div>
             </>
           ) : (
-            <div className='cell-width-listing'>{cell.render('Cell')}</div>
+            <div className="cell-width-listing">{cell.render('Cell')}</div>
           )}
         </td>
       );

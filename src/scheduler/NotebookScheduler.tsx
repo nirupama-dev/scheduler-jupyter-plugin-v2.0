@@ -154,7 +154,11 @@ const NotebookSchedulerComponent = ({
 
   return (
     <>
-      <div className={listingScreenFlag ? "list-level-component" : "component-level"}>
+      <div
+        className={
+          listingScreenFlag ? 'list-level-component' : 'component-level'
+        }
+      >
         {isLoading ? (
           <div className="spin-loader-main">
             <CircularProgress
