@@ -874,7 +874,7 @@ function ListVertexScheduler({
               </div>
             </>
           ) : (
-            <>{cell.render('Cell')}</>
+            <div className='cell-width-listing'>{cell.render('Cell')}</div>
           )}
         </td>
       );
@@ -1000,7 +1000,7 @@ function ListVertexScheduler({
 
       {vertexScheduleList.length > 0 || nextPageToken ? (
         <>
-          <div className="notebook-templates-list-tabl e-parent clusters-list-table-parent">
+          <div className="notebook-templates-list-tabl e-parent clusters-list-table-parent table-space-around">
             <TableData
               getTableProps={getTableProps}
               headerGroups={headerGroups}

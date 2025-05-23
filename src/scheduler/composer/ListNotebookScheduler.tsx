@@ -664,8 +664,8 @@ function listNotebookScheduler({
             <div
               className={
                 importErrorEntries > 0
-                  ? 'create-scheduler-form-element select-panel-list-view-lay success_icon'
-                  : 'create-scheduler-form-element select-panel-list-view'
+                  ? 'create-scheduler-form-element select-panel-list-view-lay table-right-space'
+                  : 'create-scheduler-form-element select-panel-list-view table-right-space'
               }
             >
               <DynamicDropdown
@@ -695,8 +695,8 @@ function listNotebookScheduler({
             <div
               className={
                 importErrorEntries > 0
-                  ? 'create-scheduler-form-element select-panel-list-view-lay success_icon'
-                  : 'create-scheduler-form-element select-panel-list-view'
+                  ? 'create-scheduler-form-element select-panel-list-view-lay table-right-space'
+                  : 'create-scheduler-form-element select-panel-list-view table-right-space'
               }
             >
               <RegionDropdown
@@ -761,7 +761,7 @@ function listNotebookScheduler({
       </div>
 
       {dagList.length > 0 ? (
-        <div className="notebook-templates-list-table-parent">
+        <div className="notebook-templates-list-table-parent table-space-around">
           <TableData
             getTableProps={getTableProps}
             headerGroups={headerGroups}
