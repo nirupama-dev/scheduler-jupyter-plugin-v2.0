@@ -17,6 +17,7 @@ from google.cloud.jupyter_config.config import (
     async_run_gcloud_subcommand,
 )
 
+import logging
 
 async def _gcp_credentials():
     """Helper method to get the project configured through gcloud"""
@@ -64,9 +65,9 @@ async def get_cached():
         credentials["access_token"] = await _gcp_credentials()
         credentials["project_number"] = await _gcp_project_number()
     except Exception as ex:
-        credentials["config_error"] = 1
+        logging.error(f"Error getting gcloud config: {ex}")
 
-    if not credentials["access_token"] or not credentials["project_number"]:
+    if not credentials["access_token"]:
         # These will only be set if the user is logged in to gcloud with
         # an account that has the appropriate permissions on the configured
         # project.

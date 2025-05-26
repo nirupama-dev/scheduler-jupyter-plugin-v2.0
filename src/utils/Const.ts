@@ -16,14 +16,11 @@
  */
 
 import { ConfigService } from '../services/ConfigService';
-const { version } = require('../../package.json'); // eslint-disable-line
 export const LOGIN_STATE = '1';
 export const STATUS_SUCCESS = 'SUCCEEDED';
 export const API_HEADER_BEARER = 'Bearer ';
 export const API_HEADER_CONTENT_TYPE = 'application/json';
 export const PLUGIN_ID = 'scheduler_jupyter_plugin:plugin';
-export const USER_INFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
-export const VERSION_DETAIL = version;
 
 export const gcpServiceUrls = (async () => {
   return await ConfigService.gcpServiceUrlsAPI();
@@ -38,7 +35,7 @@ export const POLLING_TIME_LIMIT = 10000;
 export const POLLING_IMPORT_ERROR = 30000;
 export const TITLE_LAUNCHER_CATEGORY = 'Google Cloud Resources';
 export type scheduleMode = 'runNow' | 'runSchedule';
-export const scheduleValueExpression = '30 17 * * 1-5'; //Expression for schedule Value in Scheduler Jobs
+export const scheduleValueExpression = '30 17 * * 1-5'; // Expression for schedule Value in Scheduler Jobs
 export const SPARK_HISTORY_SERVER = 'Spark History Server';
 export const DATAPROC_CLUSTER_KEY = 'dataprocCluster';
 export const DATAPROC_CLUSTER_LABEL = 'Dataproc cluster';
@@ -109,3 +106,15 @@ export const VERTEX_REGIONS = [
   'us-west1',
   'us-west4'
 ];
+
+export const DEFAULT_SERVICE_ACCOUNT = 'compute@developer.gserviceaccount.com';
+
+export const DEFAULT_TIME_ZONE = 'UTC';
+
+export const SHARED_NETWORK_DOC_URL =
+  'https://cloud.google.com/vpc/docs/shared-vpc';
+
+// Pattern to check whether string contains link
+export const pattern =
+  // eslint-disable-next-line
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string

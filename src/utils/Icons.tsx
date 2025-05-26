@@ -17,8 +17,6 @@
 
 import { LabIcon } from '@jupyterlab/ui-components';
 import clusterIcon from '../../style/icons/cluster_icon.svg';
-import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
-import googleCloudIcon from '../../style/icons/google-cloud.svg';
 import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.svg';
 import LeftArrowIcon from '../../style/icons/left_arrow_icon.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
@@ -29,7 +27,7 @@ import ActiveIcon from '../../style/icons/list_active_icon.svg';
 import EditIconDisable from '../../style/icons/scheduler_edit_dag.svg';
 import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
 import FailedIcon from '../../style/icons/list_error_icon.svg';
-import ListCompleteIcon from '../../style/icons/list_completed_with_error.svg';
+import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_error.svg';
 import ListPauseIcon from '../../style/icons/list_pause_icon.svg';
 import pauseIcon from '../../style/icons/scheduler_pause.svg';
 import playIcon from '../../style/icons/scheduler_play.svg';
@@ -42,20 +40,11 @@ import dashIcon from '../../style/icons/dash_icon_jupyter.svg';
 import pendingIcon from '../../style/icons/pending_icon.svg';
 import PreviousIcon from '../../style/icons/previous_page.svg';
 import NextIcon from '../../style/icons/next_page.svg';
+import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
 
 export const iconCluster = new LabIcon({
   name: 'launcher:clusters-icon',
   svgstr: clusterIcon
-});
-
-export const IconsigninGoogle = new LabIcon({
-  name: 'launcher:signin_google_icon',
-  svgstr: signinGoogleIcon
-});
-
-export const IconGoogleCloud = new LabIcon({
-  name: 'launcher:google_cloud_icon',
-  svgstr: googleCloudIcon
 });
 
 export const iconScheduledNotebooks = new LabIcon({
@@ -106,9 +95,9 @@ export const iconFailed = new LabIcon({
   svgstr: FailedIcon
 });
 
-export const iconListComplete = new LabIcon({
+export const iconListCompleteWithError = new LabIcon({
   name: 'launcher:list-complete-icon',
-  svgstr: ListCompleteIcon
+  svgstr: ListCompleteWithErrorIcon
 });
 
 export const iconListPause = new LabIcon({
@@ -165,7 +154,13 @@ export const iconPrevious = new LabIcon({
   name: 'launcher:previous-icon',
   svgstr: PreviousIcon
 });
+
 export const iconNext = new LabIcon({
   name: 'launcher:next-icon',
   svgstr: NextIcon
+});
+
+export const IconsigninGoogle = new LabIcon({
+  name: 'launcher:signin_google_icon',
+  svgstr: signinGoogleIcon
 });

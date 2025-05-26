@@ -85,7 +85,7 @@
 }
 
 .create-job-scheduler-text-para {
-  padding: 10px 0;
+  padding: 20px 0 10px;
   font-style: normal;
   font-size: 13px;
   line-height: 24px;
@@ -397,6 +397,12 @@
 
 .learn-more-a-tag {
   padding-left: 27px;
+  cursor: pointer;
+}
+
+.learn-more-url {
+  display: flex;
+  justify-content: flex-start;
 }
 
 .content-pd-space {
@@ -430,12 +436,6 @@
 
 .icon-completed {
   padding-top: 4px;
-}
-
-.log-btn {
-  display: flex;
-  justify-content: flex-end;
-  padding: 15px;
 }
 
 .icon-size-status {
@@ -591,7 +591,6 @@
 .select-panel-list {
   width: 100%;
   display: flex;
-  justify-content: space-between;
 }
 
 .select-panel-list-view {
@@ -678,4 +677,91 @@
 
 .container-main-page {
   height: 100vh;
+}
+
+.calender-top {
+  padding-top: 30px;
+}
+
+.table-execution-history-vertex {
+  height: calc(100vh - 212px);
+}
+
+.scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color1);
+  z-index: 1;
+}
+
+body[data-jp-theme-light='true'].scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color0);
+}
+
+.table-main-execution {
+  padding-right: 15px;
+}
+
+.log-btn {
+  padding: 15px;
+  margin-left: auto;
+  width: 17%;
+}
+
+.error-message-warn {
+  max-width: 500px;
+  padding-top: 10px;
+}
+
+.loader-table {
+  text-align: center;
+  padding: 50px;
+}
+
+.table-loading-ht {
+  height: calc(100vh - 368px);
+}
+
+.spin-loader-table {
+  width: 29%;
+  margin: 0 auto;
+}
+
+.expanded-toast {
+  width: 50%;
+}
+
+.expand-btn {
+  color: #3367d6;
+  font-weight: bold;
+}
+
+.cell-width-listing {
+  max-width: 300px;
+}
+
+.table-space-around {
+  padding: 0 10px;
+}
+
+.pagination-parent-view-main {
+  display: flex;
+  justify-content: flex-end;
+
+  /* Adjust spacing between elements */
+  gap: 1rem;
+
+  /* Add some padding around the component */
+  padding: 0.5rem;
+}
+
+.scroll-list {
+  overflow: auto;
+  height: calc(100vh - 298px);
+}
+
+.list-level-component {
+  max-height: 0;
 }

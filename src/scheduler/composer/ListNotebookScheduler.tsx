@@ -110,7 +110,8 @@ function listNotebookScheduler({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerSelected
+  composerSelected,
+  setApiEnableUrl
 }: {
   app: JupyterFrontEnd;
   settingRegistry: ISettingRegistry;
@@ -150,6 +151,7 @@ function listNotebookScheduler({
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   composerSelected?: string;
+  setApiEnableUrl: any;
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [composerList, setComposerList] = useState<string[]>([]);
@@ -170,6 +172,8 @@ function listNotebookScheduler({
   const [projectId, setProjectId] = useState('');
   const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
+  const [triggerLoading, setTriggerLoading] = useState('');
+  const [updateLoading, setUpdateLoading] = useState('');
 
   const columns = React.useMemo(
     () => [
@@ -231,7 +235,8 @@ function listNotebookScheduler({
       is_status_paused,
       setDagList,
       setIsLoading,
-      setBucketName
+      setBucketName,
+      setUpdateLoading
     );
   };
   const handleDeletePopUp = (dag_id: string) => {
@@ -252,7 +257,11 @@ function listNotebookScheduler({
   const handleTriggerDag = async (event: React.MouseEvent) => {
     const jobid = event.currentTarget.getAttribute('data-jobid');
     if (jobid !== null) {
-      await SchedulerService.triggerDagService(jobid, composerSelectedList);
+      await SchedulerService.triggerDagService(
+        jobid,
+        composerSelectedList,
+        setTriggerLoading
+      );
     }
   };
   const handleEditDags = async (event: React.MouseEvent) => {
@@ -330,6 +339,7 @@ function listNotebookScheduler({
       region,
       setIsApiError,
       setApiError,
+      setApiEnableUrl,
       setIsLoading
     );
   };
@@ -380,44 +390,66 @@ function listNotebookScheduler({
     const is_status_paused = data.status === 'Paused';
     return (
       <div className="actions-icon-btn">
-        <div
-          role="button"
-          className="icon-buttons-style"
-          title={is_status_paused ? 'Unpause' : 'Pause'}
-          onClick={e => handleUpdateScheduler(data.jobid, is_status_paused)}
-        >
-          {is_status_paused ? (
-            <iconPlay.react
+        {data.jobid === updateLoading ? (
+          <div className="icon-buttons-style">
+            <CircularProgress
+              size={18}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+          </div>
+        ) : (
+          <div
+            role="button"
+            className="icon-buttons-style"
+            title={is_status_paused ? 'Unpause' : 'Pause'}
+            onClick={e => handleUpdateScheduler(data.jobid, is_status_paused)}
+          >
+            {is_status_paused ? (
+              <iconPlay.react
+                tag="div"
+                className="icon-white logo-alignment-style"
+              />
+            ) : (
+              <iconPause.react
+                tag="div"
+                className="icon-white logo-alignment-style"
+              />
+            )}
+          </div>
+        )}
+        {data.jobid === triggerLoading ? (
+          <div className="icon-buttons-style">
+            <CircularProgress
+              size={18}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+          </div>
+        ) : (
+          <div
+            role="button"
+            className={
+              !is_status_paused
+                ? 'icon-buttons-style'
+                : 'icon-buttons-style-disable '
+            }
+            title={
+              !is_status_paused
+                ? 'Trigger the job'
+                : " Can't Trigger Paused job"
+            }
+            data-jobid={data.jobid}
+            onClick={e => {
+              !is_status_paused ? handleTriggerDag(e) : null;
+            }}
+          >
+            <iconTrigger.react
               tag="div"
               className="icon-white logo-alignment-style"
             />
-          ) : (
-            <iconPause.react
-              tag="div"
-              className="icon-white logo-alignment-style"
-            />
-          )}
-        </div>
-        <div
-          role="button"
-          className={
-            !is_status_paused
-              ? 'icon-buttons-style'
-              : 'icon-buttons-style-disable '
-          }
-          title={
-            !is_status_paused ? 'Trigger the job' : " Can't Trigger Paused job"
-          }
-          data-jobid={data.jobid}
-          onClick={e => {
-            !is_status_paused ? handleTriggerDag(e) : null;
-          }}
-        >
-          <iconTrigger.react
-            tag="div"
-            className="icon-white logo-alignment-style"
-          />
-        </div>
+          </div>
+        )}
         {data.jobid === editDagLoading ? (
           <div className="icon-buttons-style">
             <CircularProgress
@@ -487,12 +519,14 @@ function listNotebookScheduler({
       );
     } else if (cell.column.Header === 'Job Name') {
       return (
-        <td
-          {...cell.getCellProps()}
-          className="clusters-table-data"
-          onClick={() => handleDagIdSelection(composerSelectedList, cell.value)}
-        >
-          {cell.value}
+        <td {...cell.getCellProps()} className="clusters-table-data">
+          <span
+            onClick={() =>
+              handleDagIdSelection(composerSelectedList, cell.value)
+            }
+          >
+            {cell.value}
+          </span>
         </td>
       );
     } else {
@@ -551,6 +585,10 @@ function listNotebookScheduler({
   }, []);
 
   useEffect(() => {
+    if (composerList.length === 0) {
+      setComposerSelectedList('');
+      setDagList([]);
+    }
     if (
       composerList.length > 0 &&
       backselectedEnvironment === '' &&
@@ -626,8 +664,8 @@ function listNotebookScheduler({
             <div
               className={
                 importErrorEntries > 0
-                  ? 'create-scheduler-form-element select-panel-list-view-lay success_icon'
-                  : 'create-scheduler-form-element select-panel-list-view'
+                  ? 'create-scheduler-form-element select-panel-list-view-lay table-right-space'
+                  : 'create-scheduler-form-element select-panel-list-view table-right-space'
               }
             >
               <DynamicDropdown
@@ -657,8 +695,8 @@ function listNotebookScheduler({
             <div
               className={
                 importErrorEntries > 0
-                  ? 'create-scheduler-form-element select-panel-list-view-lay success_icon'
-                  : 'create-scheduler-form-element select-panel-list-view'
+                  ? 'create-scheduler-form-element select-panel-list-view-lay table-right-space'
+                  : 'create-scheduler-form-element select-panel-list-view table-right-space'
               }
             >
               <RegionDropdown
@@ -723,7 +761,7 @@ function listNotebookScheduler({
       </div>
 
       {dagList.length > 0 ? (
-        <div className="notebook-templates-list-table-parent">
+        <div className="notebook-templates-list-table-parent table-space-around">
           <TableData
             getTableProps={getTableProps}
             headerGroups={headerGroups}

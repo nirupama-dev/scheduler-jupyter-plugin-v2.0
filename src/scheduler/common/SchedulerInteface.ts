@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { ToastOptions } from 'react-toastify';
+
 export interface IPayload {
   input_filename: string;
   composer_environment_name: string;
@@ -80,4 +82,8 @@ export interface IDagRunList {
   state: string;
   date: Date;
   time: string;
+}
+
+export interface IExpandableToastProps extends ToastOptions {
+  message: string;
 }

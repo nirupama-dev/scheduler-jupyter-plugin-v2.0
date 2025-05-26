@@ -29,8 +29,10 @@ import {
   IUpdateSchedulerAPIResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
-import { scheduleMode } from '../utils/Const';
+import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
 import { Dispatch, SetStateAction } from 'react';
+import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
+import React from 'react';
 
 export class VertexServices {
   static machineTypeAPIService = async (
@@ -38,7 +40,8 @@ export class VertexServices {
     setMachineTypeList: (value: IMachineType[]) => void,
     setMachineTypeLoading: (value: boolean) => void,
     setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void
+    setApiError: (value: string) => void,
+    setApiEnableUrl: any
   ) => {
     try {
       setMachineTypeLoading(true);
@@ -50,8 +53,18 @@ export class VertexServices {
       } else if (formattedResponse.length === undefined) {
         try {
           if (formattedResponse.error.code === 403) {
-            setIsApiError(true);
-            setApiError(formattedResponse.error.message);
+            // Pattern to check whether string contains link
+            const pattern =
+              // eslint-disable-next-line
+              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+            const url = formattedResponse.error.message.match(pattern);
+            if (url && url.length > 0) {
+              setIsApiError(true);
+              setApiError(formattedResponse.error.message);
+              setApiEnableUrl(url);
+            } else {
+              setApiError(formattedResponse.error.message);
+            }
           }
         } catch (error) {
           showToast(
@@ -72,6 +85,7 @@ export class VertexServices {
       toast.error('Failed to fetch machine type list', toastifyCustomStyle);
     }
   };
+
   static createVertexSchedulerService = async (
     payload: ICreatePayload,
     setCreateCompleted: (value: boolean) => void,
@@ -84,13 +98,11 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        if (data.error.includes(':')) {
-          toast.error(data.error.split(':')[0], toastifyCustomStyle);
-          setCreatingVertexScheduler(false);
-        } else {
-          toast.error(data.error, toastifyCustomStyle);
-          setCreatingVertexScheduler(false);
-        }
+        toast.error(
+          <ExpandToastMessage message={data.error} />,
+          toastifyCustomStyle
+        );
+        setCreatingVertexScheduler(false);
       } else {
         toast.success(
           `Job ${payload.display_name} successfully created`,
@@ -121,7 +133,6 @@ export class VertexServices {
     if (gcsPath) {
       payload.gcs_notebook_source = gcsPath;
     }
-
     try {
       const data: any = await requestAPI(
         `api/vertex/updateSchedule?region_id=${region}&schedule_id=${jobId}`,
@@ -131,13 +142,11 @@ export class VertexServices {
         }
       );
       if (data.error) {
-        if (data.error.includes(':')) {
-          toast.error(data.error.split(':')[0], toastifyCustomStyle);
-          setCreatingVertexScheduler(false);
-        } else {
-          toast.error(data.error, toastifyCustomStyle);
-          setCreatingVertexScheduler(false);
-        }
+        toast.error(
+          <ExpandToastMessage message={data.error} />,
+          toastifyCustomStyle
+        );
+        setCreatingVertexScheduler(false);
       } else {
         toast.success(
           `Job ${payload.display_name} successfully updated`,
@@ -155,6 +164,7 @@ export class VertexServices {
       );
     }
   };
+
   static listVertexSchedules = async (
     setVertexScheduleList: (
       value:
@@ -169,6 +179,7 @@ export class VertexServices {
     newPageToken: string | null | undefined, // token of page to be fetched
     pageLength: number = 50, // number of items to be fetched
     setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
+    setApiEnableUrl: any,
     abortControllers?: any
   ) => {
     setIsLoading(true);
@@ -204,8 +215,15 @@ export class VertexServices {
 
       // Handle API error
       if (error?.code === 403) {
-        setIsApiError(true);
-        setApiError(error.message);
+        const url = error.message.match(pattern);
+        if (url && url.length > 0) {
+          setIsApiError(true);
+          setApiError(error.message);
+          setApiEnableUrl(url);
+        } else {
+          setApiError(error.message);
+        }
+
         return;
       }
 
@@ -214,14 +232,9 @@ export class VertexServices {
         setVertexScheduleList(schedules);
 
         // Handle pagination
-        if (nextPageToken) {
-          setNextPageToken(nextPageToken);
-          setHasNextPageToken(true);
-        } else {
-          setNextPageToken(null);
-          setHasNextPageToken(false);
-        }
-
+        nextPageToken
+          ? setNextPageToken(nextPageToken)
+          : setNextPageToken(null);
         // Adding a slight delay for DOM refresh
         await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -235,7 +248,6 @@ export class VertexServices {
             abortControllers
           );
         });
-
         setIsLoading(false); // Stop loading after everything is complete
       } else {
         setVertexScheduleList([]);
@@ -263,13 +275,24 @@ export class VertexServices {
     scheduleId: string,
     region: string,
     displayName: string,
-    setResumeLoading: (value: string) => void
+    setResumeLoading: (value: string) => void,
+    abortControllers: any
   ) => {
     setResumeLoading(scheduleId);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const serviceURL = 'api/vertex/pauseSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`
+        serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`,
+        {
+          method: 'POST',
+          signal
+        }
       );
       if (Object.keys(formattedResponse).length === 0) {
         toast.success(
@@ -284,8 +307,14 @@ export class VertexServices {
       }
     } catch (error) {
       setResumeLoading('');
-      SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
-      toast.error(`Failed to pause schedule : ${error}`, toastifyCustomStyle);
+      if (typeof error === 'object' && error !== null) {
+        if (error instanceof TypeError) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
+        toast.error(`Failed to pause schedule : ${error}`, toastifyCustomStyle);
+      }
     }
   };
 
@@ -293,13 +322,24 @@ export class VertexServices {
     scheduleId: string,
     region: string,
     displayName: string,
-    setResumeLoading: (value: string) => void
+    setResumeLoading: (value: string) => void,
+    abortControllers: any
   ) => {
     setResumeLoading(scheduleId);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const serviceURL = 'api/vertex/resumeSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`
+        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
+        {
+          method: 'POST',
+          signal
+        }
       );
       if (Object.keys(formattedResponse).length === 0) {
         toast.success(
@@ -317,8 +357,20 @@ export class VertexServices {
       }
     } catch (error) {
       setResumeLoading('');
-      SchedulerLoggingService.log('Error in resume schedule', LOG_LEVEL.ERROR);
-      toast.error(`Failed to resume schedule : ${error}`, toastifyCustomStyle);
+      if (typeof error === 'object' && error !== null) {
+        if (error instanceof TypeError) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          'Error in resume schedule',
+          LOG_LEVEL.ERROR
+        );
+        toast.error(
+          `Failed to resume schedule : ${error}`,
+          toastifyCustomStyle
+        );
+      }
     }
   };
 
@@ -326,13 +378,21 @@ export class VertexServices {
     region: string,
     scheduleId: string,
     displayName: string,
-    setTriggerLoading: (value: string) => void
+    setTriggerLoading: (value: string) => void,
+    abortControllers: any
   ) => {
     setTriggerLoading(scheduleId);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const serviceURL = 'api/vertex/triggerSchedule';
       const data: ITriggerSchedule = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`
+        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
+        { method: 'POST', signal }
       );
       if (data.name) {
         setTriggerLoading('');
@@ -346,10 +406,16 @@ export class VertexServices {
       }
     } catch (reason) {
       setTriggerLoading('');
-      toast.error(
-        `Failed to Trigger ${displayName} : ${reason}`,
-        toastifyCustomStyle
-      );
+      if (typeof reason === 'object' && reason !== null) {
+        if (reason instanceof TypeError) {
+          return;
+        }
+      } else {
+        toast.error(
+          `Failed to Trigger ${displayName} : ${reason}`,
+          toastifyCustomStyle
+        );
+      }
     }
   };
 
@@ -368,7 +434,8 @@ export class VertexServices {
     setNextPageToken: (value: string | null) => void,
     newPageToken: string | null | undefined,
     pageLength: number = 50,
-    hasNextPage: (value: boolean) => void
+    hasNextPage: (value: boolean) => void,
+    setApiEnableUrl: any
   ) => {
     try {
       const serviceURL = 'api/vertex/deleteSchedule';
@@ -386,7 +453,8 @@ export class VertexServices {
           setNextPageToken,
           newPageToken,
           pageLength,
-          hasNextPage
+          hasNextPage,
+          setApiEnableUrl
         );
         toast.success(
           `Deleted job ${displayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
@@ -441,45 +509,26 @@ export class VertexServices {
   };
 
   static editVertexSJobService = async (
-    job_id: string,
+    jobId: string,
     region: string,
-    setEditDagLoading: (value: string) => void,
+    setEditScheduleLoading: (value: string) => void,
     setCreateCompleted: (value: boolean) => void,
-    setInputFileSelected: (value: string) => void,
     setRegion: (value: string) => void,
-    setMachineTypeSelected: (value: string | null) => void,
-    setAcceleratedCount: (value: string | null) => void,
-    setAcceleratorType: (value: string | null) => void,
-    setKernelSelected: (value: string | null) => void,
-    setCloudStorage: (value: string | null) => void,
-    setDiskTypeSelected: (value: string | null) => void,
-    setDiskSize: (value: string) => void,
-    setParameterDetail: (value: string[]) => void,
-    setParameterDetailUpdated: (value: string[]) => void,
-    setServiceAccountSelected: (
-      value: { displayName: string; email: string } | null
-    ) => void,
-    setPrimaryNetworkSelected: (
-      value: { name: string; link: string } | null
-    ) => void,
-    setSubNetworkSelected: (
-      value: { name: string; link: string } | null
-    ) => void,
     setSubNetworkList: (value: { name: string; link: string }[]) => void,
-    setScheduleMode: (value: scheduleMode) => void,
-    setScheduleField: (value: string) => void,
-    setStartDate: (value: dayjs.Dayjs | null) => void,
-    setEndDate: (value: dayjs.Dayjs | null) => void,
-    setMaxRuns: (value: string) => void,
     setEditMode: (value: boolean) => void,
-    setJobNameSelected: (value: string) => void,
-    setGcsPath: (value: string) => void
+    abortControllers: any,
+    setVertexScheduleDetails: (value: ICreatePayload) => void
   ) => {
-    setEditDagLoading(job_id);
+    setEditScheduleLoading(jobId);
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
     try {
       const serviceURL = 'api/vertex/getSchedule';
       const formattedResponse: any = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${job_id}`
+        serviceURL + `?region_id=${region}&schedule_id=${jobId}`,
+        { signal }
       );
 
       if (formattedResponse && Object.keys(formattedResponse).length > 0) {
@@ -487,53 +536,81 @@ export class VertexServices {
           formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.gcsNotebookSource.uri.split(
             '/'
           );
-        setInputFileSelected(inputFileName[inputFileName.length - 1]);
+        const primaryNetwork =
+          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.network.split(
+            '/'
+          );
+        const subnetwork =
+          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork.split(
+            '/'
+          );
+        const scheduleDetails: ICreatePayload = {
+          job_id: jobId,
+          input_filename: inputFileName[inputFileName.length - 1],
+          display_name: formattedResponse.displayName,
+          machine_type:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.machineSpec
+              .machineType,
+          accelerator_count:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.machineSpec
+              .acceleratorCount,
+          accelerator_type:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.machineSpec
+              .acceleratorType,
+          kernel_name:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.kernelName,
+          schedule_value: undefined,
+          max_run_count: formattedResponse.maxRunCount,
+          region: region,
+          cloud_storage_bucket:
+            formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.gcsOutputUri.replace(
+              'gs://',
+              ''
+            ),
+          service_account: {
+            displayName: '',
+            email:
+              formattedResponse.createNotebookExecutionJobRequest
+                .notebookExecutionJob.serviceAccount
+          },
+          network_option: '',
+          network: {
+            name: primaryNetwork[primaryNetwork.length - 1],
+            link: formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.networkSpec.network
+          },
+          subnetwork: {
+            name: subnetwork[subnetwork.length - 1],
+            link: formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork
+          },
+          start_time: null,
+          end_time: null,
+          scheduleMode:
+            formattedResponse.cron === '* * * * *' &&
+            formattedResponse.maxRunCount === '1'
+              ? 'runNow'
+              : 'runSchedule',
+          disk_type:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
+              .diskType,
+          disk_size:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
+              .diskSizeGb,
+          gcs_notebook_source:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.gcsNotebookSource.uri
+        };
         setCreateCompleted(false);
         setRegion(region);
-        setJobNameSelected(formattedResponse.displayName);
-        setGcsPath(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.gcsNotebookSource.uri
-        );
 
-        // Machine type selection
-        setMachineTypeSelected(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.machineSpec.machineType
-        );
-        setAcceleratedCount(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.machineSpec
-            .acceleratorCount
-        );
-        setAcceleratorType(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.machineSpec
-            .acceleratorType
-        );
-
-        setKernelSelected(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.kernelName
-        );
-        setCloudStorage(
-          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.gcsOutputUri.replace(
-            'gs://',
-            ''
-          )
-        );
-        setDiskTypeSelected(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
-            .diskType
-        );
-        setDiskSize(
-          formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.persistentDiskSpec
-            .diskSizeGb
-        );
-
-        // Parameters
+        // Parameters for future scope
         if (
           Object.prototype.hasOwnProperty.call(
             formattedResponse.createNotebookExecutionJobRequest
@@ -551,36 +628,11 @@ export class VertexServices {
               formattedResponse.createNotebookExecutionJobRequest
                 .notebookExecutionJob.parameters[key]
           );
-          setParameterDetail(parameterList);
-          setParameterDetailUpdated(parameterList);
+
+          scheduleDetails.parameters = parameterList;
+        } else {
+          scheduleDetails.parameters = [];
         }
-
-        setServiceAccountSelected({
-          displayName: '',
-          email:
-            formattedResponse.createNotebookExecutionJobRequest
-              .notebookExecutionJob.serviceAccount
-        });
-
-        // Network
-        const primaryNetwork =
-          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.network.split(
-            '/'
-          );
-        setPrimaryNetworkSelected({
-          name: primaryNetwork[primaryNetwork.length - 1],
-          link: formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.networkSpec.network
-        });
-        const subnetwork =
-          formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork.split(
-            '/'
-          );
-        setSubNetworkSelected({
-          name: subnetwork[subnetwork.length - 1],
-          link: formattedResponse.createNotebookExecutionJobRequest
-            .notebookExecutionJob.customEnvironmentSpec.networkSpec.subnetwork
-        });
 
         setSubNetworkList([
           {
@@ -588,31 +640,41 @@ export class VertexServices {
             link: subnetwork[subnetwork.length - 1]
           }
         ]);
-        if (
-          formattedResponse.cron === '* * * * *' &&
-          formattedResponse.maxRunCount === '1'
-        ) {
-          setScheduleMode('runNow');
+
+        if (formattedResponse.cron.includes('TZ')) {
+          // Remove time zone from cron string. ex: TZ=America/New_York * * * * * to * * * * *
+          const firstSpaceIndex = formattedResponse.cron.indexOf(' ');
+          const timeZone = formattedResponse.cron.substring(0, firstSpaceIndex);
+          scheduleDetails.time_zone = timeZone.split('=')[1];
+          const cron = formattedResponse.cron.substring(firstSpaceIndex + 1);
+          scheduleDetails.cron = cron;
         } else {
-          setScheduleMode('runSchedule');
+          scheduleDetails.time_zone = DEFAULT_TIME_ZONE;
+          scheduleDetails.cron = formattedResponse.cron;
         }
-        setScheduleField(formattedResponse.cron);
+
         const start_time = formattedResponse.startTime;
         const end_time = formattedResponse.endTime;
-        setStartDate(start_time ? dayjs(start_time) : null);
-        setEndDate(end_time ? dayjs(end_time) : null);
-        setMaxRuns(formattedResponse.maxRunCount);
+        scheduleDetails.start_time = start_time ? dayjs(start_time) : null;
+        scheduleDetails.end_time = start_time ? dayjs(end_time) : null;
+        setVertexScheduleDetails(scheduleDetails);
         setEditMode(true);
       } else {
-        setEditDagLoading('');
+        setEditScheduleLoading('');
         toast.error('File path not found', toastifyCustomStyle);
       }
     } catch (reason) {
-      setEditDagLoading('');
-      toast.error(
-        `Error in updating notebook.\n${reason}`,
-        toastifyCustomStyle
-      );
+      setEditScheduleLoading('');
+      if (typeof reason === 'object' && reason !== null) {
+        if (reason instanceof TypeError) {
+          return;
+        }
+      } else {
+        toast.error(
+          `Error in updating notebook.\n${reason}`,
+          toastifyCustomStyle
+        );
+      }
     }
   };
 
@@ -627,15 +689,23 @@ export class VertexServices {
     setOrangeListDates: (value: string[]) => void,
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
-    setDarkGreenListDates: (value: string[]) => void
+    setDarkGreenListDates: (value: string[]) => void,
+    abortControllers: any
   ) => {
     setIsLoading(true);
+
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     const selected_month = selectedMonth && selectedMonth.toISOString();
     const schedule_id = schedulerData?.name.split('/').pop();
     const serviceURL = 'api/vertex/listNotebookExecutionJobs';
     const formattedResponse: any = await requestAPI(
       serviceURL +
-        `?region_id=${region}&schedule_id=${schedule_id}&start_date=${selected_month}&order_by=createTime desc`
+        `?region_id=${region}&schedule_id=${schedule_id}&start_date=${selected_month}&order_by=createTime desc`,
+      { signal }
     );
     try {
       let transformDagRunListDataCurrent = [];
@@ -663,7 +733,7 @@ export class VertexServices {
               endDate: jobRun.updateTime,
               gcsUrl: jobRun.gcsOutputUri,
               state: jobRun.jobState.split('_')[2].toLowerCase(),
-              date: new Date(jobRun.createTime).toDateString(),
+              date: new Date(jobRun.createTime),
               fileName: jobRun.gcsNotebookSource.uri.split('/').pop(),
               time: `${minutes} min ${seconds} sec`,
               code:
@@ -740,10 +810,16 @@ export class VertexServices {
       setDarkGreenListDates(darkGreenList);
       setVertexScheduleRunsList(transformDagRunListDataCurrent);
     } catch (error) {
-      toast.error(
-        'Error in fetching the execution history',
-        toastifyCustomStyle
-      );
+      if (typeof error === 'object' && error !== null) {
+        if (error instanceof TypeError) {
+          return;
+        }
+      } else {
+        toast.error(
+          'Error in fetching the execution history',
+          toastifyCustomStyle
+        );
+      }
     }
     setIsLoading(false);
   };
@@ -754,19 +830,32 @@ export class VertexServices {
     jobRunId: string | undefined,
     fileName: string | undefined,
     setIsLoading: Dispatch<SetStateAction<boolean>>,
-    setFileExists: Dispatch<SetStateAction<boolean>>
+    setFileExists: Dispatch<SetStateAction<boolean>>,
+    abortControllers: any
   ) => {
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const formattedResponse = await requestAPI(
-        `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${jobRunId}&file_name=${fileName}`
+        `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${jobRunId}&file_name=${fileName}`,
+        { signal }
       );
       setFileExists(formattedResponse === 'true' ? true : false);
       setIsLoading(false);
     } catch (lastRunError: any) {
-      SchedulerLoggingService.log(
-        'Error checking output file',
-        LOG_LEVEL.ERROR
-      );
+      if (typeof lastRunError === 'object' && lastRunError !== null) {
+        if (lastRunError instanceof TypeError) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          'Error checking output file',
+          LOG_LEVEL.ERROR
+        );
+      }
     }
   };
 }

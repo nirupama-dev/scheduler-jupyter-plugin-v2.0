@@ -37,7 +37,9 @@ class Client:
     async def download_output(self, bucket_name, file_name, job_run_id):
         try:
             credentials = oauth2.Credentials(self._access_token)
-            storage_client = storage.Client(credentials=credentials)
+            storage_client = storage.Client(
+                credentials=credentials, project=self.project_id
+            )
             blob_name = f"{job_run_id}/{file_name}"
             bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(blob_name)
@@ -63,7 +65,9 @@ class Client:
         try:
             cloud_storage_buckets = []
             credentials = oauth2.Credentials(self._access_token)
-            storage_client = storage.Client(credentials=credentials, project=self.project_id)
+            storage_client = storage.Client(
+                credentials=credentials, project=self.project_id
+            )
             buckets = storage_client.list_buckets()
             for bucket in buckets:
                 cloud_storage_buckets.append(bucket.name)
@@ -71,12 +75,14 @@ class Client:
 
         except Exception as e:
             self.log.exception(f"Error fetching cloud storage buckets: {str(e)}")
-            return {"Error fetching cloud storage buckets": str(e)}
+            return {"error": str(e)}
 
     async def output_file_exists(self, bucket_name, file_name, job_run_id):
         try:
             credentials = oauth2.Credentials(self._access_token)
-            storage_client = storage.Client(credentials=credentials)
+            storage_client = storage.Client(
+                credentials=credentials, project=self.project_id
+            )
             blob_name = f"{job_run_id}/{file_name}"
             bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(blob_name)

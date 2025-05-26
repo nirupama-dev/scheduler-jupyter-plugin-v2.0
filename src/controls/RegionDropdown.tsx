@@ -34,6 +34,7 @@ type Props = {
   loaderRegion?: boolean;
   /** List of Regions */
   regionsList?: Array<string>;
+  regionDisable?: boolean;
 };
 
 /**
@@ -46,18 +47,25 @@ export function RegionDropdown(props: Props) {
     onRegionChange,
     editMode,
     loaderRegion,
-    regionsList
+    regionsList,
+    regionDisable
   } = props;
-  const regions = useRegion(projectId);
+  let regionStrList: string[] = [];
 
-  const regionStrList = useMemo(
-    () => regions.map(region => region.name),
-    [regions]
-  );
+  if (!regionsList) {
+    const regions = useRegion(projectId);
+
+    regionStrList = useMemo(
+      () => regions.map(region => region.name),
+      [regions]
+    );
+  }
 
   return (
     <Autocomplete
-      value={region}
+      value={
+        regionsList ? (regionsList?.includes(region) ? region : '') : region
+      }
       options={regionsList ? regionsList : regionStrList}
       onChange={(_, value) => onRegionChange(value ?? '')}
       PaperComponent={(props: PaperProps) => <Paper elevation={8} {...props} />}
@@ -83,7 +91,7 @@ export function RegionDropdown(props: Props) {
         />
       )}
       loading={!(regionStrList.length > 0)}
-      disabled={editMode}
+      disabled={editMode || regionDisable}
       disableClearable={loaderRegion && !region}
     />
   );

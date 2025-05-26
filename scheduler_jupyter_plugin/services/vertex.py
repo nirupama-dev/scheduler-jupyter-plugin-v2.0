@@ -14,6 +14,7 @@
 
 
 import aiohttp
+import json
 from cron_descriptor import get_description
 
 import google.oauth2.credentials as oauth2
@@ -53,20 +54,6 @@ class Client:
             "Authorization": f"Bearer {self._access_token}",
         }
 
-    async def check_bucket_exists(self, bucket_name):
-        try:
-            if not bucket_name:
-                raise ValueError("Bucket name cannot be empty")
-            cloud_storage_buckets = []
-            storage_client = storage.Client()
-            buckets = storage_client.list_buckets()
-            for bucket in buckets:
-                cloud_storage_buckets.append(bucket.name)
-            return bucket_name in cloud_storage_buckets
-        except Exception as error:
-            self.log.exception(f"Error checking Bucket: {error}")
-            raise IOError(f"Error checking Bucket: {error}")
-
     async def create_gcs_bucket(self, bucket_name):
         try:
             if not bucket_name:
@@ -88,10 +75,17 @@ class Client:
         blob = bucket.blob(blob_name)
         blob.upload_from_filename(file_path)
 
+        # creating json file containing the input file path
+        metadata = {"inputFilePath": f"gs://{bucket_name}/{blob_name}"}
+        json_file_name = f"{job_name}.json"
+
+        with open(json_file_name, "w") as f:
+            json.dump(metadata, f, indent=4)
+
         # uploading json file containing the input file path
-        json_blob_name = f"{job_name}/{job_name}.json"
+        json_blob_name = f"{job_name}/{json_file_name}"
         json_blob = bucket.blob(json_blob_name)
-        json_blob.upload_from_string(f"gs://{bucket_name}/{blob_name}")
+        json_blob.upload_from_filename(json_file_name)
 
         self.log.info(f"File {input_notebook} uploaded to gcs successfully")
         return blob_name
@@ -167,9 +161,7 @@ class Client:
                     return resp
                 else:
                     self.log.exception("Error creating the schedule")
-                    raise Exception(
-                        f"Error creating the schedule: {response.reason} {await response.text()}"
-                    )
+                    raise Exception(f"{response.reason} {await response.text()}")
         except Exception as e:
             self.log.exception(f"Error creating schedule: {str(e)}")
             raise Exception(f"Error creating schedule: {str(e)}")
@@ -177,16 +169,12 @@ class Client:
     async def create_job_schedule(self, input_data):
         try:
             job = DescribeVertexJob(**input_data)
-            if await self.check_bucket_exists(VERTEX_STORAGE_BUCKET):
-                print("The bucket exists")
-            else:
-                await self.create_gcs_bucket(VERTEX_STORAGE_BUCKET)
-                print("The bucket is created")
+            storage_bucket = job.cloud_storage_bucket.split("//")[-1]
 
             file_path = await self.upload_to_gcs(
-                VERTEX_STORAGE_BUCKET, job.input_filename, job.display_name
+                storage_bucket, job.input_filename, job.display_name
             )
-            res = await self.create_schedule(job, file_path, VERTEX_STORAGE_BUCKET)
+            res = await self.create_schedule(job, file_path, storage_bucket)
             return res
         except Exception as e:
             return {"error": str(e)}
@@ -245,13 +233,16 @@ class Client:
             self.log.exception(f"Error fetching ui config: {str(e)}")
             return {"Error fetching ui config": str(e)}
 
+    def parse_schedule(self, cron):
+        return get_description(cron)
+
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
         try:
             result = {}
-            
+
             if next_page_token:
                 api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}"
-                
+
             else:
                 api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}"
 
@@ -270,12 +261,14 @@ class Client:
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
                             cron_value = (
-                                cron.split(" ", 1)[1] if ("TZ" in cron) else cron
+                                cron.split(" ", 1)[1]
+                                if (cron and "TZ" in cron)
+                                else cron
                             )
                             if max_run_count == "1" and cron_value == "* * * * *":
                                 schedule_value = "run once"
                             else:
-                                schedule_value = get_description(cron)
+                                schedule_value = self.parse_schedule(cron)
 
                             formatted_schedule = {
                                 "name": schedule.get("name"),
@@ -500,6 +493,9 @@ class Client:
                 payload["startTime"] = data.start_time
             if data.end_time:
                 payload["endTime"] = data.end_time
+
+            if data.max_run_count:
+                payload["maxRunCount"] = data.max_run_count
 
             keys = payload.keys()
             keys_to_filter = ["displayName", "maxConcurrentRunCount"]

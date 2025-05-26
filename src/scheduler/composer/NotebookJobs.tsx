@@ -58,7 +58,8 @@ const NotebookJobComponent = ({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerSelected
+  composerSelected,
+  setApiEnableUrl
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -96,6 +97,7 @@ const NotebookJobComponent = ({
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   composerSelected?: string;
+  setApiEnableUrl: any;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] = useState(false);
   const [composerName, setComposerName] = useState('');
@@ -167,6 +169,7 @@ const NotebookJobComponent = ({
                 setPackageEditFlag={setPackageEditFlag}
                 setSchedulerBtnDisable={setSchedulerBtnDisable}
                 composerSelected={composerSelected}
+                setApiEnableUrl={setApiEnableUrl}
               />
             }
           </div>
@@ -185,6 +188,7 @@ export class NotebookJobs extends SchedulerWidget {
   setIsLocalKernel: (value: boolean) => void;
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
+  setApiEnableUrl: any;
 
   constructor(
     app: JupyterLab,
@@ -195,7 +199,8 @@ export class NotebookJobs extends SchedulerWidget {
     setExecutionPageFlag: (value: boolean) => void,
     setIsLocalKernel: (value: boolean) => void,
     setPackageEditFlag: (value: boolean) => void,
-    setSchedulerBtnDisable: (value: boolean) => void
+    setSchedulerBtnDisable: (value: boolean) => void,
+    setApiEnableUrl: any
   ) {
     super(themeManager);
     this.app = app;
@@ -206,6 +211,7 @@ export class NotebookJobs extends SchedulerWidget {
     this.setIsLocalKernel = setIsLocalKernel;
     this.setPackageEditFlag = setPackageEditFlag;
     this.setSchedulerBtnDisable = setSchedulerBtnDisable;
+    this.setApiEnableUrl = setApiEnableUrl;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -219,6 +225,7 @@ export class NotebookJobs extends SchedulerWidget {
         setIsLocalKernel={this.setIsLocalKernel}
         setPackageEditFlag={this.setPackageEditFlag}
         setSchedulerBtnDisable={this.setSchedulerBtnDisable}
+        setApiEnableUrl={this.setApiEnableUrl}
       />
     );
   }

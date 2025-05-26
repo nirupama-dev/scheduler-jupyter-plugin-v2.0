@@ -79,7 +79,8 @@ const CreateNotebookScheduler = ({
   packageEditFlag,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  abortControllerRef
+  abortControllerRef,
+  setApiEnableUrl
 }: {
   themeManager: IThemeManager;
   app: JupyterLab;
@@ -106,6 +107,7 @@ const CreateNotebookScheduler = ({
   setPackageEditFlag: React.Dispatch<React.SetStateAction<boolean>>;
   setSchedulerBtnDisable: React.Dispatch<React.SetStateAction<boolean>>;
   abortControllerRef: any;
+  setApiEnableUrl: any;
 }): JSX.Element => {
   const [composerList, setComposerList] = useState<string[]>([]);
   const [composerSelected, setComposerSelected] = useState<string>('');
@@ -186,7 +188,8 @@ const CreateNotebookScheduler = ({
       region,
       setIsApiError,
       setApiError,
-      setEnvApiFlag
+      setEnvApiFlag,
+      setApiEnableUrl
     );
   };
 
@@ -634,6 +637,7 @@ const CreateNotebookScheduler = ({
           setPackageEditFlag={setPackageEditFlag}
           setSchedulerBtnDisable={setSchedulerBtnDisable}
           composerSelected={composerSelected}
+          setApiEnableUrl={setApiEnableUrl}
         />
       ) : (
         <div>
@@ -800,6 +804,11 @@ const CreateNotebookScheduler = ({
                       value={selectedMode}
                       onChange={handleSelectedModeChange}
                       row={true}
+                      data-testid={
+                        selectedMode === 'cluster'
+                          ? 'cluster-selected'
+                          : 'serverless-selected'
+                      }
                     >
                       <FormControlLabel
                         value="cluster"
@@ -988,6 +997,11 @@ const CreateNotebookScheduler = ({
                   name="controlled-radio-buttons-group"
                   value={scheduleMode}
                   onChange={handleSchedulerModeChange}
+                  data-testid={
+                    selectedMode === 'runNow'
+                      ? 'runNow-selected'
+                      : 'runSchedule-selected'
+                  }
                 >
                   <FormControlLabel
                     value="runNow"

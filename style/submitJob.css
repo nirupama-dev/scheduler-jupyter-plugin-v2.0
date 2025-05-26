@@ -314,3 +314,12 @@
   width: 90%;
   padding-left: 20px;
 }
+
+.link-font {
+  font-size: 10px;
+}
+
+.error-key-missing a:hover {
+  color: blue;
+  text-decoration: underline;
+}

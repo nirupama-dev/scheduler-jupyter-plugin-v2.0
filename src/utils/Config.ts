@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import dayjs from 'dayjs';
 import { IAuthCredentials } from '../login/LoginInterfaces';
 import { AuthenticationService } from '../services/AuthenticationService';
 import { SchedulerLoggingService } from '../services/LoggingService';
@@ -22,33 +23,35 @@ import {
   API_HEADER_BEARER,
   API_HEADER_CONTENT_TYPE,
   HTTP_METHOD,
+  STATUS_SUCCESS,
   gcpServiceUrls
 } from './Const';
 import { ToastOptions, toast } from 'react-toastify';
+import { requestAPI } from '../handler/Handler';
 
-export const authApi = async () => {
+/**
+ * Authentication function
+ * @param checkApiEnabled
+ * @returns credentials
+ */
+export const authApi = async (
+  checkApiEnabled: boolean = true
+): Promise<IAuthCredentials | undefined> => {
   const authService = await AuthenticationService.authCredentialsAPI();
   return authService;
 };
 
 export const checkConfig = async (
-  setLoginState: React.Dispatch<React.SetStateAction<boolean>>,
-  setConfigError: React.Dispatch<React.SetStateAction<boolean>>,
-  setLoginError: React.Dispatch<React.SetStateAction<boolean>>
+  setLoginError: React.Dispatch<React.SetStateAction<boolean>>,
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<void> => {
   const credentials: IAuthCredentials | undefined = await authApi();
   if (credentials) {
-    if (credentials.access_token === '') {
-      localStorage.removeItem('loginState');
-      if (credentials.config_error === 1) {
-        setConfigError(true);
-      }
-      if (credentials.login_error === 1) {
-        setLoginError(true);
-      }
-    } else {
-      setLoginState(true);
+    if (credentials.login_error === 1) {
+      setLoginError(true);
+      setIsLoading(false);
     }
+    setIsLoading(false);
   }
 };
 
@@ -98,9 +101,17 @@ export const authenticatedFetch = async (config: {
   method: HTTP_METHOD;
   regionIdentifier?: 'regions' | 'locations' | 'global';
   queryParams?: URLSearchParams;
+  checkApiEnabled?: boolean;
 }) => {
-  const { baseUrl, uri, method, regionIdentifier, queryParams } = config;
-  const credentials = await authApi();
+  const {
+    baseUrl,
+    uri,
+    method,
+    regionIdentifier,
+    queryParams,
+    checkApiEnabled
+  } = config;
+  const credentials = await authApi(checkApiEnabled);
   // If there is an issue with getting credentials, there is no point continuing the request.
   if (!credentials) {
     throw new Error('Error during authentication');
@@ -196,6 +207,25 @@ export interface ICellProps {
   render: (value: string) => React.ReactNode;
 }
 
+export interface IVertexExecutionHistoryCellProps {
+  getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
+  value: string | any;
+  column: {
+    Header: string;
+  };
+  row: {
+    original: {
+      id: string;
+      status: string;
+      jobRunId: string;
+      state: string;
+      gcsUrl: string;
+      fileName: string;
+    };
+  };
+  render: (value: string) => React.ReactNode;
+}
+
 export interface IVertexCellProps {
   getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
   value: string | any;
@@ -221,5 +251,43 @@ export interface IVertexCellProps {
 export const showToast = (message: string, id?: string) => {
   if (!id || !toast.isActive(id)) {
     toast.error(message, { toastId: id, ...toastifyCustomStyle });
+  }
+};
+
+/**
+ * Wraps a fetch call with initial authentication to pass credentials to the request
+ *
+ * @param val date object"
+ * @returns new date
+ */
+export const currentTime = (val: any) => {
+  const currentDate = dayjs(val);
+  let currentTime = dayjs();
+  if (val.hour() !== 0 || val.minute() !== 0) {
+    currentTime = dayjs(val);
+  }
+
+  // Combine the selected date with the current time
+  const newDateTime = currentDate
+    .set('hour', currentTime.hour())
+    .set('minute', currentTime.minute())
+    .set('second', currentTime.second());
+
+  return newDateTime;
+};
+
+export const login = async (
+  setLoginError: React.Dispatch<React.SetStateAction<boolean>>
+) => {
+  const data = await requestAPI('login', {
+    method: 'POST'
+  });
+  if (typeof data === 'object' && data !== null) {
+    const loginStatus = (data as { login: string }).login;
+    if (loginStatus === STATUS_SUCCESS) {
+      setLoginError(false);
+    } else {
+      setLoginError(true);
+    }
   }
 };

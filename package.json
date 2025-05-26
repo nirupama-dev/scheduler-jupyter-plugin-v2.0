@@ -7,9 +7,9 @@
         "jupyterlab",
         "jupyterlab-extension"
     ],
-    "homepage": "https://github.com/harsha-accenture/scheduler-jupyter-plugin",
+    "homepage": "https://github.com/GoogleCloudPlatform/scheduler-jupyter-plugin",
     "bugs": {
-        "url": "https://github.com/harsha-accenture/scheduler-jupyter-plugin/issues"
+        "url": "https://github.com/GoogleCloudPlatform/scheduler-jupyter-plugin/issues"
     },
     "license": "BSD-3-Clause",
     "author": {
@@ -27,7 +27,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": "https://github.com/harsha-accenture/scheduler-jupyter-plugin.git"
+        "url": "https://github.com/GoogleCloudPlatform/scheduler-jupyter-plugin.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",
@@ -43,6 +43,7 @@
         "clean:all": "jlpm clean:lib && jlpm clean:labextension && jlpm clean:lintcache",
         "eslint": "jlpm eslint:check --fix",
         "eslint:check": "eslint . --cache --ext .ts,.tsx",
+        "generate:licenses": "generate-license-file --input package.json --output third-party-licenses.txt",
         "install:extension": "jlpm build",
         "lint": "jlpm stylelint && jlpm prettier && jlpm eslint",
         "lint:check": "jlpm stylelint:check && jlpm prettier:check && jlpm eslint:check",

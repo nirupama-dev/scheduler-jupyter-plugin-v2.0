@@ -24,7 +24,11 @@ import dayjs, { Dayjs } from 'dayjs';
 import { authApi } from '../../utils/Config';
 import VertexJobRuns from './VertexJobRuns';
 import { iconLeftArrow, iconCreateCluster } from '../../utils/Icons';
-import { ISchedulerData, IVertexScheduleRunList } from './VertexInterfaces';
+import {
+  IActivePaginationVariables,
+  ISchedulerData,
+  IVertexScheduleRunList
+} from './VertexInterfaces';
 import { LOG_EXPLORER_BASE_URL } from '../../utils/Const';
 import { toast } from 'react-toastify';
 
@@ -35,15 +39,24 @@ const VertexExecutionHistory = ({
   scheduleName,
   handleBackButton,
   setExecutionPageFlag,
-  setExecutionPageListFlag
+  setExecutionPageListFlag,
+  abortControllers,
+  abortApiCall,
+  activePaginationVariables
 }: {
   region: string;
   setRegion: (value: string) => void;
   schedulerData: ISchedulerData | undefined;
   scheduleName: string;
-  handleBackButton: () => void;
+  handleBackButton: (
+    value: IActivePaginationVariables | undefined | null,
+    region: string
+  ) => void;
   setExecutionPageFlag: (value: boolean) => void;
   setExecutionPageListFlag: (value: boolean) => void;
+  abortControllers: any;
+  abortApiCall: () => void;
+  activePaginationVariables: IActivePaginationVariables | null | undefined;
 }): JSX.Element => {
   const today = dayjs();
 
@@ -70,7 +83,7 @@ const VertexExecutionHistory = ({
     authApi()
       .then(credentials => {
         if (credentials && credentials?.region_id && credentials.project_id) {
-          setRegion(credentials.region_id);
+          region ? null : setRegion(credentials.region_id);
         }
       })
       .catch(error => {
@@ -83,6 +96,7 @@ const VertexExecutionHistory = ({
 
     return () => {
       setExecutionPageListFlag(false);
+      abortApiCall();
     };
   }, []);
 
@@ -275,7 +289,7 @@ const VertexExecutionHistory = ({
           <div
             role="button"
             className="scheduler-back-arrow-icon"
-            onClick={() => handleBackButton()}
+            onClick={() => handleBackButton(activePaginationVariables, region)}
           >
             <iconLeftArrow.react
               tag="div"
@@ -304,16 +318,14 @@ const VertexExecutionHistory = ({
           <div className="execution-history-main-wrapper">
             <div
               className={
-                isLoading
-                  ? 'execution-history-left-wrapper execution-wrapper-border-none'
-                  : 'execution-history-left-wrapper text-enable-warning execution-wrapper-border-none'
+                'execution-history-left-wrapper calender-top execution-wrapper-border-none'
               }
             >
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DateCalendar
                   minDate={dayjs(schedulerData?.createTime)}
                   maxDate={dayjs(currentDate)}
-                  defaultValue={today}
+                  referenceDate={today}
                   onChange={newValue => handleDateSelection(newValue)}
                   onMonthChange={handleMonthChange}
                   slots={{
@@ -324,14 +336,24 @@ const VertexExecutionHistory = ({
               </LocalizationProvider>
             </div>
             <div className="execution-history-right-wrapper execution-wrapper-border-none">
-              <div role="button" className="log-btn" onClick={handleLogs}>
-                <div className="create-icon log-icon cursor-icon">
-                  <iconCreateCluster.react
-                    tag="div"
-                    className="logo-alignment-style"
-                  />
+              <div>
+                <div className="log-btn">
+                  <div
+                    className="execution-history-main-wrapper"
+                    role="button"
+                    onClick={handleLogs}
+                  >
+                    <div className="create-icon log-icon cursor-icon">
+                      <iconCreateCluster.react
+                        tag="div"
+                        className="logo-alignment-style"
+                      />
+                    </div>
+                    <div className="create-text cursor-icon">
+                      VIEW CLOUD LOGS
+                    </div>
+                  </div>
                 </div>
-                <div className="create-text cursor-icon">VIEW CLOUD LOGS</div>
               </div>
               <VertexJobRuns
                 region={region}
@@ -351,6 +373,8 @@ const VertexExecutionHistory = ({
                 isLoading={isLoading}
                 vertexScheduleRunsList={vertexScheduleRunsList}
                 setVertexScheduleRunsList={setVertexScheduleRunsList}
+                abortControllers={abortControllers}
+                abortApiCall={abortApiCall}
               />
             </div>
           </div>
