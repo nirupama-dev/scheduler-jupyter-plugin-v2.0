@@ -738,12 +738,12 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   font-weight: bold;
 }
 
-.table-space-around {
-  padding: 0px 10px;
-}
-
 .cell-width-listing {
   max-width: 300px;
+}
+
+.table-space-around {
+  padding: 0 10px;
 }
 
 .pagination-parent-view-main {

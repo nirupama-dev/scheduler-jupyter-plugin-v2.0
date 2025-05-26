@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## Unreleased
+.. towncrier release notes start
+
 ## [1.0.0] - 2025-05-22
 
 ### Added
