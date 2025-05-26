@@ -1,8 +1,11 @@
 # Changelog
 
+<!-- <START NEW CHANGELOG ENTRY> -->
+
 All notable changes to this project will be documented in this file.
 
 ## Unreleased
+
 .. towncrier release notes start
 
 ## [1.0.0] - 2025-05-22
@@ -33,3 +36,5 @@ All notable changes to this project will be documented in this file.
 ### Deprecated
 
 - N/A (Initial release, no deprecations)
+
+<!-- <END NEW CHANGELOG ENTRY> -->
