@@ -35,7 +35,7 @@ import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import React from 'react';
 
 export class VertexServices {
-  static machineTypeAPIService = async (
+  static machineTypeAPIService = (
     region: string,
     setMachineTypeList: (value: IMachineType[]) => void,
     setMachineTypeLoading: (value: boolean) => void,
@@ -43,47 +43,46 @@ export class VertexServices {
     setApiError: (value: string) => void,
     setApiEnableUrl: any
   ) => {
-    try {
-      setMachineTypeLoading(true);
-      const formattedResponse: any = await requestAPI(
-        `api/vertex/uiConfig?region_id=${region}`
-      );
-      if (formattedResponse.length > 0) {
-        setMachineTypeList(formattedResponse);
-      } else if (formattedResponse.length === undefined) {
-        try {
-          if (formattedResponse.error.code === 403) {
-            // Pattern to check whether string contains link
-            const pattern =
-              // eslint-disable-next-line
-              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
-            const url = formattedResponse.error.message.match(pattern);
-            if (url && url.length > 0) {
-              setIsApiError(true);
-              setApiError(formattedResponse.error.message);
-              setApiEnableUrl(url);
-            } else {
-              setApiError(formattedResponse.error.message);
+    setMachineTypeLoading(true);
+    requestAPI(`api/vertex/uiConfig?region_id=${region}`)
+      .then((formattedResponse: any) => {
+        if (formattedResponse.length > 0) {
+          setMachineTypeList(formattedResponse);
+        } else if (formattedResponse.length === undefined) {
+          try {
+            if (formattedResponse.error.code === 403) {
+              // Pattern to check whether string contains link
+              const pattern =
+                // eslint-disable-next-line
+                /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+              const url = formattedResponse.error.message.match(pattern);
+              if (url && url.length > 0) {
+                setIsApiError(true);
+                setApiError(formattedResponse.error.message);
+                setApiEnableUrl(url);
+              } else {
+                setApiError(formattedResponse.error.message);
+              }
             }
+          } catch (error) {
+            showToast(
+              'Error fetching machine type list. Please try again later.'
+            );
           }
-        } catch (error) {
-          showToast(
-            'Error fetching machine type list. Please try again later.'
-          );
+        } else {
+          setMachineTypeList([]);
         }
-      } else {
+        setMachineTypeLoading(false);
+      })
+      .catch(error => {
         setMachineTypeList([]);
-      }
-      setMachineTypeLoading(false);
-    } catch (error) {
-      setMachineTypeList([]);
-      setMachineTypeLoading(false);
-      SchedulerLoggingService.log(
-        'Error listing machine type',
-        LOG_LEVEL.ERROR
-      );
-      toast.error('Failed to fetch machine type list', toastifyCustomStyle);
-    }
+        setMachineTypeLoading(false);
+        SchedulerLoggingService.log(
+          'Error listing machine type',
+          LOG_LEVEL.ERROR
+        );
+        toast.error('Failed to fetch machine type list', toastifyCustomStyle);
+      });
   };
 
   static createVertexSchedulerService = async (

@@ -20,40 +20,42 @@ import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { toastifyCustomStyle } from '../utils/Config';
 
 export class IamServices {
-  static serviceAccountAPIService = async (
+  static serviceAccountAPIService = (
     setServiceAccountList: (
       value: { displayName: string; email: string }[]
     ) => void,
     setServiceAccountLoading: (value: boolean) => void,
     setErrorMessage: (value: string) => void
   ) => {
-    try {
-      setServiceAccountLoading(true);
-      const formattedResponse: any = await requestAPI(
-        'api/iam/listServiceAccount'
-      );
-      if (formattedResponse.length > 0) {
-        const serviceAccountList = formattedResponse.map((account: any) => ({
-          displayName: account.displayName,
-          email: account.email
-        }));
-        serviceAccountList.sort();
-        setServiceAccountList(serviceAccountList);
-      } else if (formattedResponse.error) {
-        setErrorMessage(formattedResponse.error);
+    setServiceAccountLoading(true);
+    requestAPI('api/iam/listServiceAccount')
+      .then((formattedResponse: any) => {
+        if (formattedResponse.length > 0) {
+          const serviceAccountList = formattedResponse.map((account: any) => ({
+            displayName: account.displayName,
+            email: account.email
+          }));
+          serviceAccountList.sort();
+          setServiceAccountList(serviceAccountList);
+        } else if (formattedResponse.error) {
+          setErrorMessage(formattedResponse.error);
+          setServiceAccountList([]);
+        } else {
+          setServiceAccountList([]);
+        }
+        setServiceAccountLoading(false);
+      })
+      .catch(error => {
         setServiceAccountList([]);
-      } else {
-        setServiceAccountList([]);
-      }
-      setServiceAccountLoading(false);
-    } catch (error) {
-      setServiceAccountList([]);
-      setServiceAccountLoading(false);
-      SchedulerLoggingService.log(
-        'Error listing service accounts',
-        LOG_LEVEL.ERROR
-      );
-      toast.error('Failed to fetch service accounts list', toastifyCustomStyle);
-    }
+        setServiceAccountLoading(false);
+        SchedulerLoggingService.log(
+          'Error listing service accounts',
+          LOG_LEVEL.ERROR
+        );
+        toast.error(
+          'Failed to fetch service accounts list',
+          toastifyCustomStyle
+        );
+      });
   };
 }
