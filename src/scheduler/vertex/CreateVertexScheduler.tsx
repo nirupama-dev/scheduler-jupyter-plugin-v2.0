@@ -1390,7 +1390,8 @@ const CreateVertexScheduler = ({
                       message={
                         errorMessageSubnetworkNetwork
                           ? errorMessageSubnetworkNetwork
-                          : subNetworkList.length === 0
+                          : subNetworkList.length === 0 &&
+                              primaryNetworkSelected
                             ? 'No Subnetworks found with Google Private Access - ON'
                             : 'Sub network is required'
                       }
