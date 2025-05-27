@@ -11,7 +11,7 @@
     "bugs": {
         "url": "https://github.com/GoogleCloudPlatform/scheduler-jupyter-plugin/issues"
     },
-    "license": "BSD-3-Clause",
+    "license": "Apache-2.0",
     "author": {
         "name": "Google",
         "email": "scheduler-plugins@google.com"
@@ -20,8 +20,7 @@
         "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
         "style/**/*.{css,js,eot,gif,html,jpg,json,png,svg,woff2,ttf}",
         "src/**/*.{ts,tsx}",
-        "schema/*.json",
-        "third-party-licenses.txt"
+        "schema/*.json"
     ],
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
