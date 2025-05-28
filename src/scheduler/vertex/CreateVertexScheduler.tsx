@@ -587,7 +587,7 @@ const CreateVertexScheduler = ({
    * Hosts the machine type API service
    */
   const machineTypeAPI = () => {
-     VertexServices.machineTypeAPIService(
+    VertexServices.machineTypeAPIService(
       region,
       setMachineTypeList,
       setMachineTypeLoading,
