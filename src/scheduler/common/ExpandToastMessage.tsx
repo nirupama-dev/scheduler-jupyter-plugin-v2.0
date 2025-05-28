@@ -46,10 +46,16 @@ const ExpandToastMessage: React.FC<IExpandableToastProps> = ({
     <div className="cursor-icon">
       {isExpanded ? message : truncatedMessage}
       {showExpandButton && !isExpanded && (
-        <span className="expand-btn" onClick={toggleExpand}> Show more</span>
+        <span className="expand-btn" onClick={toggleExpand}>
+          {' '}
+          Show more
+        </span>
       )}
       {showExpandButton && isExpanded && (
-        <span className="expand-btn" onClick={toggleExpand}> Show less</span>
+        <span className="expand-btn" onClick={toggleExpand}>
+          {' '}
+          Show less
+        </span>
       )}
     </div>
   );
