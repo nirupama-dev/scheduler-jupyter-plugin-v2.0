@@ -335,7 +335,7 @@ const VertexExecutionHistory = ({
                 />
               </LocalizationProvider>
             </div>
-            <div className="execution-history-right-wrapper execution-wrapper-border-none">
+            <div className="execution-history-right-wrapper execution-history-right-wrapper-scroll execution-wrapper-border-none">
               <div>
                 <div className="log-btn">
                   <div
