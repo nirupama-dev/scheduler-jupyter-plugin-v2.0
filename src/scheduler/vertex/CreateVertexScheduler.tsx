@@ -586,8 +586,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the machine type API service
    */
-  const machineTypeAPI = async () => {
-    await VertexServices.machineTypeAPIService(
+  const machineTypeAPI = () => {
+     VertexServices.machineTypeAPIService(
       region,
       setMachineTypeList,
       setMachineTypeLoading,
@@ -600,8 +600,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the cloud storage API service
    */
-  const cloudStorageAPI = async () => {
-    await StorageServices.cloudStorageAPIService(
+  const cloudStorageAPI = () => {
+    StorageServices.cloudStorageAPIService(
       setCloudStorageList,
       setCloudStorageLoading,
       setErrorMessageBucket
@@ -611,8 +611,8 @@ const CreateVertexScheduler = ({
   /**
    * To create the new cloud storage bucket API service
    */
-  const newCloudStorageAPI = async () => {
-    await StorageServices.newCloudStorageAPIService(
+  const newCloudStorageAPI = () => {
+    StorageServices.newCloudStorageAPIService(
       searchValue,
       setIsCreatingNewBucket,
       setBucketError
@@ -622,8 +622,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the service account API service
    */
-  const serviceAccountAPI = async () => {
-    await IamServices.serviceAccountAPIService(
+  const serviceAccountAPI = () => {
+    IamServices.serviceAccountAPIService(
       setServiceAccountList,
       setServiceAccountLoading,
       setErrorMessageServiceAccount
@@ -633,8 +633,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the primary network API service
    */
-  const primaryNetworkAPI = async () => {
-    await ComputeServices.primaryNetworkAPIService(
+  const primaryNetworkAPI = () => {
+    ComputeServices.primaryNetworkAPIService(
       setPrimaryNetworkList,
       setPrimaryNetworkLoading,
       setErrorMessagePrimaryNetwork
@@ -644,8 +644,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the sub network API service based on the primary network
    */
-  const subNetworkAPI = async (primaryNetwork: string | undefined) => {
-    await ComputeServices.subNetworkAPIService(
+  const subNetworkAPI = (primaryNetwork: string | undefined) => {
+    ComputeServices.subNetworkAPIService(
       region,
       primaryNetwork,
       setSubNetworkList,
@@ -657,8 +657,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the shared network API service
    */
-  const sharedNetworkAPI = async () => {
-    await ComputeServices.sharedNetworkAPIService(
+  const sharedNetworkAPI = () => {
+    ComputeServices.sharedNetworkAPIService(
       setSharedNetworkList,
       setSharedNetworkLoading,
       hostProject?.name,
@@ -782,7 +782,7 @@ const CreateVertexScheduler = ({
   /**
    * Cancel a job schedule
    */
-  const handleCancel = async () => {
+  const handleCancel = () => {
     if (!editMode) {
       setCreateCompleted(false);
       app.shell.activeWidget?.close();

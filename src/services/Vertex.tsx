@@ -17,11 +17,7 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import {
-  showToast,
-  toastifyCustomStyle,
-  toastifyCustomWidth
-} from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import {
   ICreatePayload,
   IVertexScheduleList,
@@ -30,7 +26,8 @@ import {
   IMachineType,
   ISchedulerData,
   ITriggerSchedule,
-  IUpdateSchedulerAPIResponse
+  IUpdateSchedulerAPIResponse,
+  IFormattedResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
 import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
@@ -39,7 +36,7 @@ import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import React from 'react';
 
 export class VertexServices {
-  static machineTypeAPIService = async (
+  static machineTypeAPIService = (
     region: string,
     setMachineTypeList: (value: IMachineType[]) => void,
     setMachineTypeLoading: (value: boolean) => void,
@@ -47,47 +44,54 @@ export class VertexServices {
     setApiError: (value: string) => void,
     setApiEnableUrl: any
   ) => {
-    try {
-      setMachineTypeLoading(true);
-      const formattedResponse: any = await requestAPI(
-        `api/vertex/uiConfig?region_id=${region}`
-      );
-      if (formattedResponse.length > 0) {
-        setMachineTypeList(formattedResponse);
-      } else if (formattedResponse.length === undefined) {
-        try {
-          if (formattedResponse.error.code === 403) {
-            // Pattern to check whether string contains link
-            const pattern =
-              // eslint-disable-next-line
-              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
-            const url = formattedResponse.error.message.match(pattern);
-            if (url && url.length > 0) {
-              setIsApiError(true);
-              setApiError(formattedResponse.error.message);
-              setApiEnableUrl(url);
-            } else {
-              setApiError(formattedResponse.error.message);
+    setMachineTypeLoading(true);
+    requestAPI(`api/vertex/uiConfig?region_id=${region}`)
+      .then((formattedResponse: any) => {
+        if (formattedResponse.length > 0) {
+          setMachineTypeList(formattedResponse);
+        } else if (formattedResponse.length === undefined) {
+          try {
+            if (formattedResponse.error.code === 403) {
+              // Pattern to check whether string contains link
+              const pattern =
+                // eslint-disable-next-line
+                /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+              const url = formattedResponse.error.message.match(pattern);
+              if (url && url.length > 0) {
+                setIsApiError(true);
+                setApiError(formattedResponse.error.message);
+                setApiEnableUrl(url);
+              } else {
+                setApiError(formattedResponse.error.message);
+              }
             }
+          } catch (error) {
+            const errorResponse = `Error fetching machine type list: ${error}`;
+            toast.error(
+              <ExpandToastMessage message={errorResponse} />,
+              errorResponse.length > 500
+                ? toastifyCustomWidth
+                : toastifyCustomStyle
+            );
           }
-        } catch (error) {
-          showToast(
-            'Error fetching machine type list. Please try again later.'
-          );
+        } else {
+          setMachineTypeList([]);
         }
-      } else {
+        setMachineTypeLoading(false);
+      })
+      .catch(error => {
         setMachineTypeList([]);
-      }
-      setMachineTypeLoading(false);
-    } catch (error) {
-      setMachineTypeList([]);
-      setMachineTypeLoading(false);
-      SchedulerLoggingService.log(
-        'Error listing machine type',
-        LOG_LEVEL.ERROR
-      );
-      toast.error('Failed to fetch machine type list', toastifyCustomStyle);
-    }
+        setMachineTypeLoading(false);
+        SchedulerLoggingService.log(
+          `Error listing machine type list: ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to fetch machine type list: ${error}`;
+        toast.error(
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
+        );
+      });
   };
 
   static createVertexSchedulerService = async (
@@ -133,11 +137,15 @@ export class VertexServices {
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
       }
-    } catch (reason) {
+    } catch (reason: any) {
       setCreatingVertexScheduler(false);
+      SchedulerLoggingService.log(
+          `Error creating schedule: ${reason}`,
+          LOG_LEVEL.ERROR
+        );
       toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
+        <ExpandToastMessage message={reason} />,
+        reason.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     }
   };
@@ -178,11 +186,11 @@ export class VertexServices {
         setCreateCompleted(true);
         setEditMode(false);
       }
-    } catch (reason) {
+    } catch (reason: any) {
       setCreatingVertexScheduler(false);
       toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
+        <ExpandToastMessage message={reason} />,
+        reason.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     }
   };
@@ -225,13 +233,6 @@ export class VertexServices {
         return;
       }
 
-      // Define the expected type for formattedResponse
-      interface IFormattedResponse {
-        schedules?: IVertexScheduleList[];
-        nextPageToken?: string;
-        error?: { code: number; message: string };
-      }
-
       const { schedules, nextPageToken, error } =
         formattedResponse as IFormattedResponse;
 
@@ -263,7 +264,7 @@ export class VertexServices {
         // Fetch Last run status asynchronously without waiting for completion
         schedules.forEach((schedule: IVertexScheduleList) => {
           // Triggering fetch asynchronously
-          fetchLastFiveRunStatus(
+          VertexServices.fetchLastFiveRunStatus(
             schedule,
             region,
             setVertexScheduleList,
@@ -277,7 +278,7 @@ export class VertexServices {
         setHasNextPageToken(false);
         setIsLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       // Handle errors during the API call
       setVertexScheduleList([]);
       setNextPageToken(null);
@@ -285,8 +286,12 @@ export class VertexServices {
       setIsApiError(true);
       setApiError('An error occurred while fetching schedules.');
       SchedulerLoggingService.log(
-        'Error listing vertex schedules',
+        `Error listing vertex schedules ${error}`,
         LOG_LEVEL.ERROR
+      );
+      toast.error(
+        <ExpandToastMessage message={error} />,
+        error.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     } finally {
       setIsLoading(false); // Ensure loading is stopped
@@ -334,8 +339,15 @@ export class VertexServices {
           return;
         }
       } else {
-        SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
-        toast.error(`Failed to pause schedule : ${error}`, toastifyCustomStyle);
+        SchedulerLoggingService.log(
+          `Error in pause schedule ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to pause schedule : ${error}`;
+        toast.error(
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
+        );
       }
     }
   };
@@ -385,12 +397,13 @@ export class VertexServices {
         }
       } else {
         SchedulerLoggingService.log(
-          'Error in resume schedule',
+          `Error in resume schedule ${error}`,
           LOG_LEVEL.ERROR
         );
+        const errorResponse = `Failed to resume schedule : ${error}`;
         toast.error(
-          `Failed to resume schedule : ${error}`,
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -433,9 +446,14 @@ export class VertexServices {
           return;
         }
       } else {
+        SchedulerLoggingService.log(
+          `Error in Trigger schedule ${reason}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to Trigger schedule : ${reason}`;
         toast.error(
-          `Failed to Trigger ${displayName} : ${reason}`,
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -486,10 +504,14 @@ export class VertexServices {
         toast.error(`Failed to delete the ${displayName}`, toastifyCustomStyle);
       }
     } catch (error) {
-      SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
+      SchedulerLoggingService.log(
+        `Error in Delete api ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to delete the ${displayName} : ${error}`;
       toast.error(
-        `Failed to delete the ${displayName} : ${error}`,
-        toastifyCustomStyle
+        <ExpandToastMessage message={errorResponse} />,
+        errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     }
   };
@@ -692,9 +714,14 @@ export class VertexServices {
           return;
         }
       } else {
+        SchedulerLoggingService.log(
+          `Error in update api ${reason}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Error in updating notebook. ${reason}`;
         toast.error(
-          `Error in updating notebook.\n${reason}`,
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -837,9 +864,14 @@ export class VertexServices {
           return;
         }
       } else {
+        SchedulerLoggingService.log(
+          `Error in execution history api ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Error in fetching the execution history : ${error}`;
         toast.error(
-          'Error in fetching the execution history',
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -874,61 +906,61 @@ export class VertexServices {
         }
       } else {
         SchedulerLoggingService.log(
-          'Error checking output file',
+          `Error checking output file ${lastRunError}`,
           LOG_LEVEL.ERROR
         );
       }
     }
   };
-}
 
-//Funtion to fetch last five run status for Scheduler Listing screen.
-async function fetchLastFiveRunStatus(
-  schedule: any,
-  region: string,
-  setVertexScheduleList: (
-    value:
-      | IVertexScheduleList[]
-      | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
-  ) => void,
-  abortControllers: any
-): Promise<any> {
-  // Controller to abort pending API call
-  const controller = new AbortController();
-  abortControllers.current.push(controller);
-  const signal = controller.signal;
+  //Funtion to fetch last five run status for Scheduler Listing screen.
+  static fetchLastFiveRunStatus = (
+    schedule: any,
+    region: string,
+    setVertexScheduleList: (
+      value:
+        | IVertexScheduleList[]
+        | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
+    ) => void,
+    abortControllers: any
+  ) => {
+    // Controller to abort pending API call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
 
-  //Extract Schedule id from schedule name.
-  const scheduleId = schedule.name.split('/').pop();
-  const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
-  try {
-    const jobExecutionList: any[] = await requestAPI(
+    //Extract Schedule id from schedule name.
+    const scheduleId = schedule.name.split('/').pop();
+    const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
+    requestAPI(
       serviceURLLastRunResponse +
         `?region_id=${region}&schedule_id=${scheduleId}&page_size=5&order_by=createTime desc`,
       { signal }
-    );
+    )
+      .then((jobExecutionList: any) => {
+        const lastFiveRun = jobExecutionList.map((job: any) => job.jobState);
+        schedule.jobState = lastFiveRun;
 
-    const lastFiveRun = jobExecutionList.map((job: any) => job.jobState);
-    schedule.jobState = lastFiveRun;
-
-    setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
-      prevItems.map(prevItem =>
-        prevItem.displayName === schedule.name
-          ? { ...prevItem, jobState: lastFiveRun }
-          : prevItem
-      )
-    );
-  } catch (lastRunError: any) {
-    setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
-      prevItems.map(prevItem =>
-        prevItem.displayName === schedule.name
-          ? { ...prevItem, jobState: [] }
-          : prevItem
-      )
-    );
-    SchedulerLoggingService.log(
-      'Error fetching last five job executions',
-      LOG_LEVEL.ERROR
-    );
-  }
+        setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+          prevItems.map(prevItem =>
+            prevItem.displayName === schedule.name
+              ? { ...prevItem, jobState: lastFiveRun }
+              : prevItem
+          )
+        );
+      })
+      .catch((lastRunError: any) => {
+        setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+          prevItems.map(prevItem =>
+            prevItem.displayName === schedule.name
+              ? { ...prevItem, jobState: [] }
+              : prevItem
+          )
+        );
+        SchedulerLoggingService.log(
+          'Error fetching last five job executions',
+          LOG_LEVEL.ERROR
+        );
+      });
+  };
 }

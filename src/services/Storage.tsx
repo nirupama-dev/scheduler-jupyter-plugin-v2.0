@@ -17,38 +17,45 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle } from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import path from 'path';
+import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
+import React from 'react';
 
 export class StorageServices {
-  static cloudStorageAPIService = async (
+  static cloudStorageAPIService = (
     setCloudStorageList: (value: string[]) => void,
     setCloudStorageLoading: (value: boolean) => void,
     setErrorMessageBucket: (value: string) => void
   ) => {
-    try {
-      setCloudStorageLoading(true);
-      const formattedResponse: any = await requestAPI('api/storage/listBucket');
-      if (formattedResponse.length > 0) {
-        setCloudStorageList(formattedResponse);
-      } else if (formattedResponse.error) {
-        setErrorMessageBucket(formattedResponse.error);
+    setCloudStorageLoading(true);
+    requestAPI('api/storage/listBucket')
+      .then((formattedResponse: any) => {
+        if (formattedResponse.length > 0) {
+          setCloudStorageList(formattedResponse);
+        } else if (formattedResponse.error) {
+          setErrorMessageBucket(formattedResponse.error);
+          setCloudStorageList([]);
+        } else {
+          setCloudStorageList([]);
+        }
+        setCloudStorageLoading(false);
+      })
+      .catch(error => {
         setCloudStorageList([]);
-      } else {
-        setCloudStorageList([]);
-      }
-      setCloudStorageLoading(false);
-    } catch (error) {
-      setCloudStorageList([]);
-      setCloudStorageLoading(false);
-      SchedulerLoggingService.log(
-        'Error listing cloud storage bucket',
-        LOG_LEVEL.ERROR
-      );
-      toast.error('Failed to fetch cloud storage bucket', toastifyCustomStyle);
-    }
+        setCloudStorageLoading(false);
+        SchedulerLoggingService.log(
+          `Error listing cloud storage bucket : ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to fetch cloud storage bucket : ${error}`;
+        toast.error(
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
+        );
+      });
   };
-  static newCloudStorageAPIService = async (
+  static newCloudStorageAPIService = (
     bucketName: string,
     setIsCreatingNewBucket: (value: boolean) => void,
     setBucketError: (value: string) => void
@@ -56,29 +63,27 @@ export class StorageServices {
     const payload = {
       bucket_name: bucketName
     };
-    try {
-      setIsCreatingNewBucket(true);
-      const formattedResponse: any = await requestAPI(
-        'api/storage/createNewBucket',
-        {
-          body: JSON.stringify(payload),
-          method: 'POST'
+    setIsCreatingNewBucket(true);
+    requestAPI('api/storage/createNewBucket', {
+      body: JSON.stringify(payload),
+      method: 'POST'
+    })
+      .then((formattedResponse: any) => {
+        if (formattedResponse === null) {
+          toast.success('Bucket created successfully', toastifyCustomStyle);
+          setBucketError('');
+        } else if (formattedResponse?.error) {
+          setBucketError(formattedResponse.error);
         }
-      );
-      if (formattedResponse === null) {
-        toast.success('Bucket created successfully', toastifyCustomStyle);
-        setBucketError('');
-      } else if (formattedResponse?.error) {
-        setBucketError(formattedResponse.error);
-      }
-      setIsCreatingNewBucket(false);
-    } catch (error) {
-      setIsCreatingNewBucket(false);
-      SchedulerLoggingService.log(
-        'Error creating the cloud storage bucket',
-        LOG_LEVEL.ERROR
-      );
-    }
+        setIsCreatingNewBucket(false);
+      })
+      .catch(error => {
+        setIsCreatingNewBucket(false);
+        SchedulerLoggingService.log(
+          `Error creating the cloud storage bucket ${error}`,
+          LOG_LEVEL.ERROR
+        );
+      });
   };
 
   static downloadJobAPIService = async (
