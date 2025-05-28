@@ -26,7 +26,8 @@ import {
   IMachineType,
   ISchedulerData,
   ITriggerSchedule,
-  IUpdateSchedulerAPIResponse
+  IUpdateSchedulerAPIResponse,
+  IFormattedResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
 import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
@@ -202,13 +203,6 @@ export class VertexServices {
         return;
       }
 
-      // Define the expected type for formattedResponse
-      interface IFormattedResponse {
-        schedules?: IVertexScheduleList[];
-        nextPageToken?: string;
-        error?: { code: number; message: string };
-      }
-
       const { schedules, nextPageToken, error } =
         formattedResponse as IFormattedResponse;
 
@@ -240,7 +234,7 @@ export class VertexServices {
         // Fetch Last run status asynchronously without waiting for completion
         schedules.forEach((schedule: IVertexScheduleList) => {
           // Triggering fetch asynchronously
-          fetchLastFiveRunStatus(
+          VertexServices.fetchLastFiveRunStatus(
             schedule,
             region,
             setVertexScheduleList,
@@ -857,55 +851,55 @@ export class VertexServices {
       }
     }
   };
-}
 
-//Funtion to fetch last five run status for Scheduler Listing screen.
-async function fetchLastFiveRunStatus(
-  schedule: any,
-  region: string,
-  setVertexScheduleList: (
-    value:
-      | IVertexScheduleList[]
-      | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
-  ) => void,
-  abortControllers: any
-): Promise<any> {
-  // Controller to abort pending API call
-  const controller = new AbortController();
-  abortControllers.current.push(controller);
-  const signal = controller.signal;
+  //Funtion to fetch last five run status for Scheduler Listing screen.
+  static fetchLastFiveRunStatus = (
+    schedule: any,
+    region: string,
+    setVertexScheduleList: (
+      value:
+        | IVertexScheduleList[]
+        | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
+    ) => void,
+    abortControllers: any
+  ) => {
+    // Controller to abort pending API call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
 
-  //Extract Schedule id from schedule name.
-  const scheduleId = schedule.name.split('/').pop();
-  const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
-  try {
-    const jobExecutionList: any[] = await requestAPI(
+    //Extract Schedule id from schedule name.
+    const scheduleId = schedule.name.split('/').pop();
+    const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
+    requestAPI(
       serviceURLLastRunResponse +
         `?region_id=${region}&schedule_id=${scheduleId}&page_size=5&order_by=createTime desc`,
       { signal }
-    );
+    )
+      .then((jobExecutionList: any) => {
+        const lastFiveRun = jobExecutionList.map((job: any) => job.jobState);
+        schedule.jobState = lastFiveRun;
 
-    const lastFiveRun = jobExecutionList.map((job: any) => job.jobState);
-    schedule.jobState = lastFiveRun;
-
-    setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
-      prevItems.map(prevItem =>
-        prevItem.displayName === schedule.name
-          ? { ...prevItem, jobState: lastFiveRun }
-          : prevItem
-      )
-    );
-  } catch (lastRunError: any) {
-    setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
-      prevItems.map(prevItem =>
-        prevItem.displayName === schedule.name
-          ? { ...prevItem, jobState: [] }
-          : prevItem
-      )
-    );
-    SchedulerLoggingService.log(
-      'Error fetching last five job executions',
-      LOG_LEVEL.ERROR
-    );
-  }
+        setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+          prevItems.map(prevItem =>
+            prevItem.displayName === schedule.name
+              ? { ...prevItem, jobState: lastFiveRun }
+              : prevItem
+          )
+        );
+      })
+      .catch((lastRunError: any) => {
+        setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+          prevItems.map(prevItem =>
+            prevItem.displayName === schedule.name
+              ? { ...prevItem, jobState: [] }
+              : prevItem
+          )
+        );
+        SchedulerLoggingService.log(
+          'Error fetching last five job executions',
+          LOG_LEVEL.ERROR
+        );
+      });
+  };
 }

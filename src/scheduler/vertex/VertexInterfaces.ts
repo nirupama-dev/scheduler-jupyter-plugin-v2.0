@@ -117,3 +117,10 @@ export interface IActivePaginationVariables {
   pageTokenList: string[];
   nextPageToken: string | null;
 }
+
+// Define the expected type for formattedResponse
+export interface IFormattedResponse {
+  schedules?: IVertexScheduleList[];
+  nextPageToken?: string;
+  error?: { code: number; message: string };
+}
