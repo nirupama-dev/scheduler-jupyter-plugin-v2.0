@@ -76,6 +76,16 @@ export const toastifyCustomStyle: ToastOptions<Record<string, never>> = {
   position: toast.POSITION.BOTTOM_CENTER
 };
 
+export const toastifyCustomWidth: ToastOptions<Record<string, never>> = {
+  hideProgressBar: true,
+  autoClose: 600000,
+  theme: 'dark',
+  position: toast.POSITION.BOTTOM_CENTER,
+  style: {
+    width: '150%'
+  }
+};
+
 export const handleDebounce = (func: any, delay: number) => {
   let timeoutId: any;
   return function (...args: any) {

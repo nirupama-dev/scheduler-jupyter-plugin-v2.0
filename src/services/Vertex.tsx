@@ -17,7 +17,11 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { showToast, toastifyCustomStyle } from '../utils/Config';
+import {
+  showToast,
+  toastifyCustomStyle,
+  toastifyCustomWidth
+} from '../utils/Config';
 import {
   ICreatePayload,
   IVertexScheduleList,
@@ -98,10 +102,28 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        toast.error(
-          <ExpandToastMessage message={data.error} />,
-          toastifyCustomStyle
+        const jsonstr = data?.error.slice(
+          data?.error.indexOf('{'),
+          data?.error.lastIndexOf('}') + 1
         );
+        if (jsonstr) {
+          const errorObject = JSON.parse(jsonstr);
+          if (errorObject.error.message) {
+            toast.error(
+              `Error in creating schedule : ${errorObject.error.message}`,
+              {
+                ...toastifyCustomStyle
+              }
+            );
+          } else {
+            toast.error(
+              <ExpandToastMessage message={data.error} />,
+              data.error.length > 500
+                ? toastifyCustomWidth
+                : toastifyCustomStyle
+            );
+          }
+        }
         setCreatingVertexScheduler(false);
       } else {
         toast.success(
