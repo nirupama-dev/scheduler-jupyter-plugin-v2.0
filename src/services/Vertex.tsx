@@ -17,11 +17,7 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import {
-  showToast,
-  toastifyCustomStyle,
-  toastifyCustomWidth
-} from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import {
   ICreatePayload,
   IVertexScheduleList,
@@ -70,8 +66,12 @@ export class VertexServices {
               }
             }
           } catch (error) {
-            showToast(
-              'Error fetching machine type list. Please try again later.'
+            const errorResponse = `Error fetching machine type list: ${error}`;
+            toast.error(
+              <ExpandToastMessage message={errorResponse} />,
+              errorResponse.length > 500
+                ? toastifyCustomWidth
+                : toastifyCustomStyle
             );
           }
         } else {
@@ -83,10 +83,14 @@ export class VertexServices {
         setMachineTypeList([]);
         setMachineTypeLoading(false);
         SchedulerLoggingService.log(
-          'Error listing machine type',
+          `Error listing machine type list: ${error}`,
           LOG_LEVEL.ERROR
         );
-        toast.error('Failed to fetch machine type list', toastifyCustomStyle);
+        const errorResponse = `Failed to fetch machine type list: ${error}`;
+        toast.error(
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
+        );
       });
   };
 
@@ -133,11 +137,11 @@ export class VertexServices {
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
       }
-    } catch (reason) {
+    } catch (reason: any) {
       setCreatingVertexScheduler(false);
       toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
+        <ExpandToastMessage message={reason} />,
+        reason.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     }
   };
@@ -178,11 +182,11 @@ export class VertexServices {
         setCreateCompleted(true);
         setEditMode(false);
       }
-    } catch (reason) {
+    } catch (reason: any) {
       setCreatingVertexScheduler(false);
       toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
+        <ExpandToastMessage message={reason} />,
+        reason.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     }
   };
@@ -270,7 +274,7 @@ export class VertexServices {
         setHasNextPageToken(false);
         setIsLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       // Handle errors during the API call
       setVertexScheduleList([]);
       setNextPageToken(null);
@@ -278,8 +282,12 @@ export class VertexServices {
       setIsApiError(true);
       setApiError('An error occurred while fetching schedules.');
       SchedulerLoggingService.log(
-        'Error listing vertex schedules',
+        `Error listing vertex schedules ${error}`,
         LOG_LEVEL.ERROR
+      );
+      toast.error(
+        <ExpandToastMessage message={error} />,
+        error.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     } finally {
       setIsLoading(false); // Ensure loading is stopped
@@ -327,8 +335,15 @@ export class VertexServices {
           return;
         }
       } else {
-        SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
-        toast.error(`Failed to pause schedule : ${error}`, toastifyCustomStyle);
+        SchedulerLoggingService.log(
+          `Error in pause schedule ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to pause schedule : ${error}`;
+        toast.error(
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
+        );
       }
     }
   };
@@ -378,12 +393,13 @@ export class VertexServices {
         }
       } else {
         SchedulerLoggingService.log(
-          'Error in resume schedule',
+          `Error in resume schedule ${error}`,
           LOG_LEVEL.ERROR
         );
+        const errorResponse = `Failed to resume schedule : ${error}`;
         toast.error(
-          `Failed to resume schedule : ${error}`,
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -426,9 +442,14 @@ export class VertexServices {
           return;
         }
       } else {
+        SchedulerLoggingService.log(
+          `Error in Trigger schedule ${reason}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to Trigger schedule : ${reason}`;
         toast.error(
-          `Failed to Trigger ${displayName} : ${reason}`,
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -479,10 +500,14 @@ export class VertexServices {
         toast.error(`Failed to delete the ${displayName}`, toastifyCustomStyle);
       }
     } catch (error) {
-      SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
+      SchedulerLoggingService.log(
+        `Error in Delete api ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to delete the ${displayName} : ${error}`;
       toast.error(
-        `Failed to delete the ${displayName} : ${error}`,
-        toastifyCustomStyle
+        <ExpandToastMessage message={errorResponse} />,
+        errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
       );
     }
   };
@@ -685,9 +710,14 @@ export class VertexServices {
           return;
         }
       } else {
+        SchedulerLoggingService.log(
+          `Error in update api ${reason}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Error in updating notebook. ${reason}`;
         toast.error(
-          `Error in updating notebook.\n${reason}`,
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -830,9 +860,14 @@ export class VertexServices {
           return;
         }
       } else {
+        SchedulerLoggingService.log(
+          `Error in execution history api ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Error in fetching the execution history : ${error}`;
         toast.error(
-          'Error in fetching the execution history',
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       }
     }
@@ -867,7 +902,7 @@ export class VertexServices {
         }
       } else {
         SchedulerLoggingService.log(
-          'Error checking output file',
+          `Error checking output file ${lastRunError}`,
           LOG_LEVEL.ERROR
         );
       }
