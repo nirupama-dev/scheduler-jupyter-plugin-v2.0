@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 
 .. towncrier release notes start
 
-## [1.0.0] - 2025-05-22
+## [0.1.0] - 2025-05-22
 
 ### Added
 
