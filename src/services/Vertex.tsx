@@ -17,7 +17,11 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { showToast, toastifyCustomStyle } from '../utils/Config';
+import {
+  showToast,
+  toastifyCustomStyle,
+  toastifyCustomWidth
+} from '../utils/Config';
 import {
   ICreatePayload,
   IVertexScheduleList,
@@ -114,7 +118,9 @@ export class VertexServices {
           } else {
             toast.error(
               <ExpandToastMessage message={data.error} />,
-              toastifyCustomStyle
+              data.error.length > 500
+                ? toastifyCustomWidth
+                : toastifyCustomStyle
             );
           }
         }
