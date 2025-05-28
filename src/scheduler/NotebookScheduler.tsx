@@ -156,7 +156,11 @@ const NotebookSchedulerComponent = ({
     <>
       <div
         className={
-          listingScreenFlag ? 'list-level-component' : 'component-level'
+          listingScreenFlag
+            ? 'list-level-component'
+            : executionPageListFlag
+              ? 'component-level execution-history-right-wrapper-scroll'
+              : 'component-level'
         }
       >
         {isLoading ? (
