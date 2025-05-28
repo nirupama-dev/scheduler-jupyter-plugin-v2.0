@@ -17,7 +17,9 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle } from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
+import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
+import React from 'react';
 
 export class ComputeServices {
   static getParentProjectAPIService = async (
@@ -67,12 +69,13 @@ export class ComputeServices {
         setPrimaryNetworkList([]);
         setPrimaryNetworkLoading(false);
         SchedulerLoggingService.log(
-          'Error listing primary network',
+          `Error listing primary network ${error}`,
           LOG_LEVEL.ERROR
         );
+        const errorResponse = `Failed to fetch primary network list : ${error}`;
         toast.error(
-          'Failed to fetch primary network list',
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       });
   };
@@ -111,10 +114,14 @@ export class ComputeServices {
         setSubNetworkList([]);
         setSubNetworkLoading(false);
         SchedulerLoggingService.log(
-          'Error listing sub networks',
+          `Error listing sub networks ${error}`,
           LOG_LEVEL.ERROR
         );
-        toast.error('Failed to fetch sub networks list', toastifyCustomStyle);
+        const errorResponse = `Failed to fetch sub networks list : ${error}`;
+        toast.error(
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
+        );
       });
   };
 
@@ -148,12 +155,13 @@ export class ComputeServices {
         setSharedNetworkList([]);
         setSharedNetworkLoading(false);
         SchedulerLoggingService.log(
-          'Error listing shared networks',
+          `Error listing shared networks ${error}`,
           LOG_LEVEL.ERROR
         );
+        const errorResponse = `Failed to fetch shared networks list : ${error}`;
         toast.error(
-          'Failed to fetch shared networks list',
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       });
   };

@@ -17,7 +17,9 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle } from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
+import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
+import React from 'react';
 
 export class IamServices {
   static serviceAccountAPIService = (
@@ -49,12 +51,13 @@ export class IamServices {
         setServiceAccountList([]);
         setServiceAccountLoading(false);
         SchedulerLoggingService.log(
-          'Error listing service accounts',
+          `Error listing service accounts : ${error}`,
           LOG_LEVEL.ERROR
         );
+        const errorResponse = `Failed to fetch service accounts list : ${error}`;
         toast.error(
-          'Failed to fetch service accounts list',
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       });
   };

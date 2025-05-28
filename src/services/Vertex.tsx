@@ -139,6 +139,10 @@ export class VertexServices {
       }
     } catch (reason: any) {
       setCreatingVertexScheduler(false);
+      SchedulerLoggingService.log(
+          `Error creating schedule: ${reason}`,
+          LOG_LEVEL.ERROR
+        );
       toast.error(
         <ExpandToastMessage message={reason} />,
         reason.length > 500 ? toastifyCustomWidth : toastifyCustomStyle

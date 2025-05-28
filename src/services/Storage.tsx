@@ -17,8 +17,10 @@
 import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle } from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import path from 'path';
+import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
+import React from 'react';
 
 export class StorageServices {
   static cloudStorageAPIService = (
@@ -43,12 +45,13 @@ export class StorageServices {
         setCloudStorageList([]);
         setCloudStorageLoading(false);
         SchedulerLoggingService.log(
-          'Error listing cloud storage bucket',
+          `Error listing cloud storage bucket : ${error}`,
           LOG_LEVEL.ERROR
         );
+        const errorResponse = `Failed to fetch cloud storage bucket : ${error}`;
         toast.error(
-          'Failed to fetch cloud storage bucket',
-          toastifyCustomStyle
+          <ExpandToastMessage message={errorResponse} />,
+          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
         );
       });
   };
@@ -77,7 +80,7 @@ export class StorageServices {
       .catch(error => {
         setIsCreatingNewBucket(false);
         SchedulerLoggingService.log(
-          'Error creating the cloud storage bucket',
+          `Error creating the cloud storage bucket ${error}`,
           LOG_LEVEL.ERROR
         );
       });
