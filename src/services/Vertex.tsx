@@ -98,10 +98,26 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        toast.error(
-          <ExpandToastMessage message={data.error} />,
-          toastifyCustomStyle
+        const jsonstr = data?.error.slice(
+          data?.error.indexOf('{'),
+          data?.error.lastIndexOf('}') + 1
         );
+        if (jsonstr) {
+          const errorObject = JSON.parse(jsonstr);
+          if (errorObject.error.message) {
+            toast.error(
+              `Error in creating schedule : ${errorObject.error.message}`,
+              {
+                ...toastifyCustomStyle
+              }
+            );
+          } else {
+            toast.error(
+              <ExpandToastMessage message={data.error} />,
+              toastifyCustomStyle
+            );
+          }
+        }
         setCreatingVertexScheduler(false);
       } else {
         toast.success(
