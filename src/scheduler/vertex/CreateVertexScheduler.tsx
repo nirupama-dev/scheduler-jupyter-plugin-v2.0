@@ -43,6 +43,9 @@ import { authApi, currentTime } from '../../utils/Config';
 import {
   CORN_EXP_DOC_URL,
   DEFAULT_CLOUD_STORAGE_BUCKET,
+  DEFAULT_DISK_MAX_SIZE,
+  DEFAULT_DISK_MIN_SIZE,
+  DEFAULT_DISK_SIZE,
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_PRIMARY_NETWORK,
@@ -155,7 +158,7 @@ const CreateVertexScheduler = ({
   const [diskTypeSelected, setDiskTypeSelected] = useState<string | null>(
     DISK_TYPE_VALUE[0]
   );
-  const [diskSize, setDiskSize] = useState<string>('100');
+  const [diskSize, setDiskSize] = useState<string>(DEFAULT_DISK_SIZE);
   const [serviceAccountList, setServiceAccountList] = useState<
     { displayName: string; email: string }[]
   >([]);
@@ -212,6 +215,7 @@ const CreateVertexScheduler = ({
     useState<string>('');
   const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
     useState<string>('');
+  const [diskSizeFlag, setDiskSizeFlag] = useState<boolean>(false);
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -247,7 +251,7 @@ const CreateVertexScheduler = ({
   const handleDiskSize = (e: React.ChangeEvent<HTMLInputElement>) => {
     const re = /^[1-9][0-9]*$/; // Checks whether value starts with [1-9] and all occurence should be a number [0-9]
     if (e.target.value === '' || re.test(e.target.value)) {
-      setDiskSize(e.target.value);
+        setDiskSize(e.target.value);
     }
   };
 
@@ -695,7 +699,7 @@ const CreateVertexScheduler = ({
       inputFileSelected === '' ||
       endDateError ||
       isPastEndDate ||
-      isPastStartDate
+      isPastStartDate || diskSizeFlag
     );
   };
 
@@ -944,6 +948,14 @@ const CreateVertexScheduler = ({
       machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) || null
     );
   }, [machineTypeList]);
+
+  useEffect(() => {
+    if(Number(diskSize) >= DEFAULT_DISK_MIN_SIZE && Number(diskSize) <= DEFAULT_DISK_MAX_SIZE) {
+      setDiskSizeFlag(false);
+    } else {
+      setDiskSizeFlag(true);
+    }
+  },[diskSize]);
 
   return (
     <>
@@ -1197,6 +1209,13 @@ const CreateVertexScheduler = ({
                 placeholder=""
                 Label="Disk Size (in GB)"
               />
+              {diskSizeFlag && (
+                <ErrorMessage
+                  message="Disk size should be within the range of [10 - 65536]"
+                  showIcon={false}
+                  errorWidth={true}
+                />
+              )}
             </div>
           </div>
 

@@ -258,6 +258,10 @@
   width: 90%;
 }
 
+.error-key-wrapper {
+  width: 100%;
+}
+
 .error-key-missing {
   color: var(--jp-error-color0);
   padding-left: 5px;
