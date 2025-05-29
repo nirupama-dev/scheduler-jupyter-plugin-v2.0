@@ -69,14 +69,20 @@ class Client:
         input_notebook = file_path.split("/")[-1]
         storage_client = storage.Client()
         bucket = storage_client.bucket(bucket_name)
+        blob_name = None
 
-        # uploading the input file
-        blob_name = f"{job_name}/{input_notebook}"
-        blob = bucket.blob(blob_name)
-        blob.upload_from_filename(file_path)
+        if "gs:" not in file_path:
+            # uploading the input file
+            blob_name = f"{job_name}/{input_notebook}"
+            blob = bucket.blob(blob_name)
+            blob.upload_from_filename(file_path)
+            self.log.info(f"File {input_notebook} uploaded to gcs successfully")
 
-        # creating json file containing the input file path
-        metadata = {"inputFilePath": f"gs://{bucket_name}/{blob_name}"}
+            # creating json file containing the input file path
+            metadata = {"inputFilePath": f"gs://{bucket_name}/{blob_name}"}
+        else:
+            metadata = {"inputFilePath": file_path}
+
         json_file_name = f"{job_name}.json"
 
         with open(json_file_name, "w") as f:
@@ -87,8 +93,7 @@ class Client:
         json_blob = bucket.blob(json_blob_name)
         json_blob.upload_from_filename(json_file_name)
 
-        self.log.info(f"File {input_notebook} uploaded to gcs successfully")
-        return blob_name
+        return blob_name if blob_name else file_path
 
     async def create_schedule(self, job, file_path, bucket_name):
         try:
@@ -107,6 +112,10 @@ class Client:
             parameters = {
                 param.split(":")[0]: param.split(":")[1] for param in job.parameters
             }
+
+            notebook_source = (
+                file_path if "gs://" in file_path else f"gs://{bucket_name}/{file_path}"
+            )
 
             api_endpoint = f"https://{job.region}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{job.region}/schedules"
             headers = self.create_headers()
@@ -138,7 +147,7 @@ class Client:
                                 "subnetwork": job.subnetwork,
                             },
                         },
-                        "gcsNotebookSource": {"uri": f"gs://{bucket_name}/{file_path}"},
+                        "gcsNotebookSource": {"uri": notebook_source},
                         "gcsOutputUri": job.cloud_storage_bucket,
                         "serviceAccount": job.service_account,
                         "kernelName": job.kernel_name,
@@ -171,8 +180,15 @@ class Client:
             job = DescribeVertexJob(**input_data)
             storage_bucket = job.cloud_storage_bucket.split("//")[-1]
 
+            if "gs://" in job.input_filename:
+                input_filename = job.input_filename
+            elif "gs:" in job.input_filename:
+                input_filename = job.input_filename.replace("gs:", "gs://", 1)
+            else:
+                input_filename = job.input_filename
+
             file_path = await self.upload_to_gcs(
-                storage_bucket, job.input_filename, job.display_name
+                storage_bucket, input_filename, job.display_name
             )
             res = await self.create_schedule(job, file_path, storage_bucket)
             return res
