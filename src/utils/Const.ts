@@ -118,3 +118,9 @@ export const SHARED_NETWORK_DOC_URL =
 export const pattern =
   // eslint-disable-next-line
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+
+  export const DEFAULT_DISK_MIN_SIZE = 10;
+
+  export const DEFAULT_DISK_MAX_SIZE = 65536;
+
+  export const DEFAULT_DISK_SIZE = '100';
