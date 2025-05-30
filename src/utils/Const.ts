@@ -21,6 +21,7 @@ export const STATUS_SUCCESS = 'SUCCEEDED';
 export const API_HEADER_BEARER = 'Bearer ';
 export const API_HEADER_CONTENT_TYPE = 'application/json';
 export const PLUGIN_ID = 'scheduler_jupyter_plugin:plugin';
+export const GCS_PLUGIN_ID = 'gcs-jupyter-plugin:plugin';
 
 export const gcpServiceUrls = (async () => {
   return await ConfigService.gcpServiceUrlsAPI();
