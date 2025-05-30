@@ -769,3 +769,27 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .list-level-component {
   max-height: 0;
 }
+
+.calender-status-icon {
+  margin: 0 auto;
+  position: absolute;
+  bottom: 4px;
+  left: 17px;
+}
+
+.calender-date-time-wrapper {
+  position: relative;
+}
+
+.css-jgls56-MuiButtonBase-root-MuiPickersDay-root.Mui-selected {
+  background: none !important;
+  color: none !important;
+}
+
+.css-jgls56-MuiButtonBase-root-MuiPickersDay-root:not(.Mui-selected) {
+  border: none !important;
+}
+
+.css-1u23akw-MuiButtonBase-root-MuiPickersDay-root.Mui-selected {
+  background: none !important;
+}

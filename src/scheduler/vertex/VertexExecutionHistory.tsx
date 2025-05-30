@@ -23,7 +23,13 @@ import { Box, LinearProgress } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import { authApi } from '../../utils/Config';
 import VertexJobRuns from './VertexJobRuns';
-import { iconLeftArrow, iconCreateCluster } from '../../utils/Icons';
+import {
+  iconLeftArrow,
+  iconCreateCluster,
+  IconSuccessCircle,
+  IconFailedCircle,
+  IconOrangeCircle
+} from '../../utils/Icons';
 import {
   IActivePaginationVariables,
   ISchedulerData,
@@ -189,46 +195,41 @@ const VertexExecutionHistory = ({
 
     // Case 1: If today is selected
     if (isToday && isSelectedExecution) {
-      backgroundColor = '#3B78E7';
-      borderColor = 'none';
-      textColor = 'white';
+      backgroundColor = '#E7F2FF';
+      borderColor = '#3B78E7';
+      textColor = '#0C67DF';
     }
     // Case 2: If today is not selected but it's today
     else if (isToday) {
-      backgroundColor = '#3B78E7';
-      textColor = 'white';
+      backgroundColor = '#E7F2FF';
+      textColor = '#454746';
     }
     // Case 3: If selected date has a background color (blue, green, etc.)
     else if (isBlueExecution) {
-      backgroundColor = '#00BFA5';
-      textColor = 'white';
+      textColor = '#454746';
     } else if (isDarkGreenExecution) {
-      backgroundColor = '#1E6631';
-      textColor = 'white';
+      textColor = '#454746';
     } else if (isGreenExecution) {
-      backgroundColor = '#34A853';
-      textColor = 'white';
+      textColor = '#454746';
     } else if (isOrangeExecution) {
-      backgroundColor = '#FFA52C';
-      textColor = 'white';
+      textColor = '#454746';
     } else if (isRedExecution) {
-      backgroundColor = '#EA3323';
-      textColor = 'white';
+      textColor = '#454746';
     } else if (isGreyExecution) {
-      backgroundColor = '#AEAEAE';
-      textColor = 'white';
+      textColor = '#454746';
     }
 
     // Case 4: If the day is selected but without a background color (i.e., transparent background)
     if (isSelectedExecution && backgroundColor === 'transparent') {
       backgroundColor = 'transparent';
       borderColor = '2px solid #3B78E7';
+      textColor = '#0C67DF';
     }
 
     // Case 5: If the day is selected and has an existing background color (e.g., blue, green, etc.)
     if (isSelectedExecution && backgroundColor !== 'transparent') {
       borderColor = '2px solid #3B78E7';
-      textColor = 'white';
+      textColor = '#0C67DF';
     }
 
     // Reduce opacity for past and future dates
@@ -237,19 +238,52 @@ const VertexExecutionHistory = ({
     }
 
     return (
-      <PickersDay
-        {...props}
+      <div
+        className="calender-date-time-wrapper"
         style={{
-          background: backgroundColor,
           border: borderColor,
           borderRadius:
             backgroundColor !== 'transparent' || isSelectedExecution || isToday
               ? '50%'
               : 'none',
-          color: textColor,
-          opacity: opacity
+          opacity: opacity,
+          backgroundColor: isToday ? '#E7F2FF' : 'none',
+          display: 'inline-block'
         }}
-      />
+      >
+        <PickersDay
+          {...props}
+          style={{
+            color: textColor
+          }}
+        />
+        {isGreenExecution && (
+          <div className="calender-status-icon">
+            <IconSuccessCircle.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          </div>
+        )}
+
+        {isRedExecution && (
+          <div className="calender-status-icon">
+            <IconFailedCircle.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          </div>
+        )}
+
+        {isOrangeExecution && (
+          <div className="calender-status-icon">
+            <IconOrangeCircle.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          </div>
+        )}
+      </div>
     );
   };
 
