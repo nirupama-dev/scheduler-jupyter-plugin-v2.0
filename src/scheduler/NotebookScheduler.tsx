@@ -158,9 +158,7 @@ const NotebookSchedulerComponent = ({
         className={
           listingScreenFlag
             ? 'list-level-component'
-            : executionPageListFlag
-              ? 'component-level execution-history-right-wrapper-scroll'
-              : 'component-level'
+            : 'component-level'
         }
       >
         {isLoading ? (
