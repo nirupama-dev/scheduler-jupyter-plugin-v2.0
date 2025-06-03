@@ -328,7 +328,7 @@ const CreateNotebookScheduler = ({
   };
 
   const handleEmailList = (data: string[]) => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     let invalidEmail = false;
     data.forEach(email => {
       if (!emailPattern.test(email)) {
