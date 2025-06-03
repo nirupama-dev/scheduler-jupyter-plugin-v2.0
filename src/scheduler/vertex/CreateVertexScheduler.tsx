@@ -251,7 +251,7 @@ const CreateVertexScheduler = ({
   const handleDiskSize = (e: React.ChangeEvent<HTMLInputElement>) => {
     const re = /^[1-9][0-9]*$/; // Checks whether value starts with [1-9] and all occurence should be a number [0-9]
     if (e.target.value === '' || re.test(e.target.value)) {
-        setDiskSize(e.target.value);
+      setDiskSize(e.target.value);
     }
   };
 
@@ -384,20 +384,19 @@ const CreateVertexScheduler = ({
    * @param {any} state - The state object containing the search input value.
    */
   const filterOptions = (options: string[], state: any) => {
-    // Filter out the list based on the search value
+    const inputValue = state.inputValue.trim().toLowerCase();
+    // If the input value is empty, return the original options
     const filteredOptions = options.filter(option =>
-      option.toLowerCase().includes(state.inputValue.toLowerCase())
+      option.toLowerCase().includes(inputValue)
     );
 
-    // If no match found, add the "Create new bucket" option
-    if (
-      (filteredOptions.length === 0 ||
-        options.filter(
-          option => option.toLowerCase() !== state.inputValue.toLowerCase()
-        )) &&
-      state.inputValue.trim() !== ''
-    ) {
-      filteredOptions.push(`Create and Select "${searchValue}"`);
+    // If no options match the search input, add the option to create a new bucket
+    const exactMatch = options.some(
+      option => option.toLowerCase() === inputValue
+    );
+    // If no exact match is found, add the option to create a new bucket
+    if (!exactMatch && inputValue !== '') {
+      filteredOptions.push(`Create and Select "${state.inputValue}"`);
     }
 
     return filteredOptions;
@@ -699,7 +698,8 @@ const CreateVertexScheduler = ({
       inputFileSelected === '' ||
       endDateError ||
       isPastEndDate ||
-      isPastStartDate || diskSizeFlag
+      isPastStartDate ||
+      diskSizeFlag
     );
   };
 
@@ -950,12 +950,15 @@ const CreateVertexScheduler = ({
   }, [machineTypeList]);
 
   useEffect(() => {
-    if(Number(diskSize) >= DEFAULT_DISK_MIN_SIZE && Number(diskSize) <= DEFAULT_DISK_MAX_SIZE) {
+    if (
+      Number(diskSize) >= DEFAULT_DISK_MIN_SIZE &&
+      Number(diskSize) <= DEFAULT_DISK_MAX_SIZE
+    ) {
       setDiskSizeFlag(false);
     } else {
       setDiskSizeFlag(true);
     }
-  },[diskSize]);
+  }, [diskSize]);
 
   return (
     <>
