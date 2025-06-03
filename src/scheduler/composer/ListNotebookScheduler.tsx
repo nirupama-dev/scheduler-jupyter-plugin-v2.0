@@ -34,12 +34,14 @@ import PollingTimer from '../../utils/PollingTimer';
 import PollingImportErrorTimer from '../../utils/PollingImportErrorTimer';
 import ImportErrorPopup from '../../utils/ImportErrorPopup';
 import triggerIcon from '../../../style/icons/scheduler_trigger.svg';
-import { PLUGIN_ID, scheduleMode } from '../../utils/Const';
+import { GCS_PLUGIN_ID, scheduleMode } from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { RegionDropdown } from '../../controls/RegionDropdown';
 import ErrorMessage from '../common/ErrorMessage';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
+import { toast } from 'react-toastify';
+import { toastifyCustomStyle } from '../../utils/Config';
 
 const iconDelete = new LabIcon({
   name: 'launcher:delete-icon',
@@ -168,7 +170,7 @@ function listNotebookScheduler({
   const [deletingNotebook, setDeletingNotebook] = useState(false);
   const [importErrorData, setImportErrorData] = useState<string[]>([]);
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
-  const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
+  const [isGCSPluginInstalled, setIsGCSPluginInstalled] = useState(false);
   const [projectId, setProjectId] = useState('');
   const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
@@ -472,8 +474,9 @@ function listNotebookScheduler({
             />
           </div>
         )}
-        {isPreviewEnabled &&
-          (data.jobid === editNotebookLoading ? (
+        {isGCSPluginInstalled ? ( // Check if GCS plugin is installed
+          // If installed, show the edit notebook icon
+          data.jobid === editNotebookLoading ? (
             <div className="icon-buttons-style">
               <CircularProgress
                 size={18}
@@ -494,7 +497,20 @@ function listNotebookScheduler({
                 className="icon-white logo-alignment-style"
               />
             </div>
-          ))}
+          )
+        ) : (
+          // If not installed, show the disabled edit icon
+          <div
+            role="button"
+            className="icon-buttons-style-disable"
+            title="Install GCS Plugin to enable notebook editing"
+          >
+            <iconEditDag.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          </div>
+        )}
         <div
           role="button"
           className="icon-buttons-style"
@@ -537,13 +553,21 @@ function listNotebookScheduler({
       );
     }
   };
-
-  const checkPreviewEnabled = async () => {
-    const settings = await settingRegistry.load(PLUGIN_ID);
-
-    // The current value of whether or not preview features are enabled.
-    const previewEnabled = settings.get('previewEnabled').composite as boolean;
-    setIsPreviewEnabled(previewEnabled);
+  /**
+   * Check if GCS plugin is installed
+   * If installed, set isGCSPluginInstalled to true
+   * Else set it to false
+   */
+  const checkGCSPluginAvailability = async () => {
+    try {
+      const isPluginInstalled = app.hasPlugin(GCS_PLUGIN_ID);
+      setIsGCSPluginInstalled(isPluginInstalled);
+    } catch (error) {
+      toast.error(
+        'Could not check GCS plugin availability',
+        toastifyCustomStyle
+      );
+    }
   };
 
   const openEditDagNotebookFile = async () => {
@@ -575,7 +599,7 @@ function listNotebookScheduler({
   }, [inputNotebookFilePath]);
 
   useEffect(() => {
-    checkPreviewEnabled();
+    checkGCSPluginAvailability();
     const loadComposerListAndSelectFirst = async () => {
       await listComposersAPI();
     };
