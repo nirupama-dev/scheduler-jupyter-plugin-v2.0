@@ -181,6 +181,7 @@ const ListDagTaskInstances = ({
                   {taskInstance.tryNumber !== 0 ? (
                     <div
                       className="accordion-row-data-expand-logo"
+                      role="button"
                       onClick={() =>
                         handleChange(
                           index,

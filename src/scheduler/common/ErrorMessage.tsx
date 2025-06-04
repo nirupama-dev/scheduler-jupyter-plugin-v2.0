@@ -26,10 +26,14 @@ interface IErrorMessageInterface {
 const ErrorMessage: React.FC<IErrorMessageInterface> = ({
   message,
   showIcon = true,
-  errorWidth = false,
+  errorWidth = false
 }) => {
   return (
-    <div className={errorWidth ? "error-key-parent error-key-wrapper" : "error-key-parent"}>
+    <div
+      className={
+        errorWidth ? 'error-key-parent error-key-wrapper' : 'error-key-parent'
+      }
+    >
       {showIcon && (
         <iconError.react tag="div" className="logo-alignment-style" />
       )}
