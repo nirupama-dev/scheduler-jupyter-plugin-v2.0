@@ -443,7 +443,9 @@ function ListNotebookScheduler({
             }
             data-jobid={data.jobid}
             onClick={e => {
-              !is_status_paused ? handleTriggerDag(e) : null;
+              if (!is_status_paused) {
+                handleTriggerDag(e);
+              }
             }}
           >
             <iconTrigger.react
