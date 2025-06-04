@@ -59,8 +59,7 @@ const NotebookSchedulerComponent = ({
     useState<boolean>(false);
   const [jobNameUniqueValidation, setJobNameUniqueValidation] =
     useState<boolean>(true);
-  const [createCompleted, setCreateCompleted] =
-    context !== '' ? useState(false) : useState(true);
+  const [createCompleted, setCreateCompleted] = useState(context !== '' ? false : true);
   const [notebookSelector, setNotebookSelector] = useState<string>('vertex');
   const [executionPageFlag, setExecutionPageFlag] = useState<boolean>(true);
   const [isApiError, setIsApiError] = useState(false);
