@@ -75,7 +75,7 @@ interface IDagList {
   scheduleInterval: string;
 }
 
-function listNotebookScheduler({
+function ListNotebookScheduler({
   app,
   settingRegistry,
   handleDagIdSelection,
@@ -155,22 +155,22 @@ function listNotebookScheduler({
   composerSelected?: string;
   setApiEnableUrl: any;
 }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [composerList, setComposerList] = useState<string[]>([]);
   const [composerSelectedList, setComposerSelectedList] = useState<string>('');
   const [dagList, setDagList] = useState<IDagList[]>([]);
   const data = dagList;
   const backselectedEnvironment = backButtonComposerName;
-  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
-  const [importErrorPopupOpen, setImportErrorPopupOpen] = useState(false);
+  const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
+  const [importErrorPopupOpen, setImportErrorPopupOpen] = useState<boolean>(false);
   const [selectedDagId, setSelectedDagId] = useState('');
   const [editDagLoading, setEditDagLoading] = useState('');
   const [inputNotebookFilePath, setInputNotebookFilePath] = useState('');
   const [editNotebookLoading, setEditNotebookLoading] = useState('');
-  const [deletingNotebook, setDeletingNotebook] = useState(false);
+  const [deletingNotebook, setDeletingNotebook] = useState<boolean>(false);
   const [importErrorData, setImportErrorData] = useState<string[]>([]);
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
-  const [isGCSPluginInstalled, setIsGCSPluginInstalled] = useState(false);
+  const [isGCSPluginInstalled, setIsGCSPluginInstalled] = useState<boolean>(false);
   const [projectId, setProjectId] = useState('');
   const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
@@ -840,4 +840,4 @@ function listNotebookScheduler({
     </div>
   );
 }
-export default listNotebookScheduler;
+export default ListNotebookScheduler;

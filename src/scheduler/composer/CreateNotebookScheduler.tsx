@@ -205,7 +205,7 @@ const CreateNotebookScheduler = ({
       const selectedComposer = data.toString();
       setComposerSelected(selectedComposer);
       if (selectedComposer) {
-        const unique = getDaglist(selectedComposer);
+        const unique = await getDaglist(selectedComposer);
         if (!unique) {
           setJobNameUniqueValidation(true);
         }
