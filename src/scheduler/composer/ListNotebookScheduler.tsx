@@ -40,8 +40,7 @@ import { RegionDropdown } from '../../controls/RegionDropdown';
 import ErrorMessage from '../common/ErrorMessage';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
-import { toast } from 'react-toastify';
-import { toastifyCustomStyle } from '../../utils/Config';
+import { Notification } from '@jupyterlab/apputils';
 
 const iconDelete = new LabIcon({
   name: 'launcher:delete-icon',
@@ -162,7 +161,8 @@ function ListNotebookScheduler({
   const data = dagList;
   const backselectedEnvironment = backButtonComposerName;
   const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
-  const [importErrorPopupOpen, setImportErrorPopupOpen] = useState<boolean>(false);
+  const [importErrorPopupOpen, setImportErrorPopupOpen] =
+    useState<boolean>(false);
   const [selectedDagId, setSelectedDagId] = useState('');
   const [editDagLoading, setEditDagLoading] = useState('');
   const [inputNotebookFilePath, setInputNotebookFilePath] = useState('');
@@ -170,7 +170,8 @@ function ListNotebookScheduler({
   const [deletingNotebook, setDeletingNotebook] = useState<boolean>(false);
   const [importErrorData, setImportErrorData] = useState<string[]>([]);
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
-  const [isGCSPluginInstalled, setIsGCSPluginInstalled] = useState<boolean>(false);
+  const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
+    useState<boolean>(false);
   const [projectId, setProjectId] = useState('');
   const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
@@ -563,10 +564,9 @@ function ListNotebookScheduler({
       const isPluginInstalled = app.hasPlugin(GCS_PLUGIN_ID);
       setIsGCSPluginInstalled(isPluginInstalled);
     } catch (error) {
-      toast.error(
-        'Could not check GCS plugin availability',
-        toastifyCustomStyle
-      );
+      Notification.error('Could not check GCS plugin availability', {
+        autoClose: false
+      });
     }
   };
 

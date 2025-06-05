@@ -258,12 +258,6 @@ export interface IVertexCellProps {
   render: (value: string) => React.ReactNode;
 }
 
-export const showToast = (message: string, id?: string) => {
-  if (!id || !toast.isActive(id)) {
-    toast.error(message, { toastId: id, ...toastifyCustomStyle });
-  }
-};
-
 /**
  * Wraps a fetch call with initial authentication to pass credentials to the request
  *

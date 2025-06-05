@@ -69,7 +69,7 @@ import {
   ICreatePayload,
   IMachineType
 } from './VertexInterfaces';
-import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 import VertexScheduleJobs from './VertexScheduleJobs';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
 
@@ -832,7 +832,9 @@ const CreateVertexScheduler = ({
         }
       })
       .catch(error => {
-        toast.error(error);
+        Notification.error(error, {
+          autoClose: false
+        });
       });
   }, [projectId]);
 

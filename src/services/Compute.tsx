@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
@@ -38,7 +39,9 @@ export class ComputeServices {
         LOG_LEVEL.ERROR
       );
       setHostProject('');
-      toast.error('Failed to fetch host project');
+      Notification.error('Failed to fetch host project', {
+        autoClose: false
+      });
     }
   };
   static primaryNetworkAPIService = (

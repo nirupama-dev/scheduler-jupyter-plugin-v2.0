@@ -17,7 +17,6 @@
 
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { showToast, toastifyCustomStyle } from '../utils/Config';
 import { JupyterLab } from '@jupyterlab/application';
 import { pattern, scheduleMode } from '../utils/Const';
 import {
@@ -29,7 +28,7 @@ import {
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse
 } from '../scheduler/common/SchedulerInteface';
-import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 
 export class SchedulerService {
   static listClustersAPIService = async (
@@ -78,21 +77,15 @@ export class SchedulerService {
         setIsLoadingKernelDetail(false);
       }
       if (formattedResponse?.error) {
-        if (!toast.isActive('clusterError')) {
-          toast.error(formattedResponse?.error, {
-            ...toastifyCustomStyle,
-            toastId: 'clusterError'
-          });
-        }
+        Notification.error(formattedResponse?.error, {
+          autoClose: false
+        });
       }
     } catch (error) {
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
-      if (!toast.isActive('clusterError')) {
-        toast.error(`Failed to fetch clusters : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'clusterError'
-        });
-      }
+      Notification.error(`Failed to fetch clusters : ${error}`, {
+        autoClose: false
+      });
     }
   };
   static listSessionTemplatesAPIService = async (
@@ -151,24 +144,18 @@ export class SchedulerService {
         }
       }
       if (formattedResponse?.error) {
-        if (!toast.isActive('sessionTemplateError')) {
-          toast.error(formattedResponse?.error, {
-            ...toastifyCustomStyle,
-            toastId: 'sessionTemplateError'
-          });
-        }
+        Notification.error(formattedResponse?.error, {
+          autoClose: false
+        });
       }
     } catch (error) {
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
       );
-      if (!toast.isActive('sessionTemplateError')) {
-        toast.error(`Failed to fetch session templates : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'sessionTemplateError'
-        });
-      }
+      Notification.error(`Failed to fetch session templates : ${error}`, {
+        autoClose: false
+      });
     }
   };
   static listComposersAPIService = async (
@@ -189,9 +176,11 @@ export class SchedulerService {
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
         setComposerList([]);
-        toast.error(
+        Notification.error(
           'No composer environment in this project and region',
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
         if (setIsLoading) {
           setIsLoading(false);
@@ -216,9 +205,11 @@ export class SchedulerService {
           }
         } catch (error) {
           console.error('Error parsing error message:', error);
-          showToast(
+          Notification.error(
             'Error fetching environments list. Please try again later.',
-            'error-featching-env-list'
+            {
+              autoClose: false
+            }
           );
         }
         setEnvApiFlag(false);
@@ -238,9 +229,11 @@ export class SchedulerService {
         'Error listing composer environment list',
         LOG_LEVEL.ERROR
       );
-      toast.error(
+      Notification.error(
         `Failed to fetch composer environment list : ${error}`,
-        toastifyCustomStyle
+        {
+          autoClose: false
+        }
       );
       setEnvApiFlag(false);
     }
@@ -267,30 +260,34 @@ export class SchedulerService {
         }
       );
       if (data?.error) {
-        toast.error(data.error, toastifyCustomStyle);
+        Notification.error(data.error, {
+          autoClose: false
+        });
         setCreatingScheduler(false);
       } else {
         if (editMode) {
-          toast.success(
-            'Job scheduler successfully updated',
-            toastifyCustomStyle
-          );
+          Notification.success('Job scheduler successfully updated', {
+            autoClose: false
+          });
           if (packageInstalledList.length > 0) {
-            toast.success(
+            Notification.success(
               'Installation of packages will take sometime',
-              toastifyCustomStyle
+              {
+                autoClose: false
+              }
             );
           }
           setPackageEditFlag(false);
         } else {
-          toast.success(
-            'Job scheduler successfully created',
-            toastifyCustomStyle
-          );
+          Notification.success('Job scheduler successfully created', {
+            autoClose: false
+          });
           if (packageInstalledList.length > 0) {
-            toast.success(
+            Notification.success(
               'Installation of packages will take sometime',
-              toastifyCustomStyle
+              {
+                autoClose: false
+              }
             );
           }
         }
@@ -299,10 +296,9 @@ export class SchedulerService {
       }
     } catch (reason) {
       setCreatingScheduler(false);
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Error on POST {dataToSend}.\n${reason}`, {
+        autoClose: false
+      });
     }
   };
 
@@ -321,10 +317,9 @@ export class SchedulerService {
       setInputNotebookFilePath(formattedResponse.input_filename);
     } catch (reason) {
       setEditNotebookLoading('');
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Error on POST {dataToSend}.\n${reason}`, {
+        autoClose: false
+      });
     }
   };
 
@@ -469,10 +464,9 @@ export class SchedulerService {
       setEditDagLoading('');
     } catch (reason) {
       setEditDagLoading('');
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Error on POST {dataToSend}.\n${reason}`, {
+        autoClose: false
+      });
     }
   };
 
@@ -632,12 +626,9 @@ export class SchedulerService {
         setIsLoading(false);
       }
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      Notification.error(`Error on GET credentials..\n${reason}`, {
+        autoClose: false
+      });
     }
   };
   static listDagInfoAPIService = async (
@@ -669,11 +660,10 @@ export class SchedulerService {
         );
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
-          toast.error(
-            `Failed to fetch schedule list : ${errorObject.error.message ? errorObject.error.message : errorObject.error}`,
+          Notification.error(
+            `Failed to fetch schedule list : ${errorObject.error.message ? errorObject.error.message : errorObject.error ? errorObject.error : errorObject}`,
             {
-              ...toastifyCustomStyle,
-              toastId: 'dagListError'
+              autoClose: 5000
             }
           );
         }
@@ -687,12 +677,9 @@ export class SchedulerService {
         'Error listing dag Scheduler list',
         LOG_LEVEL.ERROR
       );
-      if (!toast.isActive('dagListError')) {
-        toast.error(`Failed to fetch schedule list : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'dagListError'
-        });
-      }
+      Notification.error(`Failed to fetch schedule list : ${error}`, {
+        autoClose: false
+      });
     }
   };
   static listDagInfoAPIServiceForCreateNotebook = async (
@@ -722,12 +709,9 @@ export class SchedulerService {
         'Error listing dag Scheduler list',
         LOG_LEVEL.ERROR
       );
-      if (!toast.isActive('dagListError')) {
-        toast.error(`Failed to fetch schedule list : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'clusterError'
-        });
-      }
+      Notification.error(`Failed to fetch schedule list : ${error}`, {
+        autoClose: false
+      });
     }
   };
   static handleDownloadOutputNotebookAPIService = async (
@@ -746,20 +730,20 @@ export class SchedulerService {
       });
       dagRunId = decodeURIComponent(dagRunId);
       if (formattedResponse.status === 0) {
-        toast.success(
-          `${dagId}_${dagRunId} downloaded successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`${dagId}_${dagRunId} downloaded successfully`, {
+          autoClose: false
+        });
       } else {
-        toast.error(
-          `Failed to download the ${dagId}_${dagRunId}`,
-          toastifyCustomStyle
-        );
+        Notification.error(`Failed to download the ${dagId}_${dagRunId}`, {
+          autoClose: false
+        });
       }
       setDownloadOutputDagRunId('');
     } catch (error) {
       SchedulerLoggingService.log('Error in Download api', LOG_LEVEL.ERROR);
-      toast.error(`Error in Download api : ${error}`, toastifyCustomStyle);
+      Notification.error(`Error in Download api : ${error}`, {
+        autoClose: false
+      });
       setDownloadOutputDagRunId('');
     }
   };
@@ -784,19 +768,22 @@ export class SchedulerService {
           setBucketName,
           composerSelected
         );
-        toast.success(
+        Notification.success(
           `Deleted job ${dag_id}. It might take a few minutes to for it to be deleted from the list of jobs.`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
       } else {
-        toast.error(`Failed to delete the ${dag_id}`, toastifyCustomStyle);
+        Notification.error(`Failed to delete the ${dag_id}`, {
+          autoClose: false
+        });
       }
     } catch (error) {
       SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
-      toast.error(
-        `Failed to delete the ${dag_id} : ${error}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Failed to delete the ${dag_id} : ${error}`, {
+        autoClose: false
+      });
     }
   };
   static handleUpdateSchedulerAPIService = async (
@@ -816,10 +803,9 @@ export class SchedulerService {
         { method: 'POST' }
       );
       if (formattedResponse?.status === 0) {
-        toast.success(
-          `scheduler ${dag_id} updated successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`scheduler ${dag_id} updated successfully`, {
+          autoClose: false
+        });
         await SchedulerService.listDagInfoAPIService(
           setDagList,
           setIsLoading,
@@ -827,19 +813,20 @@ export class SchedulerService {
           composerSelected
         );
       } else {
-        toast.error(
+        Notification.error(
           `Error in pausing the schedule : ${formattedResponse?.error}`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
       }
       setUpdateLoading('');
     } catch (error) {
       setUpdateLoading('');
       SchedulerLoggingService.log('Error in Update api', LOG_LEVEL.ERROR);
-      toast.error(
-        `Error in pausing the schedule : ${error}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Error in pausing the schedule : ${error}`, {
+        autoClose: false
+      });
     }
   };
   static listDagTaskInstancesListService = async (
@@ -857,8 +844,7 @@ export class SchedulerService {
         `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}`
       );
       data.task_instances?.sort(
-        (a: any, b: any) =>
-          new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+        (a: any, b: any) => new Date(a.start_date).getTime() - 12
       );
       let transformDagRunTaskInstanceListData = [];
       transformDagRunTaskInstanceListData = data.task_instances?.map(
@@ -876,12 +862,9 @@ export class SchedulerService {
       setDagTaskInstancesList(transformDagRunTaskInstanceListData);
       setIsLoading(false);
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      Notification.error(`Error on GET credentials..\n${reason}`, {
+        autoClose: false
+      });
     }
   };
   static listDagTaskLogsListService = async (
@@ -902,12 +885,9 @@ export class SchedulerService {
       setLogList(data?.content);
       setIsLoadingLogs(false);
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      Notification.error(`Error on GET credentials..\n${reason}`, {
+        autoClose: false
+      });
     }
   };
   static handleImportErrordataService = async (
@@ -922,12 +902,9 @@ export class SchedulerService {
       setImportErrorData(data?.import_errors);
       setImportErrorEntries(data?.total_entries);
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      Notification.error(`Error on GET credentials..\n${reason}`, {
+        autoClose: false
+      });
     }
   };
 
@@ -957,32 +934,33 @@ export class SchedulerService {
             `checkRequiredPackages?composer_environment_name=${composerSelectedList}`
           );
           if (installedPackageList.length > 0) {
-            toast.error(
+            Notification.error(
               `Failed to trigger ${dagId} : required packages are not installed`,
-              toastifyCustomStyle
+              {
+                autoClose: false
+              }
             );
           } else {
-            toast.error(
-              `Failed to trigger ${dagId} : ${data?.error}`,
-              toastifyCustomStyle
-            );
+            Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
+              autoClose: false
+            });
           }
         } else {
-          toast.error(
-            `Failed to trigger ${dagId} : ${data?.error}`,
-            toastifyCustomStyle
-          );
+          Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
+            autoClose: false
+          });
         }
       } else {
-        toast.success(`${dagId} triggered successfully `, toastifyCustomStyle);
+        Notification.success(`${dagId} triggered successfully `, {
+          autoClose: false
+        });
       }
       setTriggerLoading('');
     } catch (reason) {
       setTriggerLoading('');
-      toast.error(
-        `Failed to trigger ${dagId} : ${reason}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
+        autoClose: false
+      });
     }
   };
 
@@ -1039,10 +1017,9 @@ export class SchedulerService {
           return;
         }
       } else {
-        toast.error(
-          `Failed to installation package list : ${reason}`,
-          toastifyCustomStyle
-        );
+        Notification.error(`Failed to installation package list : ${reason}`, {
+          autoClose: false
+        });
       }
     } finally {
       abortControllerRef.current = null; // Clear the AbortController

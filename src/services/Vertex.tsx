@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
@@ -113,10 +114,10 @@ export class VertexServices {
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
           if (errorObject.error.message) {
-            toast.error(
+            Notification.error(
               `Error in creating schedule : ${errorObject.error.message}`,
               {
-                ...toastifyCustomStyle
+                autoClose: false
               }
             );
           } else {
@@ -130,9 +131,11 @@ export class VertexServices {
         }
         setCreatingVertexScheduler(false);
       } else {
-        toast.success(
+        Notification.success(
           `Job ${payload.display_name} successfully created`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
@@ -178,9 +181,11 @@ export class VertexServices {
         );
         setCreatingVertexScheduler(false);
       } else {
-        toast.success(
+        Notification.success(
           `Job ${payload.display_name} successfully updated`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
@@ -322,15 +327,16 @@ export class VertexServices {
         }
       );
       if (Object.keys(formattedResponse).length === 0) {
-        toast.success(
-          `Schedule ${displayName} updated successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`Schedule ${displayName} updated successfully`, {
+          autoClose: false
+        });
         setResumeLoading('');
       } else {
         setResumeLoading('');
         SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
-        toast.error('Failed to pause schedule');
+        Notification.error('Failed to pause schedule', {
+          autoClose: false
+        });
       }
     } catch (error) {
       setResumeLoading('');
@@ -376,10 +382,9 @@ export class VertexServices {
         }
       );
       if (Object.keys(formattedResponse).length === 0) {
-        toast.success(
-          `Schedule ${displayName} updated successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`Schedule ${displayName} updated successfully`, {
+          autoClose: false
+        });
         setResumeLoading('');
       } else {
         setResumeLoading('');
@@ -387,7 +392,9 @@ export class VertexServices {
           'Error in resume schedule',
           LOG_LEVEL.ERROR
         );
-        toast.error('Failed to resume schedule');
+        Notification.error('Failed to resume schedule', {
+          autoClose: false
+        });
       }
     } catch (error) {
       setResumeLoading('');
@@ -431,13 +438,14 @@ export class VertexServices {
       );
       if (data.name) {
         setTriggerLoading('');
-        toast.success(
-          `${displayName} triggered successfully `,
-          toastifyCustomStyle
-        );
+        Notification.success(`${displayName} triggered successfully `, {
+          autoClose: false
+        });
       } else {
         setTriggerLoading('');
-        toast.error(`Failed to Trigger ${displayName}`, toastifyCustomStyle);
+        Notification.error(`Failed to Trigger ${displayName}`, {
+          autoClose: false
+        });
       }
     } catch (reason) {
       setTriggerLoading('');
@@ -496,12 +504,16 @@ export class VertexServices {
           hasNextPage,
           setApiEnableUrl
         );
-        toast.success(
+        Notification.success(
           `Deleted job ${displayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
       } else {
-        toast.error(`Failed to delete the ${displayName}`, toastifyCustomStyle);
+        Notification.error(`Failed to delete the ${displayName}`, {
+          autoClose: false
+        });
       }
     } catch (error) {
       SchedulerLoggingService.log(
@@ -541,14 +553,15 @@ export class VertexServices {
         );
       } else {
         setEditNotebookLoading('');
-        toast.error('File path not found', toastifyCustomStyle);
+        Notification.error('File path not found', {
+          autoClose: false
+        });
       }
     } catch (reason) {
       setEditNotebookLoading('');
-      toast.error(
-        `Error in updating notebook.\n${reason}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Error in updating notebook.\n${reason}`, {
+        autoClose: false
+      });
     }
   };
 
@@ -705,7 +718,9 @@ export class VertexServices {
         setEditMode(true);
       } else {
         setEditScheduleLoading('');
-        toast.error('File path not found', toastifyCustomStyle);
+        Notification.error('File path not found', {
+          autoClose: false
+        });
       }
     } catch (reason) {
       setEditScheduleLoading('');
