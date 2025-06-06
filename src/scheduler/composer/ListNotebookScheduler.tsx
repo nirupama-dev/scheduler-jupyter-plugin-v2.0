@@ -162,7 +162,8 @@ function ListNotebookScheduler({
   const data = dagList;
   const backselectedEnvironment = backButtonComposerName;
   const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
-  const [importErrorPopupOpen, setImportErrorPopupOpen] = useState<boolean>(false);
+  const [importErrorPopupOpen, setImportErrorPopupOpen] =
+    useState<boolean>(false);
   const [selectedDagId, setSelectedDagId] = useState('');
   const [editDagLoading, setEditDagLoading] = useState('');
   const [inputNotebookFilePath, setInputNotebookFilePath] = useState('');
@@ -170,7 +171,8 @@ function ListNotebookScheduler({
   const [deletingNotebook, setDeletingNotebook] = useState<boolean>(false);
   const [importErrorData, setImportErrorData] = useState<string[]>([]);
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
-  const [isGCSPluginInstalled, setIsGCSPluginInstalled] = useState<boolean>(false);
+  const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
+    useState<boolean>(false);
   const [projectId, setProjectId] = useState('');
   const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);

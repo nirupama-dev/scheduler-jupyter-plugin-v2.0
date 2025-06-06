@@ -28,14 +28,15 @@ import {
   iconCreateCluster,
   IconSuccessCircle,
   IconFailedCircle,
-  IconOrangeCircle
+  IconOrangeCircle,
+  IconGreyCircle
 } from '../../utils/Icons';
 import {
   IActivePaginationVariables,
   ISchedulerData,
   IVertexScheduleRunList
 } from './VertexInterfaces';
-import { LOG_EXPLORER_BASE_URL } from '../../utils/Const';
+import { LOG_EXPLORER_BASE_URL, VIEW_CLOUD_LOGS } from '../../utils/Const';
 import { toast } from 'react-toastify';
 
 const VertexExecutionHistory = ({
@@ -77,7 +78,6 @@ const VertexExecutionHistory = ({
   const [selectedMonth, setSelectedMonth] = useState<Dayjs | null>(null);
   const [selectedDate, setSelectedDate] = useState<Dayjs | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [blueListDates, setBlueListDates] = useState<string[]>([]);
   const [greyListDates, setGreyListDates] = useState<string[]>([]);
   const [orangeListDates, setOrangeListDates] = useState<string[]>([]);
   const [redListDates, setRedListDates] = useState<string[]>([]);
@@ -178,9 +178,9 @@ const VertexExecutionHistory = ({
       : false;
 
     // Check if the date matches the respective statuses
-    const isBlueExecution = getFormattedDate(blueListDates, day);
     const isGreyExecution = getFormattedDate(greyListDates, day);
     const isOrangeExecution = getFormattedDate(orangeListDates, day);
+    console.log('isOrangeExecution', isOrangeExecution);
     const isRedExecution = getFormattedDate(redListDates, day);
     const isGreenExecution = getFormattedDate(greenListDates, day);
     const isDarkGreenExecution = getFormattedDate(darkGreenListDates, day);
@@ -192,44 +192,60 @@ const VertexExecutionHistory = ({
     let borderColor = 'none';
     let textColor = 'inherit';
     let opacity = 1;
+    day;
+    let fontWeight = 'normal';
 
     // Case 1: If today is selected
     if (isToday && isSelectedExecution) {
-      backgroundColor = '#E7F2FF';
-      borderColor = '#3B78E7';
       textColor = '#0C67DF';
+      fontWeight = 'bold';
+
+      // Set background and border colors based on execution status
+      if (isGreyExecution) {
+        backgroundColor = '#7474740F';
+        borderColor = '2px solid #747474';
+      } else if (isGreenExecution && isRedExecution) {
+        backgroundColor = '#E374000F';
+        borderColor = '2px solid #E37400';
+      } else if (isGreenExecution && !isRedExecution) {
+        backgroundColor = '#1880380F';
+        borderColor = '2px solid #188038';
+      } else if (isRedExecution && !isGreenExecution) {
+        backgroundColor = '#B3261E0F';
+        borderColor = '2px solid #B3261E';
+      }
     }
     // Case 2: If today is not selected but it's today
     else if (isToday) {
-      backgroundColor = '#E7F2FF';
-      textColor = '#454746';
+      textColor = '#0C67DF';
+      fontWeight = 'bold';
     }
+
     // Case 3: If selected date has a background color (blue, green, etc.)
-    else if (isBlueExecution) {
+    else if (isDarkGreenExecution) {
       textColor = '#454746';
-    } else if (isDarkGreenExecution) {
+    } else if (isGreyExecution && isSelectedExecution) {
       textColor = '#454746';
-    } else if (isGreenExecution) {
+      backgroundColor = '#7474740F';
+      borderColor = '2px solid #747474';
+    } else if (isGreenExecution && isRedExecution && isSelectedExecution) {
       textColor = '#454746';
-    } else if (isOrangeExecution) {
+      backgroundColor = '#E374000F';
+      borderColor = '2px solid #E37400';
+    } else if (isGreenExecution && isSelectedExecution) {
       textColor = '#454746';
-    } else if (isRedExecution) {
+      backgroundColor = '#1880380F';
+      borderColor = '2px solid #188038';
+    } else if (isRedExecution && isSelectedExecution) {
       textColor = '#454746';
-    } else if (isGreyExecution) {
-      textColor = '#454746';
+      backgroundColor = '#B3261E0F';
+      borderColor = '2px solid #B3261E';
     }
 
     // Case 4: If the day is selected but without a background color (i.e., transparent background)
     if (isSelectedExecution && backgroundColor === 'transparent') {
       backgroundColor = 'transparent';
       borderColor = '2px solid #3B78E7';
-      textColor = '#0C67DF';
-    }
-
-    // Case 5: If the day is selected and has an existing background color (e.g., blue, green, etc.)
-    if (isSelectedExecution && backgroundColor !== 'transparent') {
-      borderColor = '2px solid #3B78E7';
-      textColor = '#0C67DF';
     }
 
     // Reduce opacity for past and future dates
@@ -238,26 +254,28 @@ const VertexExecutionHistory = ({
     }
 
     return (
-      <div
-        className="calender-date-time-wrapper"
-        style={{
-          border: borderColor,
-          borderRadius:
-            backgroundColor !== 'transparent' || isSelectedExecution || isToday
-              ? '50%'
-              : 'none',
-          opacity: opacity,
-          backgroundColor: isToday ? '#E7F2FF' : 'none',
-          display: 'inline-block'
-        }}
-      >
+      <div className="calender-date-time-wrapper">
         <PickersDay
           {...props}
           style={{
-            color: textColor
+            color: textColor,
+            border: borderColor,
+            borderRadius:
+              backgroundColor !== 'transparent' ||
+              isSelectedExecution ||
+              isToday
+                ? '50%'
+                : 'none',
+            opacity: opacity,
+            backgroundColor: backgroundColor,
+            fontWeight: fontWeight
           }}
         />
-        {isGreenExecution && (
+
+        {/* Render status icons based on conditions */}
+
+        {((isDarkGreenExecution && !isSelectedExecution) ||
+          (isDarkGreenExecution && isToday && !isSelectedExecution)) && (
           <div className="calender-status-icon">
             <IconSuccessCircle.react
               tag="div"
@@ -266,7 +284,34 @@ const VertexExecutionHistory = ({
           </div>
         )}
 
-        {isRedExecution && (
+        {((isGreyExecution && !isSelectedExecution) ||
+          (isGreyExecution && isToday && !isSelectedExecution)) && (
+          <div className="calender-status-icon">
+            <IconGreyCircle.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          </div>
+        )}
+
+        {((!isSelectedExecution && isGreenExecution && !isRedExecution) ||
+          (isGreenExecution &&
+            !isRedExecution &&
+            isToday &&
+            !isSelectedExecution)) && (
+          <div className="calender-status-icon">
+            <IconSuccessCircle.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          </div>
+        )}
+
+        {((!isSelectedExecution && isRedExecution && !isGreenExecution) ||
+          (!isGreenExecution &&
+            isRedExecution &&
+            isToday &&
+            !isSelectedExecution)) && (
           <div className="calender-status-icon">
             <IconFailedCircle.react
               tag="div"
@@ -275,7 +320,11 @@ const VertexExecutionHistory = ({
           </div>
         )}
 
-        {isOrangeExecution && (
+        {((!isSelectedExecution && isRedExecution && isGreenExecution) ||
+          (isGreenExecution &&
+            isRedExecution &&
+            isToday &&
+            !isSelectedExecution)) && (
           <div className="calender-status-icon">
             <IconOrangeCircle.react
               tag="div"
@@ -318,7 +367,7 @@ const VertexExecutionHistory = ({
 
   return (
     <>
-      <>
+      <div className="execution-history-main-wrapper">
         <div className="execution-history-header">
           <div
             role="button"
@@ -334,86 +383,82 @@ const VertexExecutionHistory = ({
             Execution History: {scheduleName}
           </div>
         </div>
-        <div className="execution-history-main-full-wrapper execution-top-border">
-          <div className="execution-history-full-wrapper execution-wrapper-border-none">
-            {isLoading ? (
-              <div className="spin-loader-main-execution-history">
-                <Box sx={{ width: '100%', height: '1px' }}>
-                  <LinearProgress />
-                </Box>
-              </div>
-            ) : (
-              <div
-                className="spin-loader-main-execution-history"
-                style={{ height: '4px' }}
-              ></div>
-            )}
-          </div>
-          <div className="execution-history-main-wrapper">
-            <div
-              className={
-                'execution-history-left-wrapper calender-top execution-wrapper-border-none'
-              }
-            >
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DateCalendar
-                  minDate={dayjs(schedulerData?.createTime)}
-                  maxDate={dayjs(currentDate)}
-                  referenceDate={today}
-                  onChange={newValue => handleDateSelection(newValue)}
-                  onMonthChange={handleMonthChange}
-                  slots={{
-                    day: CustomDay
-                  }}
-                  className="date-box-shadow"
-                />
-              </LocalizationProvider>
-            </div>
-            <div className="execution-history-right-wrapper execution-history-right-wrapper-scroll execution-wrapper-border-none">
-              <div>
-                <div className="log-btn">
-                  <div
-                    className="execution-history-main-wrapper"
-                    role="button"
-                    onClick={handleLogs}
-                  >
-                    <div className="create-icon log-icon cursor-icon">
-                      <iconCreateCluster.react
-                        tag="div"
-                        className="logo-alignment-style"
-                      />
-                    </div>
-                    <div className="create-text cursor-icon">
-                      VIEW CLOUD LOGS
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <VertexJobRuns
-                region={region}
-                schedulerData={schedulerData}
-                scheduleName={scheduleName}
-                setJobRunsData={setJobRunsData}
-                setJobRunId={setJobRunId}
-                selectedMonth={selectedMonth}
-                selectedDate={selectedDate}
-                setBlueListDates={setBlueListDates}
-                setGreyListDates={setGreyListDates}
-                setOrangeListDates={setOrangeListDates}
-                setRedListDates={setRedListDates}
-                setGreenListDates={setGreenListDates}
-                setDarkGreenListDates={setDarkGreenListDates}
-                setIsLoading={setIsLoading}
-                isLoading={isLoading}
-                vertexScheduleRunsList={vertexScheduleRunsList}
-                setVertexScheduleRunsList={setVertexScheduleRunsList}
-                abortControllers={abortControllers}
-                abortApiCall={abortApiCall}
+        <div className="log-btn right-panel-wrapper">
+          <div
+            className="execution-history-main-wrapper"
+            role="button"
+            onClick={handleLogs}
+          >
+            <div className="create-icon log-icon cursor-icon">
+              <iconCreateCluster.react
+                tag="div"
+                className="logo-alignment-style"
               />
             </div>
+            <div className="create-text cursor-icon">{VIEW_CLOUD_LOGS}</div>
           </div>
         </div>
-      </>
+      </div>
+
+      <div className="execution-history-main-full-wrapper execution-top-border">
+        <div className="execution-history-full-wrapper execution-wrapper-border-none">
+          {isLoading ? (
+            <div className="spin-loader-main-execution-history">
+              <Box sx={{ width: '100%', height: '1px' }}>
+                <LinearProgress />
+              </Box>
+            </div>
+          ) : (
+            <div
+              className="spin-loader-main-execution-history"
+              style={{ height: '4px' }}
+            ></div>
+          )}
+        </div>
+        <div className="execution-history-main-wrapper">
+          <div
+            className={
+              'execution-history-left-wrapper calender-top execution-wrapper-border-none'
+            }
+          >
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DateCalendar
+                minDate={dayjs(schedulerData?.createTime)}
+                maxDate={dayjs(currentDate)}
+                referenceDate={today}
+                onChange={newValue => handleDateSelection(newValue)}
+                onMonthChange={handleMonthChange}
+                slots={{
+                  day: CustomDay
+                }}
+                className="date-box-shadow"
+              />
+            </LocalizationProvider>
+          </div>
+          <div className="execution-history-right-wrapper execution-history-right-wrapper-scroll execution-wrapper-border-none success-message-top">
+            <VertexJobRuns
+              region={region}
+              schedulerData={schedulerData}
+              scheduleName={scheduleName}
+              setJobRunsData={setJobRunsData}
+              setJobRunId={setJobRunId}
+              selectedMonth={selectedMonth}
+              selectedDate={selectedDate}
+              setGreyListDates={setGreyListDates}
+              setOrangeListDates={setOrangeListDates}
+              setRedListDates={setRedListDates}
+              setGreenListDates={setGreenListDates}
+              setDarkGreenListDates={setDarkGreenListDates}
+              setIsLoading={setIsLoading}
+              isLoading={isLoading}
+              vertexScheduleRunsList={vertexScheduleRunsList}
+              setVertexScheduleRunsList={setVertexScheduleRunsList}
+              abortControllers={abortControllers}
+              abortApiCall={abortApiCall}
+            />
+          </div>
+        </div>
+      </div>
     </>
   );
 };

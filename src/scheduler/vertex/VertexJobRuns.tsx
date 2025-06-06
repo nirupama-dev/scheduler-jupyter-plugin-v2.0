@@ -33,7 +33,6 @@ const VertexJobRuns = ({
   setJobRunId,
   selectedMonth,
   selectedDate,
-  setBlueListDates,
   setGreyListDates,
   setOrangeListDates,
   setRedListDates,
@@ -55,7 +54,6 @@ const VertexJobRuns = ({
   setJobRunId: (value: string) => void;
   selectedMonth: Dayjs | null;
   selectedDate: Dayjs | null;
-  setBlueListDates: (value: string[]) => void;
   setGreyListDates: (value: string[]) => void;
   setOrangeListDates: (value: string[]) => void;
   setRedListDates: (value: string[]) => void;
@@ -271,7 +269,6 @@ const VertexJobRuns = ({
       selectedMonth,
       setIsLoading,
       setVertexScheduleRunsList,
-      setBlueListDates,
       setGreyListDates,
       setOrangeListDates,
       setRedListDates,

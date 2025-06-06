@@ -709,9 +709,9 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 }
 
 .log-btn {
-  padding: 15px;
+  padding: 10px;
   margin-left: auto;
-  width: 17%;
+  width: 11%;
 }
 
 .error-message-warn {
@@ -779,17 +779,4 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 
 .calender-date-time-wrapper {
   position: relative;
-}
-
-.css-jgls56-MuiButtonBase-root-MuiPickersDay-root.Mui-selected {
-  background: none !important;
-  color: none !important;
-}
-
-.css-jgls56-MuiButtonBase-root-MuiPickersDay-root:not(.Mui-selected) {
-  border: none !important;
-}
-
-.css-1u23akw-MuiButtonBase-root-MuiPickersDay-root.Mui-selected {
-  background: none !important;
 }
