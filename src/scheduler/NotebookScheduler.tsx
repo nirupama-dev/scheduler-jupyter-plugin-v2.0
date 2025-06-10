@@ -157,7 +157,9 @@ const NotebookSchedulerComponent = ({
     <>
       <div
         className={
-          listingScreenFlag ? 'list-level-component' : 'component-level'
+          listingScreenFlag
+            ? 'list-level-component'
+            : 'component-level'
         }
       >
         {isLoading ? (
