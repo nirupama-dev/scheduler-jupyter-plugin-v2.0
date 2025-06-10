@@ -501,9 +501,10 @@ function ListNotebookScheduler({
           )
         ) : (
           // If not installed, show the disabled edit icon
+          // ToDo: change css class to display disabled icon after GCS plugin release.
           <div
             role="button"
-            className="icon-buttons-style-disable"
+            className="edit-icon-buttons-display"
             title="Install GCS Plugin to enable notebook editing"
           >
             <iconEditDag.react
