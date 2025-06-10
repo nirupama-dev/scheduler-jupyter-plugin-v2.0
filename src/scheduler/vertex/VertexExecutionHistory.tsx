@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import React, { useEffect, useState } from 'react';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -268,7 +269,26 @@ const VertexExecutionHistory = ({
                 : 'none',
             opacity: opacity,
             backgroundColor: backgroundColor,
-            fontWeight: fontWeight
+            fontWeight: fontWeight,
+            transition: 'border 0.3s ease-out'
+          }}
+          sx={{
+            // Reset PickersDay's default hover styles if they conflict
+            '&:hover': {
+                backgroundColor: !isSelectedExecution
+                  ? '#1F1F1F0F !important'
+                  : 'transparent !important', // Suppress default PickersDay hover
+                  borderRadius: '50%',
+            },
+            // Reset selected hover if needed
+            '&.Mui-selected:hover': {
+                backgroundColor: 'transparent !important',
+            },
+            // Ensure its text color is managed by the parent div
+            color: 'inherit', // Inherit color from parent div
+            // Remove its own background so wrapper can control it
+            backgroundColor: 'transparent',
+            transition: 'none'
           }}
         />
 
