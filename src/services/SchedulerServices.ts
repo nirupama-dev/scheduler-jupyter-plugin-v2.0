@@ -30,6 +30,8 @@ import {
 } from '../scheduler/common/SchedulerInteface';
 import { Notification } from '@jupyterlab/apputils';
 import { handleErrorToast } from '../utils/errorUtils';
+import { toast } from 'react-toastify';
+import { toastifyCustomStyle } from '../utils/Config';
 
 export class SchedulerService {
   static listClustersAPIService = async (
@@ -659,9 +661,20 @@ export class SchedulerService {
           }
         );
       } else {
-        handleErrorToast({
-          error: formattedResponse?.error
-        });
+        const jsonstr = formattedResponse?.error.slice(
+          formattedResponse?.error.indexOf('{'),
+          formattedResponse?.error.lastIndexOf('}') + 1
+        );
+        if (jsonstr) {
+          const errorObject = JSON.parse(jsonstr);
+          toast.error(
+            `Failed to fetch schedule list : ${errorObject.error.message ? errorObject.error.message : errorObject.error}`,
+            {
+              ...toastifyCustomStyle,
+              toastId: 'dagListError'
+            }
+          );
+        }
       }
 
       setDagList(transformDagListData);
@@ -673,10 +686,12 @@ export class SchedulerService {
         'Error listing dag Scheduler list',
         LOG_LEVEL.ERROR
       );
-      const errorResponse = `Failed to fetch schedule list : ${error}`;
-      handleErrorToast({
-        error: errorResponse
-      });
+      if (!toast.isActive('dagListError')) {
+        toast.error(`Failed to fetch schedule list : ${error}`, {
+          ...toastifyCustomStyle,
+          toastId: 'dagListError'
+        });
+      }
     }
   };
   static listDagInfoAPIServiceForCreateNotebook = async (
@@ -706,10 +721,12 @@ export class SchedulerService {
         'Error listing dag Scheduler list',
         LOG_LEVEL.ERROR
       );
-      const errorResponse = `Failed to fetch schedule list : ${error}`;
-      handleErrorToast({
-        error: errorResponse
-      });
+      if (!toast.isActive('dagListError')) {
+        toast.error(`Failed to fetch schedule list : ${error}`, {
+          ...toastifyCustomStyle,
+          toastId: 'clusterError'
+        });
+      }
     }
   };
   static handleDownloadOutputNotebookAPIService = async (
