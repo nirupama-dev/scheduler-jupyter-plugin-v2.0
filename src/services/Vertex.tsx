@@ -35,6 +35,7 @@ import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
 import { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import React from 'react';
+import { handleErrorToast } from '../utils/errorUtils';
 
 export class VertexServices {
   static machineTypeAPIService = (
@@ -88,10 +89,9 @@ export class VertexServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch machine type list: ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       });
   };
 
@@ -107,28 +107,9 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        const jsonstr = data?.error.slice(
-          data?.error.indexOf('{'),
-          data?.error.lastIndexOf('}') + 1
-        );
-        if (jsonstr) {
-          const errorObject = JSON.parse(jsonstr);
-          if (errorObject.error.message) {
-            Notification.error(
-              `Error in creating schedule : ${errorObject.error.message}`,
-              {
-                autoClose: false
-              }
-            );
-          } else {
-            toast.error(
-              <ExpandToastMessage message={data.error} />,
-              data.error.length > 500
-                ? toastifyCustomWidth
-                : toastifyCustomStyle
-            );
-          }
-        }
+        handleErrorToast({
+          error: data.error
+        });
         setCreatingVertexScheduler(false);
       } else {
         Notification.success(
@@ -146,10 +127,9 @@ export class VertexServices {
         `Error creating schedule: ${reason}`,
         LOG_LEVEL.ERROR
       );
-      toast.error(
-        <ExpandToastMessage message={reason} />,
-        reason.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-      );
+      handleErrorToast({
+        error: reason
+      });
     }
   };
 
@@ -175,10 +155,9 @@ export class VertexServices {
         }
       );
       if (data.error) {
-        toast.error(
-          <ExpandToastMessage message={data.error} />,
-          toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: data.error
+        });
         setCreatingVertexScheduler(false);
       } else {
         Notification.success(
@@ -193,10 +172,9 @@ export class VertexServices {
       }
     } catch (reason: any) {
       setCreatingVertexScheduler(false);
-      toast.error(
-        <ExpandToastMessage message={reason} />,
-        reason.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-      );
+      handleErrorToast({
+        error: reason
+      });
     }
   };
 
@@ -294,10 +272,9 @@ export class VertexServices {
         `Error listing vertex schedules ${error}`,
         LOG_LEVEL.ERROR
       );
-      toast.error(
-        <ExpandToastMessage message={error} />,
-        error.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-      );
+      handleErrorToast({
+        error: error
+      });
     } finally {
       setIsLoading(false); // Ensure loading is stopped
     }
@@ -350,10 +327,9 @@ export class VertexServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to pause schedule : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
@@ -408,10 +384,9 @@ export class VertexServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to resume schedule : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
@@ -459,10 +434,9 @@ export class VertexServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to Trigger schedule : ${reason}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
@@ -521,10 +495,9 @@ export class VertexServices {
         LOG_LEVEL.ERROR
       );
       const errorResponse = `Failed to delete the ${displayName} : ${error}`;
-      toast.error(
-        <ExpandToastMessage message={errorResponse} />,
-        errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-      );
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
@@ -559,8 +532,9 @@ export class VertexServices {
       }
     } catch (reason) {
       setEditNotebookLoading('');
-      Notification.error(`Error in updating notebook.\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error in updating notebook.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -734,10 +708,9 @@ export class VertexServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Error in updating notebook. ${reason}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
@@ -884,10 +857,9 @@ export class VertexServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Error in fetching the execution history : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
     setIsLoading(false);

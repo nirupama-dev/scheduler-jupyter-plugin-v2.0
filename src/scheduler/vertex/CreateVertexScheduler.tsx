@@ -69,9 +69,9 @@ import {
   ICreatePayload,
   IMachineType
 } from './VertexInterfaces';
-import { Notification } from '@jupyterlab/apputils';
 import VertexScheduleJobs from './VertexScheduleJobs';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
+import { handleErrorToast } from '../../utils/errorUtils';
 
 const CreateVertexScheduler = ({
   themeManager,
@@ -832,8 +832,8 @@ const CreateVertexScheduler = ({
         }
       })
       .catch(error => {
-        Notification.error(error, {
-          autoClose: false
+        handleErrorToast({
+          error: error
         });
       });
   }, [projectId]);

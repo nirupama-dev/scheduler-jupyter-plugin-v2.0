@@ -34,6 +34,7 @@ import {
 import { Notification } from '@jupyterlab/apputils';
 import 'react-toastify/dist/ReactToastify.css';
 import { SchedulerLoggingService, LOG_LEVEL } from '../services/LoggingService';
+import { handleErrorToast } from '../utils/errorUtils';
 
 interface IRenderActionsData {
   state: ClusterStatus;
@@ -59,8 +60,8 @@ export class SessionService {
           console.log(response);
           const formattedResponse = await response.json();
           if (formattedResponse?.error?.code) {
-            Notification.error(formattedResponse?.error?.message, {
-              autoClose: false
+            handleErrorToast({
+              error: formattedResponse?.error?.message
             });
           } else {
             Notification.success(
@@ -76,12 +77,10 @@ export class SessionService {
             'Error deleting session',
             LOG_LEVEL.ERROR
           );
-          Notification.error(
-            `Failed to delete the session ${selectedSession} : ${err}`,
-            {
-              autoClose: false
-            }
-          );
+          const errorResponse = `Failed to delete the session ${selectedSession} : ${err}`;
+          handleErrorToast({
+            error: errorResponse
+          });
         });
     }
   };
@@ -106,8 +105,8 @@ export class SessionService {
               console.log(responseResult);
               const formattedResponse = await responseResult.json();
               if (formattedResponse?.error?.code) {
-                Notification.error(formattedResponse?.error?.message, {
-                  autoClose: false
+                handleErrorToast({
+                  error: formattedResponse?.error?.message
                 });
               }
             })
@@ -118,12 +117,10 @@ export class SessionService {
             'Error terminating session',
             LOG_LEVEL.ERROR
           );
-          Notification.error(
-            `Failed to terminate session ${selectedSession} : ${err}`,
-            {
-              autoClose: false
-            }
-          );
+          const errorResponse = `Failed to terminate session ${selectedSession} : ${err}`;
+          handleErrorToast({
+            error: errorResponse
+          });
         });
     }
   };
@@ -156,8 +153,8 @@ export class SessionService {
       setLabelDetail(labelValue);
       setIsLoading(false);
       if (formattedResponse?.error?.code) {
-        Notification.error(formattedResponse?.error?.message, {
-          autoClose: false
+        handleErrorToast({
+          error: formattedResponse?.error?.message
         });
       }
     } catch (error) {
@@ -166,12 +163,10 @@ export class SessionService {
         'Error loading session details',
         LOG_LEVEL.ERROR
       );
-      Notification.error(
-        `Failed to fetch session details ${sessionSelected} : ${error}`,
-        {
-          autoClose: false
-        }
-      );
+      const errorResponse = `Failed to fetch session details ${sessionSelected} : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
@@ -254,16 +249,17 @@ export class SessionService {
         setIsLoading(false);
       }
       if (formattedResponse?.error?.code) {
-        Notification.error(formattedResponse?.error?.message, {
-          autoClose: false
+        handleErrorToast({
+          error: formattedResponse?.error?.message
         });
         setIsLoading(false);
       }
     } catch (error) {
       setIsLoading(false);
       SchedulerLoggingService.log('Error listing Sessions', LOG_LEVEL.ERROR);
-      Notification.error(`Failed to fetch sessions : ${error}`, {
-        autoClose: false
+      const errorResponse = `Failed to fetch sessions : ${error}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };

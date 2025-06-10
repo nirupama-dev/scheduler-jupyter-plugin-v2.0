@@ -22,7 +22,7 @@ import {
   gcpServiceUrls
 } from '../utils/Const';
 import { authApi } from '../utils/Config';
-import { Notification } from '@jupyterlab/apputils';
+import { handleErrorToast } from '../utils/errorUtils';
 
 interface IRegions {
   name: string;
@@ -73,8 +73,8 @@ export function useRegion(projectId: string) {
       })
       .catch(error => {
         console.error(error);
-        Notification.error(error.message, {
-          autoClose: false
+        handleErrorToast({
+          error: error.message
         });
       });
   }, [projectId]);

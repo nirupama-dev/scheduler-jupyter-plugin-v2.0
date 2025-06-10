@@ -29,6 +29,7 @@ import {
   IUpdateSchedulerAPIResponse
 } from '../scheduler/common/SchedulerInteface';
 import { Notification } from '@jupyterlab/apputils';
+import { handleErrorToast } from '../utils/errorUtils';
 
 export class SchedulerService {
   static listClustersAPIService = async (
@@ -77,14 +78,15 @@ export class SchedulerService {
         setIsLoadingKernelDetail(false);
       }
       if (formattedResponse?.error) {
-        Notification.error(formattedResponse?.error, {
-          autoClose: false
+        handleErrorToast({
+          error: formattedResponse?.error
         });
       }
     } catch (error) {
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
-      Notification.error(`Failed to fetch clusters : ${error}`, {
-        autoClose: false
+      const errorResponse = `Failed to fetch clusters : ${error}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -144,8 +146,8 @@ export class SchedulerService {
         }
       }
       if (formattedResponse?.error) {
-        Notification.error(formattedResponse?.error, {
-          autoClose: false
+        handleErrorToast({
+          error: formattedResponse?.error
         });
       }
     } catch (error) {
@@ -153,8 +155,9 @@ export class SchedulerService {
         'Error listing session templates',
         LOG_LEVEL.ERROR
       );
-      Notification.error(`Failed to fetch session templates : ${error}`, {
-        autoClose: false
+      const errorResponse = `Failed to fetch session templates : ${error}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -229,12 +232,10 @@ export class SchedulerService {
         'Error listing composer environment list',
         LOG_LEVEL.ERROR
       );
-      Notification.error(
-        `Failed to fetch composer environment list : ${error}`,
-        {
-          autoClose: false
-        }
-      );
+      const errorResponse = `Failed to fetch composer environment list : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
       setEnvApiFlag(false);
     }
   };
@@ -260,8 +261,8 @@ export class SchedulerService {
         }
       );
       if (data?.error) {
-        Notification.error(data.error, {
-          autoClose: false
+        handleErrorToast({
+          error: data.error
         });
         setCreatingScheduler(false);
       } else {
@@ -296,8 +297,9 @@ export class SchedulerService {
       }
     } catch (reason) {
       setCreatingScheduler(false);
-      Notification.error(`Error on POST {dataToSend}.\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -317,8 +319,9 @@ export class SchedulerService {
       setInputNotebookFilePath(formattedResponse.input_filename);
     } catch (reason) {
       setEditNotebookLoading('');
-      Notification.error(`Error on POST {dataToSend}.\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -464,8 +467,9 @@ export class SchedulerService {
       setEditDagLoading('');
     } catch (reason) {
       setEditDagLoading('');
-      Notification.error(`Error on POST {dataToSend}.\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -626,8 +630,9 @@ export class SchedulerService {
         setIsLoading(false);
       }
     } catch (reason) {
-      Notification.error(`Error on GET credentials..\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error in listing dag runs..\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -654,20 +659,11 @@ export class SchedulerService {
           }
         );
       } else {
-        const jsonstr = formattedResponse?.error.slice(
-          formattedResponse?.error.indexOf('{'),
-          formattedResponse?.error.lastIndexOf('}') + 1
-        );
-        if (jsonstr) {
-          const errorObject = JSON.parse(jsonstr);
-          Notification.error(
-            `Failed to fetch schedule list : ${errorObject.error.message ? errorObject.error.message : errorObject.error ? errorObject.error : errorObject}`,
-            {
-              autoClose: 5000
-            }
-          );
-        }
+        handleErrorToast({
+          error: formattedResponse?.error
+        });
       }
+
       setDagList(transformDagListData);
       setIsLoading(false);
       setBucketName(formattedResponse[1]);
@@ -677,8 +673,9 @@ export class SchedulerService {
         'Error listing dag Scheduler list',
         LOG_LEVEL.ERROR
       );
-      Notification.error(`Failed to fetch schedule list : ${error}`, {
-        autoClose: false
+      const errorResponse = `Failed to fetch schedule list : ${error}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -709,8 +706,9 @@ export class SchedulerService {
         'Error listing dag Scheduler list',
         LOG_LEVEL.ERROR
       );
-      Notification.error(`Failed to fetch schedule list : ${error}`, {
-        autoClose: false
+      const errorResponse = `Failed to fetch schedule list : ${error}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -741,8 +739,9 @@ export class SchedulerService {
       setDownloadOutputDagRunId('');
     } catch (error) {
       SchedulerLoggingService.log('Error in Download api', LOG_LEVEL.ERROR);
-      Notification.error(`Error in Download api : ${error}`, {
-        autoClose: false
+      const errorResponse = `Error in Download api : ${error}`;
+      handleErrorToast({
+        error: errorResponse
       });
       setDownloadOutputDagRunId('');
     }
@@ -813,19 +812,18 @@ export class SchedulerService {
           composerSelected
         );
       } else {
-        Notification.error(
-          `Error in pausing the schedule : ${formattedResponse?.error}`,
-          {
-            autoClose: false
-          }
-        );
+        const errorResponse = `Error in pausing the schedule : ${formattedResponse?.error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
       setUpdateLoading('');
     } catch (error) {
       setUpdateLoading('');
       SchedulerLoggingService.log('Error in Update api', LOG_LEVEL.ERROR);
-      Notification.error(`Error in pausing the schedule : ${error}`, {
-        autoClose: false
+      const errorResponse = `Error in pausing the schedule : ${error}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -862,8 +860,9 @@ export class SchedulerService {
       setDagTaskInstancesList(transformDagRunTaskInstanceListData);
       setIsLoading(false);
     } catch (reason) {
-      Notification.error(`Error on GET credentials..\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error in dag task instances..\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -885,8 +884,9 @@ export class SchedulerService {
       setLogList(data?.content);
       setIsLoadingLogs(false);
     } catch (reason) {
-      Notification.error(`Error on GET credentials..\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error in listing task logs..\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -902,8 +902,9 @@ export class SchedulerService {
       setImportErrorData(data?.import_errors);
       setImportErrorEntries(data?.total_entries);
     } catch (reason) {
-      Notification.error(`Error on GET credentials..\n${reason}`, {
-        autoClose: false
+      const errorResponse = `Error in fetching import errors list : ${reason}`;
+      handleErrorToast({
+        error: errorResponse
       });
     }
   };
@@ -1017,8 +1018,9 @@ export class SchedulerService {
           return;
         }
       } else {
-        Notification.error(`Failed to installation package list : ${reason}`, {
-          autoClose: false
+        const errorResponse = `Failed to fetch installation package list : ${reason}`;
+        handleErrorToast({
+          error: errorResponse
         });
       }
     } finally {

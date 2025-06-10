@@ -30,7 +30,7 @@ import {
   IVertexScheduleRunList
 } from './VertexInterfaces';
 import { LOG_EXPLORER_BASE_URL } from '../../utils/Const';
-import { Notification } from '@jupyterlab/apputils';
+import { handleErrorToast } from '../../utils/errorUtils';
 
 const VertexExecutionHistory = ({
   region,
@@ -278,8 +278,8 @@ const VertexExecutionHistory = ({
         }
       })
       .catch(error => {
-        Notification.error(error, {
-          autoClose: false
+        handleErrorToast({
+          error: error
         });
       });
   }, [projectId]);

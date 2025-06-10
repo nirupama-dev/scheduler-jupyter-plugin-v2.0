@@ -14,14 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { toast } from 'react-toastify';
 import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import path from 'path';
-import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import React from 'react';
+import { handleErrorToast } from '../utils/errorUtils';
 
 export class StorageServices {
   static cloudStorageAPIService = (
@@ -50,10 +47,9 @@ export class StorageServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch cloud storage bucket : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       });
   };
   static newCloudStorageAPIService = (
