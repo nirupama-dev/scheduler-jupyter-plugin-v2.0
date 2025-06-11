@@ -14,12 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
-import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import React from 'react';
+import { handleErrorToast } from '../utils/errorUtils';
 
 export class ComputeServices {
   static getParentProjectAPIService = async (
@@ -38,7 +36,9 @@ export class ComputeServices {
         LOG_LEVEL.ERROR
       );
       setHostProject('');
-      toast.error('Failed to fetch host project');
+      Notification.error('Failed to fetch host project', {
+        autoClose: false
+      });
     }
   };
   static primaryNetworkAPIService = (
@@ -73,10 +73,9 @@ export class ComputeServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch primary network list : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       });
   };
 
@@ -118,10 +117,9 @@ export class ComputeServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch sub networks list : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       });
   };
 
@@ -159,10 +157,9 @@ export class ComputeServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch shared networks list : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       });
   };
 }
