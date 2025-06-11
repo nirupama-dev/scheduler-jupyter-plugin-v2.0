@@ -510,7 +510,7 @@ export class SchedulerService {
       );
 
       let transformDagRunListDataCurrent = [];
-      if (data && data.dag_runs.length > 0) {
+      if (data && data?.dag_runs?.length > 0) {
         transformDagRunListDataCurrent = data.dag_runs.map((dagRun: any) => {
           if (dagRun.start_date !== null) {
             return {
@@ -539,7 +539,7 @@ export class SchedulerService {
         ...transformDagRunListDataCurrent
       ];
 
-      if (data.dag_runs.length + offset !== data.total_entries) {
+      if (data?.dag_runs?.length + offset !== data.total_entries) {
         this.listDagRunsListService(
           composerName,
           dagId,
@@ -561,7 +561,7 @@ export class SchedulerService {
       } else {
         const transformDagRunListData = allDagRunsListData;
 
-        if (transformDagRunListData.length > 0) {
+        if (transformDagRunListData?.length > 0) {
           // Group by date first, then by status
           const groupedDataByDateStatus = transformDagRunListData.reduce(
             (result: any, item: any) => {
@@ -648,7 +648,7 @@ export class SchedulerService {
       const serviceURL = `dagList?composer=${composerSelected}`;
       const formattedResponse: any = await requestAPI(serviceURL);
       let transformDagListData = [];
-      if (formattedResponse.length > 0) {
+      if (formattedResponse?.length > 0) {
         transformDagListData = formattedResponse[0]?.dags?.map(
           (dag: ISchedulerDagData) => {
             return {
@@ -661,14 +661,14 @@ export class SchedulerService {
           }
         );
       } else {
-        const jsonstr = formattedResponse?.error.slice(
+        const jsonstr = formattedResponse?.error?.slice(
           formattedResponse?.error.indexOf('{'),
           formattedResponse?.error.lastIndexOf('}') + 1
         );
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
           toast.error(
-            `Failed to fetch schedule list : ${errorObject.error.message ? errorObject.error.message : errorObject.error}`,
+            `Failed to fetch schedule list : ${errorObject.error.message ? errorObject.error.message : formattedResponse?.error}`,
             {
               ...toastifyCustomStyle,
               toastId: 'dagListError'
