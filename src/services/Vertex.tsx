@@ -926,7 +926,7 @@ export class VertexServices {
   ) => {
     // Controller to abort pending API call
     const controller = new AbortController();
-    abortControllers.current.push(controller);
+    abortControllers?.current.push(controller);
     const signal = controller.signal;
 
     //Extract Schedule id from schedule name.
