@@ -24,12 +24,12 @@ const EnableNotifyMessage = ({
   message: string;
   url: any;
 }): JSX.Element => {
-  const beforeLink = message.split('. ')[0] || '';
+  const beforeLink = message?.split('. ')[0] || '';
   return (
     <>
       {beforeLink}
       <a
-        href={url[0]}
+        href={url?.[0]}
         target="_blank"
         rel="noopener noreferrer"
         className="cursor-icon"
