@@ -47,7 +47,6 @@ const ListDagRuns = ({
   setDagRunId,
   selectedDate,
   setGreyListDates,
-  setOrangeListDates,
   setRedListDates,
   setGreenListDates,
   setDarkGreenListDates,
@@ -63,7 +62,6 @@ const ListDagRuns = ({
   selectedDate: Dayjs | null;
 
   setGreyListDates: (value: string[]) => void;
-  setOrangeListDates: (value: string[]) => void;
   setRedListDates: (value: string[]) => void;
   setGreenListDates: (value: string[]) => void;
   setDarkGreenListDates: (value: string[]) => void;
@@ -269,7 +267,6 @@ const ListDagRuns = ({
       setDagRunId,
       setIsLoading,
       setGreyListDates,
-      setOrangeListDates,
       setRedListDates,
       setGreenListDates,
       setDarkGreenListDates

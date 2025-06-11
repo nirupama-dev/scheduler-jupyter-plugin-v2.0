@@ -485,7 +485,6 @@ export class SchedulerService {
     setDagRunId: (value: string) => void,
     setIsLoading: (value: boolean) => void,
     setGreyListDates: (value: string[]) => void,
-    setOrangeListDates: (value: string[]) => void,
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
     setDarkGreenListDates: (value: string[]) => void,
@@ -497,7 +496,6 @@ export class SchedulerService {
     const start_date = startDate;
     const end_date = endDate;
     setGreyListDates([]);
-    setOrangeListDates([]);
     setRedListDates([]);
     setGreenListDates([]);
     setDarkGreenListDates([]);
@@ -544,7 +542,6 @@ export class SchedulerService {
           setDagRunId,
           setIsLoading,
           setGreyListDates,
-          setOrangeListDates,
           setRedListDates,
           setGreenListDates,
           setDarkGreenListDates,
@@ -577,7 +574,6 @@ export class SchedulerService {
           );
 
           const greyList: string[] = [];
-          const orangeList: string[] = [];
           const redList: string[] = [];
           const greenList: string[] = [];
           const darkGreenList: string[] = [];
@@ -585,11 +581,6 @@ export class SchedulerService {
           Object.keys(groupedDataByDateStatus).forEach(dateValue => {
             if (groupedDataByDateStatus[dateValue].running || groupedDataByDateStatus[dateValue].queued) {
               greyList.push(dateValue);
-            } else if (
-              groupedDataByDateStatus[dateValue].failed &&
-              groupedDataByDateStatus[dateValue].success
-            ) {
-              orangeList.push(dateValue);
             } else if (groupedDataByDateStatus[dateValue].failed) {
               redList.push(dateValue);
             } else if (
@@ -603,7 +594,6 @@ export class SchedulerService {
           });
 
           setGreyListDates(greyList);
-          setOrangeListDates(orangeList);
           setRedListDates(redList);
           setGreenListDates(greenList);
           setDarkGreenListDates(darkGreenList);
@@ -612,7 +602,6 @@ export class SchedulerService {
         } else {
           setDagRunsList([]);
           setGreyListDates([]);
-          setOrangeListDates([]);
           setRedListDates([]);
           setGreenListDates([]);
           setDarkGreenListDates([]);
