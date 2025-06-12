@@ -29,7 +29,7 @@ import {
   IUpdateSchedulerAPIResponse
 } from '../scheduler/common/SchedulerInteface';
 import { Notification } from '@jupyterlab/apputils';
-import { handleErrorToast } from '../utils/errorUtils';
+import { handleErrorToast } from '../utils/ErrorUtils';
 import { toast } from 'react-toastify';
 import { toastifyCustomStyle } from '../utils/Config';
 
@@ -579,7 +579,10 @@ export class SchedulerService {
           const darkGreenList: string[] = [];
 
           Object.keys(groupedDataByDateStatus).forEach(dateValue => {
-            if (groupedDataByDateStatus[dateValue].running || groupedDataByDateStatus[dateValue].queued) {
+            if (
+              groupedDataByDateStatus[dateValue].running ||
+              groupedDataByDateStatus[dateValue].queued
+            ) {
               greyList.push(dateValue);
             } else if (groupedDataByDateStatus[dateValue].failed) {
               redList.push(dateValue);

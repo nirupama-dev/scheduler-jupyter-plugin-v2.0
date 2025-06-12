@@ -23,7 +23,6 @@ export default function CustomDate({
   darkGreenListDates: string[];
   dateProps: PickersDayProps<dayjs.Dayjs>;
 }) {
-
   const { day, disabled } = dateProps;
 
   /**
