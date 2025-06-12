@@ -40,8 +40,7 @@ import { RegionDropdown } from '../../controls/RegionDropdown';
 import ErrorMessage from '../common/ErrorMessage';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
-import { toast } from 'react-toastify';
-import { toastifyCustomStyle } from '../../utils/Config';
+import { Notification } from '@jupyterlab/apputils';
 
 const iconDelete = new LabIcon({
   name: 'launcher:delete-icon',
@@ -566,10 +565,9 @@ function ListNotebookScheduler({
       const isPluginInstalled = app.hasPlugin(GCS_PLUGIN_ID);
       setIsGCSPluginInstalled(isPluginInstalled);
     } catch (error) {
-      toast.error(
-        'Could not check GCS plugin availability',
-        toastifyCustomStyle
-      );
+      Notification.error('Could not check GCS plugin availability', {
+        autoClose: false
+      });
     }
   };
 
