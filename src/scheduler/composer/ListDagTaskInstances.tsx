@@ -60,7 +60,7 @@ const ListDagTaskInstances = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [expanded, setExpanded] = useState<string | false>(false);
-  const [loglist, setLogList] = useState('');
+  const [logList, setLogList] = useState('');
 
   const [height, setHeight] = useState(window.innerHeight - 320);
 
@@ -225,7 +225,7 @@ const ListDagTaskInstances = ({
                           className="logs-content-style"
                           style={{ maxHeight: height }}
                         >
-                          {loglist}
+                          {logList}
                         </pre>
                       </Typography>{' '}
                     </div>

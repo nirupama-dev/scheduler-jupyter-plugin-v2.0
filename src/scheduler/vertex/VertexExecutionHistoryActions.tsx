@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { VertexServices } from '../../services/Vertex';
 import { iconDownload } from '../../utils/Icons';
 import { CircularProgress } from '@mui/material';
 import { StorageServices } from '../../services/Storage';
-import React from 'react';
 
 const VertexExecutionHistoryActions = ({
   data,
@@ -28,7 +27,7 @@ const VertexExecutionHistoryActions = ({
     setDownloadOutputVertexScheduleRunId
   ] = useState<string | undefined>('');
   const [isLoading, setIsLoading] = useState<boolean>(
-    state === 'failed' ? true : false
+    state === 'failed'
   );
   const [fileExists, setFileExists] = useState<boolean>(false);
   const bucketName = gcsUrl?.split('//')[1];

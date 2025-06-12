@@ -60,7 +60,7 @@ class Client:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(token=self._access_token)
             storage_client = storage.Client(credentials=credentials)
-            bucket = storage_client.create_bucket(bucket_name)
+            storage_client.create_bucket(bucket_name)
         except Exception as error:
             self.log.exception(f"Error in creating Bucket: {error}")
             raise IOError(f"Error in creating Bucket: {error}")

@@ -109,7 +109,7 @@ class Client:
             return {"error": str(e)}
 
     async def update_job(self, composer_name, dag_id, status):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_uri = await self.get_airflow_uri(composer_name)
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}"
 
@@ -129,7 +129,7 @@ class Client:
             return {"error": str(e)}
 
     async def list_dag_runs(self, composer_name, dag_id, start_date, end_date, offset):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_uri = await self.get_airflow_uri(composer_name)
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns?start_date_gte={start_date}&start_date_lte={end_date}&offset={offset}"
             async with self.client_session.get(
@@ -147,7 +147,7 @@ class Client:
             return {"error": str(e)}
 
     async def list_dag_run_task(self, composer_name, dag_id, dag_run_id):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_uri = await self.get_airflow_uri(composer_name)
         try:
             api_endpoint = (
                 f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances"
@@ -169,7 +169,7 @@ class Client:
     async def list_dag_run_task_logs(
         self, composer_name, dag_id, dag_run_id, task_id, task_try_number
     ):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_uri = await self.get_airflow_uri(composer_name)
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/logs/{task_try_number}"
             async with self.client_session.get(
@@ -320,7 +320,7 @@ class Client:
             self.log.exception(f"Error downloading dag file: {str(e)}")
 
     async def list_import_errors(self, composer):
-        airflow_uri, bucket = await self.get_airflow_uri(composer)
+        airflow_uri = await self.get_airflow_uri(composer)
         try:
             api_endpoint = (
                 f"{airflow_uri}/api/v1/importErrors?order_by=-import_error_id"
@@ -340,7 +340,7 @@ class Client:
             return {"error": str(e)}
 
     async def dag_trigger(self, dag_id, composer):
-        airflow_uri, bucket = await self.get_airflow_uri(composer)
+        airflow_uri = await self.get_airflow_uri(composer)
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns"
             body = {"conf": {}}

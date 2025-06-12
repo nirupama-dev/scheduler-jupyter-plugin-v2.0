@@ -110,7 +110,6 @@ const ExecutionHistory = ({
   }, []);
 
   return (
-    <>
       <>
         <div className="execution-history-header">
           <div
@@ -184,7 +183,6 @@ const ExecutionHistory = ({
           </div>
         </div>
       </>
-    </>
   );
 };
 

@@ -89,8 +89,10 @@ const VertexExecutionHistory = ({
   useEffect(() => {
     authApi()
       .then(credentials => {
-        if (credentials && credentials?.region_id && credentials.project_id) {
-          region ? null : setRegion(credentials.region_id);
+        if (credentials?.region_id && credentials?.project_id) {
+          if (!region) {
+            setRegion(credentials.region_id);
+          }
         }
       })
       .catch(error => {
@@ -376,7 +378,7 @@ const VertexExecutionHistory = ({
   useEffect(() => {
     authApi()
       .then(credentials => {
-        if (credentials && credentials?.region_id && credentials.project_id) {
+        if (credentials?.region_id && credentials?.project_id) {
           setProjectId(credentials.project_id);
         }
       })

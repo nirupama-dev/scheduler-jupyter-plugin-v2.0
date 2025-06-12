@@ -114,7 +114,7 @@ class ConfigHandler(APIHandler):
             await async_run_gcloud_subcommand(f"config set project {project_id}")
             await async_run_gcloud_subcommand(f"config set dataproc/region {region}")
             self.finish({"config": ERROR_MESSAGE + "successful"})
-        except subprocess.CalledProcessError as er:
+        except subprocess.CalledProcessError:
             self.finish({"config": ERROR_MESSAGE + "failed"})
 
 

@@ -42,7 +42,7 @@ interface IRenderActionsData {
 }
 
 export class SessionService {
-  static deleteSessionAPI = async (selectedSession: string) => {
+  static readonly deleteSessionAPI = async (selectedSession: string) => {
     const credentials = await authApi();
     const { DATAPROC } = await gcpServiceUrls;
     if (credentials) {
@@ -84,7 +84,7 @@ export class SessionService {
         });
     }
   };
-  static terminateSessionAPI = async (selectedSession: string) => {
+  static readonly terminateSessionAPI = async (selectedSession: string) => {
     const credentials = await authApi();
     const { DATAPROC } = await gcpServiceUrls;
     if (credentials) {
@@ -125,7 +125,7 @@ export class SessionService {
     }
   };
 
-  static getSessionDetailsService = async (
+  static readonly getSessionDetailsService = async (
     sessionSelected: string,
     setErrorView: (value: boolean) => void,
     setIsLoading: (value: boolean) => void,
@@ -170,7 +170,7 @@ export class SessionService {
     }
   };
 
-  static listSessionsAPIService = async (
+  static readonly listSessionsAPIService = async (
     renderActions: (value: IRenderActionsData) => React.JSX.Element,
     setIsLoading: (value: boolean) => void,
     setSessionsList: any,
@@ -191,7 +191,7 @@ export class SessionService {
       });
       const formattedResponse = await response.json();
       let transformSessionListData: React.SetStateAction<never[]> = [];
-      if (formattedResponse && formattedResponse.sessions) {
+      if (formattedResponse?.sessions) {
         const sessionsListNew = formattedResponse.sessions;
 
         const existingSessionsData = previousSessionsList ?? [];
