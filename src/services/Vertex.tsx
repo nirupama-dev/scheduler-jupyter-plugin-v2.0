@@ -32,13 +32,12 @@ import {
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
 import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
-import { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import React from 'react';
 import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class VertexServices {
-  static machineTypeAPIService = (
+  static readonly machineTypeAPIService = (
     region: string,
     setMachineTypeList: (value: IMachineType[]) => void,
     setMachineTypeLoading: (value: boolean) => void,
@@ -95,7 +94,7 @@ export class VertexServices {
       });
   };
 
-  static createVertexSchedulerService = async (
+  static readonly createVertexSchedulerService = async (
     payload: ICreatePayload,
     setCreateCompleted: (value: boolean) => void,
     setCreatingVertexScheduler: (value: boolean) => void
@@ -133,7 +132,7 @@ export class VertexServices {
     }
   };
 
-  static editVertexJobSchedulerService = async (
+  static readonly editVertexJobSchedulerService = async (
     jobId: string,
     region: string,
     payload: ICreatePayload,
@@ -178,7 +177,7 @@ export class VertexServices {
     }
   };
 
-  static listVertexSchedules = async (
+  static readonly listVertexSchedules = async (
     setVertexScheduleList: (
       value:
         | IVertexScheduleList[]
@@ -190,9 +189,9 @@ export class VertexServices {
     setApiError: (value: string) => void,
     setNextPageToken: (value: string | null) => void, // function for setting the next page token
     newPageToken: string | null | undefined, // token of page to be fetched
-    pageLength: number = 50, // number of items to be fetched
     setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
     setApiEnableUrl: any,
+    pageLength: number = 50, // number of items to be fetched
     abortControllers?: any
   ) => {
     setIsLoading(true);
@@ -280,7 +279,7 @@ export class VertexServices {
     }
   };
 
-  static handleUpdateSchedulerPauseAPIService = async (
+  static readonly handleUpdateSchedulerPauseAPIService = async (
     scheduleId: string,
     region: string,
     displayName: string,
@@ -334,7 +333,7 @@ export class VertexServices {
     }
   };
 
-  static handleUpdateSchedulerResumeAPIService = async (
+  static readonly handleUpdateSchedulerResumeAPIService = async (
     scheduleId: string,
     region: string,
     displayName: string,
@@ -391,7 +390,7 @@ export class VertexServices {
     }
   };
 
-  static triggerSchedule = async (
+  static readonly triggerSchedule = async (
     region: string,
     scheduleId: string,
     displayName: string,
@@ -441,7 +440,7 @@ export class VertexServices {
     }
   };
 
-  static handleDeleteSchedulerAPIService = async (
+  static readonly handleDeleteSchedulerAPIService = async (
     region: string,
     scheduleId: string,
     displayName: string,
@@ -455,9 +454,9 @@ export class VertexServices {
     setApiError: (value: string) => void,
     setNextPageToken: (value: string | null) => void,
     newPageToken: string | null | undefined,
-    pageLength: number = 50,
     hasNextPage: (value: boolean) => void,
-    setApiEnableUrl: any
+    setApiEnableUrl: any,
+    pageLength: number = 50
   ) => {
     try {
       const serviceURL = 'api/vertex/deleteSchedule';
@@ -474,9 +473,9 @@ export class VertexServices {
           setApiError,
           setNextPageToken,
           newPageToken,
-          pageLength,
           hasNextPage,
-          setApiEnableUrl
+          setApiEnableUrl,
+          pageLength
         );
         Notification.success(
           `Deleted job ${displayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
@@ -501,7 +500,7 @@ export class VertexServices {
     }
   };
 
-  static editVertexSchedulerService = async (
+  static readonly editVertexSchedulerService = async (
     scheduleId: string,
     region: string,
     setInputNotebookFilePath: (value: string) => void,
@@ -539,7 +538,7 @@ export class VertexServices {
     }
   };
 
-  static editVertexSJobService = async (
+  static readonly editVertexSJobService = async (
     jobId: string,
     region: string,
     setEditScheduleLoading: (value: string) => void,
@@ -715,7 +714,7 @@ export class VertexServices {
     }
   };
 
-  static executionHistoryServiceList = async (
+  static readonly executionHistoryServiceList = async (
     region: string,
     schedulerData: ISchedulerData | undefined,
     selectedMonth: Dayjs | null,
@@ -736,7 +735,7 @@ export class VertexServices {
     abortControllers.current.push(controller);
     const signal = controller.signal;
 
-    const selected_month = selectedMonth && selectedMonth.toISOString();
+    const selected_month = selectedMonth?.toISOString();
     const schedule_id = schedulerData?.name.split('/').pop();
     const serviceURL = 'api/vertex/listNotebookExecutionJobs';
     const formattedResponse: any = await requestAPI(
@@ -792,13 +791,9 @@ export class VertexServices {
           const date = item.date; // Group by date
           const status = item.state; // Group by state
 
-          if (!result[date]) {
-            result[date] = {};
-          }
+          result[date] ??= {};
 
-          if (!result[date][status]) {
-            result[date][status] = [];
-          }
+          result[date][status] ??= [];
 
           result[date][status].push(item);
 
@@ -866,7 +861,7 @@ export class VertexServices {
   };
 
   //Funtion to check weather output file exists or not
-  static outputFileExists = async (
+  static readonly outputFileExists = async (
     bucketName: string | undefined,
     jobRunId: string | undefined,
     fileName: string | undefined,
@@ -884,7 +879,7 @@ export class VertexServices {
         `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${jobRunId}&file_name=${fileName}`,
         { signal }
       );
-      setFileExists(formattedResponse === 'true' ? true : false);
+      setFileExists(formattedResponse === 'true');
       setIsLoading(false);
     } catch (lastRunError: any) {
       if (typeof lastRunError === 'object' && lastRunError !== null) {
@@ -901,7 +896,7 @@ export class VertexServices {
   };
 
   //Funtion to fetch last five run status for Scheduler Listing screen.
-  static fetchLastFiveRunStatus = (
+  static readonly fetchLastFiveRunStatus = (
     schedule: any,
     region: string,
     setVertexScheduleList: (

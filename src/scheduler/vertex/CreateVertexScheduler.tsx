@@ -209,7 +209,7 @@ const CreateVertexScheduler = ({
   const [isPastStartDate, setIsPastStartDate] = useState<boolean>(false);
   const [isPastEndDate, setIsPastEndDate] = useState<boolean>(false);
   const [errorMessageBucket, setErrorMessageBucket] = useState<string>('');
-  const [errrorMessageServiceAccount, setErrorMessageServiceAccount] =
+  const [errorMessageServiceAccount, setErrorMessageServiceAccount] =
     useState<string>('');
   const [errorMessagePrimaryNetwork, setErrorMessagePrimaryNetwork] =
     useState<string>('');
@@ -669,9 +669,9 @@ const CreateVertexScheduler = ({
     );
   };
 
-  const selectedMachineType =
-    machineTypeList &&
-    machineTypeList.find(item => item.machineType === machineTypeSelected);
+  const selectedMachineType = machineTypeList?.find(
+    item => item.machineType === machineTypeSelected
+  );
   /**
    * Disable the create button when the mandatory fields are not filled and the validations is not proper.
    */
@@ -825,7 +825,7 @@ const CreateVertexScheduler = ({
     primaryNetworkAPI();
     authApi()
       .then(credentials => {
-        if (credentials && credentials?.region_id && credentials.project_id) {
+        if (credentials?.region_id && credentials?.project_id) {
           setLoaderRegion(false);
           setRegion(credentials.region_id);
           setProjectId(credentials.project_id);
@@ -878,7 +878,7 @@ const CreateVertexScheduler = ({
 
       // eslint-disable-next-line no-useless-escape
       const projectInNetwork = primaryNetworkLink.match(/projects\/([^\/]+)/);
-      if (projectInNetwork && projectInNetwork[1]) {
+      if (projectInNetwork?.[1]) {
         if (projectInNetwork[1] === projectId) {
           setNetworkSelected('networkInThisProject');
         } else {
@@ -1002,9 +1002,7 @@ const CreateVertexScheduler = ({
           <div className="create-scheduler-form-element">
             <Autocomplete
               className="create-scheduler-style"
-              options={
-                machineTypeList && machineTypeList.map(item => item.machineType)
-              }
+              options={machineTypeList?.map(item => item.machineType)}
               value={machineTypeSelected}
               onChange={(_event, val) => handleMachineType(val)}
               renderInput={params => (
@@ -1258,16 +1256,16 @@ const CreateVertexScheduler = ({
               )}
             />
           </div>
-          {!serviceAccountSelected && !errrorMessageServiceAccount && (
+          {!serviceAccountSelected && !errorMessageServiceAccount && (
             <ErrorMessage
               message="Service account is required"
               showIcon={false}
             />
           )}
 
-          {errrorMessageServiceAccount && (
+          {errorMessageServiceAccount && (
             <span className="error-message-warn error-key-missing">
-              {errrorMessageServiceAccount}
+              {errorMessageServiceAccount}
             </span>
           )}
 
@@ -1326,105 +1324,98 @@ const CreateVertexScheduler = ({
 
           {/* Network in this project  */}
           {networkSelected === 'networkInThisProject' ? (
-            <>
-              <div className="execution-history-main-wrapper">
-                <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-                  <Autocomplete
-                    className="create-scheduler-style create-scheduler-form-element-input-fl"
-                    options={primaryNetworkList}
-                    getOptionLabel={option => option.name}
-                    value={
-                      primaryNetworkList.find(
-                        option => option.name === primaryNetworkSelected?.name
-                      ) || null
-                    }
-                    onChange={(_event, val) => handlePrimaryNetwork(val)}
-                    renderInput={params => (
-                      <TextField
-                        {...params}
-                        label="Primary network*"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {primaryNetworkLoading ? (
-                                <CircularProgress
-                                  aria-label="Loading Spinner"
-                                  data-testid="loader"
-                                  size={18}
-                                />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          )
-                        }}
-                      />
-                    )}
-                    clearIcon={false}
-                    disabled={editMode}
-                  />
-                  {!primaryNetworkSelected && (
-                    <ErrorMessage
-                      message={
-                        errorMessagePrimaryNetwork
-                          ? errorMessagePrimaryNetwork
-                          : 'Primary network is required'
-                      }
-                      showIcon={false}
+            <div className="execution-history-main-wrapper">
+              <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                <Autocomplete
+                  className="create-scheduler-style create-scheduler-form-element-input-fl"
+                  options={primaryNetworkList}
+                  getOptionLabel={option => option.name}
+                  value={
+                    primaryNetworkList.find(
+                      option => option.name === primaryNetworkSelected?.name
+                    ) || null
+                  }
+                  onChange={(_event, val) => handlePrimaryNetwork(val)}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="Primary network*"
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {primaryNetworkLoading ? (
+                              <CircularProgress
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                                size={18}
+                              />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }}
                     />
                   )}
-                </div>
-                <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
-                  <Autocomplete
-                    className="create-scheduler-style create-scheduler-form-element-input-fl"
-                    options={subNetworkList}
-                    getOptionLabel={option => option.name}
-                    value={
-                      subNetworkList?.find(
-                        option => option?.name === subNetworkSelected?.name
-                      ) || null
-                    }
-                    onChange={(_event, val) => handleSubNetwork(val)}
-                    renderInput={params => (
-                      <TextField
-                        {...params}
-                        label="Sub network*"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {subNetworkLoading ? (
-                                <CircularProgress
-                                  aria-label="Loading Spinner"
-                                  data-testid="loader"
-                                  size={18}
-                                />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          )
-                        }}
-                      />
-                    )}
-                    clearIcon={false}
-                    disabled={editMode}
+                  clearIcon={false}
+                  disabled={editMode}
+                />
+                {!primaryNetworkSelected && (
+                  <ErrorMessage
+                    message={errorMessagePrimaryNetwork || 'Primary network is required'}
+                    showIcon={false}
                   />
-                  {!subNetworkSelected && (
-                    <ErrorMessage
-                      message={
-                        errorMessageSubnetworkNetwork
-                          ? errorMessageSubnetworkNetwork
-                          : subNetworkList.length === 0 &&
-                              primaryNetworkSelected
-                            ? 'No Subnetworks found with Google Private Access - ON'
-                            : 'Sub network is required'
-                      }
-                      showIcon={false}
-                    />
-                  )}
-                </div>
+                )}
               </div>
-            </>
+              <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
+                <Autocomplete
+                  className="create-scheduler-style create-scheduler-form-element-input-fl"
+                  options={subNetworkList}
+                  getOptionLabel={option => option.name}
+                  value={
+                    subNetworkList?.find(
+                      option => option?.name === subNetworkSelected?.name
+                    ) || null
+                  }
+                  onChange={(_event, val) => handleSubNetwork(val)}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="Sub network*"
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {subNetworkLoading ? (
+                              <CircularProgress
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                                size={18}
+                              />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }}
+                    />
+                  )}
+                  clearIcon={false}
+                  disabled={editMode}
+                />
+                {!subNetworkSelected && (
+                  <ErrorMessage
+                    message={
+                      errorMessageSubnetworkNetwork
+                        ? errorMessageSubnetworkNetwork
+                        : subNetworkList.length === 0 && primaryNetworkSelected
+                          ? 'No Subnetworks found with Google Private Access - ON'
+                          : 'Sub network is required'
+                    }
+                    showIcon={false}
+                  />
+                )}
+              </div>
+            </div>
           ) : (
             <>
               {/* Network shared from host project */}

@@ -27,7 +27,8 @@ import {
   Radio,
   RadioGroup,
   TextField,
-  Typography
+  Typography,
+  Button
 } from '@mui/material';
 import { MuiChipsInput } from 'mui-chips-input';
 import { IThemeManager } from '@jupyterlab/apputils';
@@ -40,9 +41,7 @@ import { KernelSpecAPI } from '@jupyterlab/services';
 import tzdata from 'tzdata';
 import { SchedulerService } from '../../services/SchedulerServices';
 import NotebookJobComponent from './NotebookJobs';
-import { Button } from '@mui/material';
-import { scheduleMode } from '../../utils/Const';
-import { scheduleValueExpression } from '../../utils/Const';
+import { scheduleMode, scheduleValueExpression } from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import ErrorMessage from '../common/ErrorMessage';
 import { IDagList } from '../common/SchedulerInteface';
@@ -130,7 +129,7 @@ const CreateNotebookScheduler = ({
   const [retryCount, setRetryCount] = useState<number | undefined>(2);
   const [retryDelay, setRetryDelay] = useState<number | undefined>(5);
   const [emailOnFailure, setEmailOnFailure] = useState(false);
-  const [emailOnRetry, setEmailonRetry] = useState(false);
+  const [emailOnRetry, setEmailOnRetry] = useState(false);
   const [emailOnSuccess, setEmailOnSuccess] = useState(false);
   const [emailList, setEmailList] = useState<string[]>([]);
   const [emailError, setEmailError] = useState<boolean>(false);
@@ -160,7 +159,7 @@ const CreateNotebookScheduler = ({
     checkRequiredPackagesInstalledFlag,
     setCheckRequiredPackagesInstalledFlag
   ] = useState<boolean>(false);
-  const [disableEnvLocal, setDisabaleEnvLocal] = useState<boolean>(false);
+  const [disableEnvLocal, setDisableEnvLocal] = useState<boolean>(false);
   const [clusterFlag, setClusterFlag] = useState<boolean>(false);
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
@@ -211,7 +210,7 @@ const CreateNotebookScheduler = ({
         }
 
         if (isLocalKernel) {
-          setDisabaleEnvLocal(true);
+          setDisableEnvLocal(true);
           await SchedulerService.checkRequiredPackagesInstalled(
             selectedComposer,
             setPackageInstallationMessage,
@@ -219,7 +218,7 @@ const CreateNotebookScheduler = ({
             setPackageListFlag,
             setapiErrorMessage,
             setCheckRequiredPackagesInstalledFlag,
-            setDisabaleEnvLocal,
+            setDisableEnvLocal,
             signal,
             abortControllerRef
           );
@@ -312,7 +311,7 @@ const CreateNotebookScheduler = ({
   };
 
   const handleRetryChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setEmailonRetry(event.target.checked);
+    setEmailOnRetry(event.target.checked);
     if (!event.target.checked) {
       setEmailError(false);
       setEmailList([]);
@@ -371,16 +370,14 @@ const CreateNotebookScheduler = ({
 
     if (packageInstalledList.length > 0 && isLocalKernel) {
       payload['packages_to_install'] = packageInstalledList;
-      {
-        toast(ProgressPopUp, {
-          autoClose: false,
-          closeButton: true,
-          data: {
-            message:
-              'Installing packages taking longer than usual. Scheduled job starts post installation. Please wait....'
-          }
-        });
-      }
+      toast(ProgressPopUp, {
+        autoClose: false,
+        closeButton: true,
+        data: {
+          message:
+            'Installing packages taking longer than usual. Scheduled job starts post installation. Please wait....'
+        }
+      });
     }
 
     await SchedulerService.createJobSchedulerService(
@@ -554,7 +551,7 @@ const CreateNotebookScheduler = ({
     setLoaderRegion(true);
     setLoaderProjectId(true);
     authApi().then(credentials => {
-      if (credentials && credentials.project_id && credentials.region_id) {
+      if (credentials?.project_id && credentials.region_id) {
         setLoaderProjectId(false);
         setProjectId(credentials.project_id);
         setLoaderRegion(false);
@@ -587,7 +584,7 @@ const CreateNotebookScheduler = ({
         setPackageListFlag,
         setapiErrorMessage,
         setCheckRequiredPackagesInstalledFlag,
-        setDisabaleEnvLocal,
+        setDisableEnvLocal,
         signal,
         abortControllerRef
       );
@@ -623,7 +620,7 @@ const CreateNotebookScheduler = ({
           setRetryCount={setRetryCount}
           setRetryDelay={setRetryDelay}
           setEmailOnFailure={setEmailOnFailure}
-          setEmailonRetry={setEmailonRetry}
+          setEmailonRetry={setEmailOnRetry}
           setEmailOnSuccess={setEmailOnSuccess}
           setEmailList={setEmailList}
           setStopCluster={setStopCluster}
@@ -689,15 +686,13 @@ const CreateNotebookScheduler = ({
                       ...params.InputProps,
                       endAdornment: (
                         <>
-                          {!(composerList.length > 0) &&
-                            region &&
-                            envApiFlag && (
-                              <CircularProgress
-                                aria-label="Loading Spinner"
-                                data-testid="loader"
-                                size={18}
-                              />
-                            )}
+                          {composerList.length <= 0 && region && envApiFlag && (
+                            <CircularProgress
+                              aria-label="Loading Spinner"
+                              data-testid="loader"
+                              size={18}
+                            />
+                          )}
                           {params.InputProps.endAdornment}
                         </>
                       )
@@ -778,22 +773,20 @@ const CreateNotebookScheduler = ({
             <div className="create-scheduler-label block-seperation">
               Parameters
             </div>
-            <>
-              <LabelProperties
-                labelDetail={parameterDetail}
-                setLabelDetail={setParameterDetail}
-                labelDetailUpdated={parameterDetailUpdated}
-                setLabelDetailUpdated={setParameterDetailUpdated}
-                buttonText="ADD PARAMETER"
-                keyValidation={keyValidation}
-                setKeyValidation={setKeyValidation}
-                valueValidation={valueValidation}
-                setValueValidation={setValueValidation}
-                duplicateKeyError={duplicateKeyError}
-                setDuplicateKeyError={setDuplicateKeyError}
-                fromPage="scheduler"
-              />
-            </>
+            <LabelProperties
+              labelDetail={parameterDetail}
+              setLabelDetail={setParameterDetail}
+              labelDetailUpdated={parameterDetailUpdated}
+              setLabelDetailUpdated={setParameterDetailUpdated}
+              buttonText="ADD PARAMETER"
+              keyValidation={keyValidation}
+              setKeyValidation={setKeyValidation}
+              valueValidation={valueValidation}
+              setValueValidation={setValueValidation}
+              duplicateKeyError={duplicateKeyError}
+              setDuplicateKeyError={setDuplicateKeyError}
+              fromPage="scheduler"
+            />
             {!isLocalKernel && (
               <>
                 <div className="create-scheduler-form-element block-seperation">

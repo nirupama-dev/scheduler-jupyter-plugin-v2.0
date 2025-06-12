@@ -444,7 +444,9 @@ function ListNotebookScheduler({
             }
             data-jobid={data.jobid}
             onClick={e => {
-              !is_status_paused ? handleTriggerDag(e) : null;
+              if (!is_status_paused) {
+                handleTriggerDag(e);
+              }
             }}
           >
             <iconTrigger.react
@@ -655,7 +657,7 @@ function ListNotebookScheduler({
   useEffect(() => {
     setLoaderProjectId(true);
     authApi().then(credentials => {
-      if (credentials && credentials.project_id && credentials.region_id) {
+      if (credentials?.project_id && credentials?.region_id) {
         setLoaderProjectId(false);
         setProjectId(credentials.project_id);
         setRegion(credentials.region_id);

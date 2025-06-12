@@ -19,7 +19,7 @@ import { authenticatedFetch } from '../utils/Config';
 import { HTTP_METHOD } from '../utils/Const';
 
 export class DataprocService {
-  static listClustersDataprocAPIService = async () => {
+  static readonly listClustersDataprocAPIService = async () => {
     try {
       const queryParams = new URLSearchParams({ pageSize: '100' });
       const response = await authenticatedFetch({

@@ -179,9 +179,9 @@ function ListVertexScheduler({
       setApiError,
       setNextPageToken,
       nextToken,
-      scheduleListPageLength,
       setCanNextPage,
       setApiEnableUrl,
+      scheduleListPageLength,
       abortControllers
     );
     setRegionDisable(false);
@@ -436,9 +436,9 @@ function ListVertexScheduler({
       setApiError,
       setNextPageToken,
       newPageToken,
-      scheduleListPageLength,
       setCanNextPage,
-      setApiEnableUrl
+      setApiEnableUrl,
+      scheduleListPageLength
     );
     setDeletePopupOpen(false);
     setDeletingSchedule(false);

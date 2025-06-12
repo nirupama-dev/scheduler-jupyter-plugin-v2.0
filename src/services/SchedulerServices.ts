@@ -34,7 +34,7 @@ import { toast } from 'react-toastify';
 import { toastifyCustomStyle } from '../utils/Config';
 
 export class SchedulerService {
-  static listClustersAPIService = async (
+  static readonly listClustersAPIService = async (
     setClusterList: (value: string[]) => void,
     setIsLoadingKernelDetail: (value: boolean) => void,
     nextPageToken?: string,
@@ -92,7 +92,7 @@ export class SchedulerService {
       });
     }
   };
-  static listSessionTemplatesAPIService = async (
+  static readonly listSessionTemplatesAPIService = async (
     setServerlessDataList: (value: string[]) => void,
     setServerlessList: (value: string[]) => void,
     setIsLoadingKernelDetail?: (value: boolean) => void,
@@ -163,7 +163,7 @@ export class SchedulerService {
       });
     }
   };
-  static listComposersAPIService = async (
+  static readonly listComposersAPIService = async (
     setComposerList: (value: string[]) => void,
     projectId: string,
     region: string,
@@ -241,7 +241,7 @@ export class SchedulerService {
       setEnvApiFlag(false);
     }
   };
-  static createJobSchedulerService = async (
+  static readonly createJobSchedulerService = async (
     payload: IPayload,
     app: JupyterLab,
     setCreateCompleted: (value: boolean) => void,
@@ -306,7 +306,7 @@ export class SchedulerService {
     }
   };
 
-  static editNotebookSchedulerService = async (
+  static readonly editNotebookSchedulerService = async (
     bucketName: string,
     dagId: string,
     setInputNotebookFilePath: (value: string) => void,
@@ -328,7 +328,7 @@ export class SchedulerService {
     }
   };
 
-  static editJobSchedulerService = async (
+  static readonly editJobSchedulerService = async (
     bucketName: string,
     dagId: string,
     composerSelectedList: string,
@@ -476,7 +476,7 @@ export class SchedulerService {
     }
   };
 
-  static listDagRunsListService = async (
+  static readonly listDagRunsListService = async (
     composerName: string,
     dagId: string,
     startDate: string,
@@ -558,13 +558,9 @@ export class SchedulerService {
               const date = item.filteredDate;
               const status = item.state;
 
-              if (!result[date]) {
-                result[date] = {};
-              }
+              result[date] ??= {};
 
-              if (!result[date][status]) {
-                result[date][status] = [];
-              }
+              result[date][status] ??= [];
 
               result[date][status].push(item);
 
@@ -618,7 +614,7 @@ export class SchedulerService {
       });
     }
   };
-  static listDagInfoAPIService = async (
+  static readonly listDagInfoAPIService = async (
     setDagList: (value: IDagList[]) => void,
     setIsLoading: (value: boolean) => void,
     setBucketName: (value: string) => void,
@@ -648,7 +644,7 @@ export class SchedulerService {
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
           toast.error(
-            `Failed to fetch schedule list : ${errorObject.error.message ? errorObject.error.message : formattedResponse?.error}`,
+            `Failed to fetch schedule list : ${errorObject.error.message ?? errorObject.error}`,
             {
               ...toastifyCustomStyle,
               toastId: 'dagListError'
@@ -674,7 +670,7 @@ export class SchedulerService {
       }
     }
   };
-  static listDagInfoAPIServiceForCreateNotebook = async (
+  static readonly listDagInfoAPIServiceForCreateNotebook = async (
     setDagList: (value: IDagList[]) => void,
     composerSelected: string
   ) => {
@@ -682,7 +678,7 @@ export class SchedulerService {
       const serviceURL = `dagList?composer=${composerSelected}`;
       const formattedResponse: any = await requestAPI(serviceURL);
       let transformDagListData = [];
-      if (formattedResponse && formattedResponse[0].dags) {
+      if (formattedResponse?.[0].dags) {
         transformDagListData = formattedResponse[0].dags.map(
           (dag: ISchedulerDagData) => {
             return {
@@ -709,7 +705,7 @@ export class SchedulerService {
       }
     }
   };
-  static handleDownloadOutputNotebookAPIService = async (
+  static readonly handleDownloadOutputNotebookAPIService = async (
     composerName: string,
     dagRunId: string,
     bucketName: string,
@@ -743,7 +739,7 @@ export class SchedulerService {
       setDownloadOutputDagRunId('');
     }
   };
-  static handleDeleteSchedulerAPIService = async (
+  static readonly handleDeleteSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
     setDagList: (value: IDagList[]) => void,
@@ -782,7 +778,7 @@ export class SchedulerService {
       });
     }
   };
-  static handleUpdateSchedulerAPIService = async (
+  static readonly handleUpdateSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
     is_status_paused: boolean,
@@ -824,7 +820,7 @@ export class SchedulerService {
       });
     }
   };
-  static listDagTaskInstancesListService = async (
+  static readonly listDagTaskInstancesListService = async (
     composerName: string,
     dagId: string,
     dagRunId: string,
@@ -863,7 +859,7 @@ export class SchedulerService {
       });
     }
   };
-  static listDagTaskLogsListService = async (
+  static readonly listDagTaskLogsListService = async (
     composerName: string,
     dagId: string,
     dagRunId: string,
@@ -887,7 +883,7 @@ export class SchedulerService {
       });
     }
   };
-  static handleImportErrordataService = async (
+  static readonly handleImportErrordataService = async (
     composerSelectedList: string,
     setImportErrorData: (value: string[]) => void,
     setImportErrorEntries: (value: number) => void
@@ -906,7 +902,7 @@ export class SchedulerService {
     }
   };
 
-  static triggerDagService = async (
+  static readonly triggerDagService = async (
     dagId: string,
     composerSelectedList: string,
     setTriggerLoading: (value: string) => void
@@ -962,7 +958,7 @@ export class SchedulerService {
     }
   };
 
-  static listComposersAPICheckService = async () => {
+  static readonly listComposersAPICheckService = async () => {
     try {
       const formattedResponse: any = await requestAPI('composerList');
       return formattedResponse;
@@ -971,14 +967,14 @@ export class SchedulerService {
     }
   };
 
-  static checkRequiredPackagesInstalled = async (
+  static readonly checkRequiredPackagesInstalled = async (
     selectedComposer: string,
     setPackageInstallationMessage: (value: string) => void,
     setPackageInstalledList: (value: string[]) => void,
     setPackageListFlag: (value: boolean) => void,
     setapiErrorMessage: (value: string) => void,
     setCheckRequiredPackagesInstalledFlag: (value: boolean) => void,
-    setDisabaleEnvLocal: (value: boolean) => void,
+    setDisableEnvLocal: (value: boolean) => void,
     signal: any,
     abortControllerRef: any
   ) => {
@@ -1008,7 +1004,7 @@ export class SchedulerService {
       }
 
       setCheckRequiredPackagesInstalledFlag(true);
-      setDisabaleEnvLocal(false);
+      setDisableEnvLocal(false);
     } catch (reason) {
       if (typeof reason === 'object' && reason !== null) {
         if (reason instanceof TypeError) {
