@@ -34,7 +34,7 @@ import {
 import { Notification } from '@jupyterlab/apputils';
 import 'react-toastify/dist/ReactToastify.css';
 import { SchedulerLoggingService, LOG_LEVEL } from '../services/LoggingService';
-import { handleErrorToast } from '../utils/errorUtils';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 interface IRenderActionsData {
   state: ClusterStatus;

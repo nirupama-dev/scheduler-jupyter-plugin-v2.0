@@ -30,7 +30,7 @@ import {
   IVertexScheduleRunList
 } from './VertexInterfaces';
 import { LOG_EXPLORER_BASE_URL } from '../../utils/Const';
-import { handleErrorToast } from '../../utils/errorUtils';
+import { handleErrorToast } from '../../utils/ErrorUtils';
 
 const VertexExecutionHistory = ({
   region,

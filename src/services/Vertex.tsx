@@ -34,7 +34,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
 import React, { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import { handleErrorToast } from '../utils/errorUtils';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class VertexServices {
   static readonly machineTypeAPIService = (

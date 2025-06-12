@@ -131,7 +131,7 @@ class Client:
     async def list_dag_runs(self, composer_name, dag_id, start_date, end_date, offset):
         airflow_uri = await self.get_airflow_uri(composer_name)
         try:
-            api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns?execution_date_gte={start_date}&execution_date_lte={end_date}&offset={offset}"
+            api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns?start_date_gte={start_date}&start_date_lte={end_date}&offset={offset}"
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:

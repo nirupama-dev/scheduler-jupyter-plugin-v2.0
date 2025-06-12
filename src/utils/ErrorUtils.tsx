@@ -2,22 +2,31 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import { Notification } from '@jupyterlab/apputils';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from './Config';
 
 // Recursively search for a 'message' key in an object
 function findMessage(obj: any): string | undefined {
-  if (!obj || typeof obj !== 'object') return undefined;
-  if ('message' in obj && typeof obj.message === 'string') return obj.message;
+  if (!obj || typeof obj !== 'object') {
+    return undefined;
+  }
+  if ('message' in obj && typeof obj.message === 'string') {
+    return obj.message;
+  }
   for (const key of Object.keys(obj)) {
     const found = findMessage(obj[key]);
-    if (found) return found;
+    if (found) {
+      return found;
+    }
   }
   return undefined;
 }
 
 // Extract URLs from a string using regex
 export function extractUrls(text: string): string[] {
-  if (!text) return [];
+  if (!text) {
+    return [];
+  }
+  /* eslint-disable */
   const urlPattern =
     /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
   return text.match(urlPattern) || [];
@@ -39,7 +48,7 @@ export function handleErrorToast({
   setApiEnableUrl?: (urls: string[]) => void;
 }) {
   let errorMessage: string | undefined;
-  let errorStr = typeof error === 'string' ? error : JSON.stringify(error);
+  const errorStr = typeof error === 'string' ? error : JSON.stringify(error);
 
   // Try to parse JSON if error is a string and looks like JSON
   let errorObj: any = error;
