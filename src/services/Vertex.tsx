@@ -35,7 +35,7 @@ import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
 import { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import React from 'react';
-import { handleErrorToast } from '../utils/errorUtils';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class VertexServices {
   static machineTypeAPIService = (

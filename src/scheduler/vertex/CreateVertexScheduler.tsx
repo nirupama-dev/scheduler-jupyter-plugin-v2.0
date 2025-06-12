@@ -71,7 +71,7 @@ import {
 } from './VertexInterfaces';
 import VertexScheduleJobs from './VertexScheduleJobs';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
-import { handleErrorToast } from '../../utils/errorUtils';
+import { handleErrorToast } from '../../utils/ErrorUtils';
 
 const CreateVertexScheduler = ({
   themeManager,

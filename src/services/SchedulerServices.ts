@@ -29,7 +29,7 @@ import {
   IUpdateSchedulerAPIResponse
 } from '../scheduler/common/SchedulerInteface';
 import { Notification } from '@jupyterlab/apputils';
-import { handleErrorToast } from '../utils/errorUtils';
+import { handleErrorToast } from '../utils/ErrorUtils';
 import { toast } from 'react-toastify';
 import { toastifyCustomStyle } from '../utils/Config';
 
@@ -484,10 +484,7 @@ export class SchedulerService {
     setDagRunsList: (value: IDagRunList[]) => void,
     setDagRunId: (value: string) => void,
     setIsLoading: (value: boolean) => void,
-
-    setBlueListDates: (value: string[]) => void,
     setGreyListDates: (value: string[]) => void,
-    setOrangeListDates: (value: string[]) => void,
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
     setDarkGreenListDates: (value: string[]) => void,
@@ -498,9 +495,7 @@ export class SchedulerService {
     setIsLoading(true);
     const start_date = startDate;
     const end_date = endDate;
-    setBlueListDates([]);
     setGreyListDates([]);
-    setOrangeListDates([]);
     setRedListDates([]);
     setGreenListDates([]);
     setDarkGreenListDates([]);
@@ -515,9 +510,7 @@ export class SchedulerService {
           if (dagRun.start_date !== null) {
             return {
               dagRunId: dagRun.dag_run_id,
-              filteredDate: new Date(dagRun.start_date)
-                .toDateString()
-                .split(' ')[2],
+              filteredDate: new Date(dagRun.start_date),
               state: dagRun.state,
               date: new Date(dagRun.start_date).toDateString(),
               time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
@@ -548,10 +541,7 @@ export class SchedulerService {
           setDagRunsList,
           setDagRunId,
           setIsLoading,
-
-          setBlueListDates,
           setGreyListDates,
-          setOrangeListDates,
           setRedListDates,
           setGreenListDates,
           setDarkGreenListDates,
@@ -583,23 +573,17 @@ export class SchedulerService {
             {}
           );
 
-          const blueList: string[] = [];
           const greyList: string[] = [];
-          const orangeList: string[] = [];
           const redList: string[] = [];
           const greenList: string[] = [];
           const darkGreenList: string[] = [];
 
           Object.keys(groupedDataByDateStatus).forEach(dateValue => {
-            if (groupedDataByDateStatus[dateValue].running) {
-              blueList.push(dateValue);
-            } else if (groupedDataByDateStatus[dateValue].queued) {
-              greyList.push(dateValue);
-            } else if (
-              groupedDataByDateStatus[dateValue].failed &&
-              groupedDataByDateStatus[dateValue].success
+            if (
+              groupedDataByDateStatus[dateValue].running ||
+              groupedDataByDateStatus[dateValue].queued
             ) {
-              orangeList.push(dateValue);
+              greyList.push(dateValue);
             } else if (groupedDataByDateStatus[dateValue].failed) {
               redList.push(dateValue);
             } else if (
@@ -612,9 +596,7 @@ export class SchedulerService {
             }
           });
 
-          setBlueListDates(blueList);
           setGreyListDates(greyList);
-          setOrangeListDates(orangeList);
           setRedListDates(redList);
           setGreenListDates(greenList);
           setDarkGreenListDates(darkGreenList);
@@ -622,9 +604,7 @@ export class SchedulerService {
           setDagRunsList(transformDagRunListData);
         } else {
           setDagRunsList([]);
-          setBlueListDates([]);
           setGreyListDates([]);
-          setOrangeListDates([]);
           setRedListDates([]);
           setGreenListDates([]);
           setDarkGreenListDates([]);

@@ -22,7 +22,7 @@ import {
   gcpServiceUrls
 } from '../utils/Const';
 import { authApi } from '../utils/Config';
-import { handleErrorToast } from '../utils/errorUtils';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 interface IRegions {
   name: string;

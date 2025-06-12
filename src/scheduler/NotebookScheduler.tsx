@@ -59,7 +59,9 @@ const NotebookSchedulerComponent = ({
     useState<boolean>(false);
   const [jobNameUniqueValidation, setJobNameUniqueValidation] =
     useState<boolean>(true);
-  const [createCompleted, setCreateCompleted] = useState(context !== '' ? false : true);
+  const [createCompleted, setCreateCompleted] = useState(
+    context !== '' ? false : true
+  );
   const [notebookSelector, setNotebookSelector] = useState<string>('vertex');
   const [executionPageFlag, setExecutionPageFlag] = useState<boolean>(true);
   const [isApiError, setIsApiError] = useState(false);
@@ -155,9 +157,7 @@ const NotebookSchedulerComponent = ({
     <>
       <div
         className={
-          listingScreenFlag
-            ? 'list-level-component'
-            : 'component-level'
+          listingScreenFlag ? 'list-level-component' : 'component-level'
         }
       >
         {isLoading ? (
