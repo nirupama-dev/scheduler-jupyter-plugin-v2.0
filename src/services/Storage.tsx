@@ -21,7 +21,7 @@ import path from 'path';
 import { handleErrorToast } from '../utils/errorUtils';
 
 export class StorageServices {
-  static cloudStorageAPIService = (
+  static readonly cloudStorageAPIService = (
     setCloudStorageList: (value: string[]) => void,
     setCloudStorageLoading: (value: boolean) => void,
     setErrorMessageBucket: (value: string) => void
@@ -52,7 +52,7 @@ export class StorageServices {
         });
       });
   };
-  static newCloudStorageAPIService = (
+  static readonly newCloudStorageAPIService = (
     bucketName: string,
     setIsCreatingNewBucket: (value: boolean) => void,
     setBucketError: (value: string) => void
@@ -85,7 +85,7 @@ export class StorageServices {
       });
   };
 
-  static downloadJobAPIService = async (
+  static readonly downloadJobAPIService = async (
     gcsUrl: string | undefined,
     fileName: string | undefined,
     jobRunId: string | undefined,

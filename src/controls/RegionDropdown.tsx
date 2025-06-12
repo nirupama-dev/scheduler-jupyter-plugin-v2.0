@@ -66,7 +66,7 @@ export function RegionDropdown(props: Props) {
       value={
         regionsList ? (regionsList?.includes(region) ? region : '') : region
       }
-      options={regionsList ? regionsList : regionStrList}
+      options={regionsList ?? regionStrList}
       onChange={(_, value) => onRegionChange(value ?? '')}
       PaperComponent={(props: PaperProps) => <Paper elevation={8} {...props} />}
       renderInput={params => (
@@ -90,7 +90,7 @@ export function RegionDropdown(props: Props) {
           }}
         />
       )}
-      loading={!(regionStrList.length > 0)}
+      loading={regionStrList.length <= 0}
       disabled={editMode || regionDisable}
       disableClearable={loaderRegion && !region}
     />

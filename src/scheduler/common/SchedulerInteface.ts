@@ -23,7 +23,7 @@ export interface IPayload {
   output_formats: string[];
   parameters: string[];
   cluster_name?: string;
-  serverless_name?: Record<string, never> | undefined;
+  serverless_name?: Record<string, never>;
   mode_selected: string;
   retry_count: number | undefined;
   retry_delay: number | undefined;

@@ -20,7 +20,7 @@ import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { handleErrorToast } from '../utils/errorUtils';
 
 export class ComputeServices {
-  static getParentProjectAPIService = async (
+  static readonly getParentProjectAPIService = async (
     setHostProject: (value: any) => void
   ) => {
     try {
@@ -41,7 +41,7 @@ export class ComputeServices {
       });
     }
   };
-  static primaryNetworkAPIService = (
+  static readonly primaryNetworkAPIService = (
     setPrimaryNetworkList: (value: { name: string; link: string }[]) => void,
     setPrimaryNetworkLoading: (value: boolean) => void,
     setErrorMessagePrimaryNetwork: (value: string) => void
@@ -79,7 +79,7 @@ export class ComputeServices {
       });
   };
 
-  static subNetworkAPIService = async (
+  static readonly subNetworkAPIService = async (
     region: string,
     primaryNetworkSelected: string | undefined,
     setSubNetworkList: (value: { name: string; link: string }[]) => void,
@@ -123,7 +123,7 @@ export class ComputeServices {
       });
   };
 
-  static sharedNetworkAPIService = async (
+  static readonly sharedNetworkAPIService = async (
     setSharedNetworkList: (
       value: { name: string; network: string; subnetwork: string }[]
     ) => void,

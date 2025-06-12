@@ -314,46 +314,44 @@ const ListDagRuns = ({
 
   return (
     <div>
-      <>
-        {(dagRunsList.length > 0 && selectedDate === null) ||
-        (selectedDate !== null && dagRunsCurrentDateList.length > 0) ? (
-          <div>
-            <div
-              className="dag-runs-list-table-parent"
-              style={{ maxHeight: listDagRunHeight }}
-            >
-              <TableData
-                getTableProps={getTableProps}
-                headerGroups={headerGroups}
-                getTableBodyProps={getTableBodyProps}
-                rows={rows}
-                page={page}
-                prepareRow={prepareRow}
-                tableDataCondition={tableDataCondition}
-                fromPage="Dag Runs"
-              />
-            </div>
-            {dagRunsCurrentDateList.length > 50 && (
-              <PaginationView
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                pageIndex={pageIndex}
-                allData={dagRunsCurrentDateList}
-                previousPage={previousPage}
-                nextPage={nextPage}
-                canPreviousPage={canPreviousPage}
-                canNextPage={canNextPage}
-              />
-            )}
+      {(dagRunsList.length > 0 && selectedDate === null) ||
+      (selectedDate !== null && dagRunsCurrentDateList.length > 0) ? (
+        <div>
+          <div
+            className="dag-runs-list-table-parent"
+            style={{ maxHeight: listDagRunHeight }}
+          >
+            <TableData
+              getTableProps={getTableProps}
+              headerGroups={headerGroups}
+              getTableBodyProps={getTableBodyProps}
+              rows={rows}
+              page={page}
+              prepareRow={prepareRow}
+              tableDataCondition={tableDataCondition}
+              fromPage="Dag Runs"
+            />
           </div>
-        ) : (
-          <div>
-            {dagRunsCurrentDateList.length === 0 && (
-              <div className="no-data-style">No rows to display</div>
-            )}
-          </div>
-        )}
-      </>
+          {dagRunsCurrentDateList.length > 50 && (
+            <PaginationView
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              pageIndex={pageIndex}
+              allData={dagRunsCurrentDateList}
+              previousPage={previousPage}
+              nextPage={nextPage}
+              canPreviousPage={canPreviousPage}
+              canNextPage={canNextPage}
+            />
+          )}
+        </div>
+      ) : (
+        <div>
+          {dagRunsCurrentDateList.length === 0 && (
+            <div className="no-data-style">No rows to display</div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -20,7 +20,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { IGcpUrlResponseData } from '../utils/SchedulerJupyterInterfaces';
 
 export class ConfigService {
-  static gcpServiceUrlsAPI = async () => {
+  static readonly gcpServiceUrlsAPI = async () => {
     const data = (await requestAPI('getGcpServiceUrls')) as IGcpUrlResponseData;
     const storage_url = new URL(data.storage_url);
     const storage_upload_url = new URL(data.storage_url);

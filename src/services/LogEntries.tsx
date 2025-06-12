@@ -18,7 +18,7 @@ import { requestAPI } from '../handler/Handler';
 import { IVertexScheduleRunList } from '../scheduler/vertex/VertexInterfaces';
 
 export class LogEntriesServices {
-  static vertexJobTaskLogsListService = async (
+  static readonly vertexJobTaskLogsListService = async (
     dagRunId: string | undefined,
     jobRunsData: IVertexScheduleRunList | undefined,
     setDagTaskInstancesList: (value: any) => void,
@@ -26,8 +26,8 @@ export class LogEntriesServices {
   ) => {
     setDagTaskInstancesList([]);
     setIsLoading(true);
-    const start_date = encodeURIComponent(jobRunsData?.startDate || '');
-    const end_date = encodeURIComponent(jobRunsData?.endDate || '');
+    const start_date = encodeURIComponent(jobRunsData?.startDate ?? '');
+    const end_date = encodeURIComponent(jobRunsData?.endDate ?? '');
     try {
       /* eslint-disable */
       const data: any = await requestAPI(

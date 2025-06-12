@@ -657,7 +657,7 @@ function ListNotebookScheduler({
   useEffect(() => {
     setLoaderProjectId(true);
     authApi().then(credentials => {
-      if (credentials && credentials.project_id && credentials.region_id) {
+      if (credentials?.project_id && credentials?.region_id) {
         setLoaderProjectId(false);
         setProjectId(credentials.project_id);
         setRegion(credentials.region_id);

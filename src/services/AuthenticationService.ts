@@ -20,7 +20,7 @@ import { IAuthCredentials } from '../login/LoginInterfaces';
 import { LOGIN_STATE, STATUS_SUCCESS } from '../utils/Const';
 
 export class AuthenticationService {
-  static loginAPI = async (
+  static readonly loginAPI = async (
     setLoginState: (value: boolean) => void,
     setLoginError: (value: boolean) => void
   ) => {
@@ -46,7 +46,7 @@ export class AuthenticationService {
    * @returns credentials
    */
 
-  static authCredentialsAPI = async (
+  static readonly authCredentialsAPI = async (
     checkApiEnabled: boolean = true
   ): Promise<IAuthCredentials | undefined> => {
     try {

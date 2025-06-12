@@ -19,7 +19,7 @@ import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { handleErrorToast } from '../utils/errorUtils';
 
 export class IamServices {
-  static serviceAccountAPIService = (
+  static readonly serviceAccountAPIService = (
     setServiceAccountList: (
       value: { displayName: string; email: string }[]
     ) => void,
