@@ -26,15 +26,15 @@ import {
 } from '../utils/Const';
 import {
   authApi,
-  toastifyCustomStyle,
   loggedFetch,
   authenticatedFetch,
   jobTimeFormat,
   elapsedTime
 } from '../utils/Config';
-import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 import 'react-toastify/dist/ReactToastify.css';
 import { SchedulerLoggingService, LOG_LEVEL } from '../services/LoggingService';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 interface IRenderActionsData {
   state: ClusterStatus;
@@ -60,11 +60,15 @@ export class SessionService {
           console.log(response);
           const formattedResponse = await response.json();
           if (formattedResponse?.error?.code) {
-            toast.error(formattedResponse?.error?.message, toastifyCustomStyle);
+            handleErrorToast({
+              error: formattedResponse?.error?.message
+            });
           } else {
-            toast.success(
+            Notification.success(
               `Session ${selectedSession} deleted successfully`,
-              toastifyCustomStyle
+              {
+                autoClose: false
+              }
             );
           }
         })
@@ -73,10 +77,10 @@ export class SessionService {
             'Error deleting session',
             LOG_LEVEL.ERROR
           );
-          toast.error(
-            `Failed to delete the session ${selectedSession} : ${err}`,
-            toastifyCustomStyle
-          );
+          const errorResponse = `Failed to delete the session ${selectedSession} : ${err}`;
+          handleErrorToast({
+            error: errorResponse
+          });
         });
     }
   };
@@ -101,10 +105,9 @@ export class SessionService {
               console.log(responseResult);
               const formattedResponse = await responseResult.json();
               if (formattedResponse?.error?.code) {
-                toast.error(
-                  formattedResponse?.error?.message,
-                  toastifyCustomStyle
-                );
+                handleErrorToast({
+                  error: formattedResponse?.error?.message
+                });
               }
             })
             .catch((e: Error) => console.log(e));
@@ -114,10 +117,10 @@ export class SessionService {
             'Error terminating session',
             LOG_LEVEL.ERROR
           );
-          toast.error(
-            `Failed to terminate session ${selectedSession} : ${err}`,
-            toastifyCustomStyle
-          );
+          const errorResponse = `Failed to terminate session ${selectedSession} : ${err}`;
+          handleErrorToast({
+            error: errorResponse
+          });
         });
     }
   };
@@ -150,7 +153,9 @@ export class SessionService {
       setLabelDetail(labelValue);
       setIsLoading(false);
       if (formattedResponse?.error?.code) {
-        toast.error(formattedResponse?.error?.message, toastifyCustomStyle);
+        handleErrorToast({
+          error: formattedResponse?.error?.message
+        });
       }
     } catch (error) {
       setIsLoading(false);
@@ -158,10 +163,10 @@ export class SessionService {
         'Error loading session details',
         LOG_LEVEL.ERROR
       );
-      toast.error(
-        `Failed to fetch session details ${sessionSelected} : ${error}`,
-        toastifyCustomStyle
-      );
+      const errorResponse = `Failed to fetch session details ${sessionSelected} : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
@@ -244,23 +249,18 @@ export class SessionService {
         setIsLoading(false);
       }
       if (formattedResponse?.error?.code) {
-        if (!toast.isActive('sessionError')) {
-          toast.error(formattedResponse?.error?.message, {
-            ...toastifyCustomStyle,
-            toastId: 'sessionError'
-          });
-        }
+        handleErrorToast({
+          error: formattedResponse?.error?.message
+        });
         setIsLoading(false);
       }
     } catch (error) {
       setIsLoading(false);
       SchedulerLoggingService.log('Error listing Sessions', LOG_LEVEL.ERROR);
-      if (!toast.isActive('sessionError')) {
-        toast.error(`Failed to fetch sessions : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'sessionError'
-        });
-      }
+      const errorResponse = `Failed to fetch sessions : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 }

@@ -770,6 +770,10 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   max-height: 0;
 }
 
+.calender-date-time-wrapper {
+  position: relative;
+}
+
 .calender-status-icon {
   margin: 0 auto;
   position: absolute;
@@ -777,6 +781,6 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   left: 17px;
 }
 
-.calender-date-time-wrapper {
-  position: relative;
+.calendar-status-icon-double {
+  left: 16.2px;
 }

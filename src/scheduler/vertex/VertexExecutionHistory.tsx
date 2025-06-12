@@ -38,7 +38,7 @@ import {
   IVertexScheduleRunList
 } from './VertexInterfaces';
 import { LOG_EXPLORER_BASE_URL, VIEW_CLOUD_LOGS } from '../../utils/Const';
-import { toast } from 'react-toastify';
+import { handleErrorToast } from '../../utils/ErrorUtils';
 
 const VertexExecutionHistory = ({
   region,
@@ -381,7 +381,9 @@ const VertexExecutionHistory = ({
         }
       })
       .catch(error => {
-        toast.error(error);
+        handleErrorToast({
+          error: error
+        });
       });
   }, [projectId]);
 

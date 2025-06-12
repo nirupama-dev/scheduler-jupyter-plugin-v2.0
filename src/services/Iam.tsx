@@ -14,12 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
-import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import React from 'react';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class IamServices {
   static serviceAccountAPIService = (
@@ -55,10 +52,9 @@ export class IamServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch service accounts list : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       });
   };
 }

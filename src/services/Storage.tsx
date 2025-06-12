@@ -14,13 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import path from 'path';
-import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import React from 'react';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class StorageServices {
   static cloudStorageAPIService = (
@@ -49,10 +47,9 @@ export class StorageServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch cloud storage bucket : ${error}`;
-        toast.error(
-          <ExpandToastMessage message={errorResponse} />,
-          errorResponse.length > 500 ? toastifyCustomWidth : toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: errorResponse
+        });
       });
   };
   static newCloudStorageAPIService = (
@@ -70,7 +67,9 @@ export class StorageServices {
     })
       .then((formattedResponse: any) => {
         if (formattedResponse === null) {
-          toast.success('Bucket created successfully', toastifyCustomStyle);
+          Notification.success('Bucket created successfully', {
+            autoClose: false
+          });
           setBucketError('');
         } else if (formattedResponse?.error) {
           setBucketError(formattedResponse.error);
@@ -106,19 +105,20 @@ export class StorageServices {
         const base_filename = path.basename(
           formattedResponse.downloaded_filename
         );
-        toast.success(
+        Notification.success(
           `${base_filename} has been successfully downloaded from the ${scheduleName} job history`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
       } else {
         SchedulerLoggingService.log(
           'Error in downloading the job history',
           LOG_LEVEL.ERROR
         );
-        toast.error(
-          'Error in downloading the job history',
-          toastifyCustomStyle
-        );
+        Notification.error('Error in downloading the job history', {
+          autoClose: false
+        });
       }
       setJobDownloadLoading(false);
     } catch (error) {
@@ -127,7 +127,9 @@ export class StorageServices {
         'Error in downloading the job history',
         LOG_LEVEL.ERROR
       );
-      toast.error('Error in downloading the job history', toastifyCustomStyle);
+      Notification.error('Error in downloading the job history', {
+        autoClose: false
+      });
     }
   };
 }

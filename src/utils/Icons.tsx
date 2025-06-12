@@ -43,8 +43,8 @@ import NextIcon from '../../style/icons/next_page.svg';
 import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
 import SuccessCircleIcon from '../../style/icons/success-circle-icon.svg';
 import FailedCircleIcon from '../../style/icons/failed-circle-icon.svg';
-import OrangeCircle from '../../style/icons/orange_circle_icon.svg';
-import GreyCircle from '../../style/icons/grey_circle_icon.svg';
+import OrangeCircle from '../../style/icons/orange_icon.svg';
+import GreyCircle from '../../style/icons/grey_icon.svg';
 
 export const iconCluster = new LabIcon({
   name: 'launcher:clusters-icon',
