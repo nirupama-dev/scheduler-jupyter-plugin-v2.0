@@ -89,9 +89,7 @@ const ExecutionHistory = ({
       setStartDate(new Date(day.toDate()).toISOString());
     }
     if (isLastVisibleCell) {
-      const nextDate = new Date(day.toDate());
-      nextDate.setDate(day.toDate().getDate() + 1);
-      setEndDate(nextDate.toISOString());
+      setEndDate(day.toDate().toISOString());
     }
 
     return (
