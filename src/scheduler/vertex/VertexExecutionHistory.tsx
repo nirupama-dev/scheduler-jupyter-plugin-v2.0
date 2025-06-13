@@ -24,10 +24,7 @@ import { Box, LinearProgress } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import { authApi } from '../../utils/Config';
 import VertexJobRuns from './VertexJobRuns';
-import {
-  iconLeftArrow,
-  iconCreateCluster
-} from '../../utils/Icons';
+import { iconLeftArrow, iconCreateCluster } from '../../utils/Icons';
 import {
   IActivePaginationVariables,
   ISchedulerData,

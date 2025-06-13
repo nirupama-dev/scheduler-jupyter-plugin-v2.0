@@ -26,9 +26,7 @@ const VertexExecutionHistoryActions = ({
     downloadOutputVertexScheduleRunId,
     setDownloadOutputVertexScheduleRunId
   ] = useState<string | undefined>('');
-  const [isLoading, setIsLoading] = useState<boolean>(
-    state === 'failed'
-  );
+  const [isLoading, setIsLoading] = useState<boolean>(state === 'failed');
   const [fileExists, setFileExists] = useState<boolean>(false);
   const bucketName = gcsUrl?.split('//')[1];
 

@@ -110,79 +110,79 @@ const ExecutionHistory = ({
   }, []);
 
   return (
-      <>
-        <div className="execution-history-header">
-          <div
-            role="button"
-            className="scheduler-back-arrow-icon"
-            onClick={() => handleBackButton()}
-          >
-            <iconLeftArrow.react
-              tag="div"
-              className="icon-white logo-alignment-style"
-            />
-          </div>
-          <div className="create-job-scheduler-title">
-            Execution History: {dagId}
-          </div>
-        </div>
+    <>
+      <div className="execution-history-header">
         <div
-          className="execution-history-main-wrapper"
-          style={{ height: height }}
+          role="button"
+          className="scheduler-back-arrow-icon"
+          onClick={() => handleBackButton()}
         >
-          <div className="execution-history-left-wrapper">
-            <LocalizationProvider dateAdapter={AdapterDayjs}>
-              {isLoading ? (
-                <div className="spin-loader-main-execution-history">
-                  <Box sx={{ width: '100%' }}>
-                    <LinearProgress />
-                  </Box>
-                </div>
-              ) : (
-                <div
-                  className="spin-loader-main-execution-history"
-                  style={{ height: '4px' }}
-                ></div>
-              )}
-              <DateCalendar
-                minDate={dayjs().year(2024).startOf('year')}
-                maxDate={dayjs(currentDate)}
-                referenceDate={dayjs(currentDate)}
-                onChange={newValue => handleDateSelection(newValue)}
-                slots={{
-                  day: CustomDay
-                }}
-              />
-            </LocalizationProvider>
-            {startDate !== '' && endDate !== '' && (
-              <ListDagRuns
-                composerName={composerName}
-                dagId={dagId}
-                startDate={startDate}
-                endDate={endDate}
-                setDagRunId={setDagRunId}
-                selectedDate={selectedDate}
-                setGreyListDates={setGreyListDates}
-                setRedListDates={setRedListDates}
-                setGreenListDates={setGreenListDates}
-                setDarkGreenListDates={setDarkGreenListDates}
-                bucketName={bucketName}
-                setIsLoading={setIsLoading}
-                isLoading={isLoading}
-              />
-            )}
-          </div>
-          <div className="execution-history-right-wrapper">
-            {dagRunId !== '' && (
-              <ListDagTaskInstances
-                composerName={composerName}
-                dagId={dagId}
-                dagRunId={dagRunId}
-              />
-            )}
-          </div>
+          <iconLeftArrow.react
+            tag="div"
+            className="icon-white logo-alignment-style"
+          />
         </div>
-      </>
+        <div className="create-job-scheduler-title">
+          Execution History: {dagId}
+        </div>
+      </div>
+      <div
+        className="execution-history-main-wrapper"
+        style={{ height: height }}
+      >
+        <div className="execution-history-left-wrapper">
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {isLoading ? (
+              <div className="spin-loader-main-execution-history">
+                <Box sx={{ width: '100%' }}>
+                  <LinearProgress />
+                </Box>
+              </div>
+            ) : (
+              <div
+                className="spin-loader-main-execution-history"
+                style={{ height: '4px' }}
+              ></div>
+            )}
+            <DateCalendar
+              minDate={dayjs().year(2024).startOf('year')}
+              maxDate={dayjs(currentDate)}
+              referenceDate={dayjs(currentDate)}
+              onChange={newValue => handleDateSelection(newValue)}
+              slots={{
+                day: CustomDay
+              }}
+            />
+          </LocalizationProvider>
+          {startDate !== '' && endDate !== '' && (
+            <ListDagRuns
+              composerName={composerName}
+              dagId={dagId}
+              startDate={startDate}
+              endDate={endDate}
+              setDagRunId={setDagRunId}
+              selectedDate={selectedDate}
+              setGreyListDates={setGreyListDates}
+              setRedListDates={setRedListDates}
+              setGreenListDates={setGreenListDates}
+              setDarkGreenListDates={setDarkGreenListDates}
+              bucketName={bucketName}
+              setIsLoading={setIsLoading}
+              isLoading={isLoading}
+            />
+          )}
+        </div>
+        <div className="execution-history-right-wrapper">
+          {dagRunId !== '' && (
+            <ListDagTaskInstances
+              composerName={composerName}
+              dagId={dagId}
+              dagRunId={dagRunId}
+            />
+          )}
+        </div>
+      </div>
+    </>
   );
 };
 

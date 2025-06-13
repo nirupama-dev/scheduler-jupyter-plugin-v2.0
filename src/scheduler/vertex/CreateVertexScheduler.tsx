@@ -1362,7 +1362,10 @@ const CreateVertexScheduler = ({
                 />
                 {!primaryNetworkSelected && (
                   <ErrorMessage
-                    message={errorMessagePrimaryNetwork || 'Primary network is required'}
+                    message={
+                      errorMessagePrimaryNetwork ||
+                      'Primary network is required'
+                    }
                     showIcon={false}
                   />
                 )}
