@@ -27,14 +27,16 @@ from scheduler_jupyter_plugin import credentials
 from scheduler_jupyter_plugin.services import airflow
 
 
-async def mock_get_airflow_uri(self, composer_name):
-    return "https://mock_airflow_uri", "mock_bucket"
+async def mock_get_airflow_uri_and_bucket(self, composer_name):
+    return {"airflow_uri": "https://mock_airflow_uri", "bucket": "mock_bucket"}
 
 
 async def test_list_jobs(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
 
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
     mock_composer = "mock-url"
     response = await jp_fetch(
         "scheduler-plugin",
@@ -53,7 +55,9 @@ async def test_list_jobs(monkeypatch, jp_fetch):
 
 async def test_list_dag_with_missing_argument(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
     response = await jp_fetch(
         "scheduler-plugin",
         "dagList",
@@ -70,7 +74,9 @@ async def test_list_dag_with_invalid_credentials(monkeypatch, jp_fetch):
 
     mocks.patch_mocks(monkeypatch)
     monkeypatch.setattr(credentials, "get_cached", mock_credentials)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
     mock_composer = "mock-url"
     response = await jp_fetch(
         "scheduler-plugin",
@@ -86,7 +92,11 @@ async def test_list_dag_with_invalid_credentials(monkeypatch, jp_fetch):
         "from_page, expected_status", [(None, 0), ("some_page", 0)]
     )
     async def test_delete_job(monkeypatch, from_page, expected_status, jp_fetch):
-        monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+        monkeypatch.setattr(
+            airflow.Client,
+            "get_airflow_uri_and_bucket",
+            mock_get_airflow_uri_and_bucket,
+        )
         mock_delete = AsyncMock()
         mock_delete.return_value.__aenter__.return_value.status = 200
         mock_client_session = MagicMock()
@@ -141,7 +151,9 @@ async def test_update_job(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
     monkeypatch.setattr(jupyter_config, "async_get_gcloud_config", mock_config)
     monkeypatch.setattr(aiohttp, "ClientSession", MockClientSession)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
     mock_composer = "composer"
     mock_dag_id = "mock_dag_id"
     mock_status = "true"
@@ -163,7 +175,9 @@ async def test_update_job(monkeypatch, jp_fetch):
 
 async def test_list_dag_run(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
 
     mock_composer = "mock-url"
     mock_dag_id = "mock_dag_id"
@@ -186,7 +200,7 @@ async def test_list_dag_run(monkeypatch, jp_fetch):
 
     assert (
         payload["api_endpoint"]
-        == f"https://mock_airflow_uri/api/v1/dags/mock_dag_id/dagRuns?execution_date_gte={mock_start_date}&execution_date_lte={mock_end_date}&offset={mock_offset}"
+        == f"https://mock_airflow_uri/api/v1/dags/mock_dag_id/dagRuns?start_date_gte={mock_start_date}&start_date_lte={mock_end_date}&offset={mock_offset}"
     )
     assert payload["headers"]["Authorization"] == f"Bearer mock-token"
 
@@ -194,7 +208,9 @@ async def test_list_dag_run(monkeypatch, jp_fetch):
 async def test_list_dag_run_task_logs(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
     monkeypatch.setattr(aiohttp, "ClientSession", MockClientSession)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
 
     mock_composer = "mock-url"
     mock_dag_id = "mock_dag_id"
@@ -219,7 +235,9 @@ async def test_list_dag_run_task_logs(monkeypatch, jp_fetch):
 
 async def test_list_dag_run_task(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
 
     mock_composer = "mock-url"
     mock_dag_id = "mock_dag_id"
@@ -257,7 +275,9 @@ async def test_edit_jobs(monkeypatch, jp_fetch):
 
 async def test_list_import_errors(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
 
     mock_composer = "mock-composer"
     response = await jp_fetch(
@@ -276,7 +296,9 @@ async def test_list_import_errors(monkeypatch, jp_fetch):
 
 async def test_dag_trigger(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
 
     mock_composer = "mock-url"
     mock_dag_id = "mock_dag_id"
@@ -298,7 +320,9 @@ async def test_dag_trigger(monkeypatch, jp_fetch):
 
 async def test_invalid_composer(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
 
     mock_composer = "mock/url"
     mock_dag_id = "mock_dag_id"
@@ -321,7 +345,9 @@ async def test_invalid_composer(monkeypatch, jp_fetch):
 
 async def test_invalid_dag_id(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
-    monkeypatch.setattr(airflow.Client, "get_airflow_uri", mock_get_airflow_uri)
+    monkeypatch.setattr(
+        airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
+    )
 
     mock_composer = "mock-url"
     mock_dag_id = "mock/dag/id"
