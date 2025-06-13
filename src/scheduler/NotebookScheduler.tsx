@@ -132,6 +132,7 @@ const NotebookSchedulerComponent = ({
   const handleSchedulerModeChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
+    setJobNameSpecialValidation(false);
     setIsApiError(false);
     const newValue = (event.target as HTMLInputElement).value;
     setNotebookSelector(newValue);
