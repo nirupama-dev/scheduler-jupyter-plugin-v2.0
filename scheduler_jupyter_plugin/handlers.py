@@ -38,6 +38,7 @@ from scheduler_jupyter_plugin.controllers import (
     iam,
     logEntries,
     storage,
+    version,
     vertex,
 )
 
@@ -190,6 +191,8 @@ def setup_handlers(web_app):
         "api/vertex/listNotebookExecutionJobs": vertex.NotebookExecutionJobListController,
         "api/storage/downloadOutput": storage.DownloadOutputController,
         "api/storage/outputFileExists": storage.OutputFileExistsController,
+        "jupyterlabVersion": version.LatestVersionController,
+        "updatePlugin": version.UpdatePackageController,
     }
     handlers = [(full_path(name), handler) for name, handler in handlersMap.items()]
     web_app.add_handlers(host_pattern, handlers)

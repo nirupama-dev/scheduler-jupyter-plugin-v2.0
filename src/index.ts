@@ -22,12 +22,21 @@ import {
 } from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
-import { MainAreaWidget, IThemeManager } from '@jupyterlab/apputils';
+import {
+  MainAreaWidget,
+  IThemeManager,
+  Notification
+} from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
 import { NotebookScheduler } from './scheduler/NotebookScheduler';
 import { NotebookButtonExtension } from './controls/NotebookButtonExtension';
-import { TITLE_LAUNCHER_CATEGORY } from './utils/Const';
+import {
+  PLUGIN_NAME,
+  TITLE_LAUNCHER_CATEGORY,
+  VERSION_DETAIL
+} from './utils/Const';
 import { iconScheduledNotebooks } from './utils/Icons';
+import { requestAPI } from './handler/Handler';
 
 /**
  * Initialization data for the scheduler-jupyter-plugin extension.
@@ -48,6 +57,58 @@ const plugin: JupyterFrontEndPlugin<void> = {
     const { commands } = app;
 
     const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';
+
+    async function jupyterVersionCheck() {
+      try {
+        const notificationMessage =
+          'There is a newer version of Scheduler Plugin available. Would you like to update it?';
+        const latestVersion = await requestAPI(
+          `jupyterlabVersion?packageName=${PLUGIN_NAME}`,
+          {
+            method: 'GET'
+          }
+        );
+
+        if (
+          typeof latestVersion === 'string' &&
+          latestVersion > VERSION_DETAIL
+        ) {
+          Notification.info(notificationMessage, {
+            actions: [
+              {
+                label: 'Update',
+                callback: () => {
+                  console.log('Update JupyterLab to the latest version');
+                  requestAPI(`updatePlugin?packageName=${PLUGIN_NAME}`, {
+                    method: 'POST'
+                  })
+                    .then(() => {
+                      // After successful update, refresh the application
+                      window.location.reload();
+                    })
+                    .catch(updateError => {
+                      Notification.error(`Update failed.${updateError}`);
+                    });
+                },
+                displayType: 'warn'
+              },
+              {
+                label: 'Ignore',
+                callback: () => {
+                  Notification.warning('Update Cancelled by user');
+                },
+                displayType: 'default'
+              }
+            ],
+            autoClose: false
+          });
+        }
+      } catch (error) {
+        Notification.error(`Failed to fetch JupyterLab version:${error}`);
+        throw error;
+      }
+    }
+
     commands.addCommand(createNotebookJobsComponentCommand, {
       caption: 'Scheduled Jobs',
       label: 'Scheduled Jobs',
@@ -83,6 +144,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
         rank: 4
       });
     }
+
+    await jupyterVersionCheck();
   }
 };
 
