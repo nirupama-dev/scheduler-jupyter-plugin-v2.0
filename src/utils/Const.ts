@@ -16,11 +16,17 @@
  */
 
 import { ConfigService } from '../services/ConfigService';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { version, name } = require('../../package.json');
+
+export const VERSION_DETAIL = version;
+export const PLUGIN_NAME = name;
 export const LOGIN_STATE = '1';
 export const STATUS_SUCCESS = 'SUCCEEDED';
 export const API_HEADER_BEARER = 'Bearer ';
 export const API_HEADER_CONTENT_TYPE = 'application/json';
 export const PLUGIN_ID = 'scheduler_jupyter_plugin:plugin';
+export const GCS_PLUGIN_ID = 'gcs-jupyter-plugin:plugin';
 
 export const gcpServiceUrls = (async () => {
   return await ConfigService.gcpServiceUrlsAPI();
@@ -118,3 +124,11 @@ export const SHARED_NETWORK_DOC_URL =
 export const pattern =
   // eslint-disable-next-line
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+
+export const DEFAULT_DISK_MIN_SIZE = 10;
+
+export const DEFAULT_DISK_MAX_SIZE = 65536;
+
+export const DEFAULT_DISK_SIZE = '100';
+
+export const VIEW_CLOUD_LOGS = 'VIEW CLOUD LOGS';

@@ -34,12 +34,13 @@ import PollingTimer from '../../utils/PollingTimer';
 import PollingImportErrorTimer from '../../utils/PollingImportErrorTimer';
 import ImportErrorPopup from '../../utils/ImportErrorPopup';
 import triggerIcon from '../../../style/icons/scheduler_trigger.svg';
-import { PLUGIN_ID, scheduleMode } from '../../utils/Const';
+import { GCS_PLUGIN_ID, scheduleMode } from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { RegionDropdown } from '../../controls/RegionDropdown';
 import ErrorMessage from '../common/ErrorMessage';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
+import { Notification } from '@jupyterlab/apputils';
 
 const iconDelete = new LabIcon({
   name: 'launcher:delete-icon',
@@ -73,7 +74,7 @@ interface IDagList {
   scheduleInterval: string;
 }
 
-function listNotebookScheduler({
+function ListNotebookScheduler({
   app,
   settingRegistry,
   handleDagIdSelection,
@@ -153,22 +154,24 @@ function listNotebookScheduler({
   composerSelected?: string;
   setApiEnableUrl: any;
 }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [composerList, setComposerList] = useState<string[]>([]);
   const [composerSelectedList, setComposerSelectedList] = useState<string>('');
   const [dagList, setDagList] = useState<IDagList[]>([]);
   const data = dagList;
   const backselectedEnvironment = backButtonComposerName;
-  const [deletePopupOpen, setDeletePopupOpen] = useState(false);
-  const [importErrorPopupOpen, setImportErrorPopupOpen] = useState(false);
+  const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
+  const [importErrorPopupOpen, setImportErrorPopupOpen] =
+    useState<boolean>(false);
   const [selectedDagId, setSelectedDagId] = useState('');
   const [editDagLoading, setEditDagLoading] = useState('');
   const [inputNotebookFilePath, setInputNotebookFilePath] = useState('');
   const [editNotebookLoading, setEditNotebookLoading] = useState('');
-  const [deletingNotebook, setDeletingNotebook] = useState(false);
+  const [deletingNotebook, setDeletingNotebook] = useState<boolean>(false);
   const [importErrorData, setImportErrorData] = useState<string[]>([]);
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
-  const [isPreviewEnabled, setIsPreviewEnabled] = useState(false);
+  const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
+    useState<boolean>(false);
   const [projectId, setProjectId] = useState('');
   const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
@@ -441,7 +444,9 @@ function listNotebookScheduler({
             }
             data-jobid={data.jobid}
             onClick={e => {
-              !is_status_paused ? handleTriggerDag(e) : null;
+              if (!is_status_paused) {
+                handleTriggerDag(e);
+              }
             }}
           >
             <iconTrigger.react
@@ -472,8 +477,9 @@ function listNotebookScheduler({
             />
           </div>
         )}
-        {isPreviewEnabled &&
-          (data.jobid === editNotebookLoading ? (
+        {isGCSPluginInstalled ? ( // Check if GCS plugin is installed
+          // If installed, show the edit notebook icon
+          data.jobid === editNotebookLoading ? (
             <div className="icon-buttons-style">
               <CircularProgress
                 size={18}
@@ -494,7 +500,21 @@ function listNotebookScheduler({
                 className="icon-white logo-alignment-style"
               />
             </div>
-          ))}
+          )
+        ) : (
+          // If not installed, show the disabled edit icon
+          // ToDo: change css class to display disabled icon after GCS plugin release.
+          <div
+            role="button"
+            className="edit-icon-buttons-display"
+            title="Install GCS Plugin to enable notebook editing"
+          >
+            <iconEditDag.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          </div>
+        )}
         <div
           role="button"
           className="icon-buttons-style"
@@ -537,13 +557,20 @@ function listNotebookScheduler({
       );
     }
   };
-
-  const checkPreviewEnabled = async () => {
-    const settings = await settingRegistry.load(PLUGIN_ID);
-
-    // The current value of whether or not preview features are enabled.
-    const previewEnabled = settings.get('previewEnabled').composite as boolean;
-    setIsPreviewEnabled(previewEnabled);
+  /**
+   * Check if GCS plugin is installed
+   * If installed, set isGCSPluginInstalled to true
+   * Else set it to false
+   */
+  const checkGCSPluginAvailability = async () => {
+    try {
+      const isPluginInstalled = app.hasPlugin(GCS_PLUGIN_ID);
+      setIsGCSPluginInstalled(isPluginInstalled);
+    } catch (error) {
+      Notification.error('Could not check GCS plugin availability', {
+        autoClose: false
+      });
+    }
   };
 
   const openEditDagNotebookFile = async () => {
@@ -575,7 +602,7 @@ function listNotebookScheduler({
   }, [inputNotebookFilePath]);
 
   useEffect(() => {
-    checkPreviewEnabled();
+    checkGCSPluginAvailability();
     const loadComposerListAndSelectFirst = async () => {
       await listComposersAPI();
     };
@@ -630,7 +657,7 @@ function listNotebookScheduler({
   useEffect(() => {
     setLoaderProjectId(true);
     authApi().then(credentials => {
-      if (credentials && credentials.project_id && credentials.region_id) {
+      if (credentials?.project_id && credentials?.region_id) {
         setLoaderProjectId(false);
         setProjectId(credentials.project_id);
         setRegion(credentials.region_id);
@@ -816,4 +843,4 @@ function listNotebookScheduler({
     </div>
   );
 }
-export default listNotebookScheduler;
+export default ListNotebookScheduler;

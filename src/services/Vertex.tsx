@@ -15,9 +15,10 @@
  * limitations under the License.
  */
 import { toast } from 'react-toastify';
+import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { showToast, toastifyCustomStyle } from '../utils/Config';
+import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import {
   ICreatePayload,
   IVertexScheduleList,
@@ -26,16 +27,17 @@ import {
   IMachineType,
   ISchedulerData,
   ITriggerSchedule,
-  IUpdateSchedulerAPIResponse
+  IUpdateSchedulerAPIResponse,
+  IFormattedResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
 import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
-import { Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import React from 'react';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class VertexServices {
-  static machineTypeAPIService = async (
+  static readonly machineTypeAPIService = (
     region: string,
     setMachineTypeList: (value: IMachineType[]) => void,
     setMachineTypeLoading: (value: boolean) => void,
@@ -43,50 +45,56 @@ export class VertexServices {
     setApiError: (value: string) => void,
     setApiEnableUrl: any
   ) => {
-    try {
-      setMachineTypeLoading(true);
-      const formattedResponse: any = await requestAPI(
-        `api/vertex/uiConfig?region_id=${region}`
-      );
-      if (formattedResponse.length > 0) {
-        setMachineTypeList(formattedResponse);
-      } else if (formattedResponse.length === undefined) {
-        try {
-          if (formattedResponse.error.code === 403) {
-            // Pattern to check whether string contains link
-            const pattern =
-              // eslint-disable-next-line
-              /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
-            const url = formattedResponse.error.message.match(pattern);
-            if (url && url.length > 0) {
-              setIsApiError(true);
-              setApiError(formattedResponse.error.message);
-              setApiEnableUrl(url);
-            } else {
-              setApiError(formattedResponse.error.message);
+    setMachineTypeLoading(true);
+    requestAPI(`api/vertex/uiConfig?region_id=${region}`)
+      .then((formattedResponse: any) => {
+        if (formattedResponse.length > 0) {
+          setMachineTypeList(formattedResponse);
+        } else if (formattedResponse.length === undefined) {
+          try {
+            if (formattedResponse.error.code === 403) {
+              // Pattern to check whether string contains link
+              const pattern =
+                // eslint-disable-next-line
+                /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+              const url = formattedResponse.error.message.match(pattern);
+              if (url && url.length > 0) {
+                setIsApiError(true);
+                setApiError(formattedResponse.error.message);
+                setApiEnableUrl(url);
+              } else {
+                setApiError(formattedResponse.error.message);
+              }
             }
+          } catch (error) {
+            const errorResponse = `Error fetching machine type list: ${error}`;
+            toast.error(
+              <ExpandToastMessage message={errorResponse} />,
+              errorResponse.length > 500
+                ? toastifyCustomWidth
+                : toastifyCustomStyle
+            );
           }
-        } catch (error) {
-          showToast(
-            'Error fetching machine type list. Please try again later.'
-          );
+        } else {
+          setMachineTypeList([]);
         }
-      } else {
+        setMachineTypeLoading(false);
+      })
+      .catch(error => {
         setMachineTypeList([]);
-      }
-      setMachineTypeLoading(false);
-    } catch (error) {
-      setMachineTypeList([]);
-      setMachineTypeLoading(false);
-      SchedulerLoggingService.log(
-        'Error listing machine type',
-        LOG_LEVEL.ERROR
-      );
-      toast.error('Failed to fetch machine type list', toastifyCustomStyle);
-    }
+        setMachineTypeLoading(false);
+        SchedulerLoggingService.log(
+          `Error listing machine type list: ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to fetch machine type list: ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      });
   };
 
-  static createVertexSchedulerService = async (
+  static readonly createVertexSchedulerService = async (
     payload: ICreatePayload,
     setCreateCompleted: (value: boolean) => void,
     setCreatingVertexScheduler: (value: boolean) => void
@@ -98,29 +106,33 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        toast.error(
-          <ExpandToastMessage message={data.error} />,
-          toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: data.error
+        });
         setCreatingVertexScheduler(false);
       } else {
-        toast.success(
+        Notification.success(
           `Job ${payload.display_name} successfully created`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
       }
-    } catch (reason) {
+    } catch (reason: any) {
       setCreatingVertexScheduler(false);
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
+      SchedulerLoggingService.log(
+        `Error creating schedule: ${reason}`,
+        LOG_LEVEL.ERROR
       );
+      handleErrorToast({
+        error: reason
+      });
     }
   };
 
-  static editVertexJobSchedulerService = async (
+  static readonly editVertexJobSchedulerService = async (
     jobId: string,
     region: string,
     payload: ICreatePayload,
@@ -142,30 +154,30 @@ export class VertexServices {
         }
       );
       if (data.error) {
-        toast.error(
-          <ExpandToastMessage message={data.error} />,
-          toastifyCustomStyle
-        );
+        handleErrorToast({
+          error: data.error
+        });
         setCreatingVertexScheduler(false);
       } else {
-        toast.success(
+        Notification.success(
           `Job ${payload.display_name} successfully updated`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
         setEditMode(false);
       }
-    } catch (reason) {
+    } catch (reason: any) {
       setCreatingVertexScheduler(false);
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
-      );
+      handleErrorToast({
+        error: reason
+      });
     }
   };
 
-  static listVertexSchedules = async (
+  static readonly listVertexSchedules = async (
     setVertexScheduleList: (
       value:
         | IVertexScheduleList[]
@@ -177,9 +189,9 @@ export class VertexServices {
     setApiError: (value: string) => void,
     setNextPageToken: (value: string | null) => void, // function for setting the next page token
     newPageToken: string | null | undefined, // token of page to be fetched
-    pageLength: number = 50, // number of items to be fetched
     setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
     setApiEnableUrl: any,
+    pageLength: number = 50, // number of items to be fetched
     abortControllers?: any
   ) => {
     setIsLoading(true);
@@ -201,13 +213,6 @@ export class VertexServices {
         setNextPageToken(null);
         setHasNextPageToken(false);
         return;
-      }
-
-      // Define the expected type for formattedResponse
-      interface IFormattedResponse {
-        schedules?: IVertexScheduleList[];
-        nextPageToken?: string;
-        error?: { code: number; message: string };
       }
 
       const { schedules, nextPageToken, error } =
@@ -241,7 +246,7 @@ export class VertexServices {
         // Fetch Last run status asynchronously without waiting for completion
         schedules.forEach((schedule: IVertexScheduleList) => {
           // Triggering fetch asynchronously
-          fetchLastFiveRunStatus(
+          VertexServices.fetchLastFiveRunStatus(
             schedule,
             region,
             setVertexScheduleList,
@@ -255,7 +260,7 @@ export class VertexServices {
         setHasNextPageToken(false);
         setIsLoading(false);
       }
-    } catch (error) {
+    } catch (error: any) {
       // Handle errors during the API call
       setVertexScheduleList([]);
       setNextPageToken(null);
@@ -263,15 +268,18 @@ export class VertexServices {
       setIsApiError(true);
       setApiError('An error occurred while fetching schedules.');
       SchedulerLoggingService.log(
-        'Error listing vertex schedules',
+        `Error listing vertex schedules ${error}`,
         LOG_LEVEL.ERROR
       );
+      handleErrorToast({
+        error: error
+      });
     } finally {
       setIsLoading(false); // Ensure loading is stopped
     }
   };
 
-  static handleUpdateSchedulerPauseAPIService = async (
+  static readonly handleUpdateSchedulerPauseAPIService = async (
     scheduleId: string,
     region: string,
     displayName: string,
@@ -295,15 +303,16 @@ export class VertexServices {
         }
       );
       if (Object.keys(formattedResponse).length === 0) {
-        toast.success(
-          `Schedule ${displayName} updated successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`Schedule ${displayName} updated successfully`, {
+          autoClose: false
+        });
         setResumeLoading('');
       } else {
         setResumeLoading('');
         SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
-        toast.error('Failed to pause schedule');
+        Notification.error('Failed to pause schedule', {
+          autoClose: false
+        });
       }
     } catch (error) {
       setResumeLoading('');
@@ -312,13 +321,19 @@ export class VertexServices {
           return;
         }
       } else {
-        SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
-        toast.error(`Failed to pause schedule : ${error}`, toastifyCustomStyle);
+        SchedulerLoggingService.log(
+          `Error in pause schedule ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to pause schedule : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
 
-  static handleUpdateSchedulerResumeAPIService = async (
+  static readonly handleUpdateSchedulerResumeAPIService = async (
     scheduleId: string,
     region: string,
     displayName: string,
@@ -342,10 +357,9 @@ export class VertexServices {
         }
       );
       if (Object.keys(formattedResponse).length === 0) {
-        toast.success(
-          `Schedule ${displayName} updated successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`Schedule ${displayName} updated successfully`, {
+          autoClose: false
+        });
         setResumeLoading('');
       } else {
         setResumeLoading('');
@@ -353,7 +367,9 @@ export class VertexServices {
           'Error in resume schedule',
           LOG_LEVEL.ERROR
         );
-        toast.error('Failed to resume schedule');
+        Notification.error('Failed to resume schedule', {
+          autoClose: false
+        });
       }
     } catch (error) {
       setResumeLoading('');
@@ -363,18 +379,18 @@ export class VertexServices {
         }
       } else {
         SchedulerLoggingService.log(
-          'Error in resume schedule',
+          `Error in resume schedule ${error}`,
           LOG_LEVEL.ERROR
         );
-        toast.error(
-          `Failed to resume schedule : ${error}`,
-          toastifyCustomStyle
-        );
+        const errorResponse = `Failed to resume schedule : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
 
-  static triggerSchedule = async (
+  static readonly triggerSchedule = async (
     region: string,
     scheduleId: string,
     displayName: string,
@@ -396,13 +412,14 @@ export class VertexServices {
       );
       if (data.name) {
         setTriggerLoading('');
-        toast.success(
-          `${displayName} triggered successfully `,
-          toastifyCustomStyle
-        );
+        Notification.success(`${displayName} triggered successfully `, {
+          autoClose: false
+        });
       } else {
         setTriggerLoading('');
-        toast.error(`Failed to Trigger ${displayName}`, toastifyCustomStyle);
+        Notification.error(`Failed to Trigger ${displayName}`, {
+          autoClose: false
+        });
       }
     } catch (reason) {
       setTriggerLoading('');
@@ -411,15 +428,19 @@ export class VertexServices {
           return;
         }
       } else {
-        toast.error(
-          `Failed to Trigger ${displayName} : ${reason}`,
-          toastifyCustomStyle
+        SchedulerLoggingService.log(
+          `Error in Trigger schedule ${reason}`,
+          LOG_LEVEL.ERROR
         );
+        const errorResponse = `Failed to Trigger schedule : ${reason}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
 
-  static handleDeleteSchedulerAPIService = async (
+  static readonly handleDeleteSchedulerAPIService = async (
     region: string,
     scheduleId: string,
     displayName: string,
@@ -433,9 +454,9 @@ export class VertexServices {
     setApiError: (value: string) => void,
     setNextPageToken: (value: string | null) => void,
     newPageToken: string | null | undefined,
-    pageLength: number = 50,
     hasNextPage: (value: boolean) => void,
-    setApiEnableUrl: any
+    setApiEnableUrl: any,
+    pageLength: number = 50
   ) => {
     try {
       const serviceURL = 'api/vertex/deleteSchedule';
@@ -452,27 +473,34 @@ export class VertexServices {
           setApiError,
           setNextPageToken,
           newPageToken,
-          pageLength,
           hasNextPage,
-          setApiEnableUrl
+          setApiEnableUrl,
+          pageLength
         );
-        toast.success(
+        Notification.success(
           `Deleted job ${displayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
       } else {
-        toast.error(`Failed to delete the ${displayName}`, toastifyCustomStyle);
+        Notification.error(`Failed to delete the ${displayName}`, {
+          autoClose: false
+        });
       }
     } catch (error) {
-      SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
-      toast.error(
-        `Failed to delete the ${displayName} : ${error}`,
-        toastifyCustomStyle
+      SchedulerLoggingService.log(
+        `Error in Delete api ${error}`,
+        LOG_LEVEL.ERROR
       );
+      const errorResponse = `Failed to delete the ${displayName} : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
-  static editVertexSchedulerService = async (
+  static readonly editVertexSchedulerService = async (
     scheduleId: string,
     region: string,
     setInputNotebookFilePath: (value: string) => void,
@@ -497,18 +525,20 @@ export class VertexServices {
         );
       } else {
         setEditNotebookLoading('');
-        toast.error('File path not found', toastifyCustomStyle);
+        Notification.error('File path not found', {
+          autoClose: false
+        });
       }
     } catch (reason) {
       setEditNotebookLoading('');
-      toast.error(
-        `Error in updating notebook.\n${reason}`,
-        toastifyCustomStyle
-      );
+      const errorResponse = `Error in updating notebook.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
-  static editVertexSJobService = async (
+  static readonly editVertexSJobService = async (
     jobId: string,
     region: string,
     setEditScheduleLoading: (value: string) => void,
@@ -661,7 +691,9 @@ export class VertexServices {
         setEditMode(true);
       } else {
         setEditScheduleLoading('');
-        toast.error('File path not found', toastifyCustomStyle);
+        Notification.error('File path not found', {
+          autoClose: false
+        });
       }
     } catch (reason) {
       setEditScheduleLoading('');
@@ -670,23 +702,25 @@ export class VertexServices {
           return;
         }
       } else {
-        toast.error(
-          `Error in updating notebook.\n${reason}`,
-          toastifyCustomStyle
+        SchedulerLoggingService.log(
+          `Error in update api ${reason}`,
+          LOG_LEVEL.ERROR
         );
+        const errorResponse = `Error in updating notebook. ${reason}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
   };
 
-  static executionHistoryServiceList = async (
+  static readonly executionHistoryServiceList = async (
     region: string,
     schedulerData: ISchedulerData | undefined,
     selectedMonth: Dayjs | null,
     setIsLoading: (value: boolean) => void,
     setVertexScheduleRunsList: (value: IVertexScheduleRunList[]) => void,
-    setBlueListDates: (value: string[]) => void,
     setGreyListDates: (value: string[]) => void,
-    setOrangeListDates: (value: string[]) => void,
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
     setDarkGreenListDates: (value: string[]) => void,
@@ -699,7 +733,7 @@ export class VertexServices {
     abortControllers.current.push(controller);
     const signal = controller.signal;
 
-    const selected_month = selectedMonth && selectedMonth.toISOString();
+    const selected_month = selectedMonth?.toISOString();
     const schedule_id = schedulerData?.name.split('/').pop();
     const serviceURL = 'api/vertex/listNotebookExecutionJobs';
     const formattedResponse: any = await requestAPI(
@@ -755,13 +789,9 @@ export class VertexServices {
           const date = item.date; // Group by date
           const status = item.state; // Group by state
 
-          if (!result[date]) {
-            result[date] = {};
-          }
+          result[date] ??= {};
 
-          if (!result[date][status]) {
-            result[date][status] = [];
-          }
+          result[date][status] ??= [];
 
           result[date][status].push(item);
 
@@ -771,25 +801,28 @@ export class VertexServices {
       );
 
       // Initialize grouping lists
-      const blueList: string[] = [];
       const greyList: string[] = [];
-      const orangeList: string[] = [];
       const redList: string[] = [];
       const greenList: string[] = [];
       const darkGreenList: string[] = [];
 
       // Process grouped data
       Object.keys(groupedDataByDateStatus).forEach(dateValue => {
-        if (groupedDataByDateStatus[dateValue].running) {
-          blueList.push(dateValue);
-        } else if (groupedDataByDateStatus[dateValue].queued) {
+        if (
+          groupedDataByDateStatus[dateValue].running ||
+          groupedDataByDateStatus[dateValue].queued ||
+          groupedDataByDateStatus[dateValue].pending ||
+          groupedDataByDateStatus[dateValue].unspecified ||
+          groupedDataByDateStatus[dateValue].paused ||
+          groupedDataByDateStatus[dateValue].updating
+        ) {
           greyList.push(dateValue);
         } else if (
-          groupedDataByDateStatus[dateValue].failed &&
-          groupedDataByDateStatus[dateValue].succeeded
+          groupedDataByDateStatus[dateValue].failed ||
+          groupedDataByDateStatus[dateValue].cancelled ||
+          groupedDataByDateStatus[dateValue].expired ||
+          groupedDataByDateStatus[dateValue].partially
         ) {
-          orangeList.push(dateValue);
-        } else if (groupedDataByDateStatus[dateValue].failed) {
           redList.push(dateValue);
         } else if (
           groupedDataByDateStatus[dateValue].succeeded &&
@@ -802,9 +835,7 @@ export class VertexServices {
       });
 
       // Update state lists with their respective transformations
-      setBlueListDates(blueList);
       setGreyListDates(greyList);
-      setOrangeListDates(orangeList);
       setRedListDates(redList);
       setGreenListDates(greenList);
       setDarkGreenListDates(darkGreenList);
@@ -815,17 +846,21 @@ export class VertexServices {
           return;
         }
       } else {
-        toast.error(
-          'Error in fetching the execution history',
-          toastifyCustomStyle
+        SchedulerLoggingService.log(
+          `Error in execution history api ${error}`,
+          LOG_LEVEL.ERROR
         );
+        const errorResponse = `Error in fetching the execution history : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     }
     setIsLoading(false);
   };
 
   //Funtion to check weather output file exists or not
-  static outputFileExists = async (
+  static readonly outputFileExists = async (
     bucketName: string | undefined,
     jobRunId: string | undefined,
     fileName: string | undefined,
@@ -843,7 +878,7 @@ export class VertexServices {
         `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${jobRunId}&file_name=${fileName}`,
         { signal }
       );
-      setFileExists(formattedResponse === 'true' ? true : false);
+      setFileExists(formattedResponse === 'true');
       setIsLoading(false);
     } catch (lastRunError: any) {
       if (typeof lastRunError === 'object' && lastRunError !== null) {
@@ -852,61 +887,61 @@ export class VertexServices {
         }
       } else {
         SchedulerLoggingService.log(
-          'Error checking output file',
+          `Error checking output file ${lastRunError}`,
           LOG_LEVEL.ERROR
         );
       }
     }
   };
-}
 
-//Funtion to fetch last five run status for Scheduler Listing screen.
-async function fetchLastFiveRunStatus(
-  schedule: any,
-  region: string,
-  setVertexScheduleList: (
-    value:
-      | IVertexScheduleList[]
-      | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
-  ) => void,
-  abortControllers: any
-): Promise<any> {
-  // Controller to abort pending API call
-  const controller = new AbortController();
-  abortControllers.current.push(controller);
-  const signal = controller.signal;
+  //Funtion to fetch last five run status for Scheduler Listing screen.
+  static readonly fetchLastFiveRunStatus = (
+    schedule: any,
+    region: string,
+    setVertexScheduleList: (
+      value:
+        | IVertexScheduleList[]
+        | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
+    ) => void,
+    abortControllers: any
+  ) => {
+    // Controller to abort pending API call
+    const controller = new AbortController();
+    abortControllers?.current.push(controller);
+    const signal = controller.signal;
 
-  //Extract Schedule id from schedule name.
-  const scheduleId = schedule.name.split('/').pop();
-  const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
-  try {
-    const jobExecutionList: any[] = await requestAPI(
+    //Extract Schedule id from schedule name.
+    const scheduleId = schedule.name.split('/').pop();
+    const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
+    requestAPI(
       serviceURLLastRunResponse +
         `?region_id=${region}&schedule_id=${scheduleId}&page_size=5&order_by=createTime desc`,
       { signal }
-    );
+    )
+      .then((jobExecutionList: any) => {
+        const lastFiveRun = jobExecutionList.map((job: any) => job.jobState);
+        schedule.jobState = lastFiveRun;
 
-    const lastFiveRun = jobExecutionList.map((job: any) => job.jobState);
-    schedule.jobState = lastFiveRun;
-
-    setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
-      prevItems.map(prevItem =>
-        prevItem.displayName === schedule.name
-          ? { ...prevItem, jobState: lastFiveRun }
-          : prevItem
-      )
-    );
-  } catch (lastRunError: any) {
-    setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
-      prevItems.map(prevItem =>
-        prevItem.displayName === schedule.name
-          ? { ...prevItem, jobState: [] }
-          : prevItem
-      )
-    );
-    SchedulerLoggingService.log(
-      'Error fetching last five job executions',
-      LOG_LEVEL.ERROR
-    );
-  }
+        setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+          prevItems.map(prevItem =>
+            prevItem.displayName === schedule.name
+              ? { ...prevItem, jobState: lastFiveRun }
+              : prevItem
+          )
+        );
+      })
+      .catch((lastRunError: any) => {
+        setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+          prevItems.map(prevItem =>
+            prevItem.displayName === schedule.name
+              ? { ...prevItem, jobState: [] }
+              : prevItem
+          )
+        );
+        SchedulerLoggingService.log(
+          'Error fetching last five job executions',
+          LOG_LEVEL.ERROR
+        );
+      });
+  };
 }

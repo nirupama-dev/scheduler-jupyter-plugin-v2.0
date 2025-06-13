@@ -33,9 +33,7 @@ const VertexJobRuns = ({
   setJobRunId,
   selectedMonth,
   selectedDate,
-  setBlueListDates,
   setGreyListDates,
-  setOrangeListDates,
   setRedListDates,
   setGreenListDates,
   setDarkGreenListDates,
@@ -55,9 +53,7 @@ const VertexJobRuns = ({
   setJobRunId: (value: string) => void;
   selectedMonth: Dayjs | null;
   selectedDate: Dayjs | null;
-  setBlueListDates: (value: string[]) => void;
   setGreyListDates: (value: string[]) => void;
-  setOrangeListDates: (value: string[]) => void;
   setRedListDates: (value: string[]) => void;
   setGreenListDates: (value: string[]) => void;
   setDarkGreenListDates: (value: string[]) => void;
@@ -271,9 +267,7 @@ const VertexJobRuns = ({
       selectedMonth,
       setIsLoading,
       setVertexScheduleRunsList,
-      setBlueListDates,
       setGreyListDates,
-      setOrangeListDates,
       setRedListDates,
       setGreenListDates,
       setDarkGreenListDates,
@@ -295,49 +289,47 @@ const VertexJobRuns = ({
 
   return (
     <div>
-      <>
-        {!isLoading && filteredData && filteredData.length > 0 ? (
-          <div className="table-main-execution">
-            <div className="dag-runs-list-table-parent table-execution-history-vertex">
-              <TableData
-                getTableProps={getTableProps}
-                headerGroups={headerGroups}
-                getTableBodyProps={getTableBodyProps}
-                rows={rows}
-                page={page}
-                prepareRow={prepareRow}
-                tableDataCondition={tableDataCondition}
-                fromPage="vertexTaskLog"
+      {!isLoading && filteredData && filteredData.length > 0 ? (
+        <div className="table-main-execution">
+          <div className="dag-runs-list-table-parent table-execution-history-vertex">
+            <TableData
+              getTableProps={getTableProps}
+              headerGroups={headerGroups}
+              getTableBodyProps={getTableBodyProps}
+              rows={rows}
+              page={page}
+              prepareRow={prepareRow}
+              tableDataCondition={tableDataCondition}
+              fromPage="vertexTaskLog"
+            />
+          </div>
+        </div>
+      ) : (
+        <div>
+          {isLoading && (
+            <div className="spin-loader-main">
+              <CircularProgress
+                className="spin-loader-custom-style"
+                size={18}
+                aria-label="Loading Spinner"
+                data-testid="loader"
               />
+              Loading History
             </div>
-          </div>
-        ) : (
-          <div>
-            {isLoading && (
-              <div className="spin-loader-main">
-                <CircularProgress
-                  className="spin-loader-custom-style"
-                  size={18}
-                  aria-label="Loading Spinner"
-                  data-testid="loader"
-                />
-                Loading History
-              </div>
-            )}
-            {!isLoading && filteredData.length === 0 && (
-              <div className="no-data-style">
-                No rows to display on{' '}
-                {selectedDate
-                  ?.toDate()
-                  .toDateString()
-                  .split(' ')
-                  .slice(1)
-                  .join(' ')}
-              </div>
-            )}
-          </div>
-        )}
-      </>
+          )}
+          {!isLoading && filteredData.length === 0 && (
+            <div className="no-data-style">
+              No rows to display on{' '}
+              {selectedDate
+                ?.toDate()
+                .toDateString()
+                .split(' ')
+                .slice(1)
+                .join(' ')}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

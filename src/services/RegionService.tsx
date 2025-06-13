@@ -22,8 +22,7 @@ import {
   gcpServiceUrls
 } from '../utils/Const';
 import { authApi } from '../utils/Config';
-import { toastifyCustomStyle } from '../utils/CustomStyle';
-import { toast } from 'react-toastify';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 interface IRegions {
   name: string;
@@ -74,7 +73,9 @@ export function useRegion(projectId: string) {
       })
       .catch(error => {
         console.error(error);
-        toast.error(error.message, toastifyCustomStyle);
+        handleErrorToast({
+          error: error.message
+        });
       });
   }, [projectId]);
 

@@ -179,9 +179,9 @@ function ListVertexScheduler({
       setApiError,
       setNextPageToken,
       nextToken,
-      scheduleListPageLength,
       setCanNextPage,
       setApiEnableUrl,
+      scheduleListPageLength,
       abortControllers
     );
     setRegionDisable(false);
@@ -195,7 +195,8 @@ function ListVertexScheduler({
     const hasListChanged = previousScheduleList.current !== vertexScheduleList;
     const hasNextPageTokenChanged =
       previousNextPageToken.current !== nextPageToken;
-
+    // Reset pagination variables only if the list has changed or next page token has changed
+    // or if the resetToCurrentPage is true.
     if (resetToCurrentPage || (hasListChanged && hasNextPageTokenChanged)) {
       setPaginationVariables();
 
@@ -213,7 +214,6 @@ function ListVertexScheduler({
   const setPaginationVariables = () => {
     let updatedPageTokenList = [...pageTokenList];
     let resetFlag = resetToCurrentPage;
-
     if (fetchPreviousPage) {
       // True only in case of clicking for previous page
       if (updatedPageTokenList.length > 0) {
@@ -243,8 +243,11 @@ function ListVertexScheduler({
       }
     }
     setCanNextPage(hasNextPage);
-    const hasPreviousPage = updatedPageTokenList.length > 1; // true only if not in first page
+    const hasPreviousPage = hasNextPage
+      ? updatedPageTokenList.length > 1
+      : updatedPageTokenList.length > 0; // hasPreviousPage is true if there are more than 1 tokens in the list, which means there is a previous page available.
     setCanPreviousPage(hasPreviousPage); // false only on first page
+
     setPageTokenList([...updatedPageTokenList]); // set the updated token list after pagination
     let startIndex = 1;
     if (hasPreviousPage) {
@@ -433,9 +436,9 @@ function ListVertexScheduler({
       setApiError,
       setNextPageToken,
       newPageToken,
-      scheduleListPageLength,
       setCanNextPage,
-      setApiEnableUrl
+      setApiEnableUrl,
+      scheduleListPageLength
     );
     setDeletePopupOpen(false);
     setDeletingSchedule(false);

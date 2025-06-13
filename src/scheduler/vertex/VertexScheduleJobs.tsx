@@ -64,7 +64,7 @@ const VertexScheduleJobs = ({
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] =
     useState<boolean>(false);
-  const [schedulerData, setScheduleData] = useState<ISchedulerData>();
+  const [schedulerData, setSchedulerData] = useState<ISchedulerData>();
   const [scheduleName, setScheduleName] = useState('');
   const abortControllers = useRef<any>([]); // Array of API signals to abort
   const [activePaginationVariables, setActivePaginationVariables] = useState<
@@ -104,7 +104,7 @@ const VertexScheduleJobs = ({
   ) => {
     setShowExecutionHistory(true);
     setScheduleName(scheduleName);
-    setScheduleData(schedulerData);
+    setSchedulerData(schedulerData);
     setActivePaginationVariables(paginationVariables);
     setRegion(regionToLoad);
   };

@@ -134,6 +134,10 @@
   overflow: auto;
 }
 
+.execution-history-right-wrapper-scroll {
+  overflow: hidden;
+}
+
 .execution-history-main-full-wrapper {
   display: flex;
   flex-direction: column;
@@ -580,7 +584,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  cursor: pointer;
   position: relative;
 }
 
@@ -705,9 +708,9 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 }
 
 .log-btn {
-  padding: 15px;
+  padding: 10px;
   margin-left: auto;
-  width: 17%;
+  width: 11%;
 }
 
 .error-message-warn {
@@ -764,4 +767,19 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 
 .list-level-component {
   max-height: 0;
+}
+
+.calender-date-time-wrapper {
+  position: relative;
+}
+
+.calender-status-icon {
+  margin: 0 auto;
+  position: absolute;
+  bottom: 4px;
+  left: 17px;
+}
+
+.calendar-status-icon-double {
+  left: 16.2px;
 }

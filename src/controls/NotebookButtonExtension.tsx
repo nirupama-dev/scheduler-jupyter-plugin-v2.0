@@ -22,8 +22,12 @@ import logsIcon from '../../style/icons/logs_icon.svg';
 import sessionLogsIcon from '../../style/icons/session_logs_icon.svg';
 import { LabIcon } from '@jupyterlab/ui-components';
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
-import { ToolbarButton, ISessionContext } from '@jupyterlab/apputils';
-import { MainAreaWidget, IThemeManager } from '@jupyterlab/apputils';
+import {
+  ToolbarButton,
+  ISessionContext,
+  MainAreaWidget,
+  IThemeManager
+} from '@jupyterlab/apputils';
 import { KernelAPI } from '@jupyterlab/services';
 import { authenticatedFetch } from '../utils/Config';
 import { HTTP_METHOD, SPARK_HISTORY_SERVER } from '../utils/Const';
@@ -233,11 +237,11 @@ class NotebookButtonExtensionPoint implements IDisposable {
   /**
    * Event handler to update kernel status when the session status changes.
    */
-  private updateKernelStatus = async () => {
+  private readonly updateKernelStatus = async () => {
     await this.fetchAndUpdateKernelStatus();
   };
 
-  private onNotebookSchedulerClick = () => {
+  private readonly onNotebookSchedulerClick = () => {
     const content = new NotebookScheduler(
       this.app as JupyterLab,
       this.themeManager,
@@ -250,7 +254,7 @@ class NotebookButtonExtensionPoint implements IDisposable {
     this.app.shell.add(widget, 'main');
   };
 
-  private onSessionDetailsClick = () => {
+  private readonly onSessionDetailsClick = () => {
     if (!this.sessionId) {
       //TODO: log error.
       return;
@@ -267,7 +271,7 @@ class NotebookButtonExtensionPoint implements IDisposable {
     this.app.shell.add(widget, 'main');
   };
 
-  private onSparkLogsClick = () => {
+  private readonly onSparkLogsClick = () => {
     if (!this.shsUri) {
       //TODO: log error.
       return;
@@ -281,7 +285,7 @@ class NotebookButtonExtensionPoint implements IDisposable {
    *  2) what is the SHS url (if relevant)
    *  3) Show or hide the log and session details buttons as necessary.
    */
-  private onKernelChanged = async (session: ISessionContext) => {
+  private readonly onKernelChanged = async (session: ISessionContext) => {
     this.sessionDetailsButton.hide();
 
     // Get the current kernel ID and look for the kernel in the kernel API.

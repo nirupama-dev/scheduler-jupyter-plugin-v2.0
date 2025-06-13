@@ -43,6 +43,9 @@ import { authApi, currentTime } from '../../utils/Config';
 import {
   CORN_EXP_DOC_URL,
   DEFAULT_CLOUD_STORAGE_BUCKET,
+  DEFAULT_DISK_MAX_SIZE,
+  DEFAULT_DISK_MIN_SIZE,
+  DEFAULT_DISK_SIZE,
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_PRIMARY_NETWORK,
@@ -66,9 +69,9 @@ import {
   ICreatePayload,
   IMachineType
 } from './VertexInterfaces';
-import { toast } from 'react-toastify';
 import VertexScheduleJobs from './VertexScheduleJobs';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
+import { handleErrorToast } from '../../utils/ErrorUtils';
 
 const CreateVertexScheduler = ({
   themeManager,
@@ -155,7 +158,7 @@ const CreateVertexScheduler = ({
   const [diskTypeSelected, setDiskTypeSelected] = useState<string | null>(
     DISK_TYPE_VALUE[0]
   );
-  const [diskSize, setDiskSize] = useState<string>('100');
+  const [diskSize, setDiskSize] = useState<string>(DEFAULT_DISK_SIZE);
   const [serviceAccountList, setServiceAccountList] = useState<
     { displayName: string; email: string }[]
   >([]);
@@ -206,12 +209,13 @@ const CreateVertexScheduler = ({
   const [isPastStartDate, setIsPastStartDate] = useState<boolean>(false);
   const [isPastEndDate, setIsPastEndDate] = useState<boolean>(false);
   const [errorMessageBucket, setErrorMessageBucket] = useState<string>('');
-  const [errrorMessageServiceAccount, setErrorMessageServiceAccount] =
+  const [errorMessageServiceAccount, setErrorMessageServiceAccount] =
     useState<string>('');
   const [errorMessagePrimaryNetwork, setErrorMessagePrimaryNetwork] =
     useState<string>('');
   const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
     useState<string>('');
+  const [diskSizeFlag, setDiskSizeFlag] = useState<boolean>(false);
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -380,20 +384,19 @@ const CreateVertexScheduler = ({
    * @param {any} state - The state object containing the search input value.
    */
   const filterOptions = (options: string[], state: any) => {
-    // Filter out the list based on the search value
+    const inputValue = state.inputValue.trim().toLowerCase();
+    // If the input value is empty, return the original options
     const filteredOptions = options.filter(option =>
-      option.toLowerCase().includes(state.inputValue.toLowerCase())
+      option.toLowerCase().includes(inputValue)
     );
 
-    // If no match found, add the "Create new bucket" option
-    if (
-      (filteredOptions.length === 0 ||
-        options.filter(
-          option => option.toLowerCase() !== state.inputValue.toLowerCase()
-        )) &&
-      state.inputValue.trim() !== ''
-    ) {
-      filteredOptions.push(`Create and Select "${searchValue}"`);
+    // If no options match the search input, add the option to create a new bucket
+    const exactMatch = options.some(
+      option => option.toLowerCase() === inputValue
+    );
+    // If no exact match is found, add the option to create a new bucket
+    if (!exactMatch && inputValue !== '') {
+      filteredOptions.push(`Create and Select "${state.inputValue}"`);
     }
 
     return filteredOptions;
@@ -586,8 +589,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the machine type API service
    */
-  const machineTypeAPI = async () => {
-    await VertexServices.machineTypeAPIService(
+  const machineTypeAPI = () => {
+    VertexServices.machineTypeAPIService(
       region,
       setMachineTypeList,
       setMachineTypeLoading,
@@ -600,8 +603,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the cloud storage API service
    */
-  const cloudStorageAPI = async () => {
-    await StorageServices.cloudStorageAPIService(
+  const cloudStorageAPI = () => {
+    StorageServices.cloudStorageAPIService(
       setCloudStorageList,
       setCloudStorageLoading,
       setErrorMessageBucket
@@ -611,8 +614,8 @@ const CreateVertexScheduler = ({
   /**
    * To create the new cloud storage bucket API service
    */
-  const newCloudStorageAPI = async () => {
-    await StorageServices.newCloudStorageAPIService(
+  const newCloudStorageAPI = () => {
+    StorageServices.newCloudStorageAPIService(
       searchValue,
       setIsCreatingNewBucket,
       setBucketError
@@ -622,8 +625,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the service account API service
    */
-  const serviceAccountAPI = async () => {
-    await IamServices.serviceAccountAPIService(
+  const serviceAccountAPI = () => {
+    IamServices.serviceAccountAPIService(
       setServiceAccountList,
       setServiceAccountLoading,
       setErrorMessageServiceAccount
@@ -633,8 +636,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the primary network API service
    */
-  const primaryNetworkAPI = async () => {
-    await ComputeServices.primaryNetworkAPIService(
+  const primaryNetworkAPI = () => {
+    ComputeServices.primaryNetworkAPIService(
       setPrimaryNetworkList,
       setPrimaryNetworkLoading,
       setErrorMessagePrimaryNetwork
@@ -644,8 +647,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the sub network API service based on the primary network
    */
-  const subNetworkAPI = async (primaryNetwork: string | undefined) => {
-    await ComputeServices.subNetworkAPIService(
+  const subNetworkAPI = (primaryNetwork: string | undefined) => {
+    ComputeServices.subNetworkAPIService(
       region,
       primaryNetwork,
       setSubNetworkList,
@@ -657,8 +660,8 @@ const CreateVertexScheduler = ({
   /**
    * Hosts the shared network API service
    */
-  const sharedNetworkAPI = async () => {
-    await ComputeServices.sharedNetworkAPIService(
+  const sharedNetworkAPI = () => {
+    ComputeServices.sharedNetworkAPIService(
       setSharedNetworkList,
       setSharedNetworkLoading,
       hostProject?.name,
@@ -666,9 +669,9 @@ const CreateVertexScheduler = ({
     );
   };
 
-  const selectedMachineType =
-    machineTypeList &&
-    machineTypeList.find(item => item.machineType === machineTypeSelected);
+  const selectedMachineType = machineTypeList?.find(
+    item => item.machineType === machineTypeSelected
+  );
   /**
    * Disable the create button when the mandatory fields are not filled and the validations is not proper.
    */
@@ -695,7 +698,8 @@ const CreateVertexScheduler = ({
       inputFileSelected === '' ||
       endDateError ||
       isPastEndDate ||
-      isPastStartDate
+      isPastStartDate ||
+      diskSizeFlag
     );
   };
 
@@ -782,7 +786,7 @@ const CreateVertexScheduler = ({
   /**
    * Cancel a job schedule
    */
-  const handleCancel = async () => {
+  const handleCancel = () => {
     if (!editMode) {
       setCreateCompleted(false);
       app.shell.activeWidget?.close();
@@ -821,14 +825,16 @@ const CreateVertexScheduler = ({
     primaryNetworkAPI();
     authApi()
       .then(credentials => {
-        if (credentials && credentials?.region_id && credentials.project_id) {
+        if (credentials?.region_id && credentials?.project_id) {
           setLoaderRegion(false);
           setRegion(credentials.region_id);
           setProjectId(credentials.project_id);
         }
       })
       .catch(error => {
-        toast.error(error);
+        handleErrorToast({
+          error: error
+        });
       });
   }, [projectId]);
 
@@ -872,7 +878,7 @@ const CreateVertexScheduler = ({
 
       // eslint-disable-next-line no-useless-escape
       const projectInNetwork = primaryNetworkLink.match(/projects\/([^\/]+)/);
-      if (projectInNetwork && projectInNetwork[1]) {
+      if (projectInNetwork?.[1]) {
         if (projectInNetwork[1] === projectId) {
           setNetworkSelected('networkInThisProject');
         } else {
@@ -945,6 +951,17 @@ const CreateVertexScheduler = ({
     );
   }, [machineTypeList]);
 
+  useEffect(() => {
+    if (
+      Number(diskSize) >= DEFAULT_DISK_MIN_SIZE &&
+      Number(diskSize) <= DEFAULT_DISK_MAX_SIZE
+    ) {
+      setDiskSizeFlag(false);
+    } else {
+      setDiskSizeFlag(true);
+    }
+  }, [diskSize]);
+
   return (
     <>
       {createCompleted ? (
@@ -985,9 +1002,7 @@ const CreateVertexScheduler = ({
           <div className="create-scheduler-form-element">
             <Autocomplete
               className="create-scheduler-style"
-              options={
-                machineTypeList && machineTypeList.map(item => item.machineType)
-              }
+              options={machineTypeList?.map(item => item.machineType)}
               value={machineTypeSelected}
               onChange={(_event, val) => handleMachineType(val)}
               renderInput={params => (
@@ -1197,6 +1212,13 @@ const CreateVertexScheduler = ({
                 placeholder=""
                 Label="Disk Size (in GB)"
               />
+              {diskSizeFlag && (
+                <ErrorMessage
+                  message="Disk size should be within the range of [10 - 65536]"
+                  showIcon={false}
+                  errorWidth={true}
+                />
+              )}
             </div>
           </div>
 
@@ -1234,16 +1256,16 @@ const CreateVertexScheduler = ({
               )}
             />
           </div>
-          {!serviceAccountSelected && !errrorMessageServiceAccount && (
+          {!serviceAccountSelected && !errorMessageServiceAccount && (
             <ErrorMessage
               message="Service account is required"
               showIcon={false}
             />
           )}
 
-          {errrorMessageServiceAccount && (
+          {errorMessageServiceAccount && (
             <span className="error-message-warn error-key-missing">
-              {errrorMessageServiceAccount}
+              {errorMessageServiceAccount}
             </span>
           )}
 
@@ -1302,105 +1324,101 @@ const CreateVertexScheduler = ({
 
           {/* Network in this project  */}
           {networkSelected === 'networkInThisProject' ? (
-            <>
-              <div className="execution-history-main-wrapper">
-                <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-                  <Autocomplete
-                    className="create-scheduler-style create-scheduler-form-element-input-fl"
-                    options={primaryNetworkList}
-                    getOptionLabel={option => option.name}
-                    value={
-                      primaryNetworkList.find(
-                        option => option.name === primaryNetworkSelected?.name
-                      ) || null
-                    }
-                    onChange={(_event, val) => handlePrimaryNetwork(val)}
-                    renderInput={params => (
-                      <TextField
-                        {...params}
-                        label="Primary network*"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {primaryNetworkLoading ? (
-                                <CircularProgress
-                                  aria-label="Loading Spinner"
-                                  data-testid="loader"
-                                  size={18}
-                                />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          )
-                        }}
-                      />
-                    )}
-                    clearIcon={false}
-                    disabled={editMode}
-                  />
-                  {!primaryNetworkSelected && (
-                    <ErrorMessage
-                      message={
-                        errorMessagePrimaryNetwork
-                          ? errorMessagePrimaryNetwork
-                          : 'Primary network is required'
-                      }
-                      showIcon={false}
+            <div className="execution-history-main-wrapper">
+              <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                <Autocomplete
+                  className="create-scheduler-style create-scheduler-form-element-input-fl"
+                  options={primaryNetworkList}
+                  getOptionLabel={option => option.name}
+                  value={
+                    primaryNetworkList.find(
+                      option => option.name === primaryNetworkSelected?.name
+                    ) || null
+                  }
+                  onChange={(_event, val) => handlePrimaryNetwork(val)}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="Primary network*"
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {primaryNetworkLoading ? (
+                              <CircularProgress
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                                size={18}
+                              />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }}
                     />
                   )}
-                </div>
-                <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
-                  <Autocomplete
-                    className="create-scheduler-style create-scheduler-form-element-input-fl"
-                    options={subNetworkList}
-                    getOptionLabel={option => option.name}
-                    value={
-                      subNetworkList?.find(
-                        option => option?.name === subNetworkSelected?.name
-                      ) || null
+                  clearIcon={false}
+                  disabled={editMode}
+                />
+                {!primaryNetworkSelected && (
+                  <ErrorMessage
+                    message={
+                      errorMessagePrimaryNetwork ||
+                      'Primary network is required'
                     }
-                    onChange={(_event, val) => handleSubNetwork(val)}
-                    renderInput={params => (
-                      <TextField
-                        {...params}
-                        label="Sub network*"
-                        InputProps={{
-                          ...params.InputProps,
-                          endAdornment: (
-                            <>
-                              {subNetworkLoading ? (
-                                <CircularProgress
-                                  aria-label="Loading Spinner"
-                                  data-testid="loader"
-                                  size={18}
-                                />
-                              ) : null}
-                              {params.InputProps.endAdornment}
-                            </>
-                          )
-                        }}
-                      />
-                    )}
-                    clearIcon={false}
-                    disabled={editMode}
+                    showIcon={false}
                   />
-                  {!subNetworkSelected && (
-                    <ErrorMessage
-                      message={
-                        errorMessageSubnetworkNetwork
-                          ? errorMessageSubnetworkNetwork
-                          : subNetworkList.length === 0 &&
-                              primaryNetworkSelected
-                            ? 'No Subnetworks found with Google Private Access - ON'
-                            : 'Sub network is required'
-                      }
-                      showIcon={false}
-                    />
-                  )}
-                </div>
+                )}
               </div>
-            </>
+              <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
+                <Autocomplete
+                  className="create-scheduler-style create-scheduler-form-element-input-fl"
+                  options={subNetworkList}
+                  getOptionLabel={option => option.name}
+                  value={
+                    subNetworkList?.find(
+                      option => option?.name === subNetworkSelected?.name
+                    ) || null
+                  }
+                  onChange={(_event, val) => handleSubNetwork(val)}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="Sub network*"
+                      InputProps={{
+                        ...params.InputProps,
+                        endAdornment: (
+                          <>
+                            {subNetworkLoading ? (
+                              <CircularProgress
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                                size={18}
+                              />
+                            ) : null}
+                            {params.InputProps.endAdornment}
+                          </>
+                        )
+                      }}
+                    />
+                  )}
+                  clearIcon={false}
+                  disabled={editMode}
+                />
+                {!subNetworkSelected && (
+                  <ErrorMessage
+                    message={
+                      errorMessageSubnetworkNetwork
+                        ? errorMessageSubnetworkNetwork
+                        : subNetworkList.length === 0 && primaryNetworkSelected
+                          ? 'No Subnetworks found with Google Private Access - ON'
+                          : 'Sub network is required'
+                    }
+                    showIcon={false}
+                  />
+                )}
+              </div>
+            </div>
           ) : (
             <>
               {/* Network shared from host project */}

@@ -48,7 +48,7 @@ class Client:
             "Authorization": f"Bearer {self._access_token}",
         }
 
-    async def get_airflow_uri(self, composer_name):
+    async def get_airflow_uri_and_bucket(self, composer_name):
         try:
             composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
             api_endpoint = f"{composer_url}v1/projects/{self.project_id}/locations/{self.region_id}/environments/{composer_name}"
@@ -59,7 +59,7 @@ class Client:
                     resp = await response.json()
                     airflow_uri = resp.get("config", {}).get("airflowUri", "")
                     bucket = resp.get("storageConfig", {}).get("bucket", "")
-                    return airflow_uri, bucket
+                    return {"airflow_uri": airflow_uri, "bucket": bucket}
                 else:
                     raise Exception(
                         f"Error getting airflow uri: {response.reason} {await response.text()}"
@@ -69,7 +69,8 @@ class Client:
             raise Exception(f"Error getting airflow uri: {str(e)}")
 
     async def list_jobs(self, composer_name):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+        airflow_uri = airflow_obj.get("airflow_uri")
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags?tags={TAGS}"
             async with self.client_session.get(
@@ -77,7 +78,7 @@ class Client:
             ) as response:
                 if response.status == 200:
                     resp = await response.json()
-                    return resp, bucket
+                    return resp, airflow_obj.get("bucket")
                 else:
                     raise Exception(
                         f"Error listing scheduled jobs: {response.reason} {await response.text()}"
@@ -87,7 +88,9 @@ class Client:
             return {"error": str(e)}
 
     async def delete_job(self, composer_name, dag_id, from_page):
-        airflow_uri, bucket_name = await self.get_airflow_uri(composer_name)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+        airflow_uri = airflow_obj.get("airflow_uri")
+        airflow_bucket = airflow_obj.get("bucket")
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}"
             # Delete the DAG via the Airflow API if from_page is None
@@ -96,12 +99,14 @@ class Client:
                     api_endpoint, headers=self.create_headers()
                 ) as response:
                     self.log.info(response)
-            bucket = storage.Client().bucket(bucket_name)
+            bucket = storage.Client().bucket(airflow_obj.get("bucket"))
             blob_name = f"dags/dag_{dag_id}.py"
             blob = bucket.blob(blob_name)
             blob.delete()
 
-            self.log.info(f"Deleted {blob_name} from bucket {bucket_name}")
+            self.log.info(
+                f"Deleted {blob_name} from bucket {airflow_bucket}"
+            )
 
             return 0
         except Exception as e:
@@ -109,7 +114,8 @@ class Client:
             return {"error": str(e)}
 
     async def update_job(self, composer_name, dag_id, status):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+        airflow_uri = airflow_obj.get("airflow_uri")
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}"
 
@@ -129,9 +135,10 @@ class Client:
             return {"error": str(e)}
 
     async def list_dag_runs(self, composer_name, dag_id, start_date, end_date, offset):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+        airflow_uri = airflow_obj.get("airflow_uri")
         try:
-            api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns?execution_date_gte={start_date}&execution_date_lte={end_date}&offset={offset}"
+            api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns?start_date_gte={start_date}&start_date_lte={end_date}&offset={offset}"
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
@@ -147,11 +154,10 @@ class Client:
             return {"error": str(e)}
 
     async def list_dag_run_task(self, composer_name, dag_id, dag_run_id):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+        airflow_uri = airflow_obj.get("airflow_uri")
         try:
-            api_endpoint = (
-                f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances"
-            )
+            api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances"
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
@@ -169,7 +175,8 @@ class Client:
     async def list_dag_run_task_logs(
         self, composer_name, dag_id, dag_run_id, task_id, task_try_number
     ):
-        airflow_uri, bucket = await self.get_airflow_uri(composer_name)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+        airflow_uri = airflow_obj.get("airflow_uri")
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/logs/{task_try_number}"
             async with self.client_session.get(
@@ -320,11 +327,10 @@ class Client:
             self.log.exception(f"Error downloading dag file: {str(e)}")
 
     async def list_import_errors(self, composer):
-        airflow_uri, bucket = await self.get_airflow_uri(composer)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer)
+        airflow_uri = airflow_obj.get("airflow_uri")
         try:
-            api_endpoint = (
-                f"{airflow_uri}/api/v1/importErrors?order_by=-import_error_id"
-            )
+            api_endpoint = f"{airflow_uri}/api/v1/importErrors?order_by=-import_error_id"
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
@@ -340,9 +346,12 @@ class Client:
             return {"error": str(e)}
 
     async def dag_trigger(self, dag_id, composer):
-        airflow_uri, bucket = await self.get_airflow_uri(composer)
+        airflow_obj = await self.get_airflow_uri_and_bucket(composer)
+        airflow_uri = airflow_obj.get("airflow_uri")
         try:
-            api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns"
+            api_endpoint = (
+                f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns"
+            )
             body = {"conf": {}}
             async with self.client_session.post(
                 api_endpoint, headers=self.create_headers(), json=body

@@ -14,46 +14,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { toastifyCustomStyle } from '../utils/Config';
+import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class IamServices {
-  static serviceAccountAPIService = async (
+  static readonly serviceAccountAPIService = (
     setServiceAccountList: (
       value: { displayName: string; email: string }[]
     ) => void,
     setServiceAccountLoading: (value: boolean) => void,
     setErrorMessage: (value: string) => void
   ) => {
-    try {
-      setServiceAccountLoading(true);
-      const formattedResponse: any = await requestAPI(
-        'api/iam/listServiceAccount'
-      );
-      if (formattedResponse.length > 0) {
-        const serviceAccountList = formattedResponse.map((account: any) => ({
-          displayName: account.displayName,
-          email: account.email
-        }));
-        serviceAccountList.sort();
-        setServiceAccountList(serviceAccountList);
-      } else if (formattedResponse.error) {
-        setErrorMessage(formattedResponse.error);
+    setServiceAccountLoading(true);
+    requestAPI('api/iam/listServiceAccount')
+      .then((formattedResponse: any) => {
+        if (formattedResponse.length > 0) {
+          const serviceAccountList = formattedResponse.map((account: any) => ({
+            displayName: account.displayName,
+            email: account.email
+          }));
+          serviceAccountList.sort();
+          setServiceAccountList(serviceAccountList);
+        } else if (formattedResponse.error) {
+          setErrorMessage(formattedResponse.error);
+          setServiceAccountList([]);
+        } else {
+          setServiceAccountList([]);
+        }
+        setServiceAccountLoading(false);
+      })
+      .catch(error => {
         setServiceAccountList([]);
-      } else {
-        setServiceAccountList([]);
-      }
-      setServiceAccountLoading(false);
-    } catch (error) {
-      setServiceAccountList([]);
-      setServiceAccountLoading(false);
-      SchedulerLoggingService.log(
-        'Error listing service accounts',
-        LOG_LEVEL.ERROR
-      );
-      toast.error('Failed to fetch service accounts list', toastifyCustomStyle);
-    }
+        setServiceAccountLoading(false);
+        SchedulerLoggingService.log(
+          `Error listing service accounts : ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to fetch service accounts list : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      });
   };
 }

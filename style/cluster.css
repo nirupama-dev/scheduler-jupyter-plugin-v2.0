@@ -106,7 +106,6 @@
 }
 
 .icon-buttons-style-disable {
-  /* cursor: not-allowed; */
   padding-right: 5px;
   color: rgb(245 245 245);
   opacity: 0.5;
@@ -360,4 +359,8 @@
 
 .spin-loader-listing {
   margin: 10%;
+}
+
+.edit-icon-buttons-display {
+  display: none;
 }

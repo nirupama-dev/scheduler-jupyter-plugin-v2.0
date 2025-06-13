@@ -17,7 +17,6 @@
 
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
-import { showToast, toastifyCustomStyle } from '../utils/Config';
 import { JupyterLab } from '@jupyterlab/application';
 import { pattern, scheduleMode } from '../utils/Const';
 import {
@@ -29,10 +28,13 @@ import {
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse
 } from '../scheduler/common/SchedulerInteface';
+import { Notification } from '@jupyterlab/apputils';
+import { handleErrorToast } from '../utils/ErrorUtils';
 import { toast } from 'react-toastify';
+import { toastifyCustomStyle } from '../utils/Config';
 
 export class SchedulerService {
-  static listClustersAPIService = async (
+  static readonly listClustersAPIService = async (
     setClusterList: (value: string[]) => void,
     setIsLoadingKernelDetail: (value: boolean) => void,
     nextPageToken?: string,
@@ -78,24 +80,19 @@ export class SchedulerService {
         setIsLoadingKernelDetail(false);
       }
       if (formattedResponse?.error) {
-        if (!toast.isActive('clusterError')) {
-          toast.error(formattedResponse?.error, {
-            ...toastifyCustomStyle,
-            toastId: 'clusterError'
-          });
-        }
+        handleErrorToast({
+          error: formattedResponse?.error
+        });
       }
     } catch (error) {
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
-      if (!toast.isActive('clusterError')) {
-        toast.error(`Failed to fetch clusters : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'clusterError'
-        });
-      }
+      const errorResponse = `Failed to fetch clusters : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
-  static listSessionTemplatesAPIService = async (
+  static readonly listSessionTemplatesAPIService = async (
     setServerlessDataList: (value: string[]) => void,
     setServerlessList: (value: string[]) => void,
     setIsLoadingKernelDetail?: (value: boolean) => void,
@@ -151,27 +148,22 @@ export class SchedulerService {
         }
       }
       if (formattedResponse?.error) {
-        if (!toast.isActive('sessionTemplateError')) {
-          toast.error(formattedResponse?.error, {
-            ...toastifyCustomStyle,
-            toastId: 'sessionTemplateError'
-          });
-        }
+        handleErrorToast({
+          error: formattedResponse?.error
+        });
       }
     } catch (error) {
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
       );
-      if (!toast.isActive('sessionTemplateError')) {
-        toast.error(`Failed to fetch session templates : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'sessionTemplateError'
-        });
-      }
+      const errorResponse = `Failed to fetch session templates : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
-  static listComposersAPIService = async (
+  static readonly listComposersAPIService = async (
     setComposerList: (value: string[]) => void,
     projectId: string,
     region: string,
@@ -189,9 +181,11 @@ export class SchedulerService {
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
         setComposerList([]);
-        toast.error(
+        Notification.error(
           'No composer environment in this project and region',
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
         if (setIsLoading) {
           setIsLoading(false);
@@ -216,9 +210,11 @@ export class SchedulerService {
           }
         } catch (error) {
           console.error('Error parsing error message:', error);
-          showToast(
+          Notification.error(
             'Error fetching environments list. Please try again later.',
-            'error-featching-env-list'
+            {
+              autoClose: false
+            }
           );
         }
         setEnvApiFlag(false);
@@ -238,14 +234,14 @@ export class SchedulerService {
         'Error listing composer environment list',
         LOG_LEVEL.ERROR
       );
-      toast.error(
-        `Failed to fetch composer environment list : ${error}`,
-        toastifyCustomStyle
-      );
+      const errorResponse = `Failed to fetch composer environment list : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
       setEnvApiFlag(false);
     }
   };
-  static createJobSchedulerService = async (
+  static readonly createJobSchedulerService = async (
     payload: IPayload,
     app: JupyterLab,
     setCreateCompleted: (value: boolean) => void,
@@ -267,30 +263,34 @@ export class SchedulerService {
         }
       );
       if (data?.error) {
-        toast.error(data.error, toastifyCustomStyle);
+        handleErrorToast({
+          error: data.error
+        });
         setCreatingScheduler(false);
       } else {
         if (editMode) {
-          toast.success(
-            'Job scheduler successfully updated',
-            toastifyCustomStyle
-          );
+          Notification.success('Job scheduler successfully updated', {
+            autoClose: false
+          });
           if (packageInstalledList.length > 0) {
-            toast.success(
+            Notification.success(
               'Installation of packages will take sometime',
-              toastifyCustomStyle
+              {
+                autoClose: false
+              }
             );
           }
           setPackageEditFlag(false);
         } else {
-          toast.success(
-            'Job scheduler successfully created',
-            toastifyCustomStyle
-          );
+          Notification.success('Job scheduler successfully created', {
+            autoClose: false
+          });
           if (packageInstalledList.length > 0) {
-            toast.success(
+            Notification.success(
               'Installation of packages will take sometime',
-              toastifyCustomStyle
+              {
+                autoClose: false
+              }
             );
           }
         }
@@ -299,14 +299,14 @@ export class SchedulerService {
       }
     } catch (reason) {
       setCreatingScheduler(false);
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
-      );
+      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
-  static editNotebookSchedulerService = async (
+  static readonly editNotebookSchedulerService = async (
     bucketName: string,
     dagId: string,
     setInputNotebookFilePath: (value: string) => void,
@@ -321,14 +321,14 @@ export class SchedulerService {
       setInputNotebookFilePath(formattedResponse.input_filename);
     } catch (reason) {
       setEditNotebookLoading('');
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
-      );
+      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
-  static editJobSchedulerService = async (
+  static readonly editJobSchedulerService = async (
     bucketName: string,
     dagId: string,
     composerSelectedList: string,
@@ -469,14 +469,14 @@ export class SchedulerService {
       setEditDagLoading('');
     } catch (reason) {
       setEditDagLoading('');
-      toast.error(
-        `Error on POST {dataToSend}.\n${reason}`,
-        toastifyCustomStyle
-      );
+      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
-  static listDagRunsListService = async (
+  static readonly listDagRunsListService = async (
     composerName: string,
     dagId: string,
     startDate: string,
@@ -484,10 +484,7 @@ export class SchedulerService {
     setDagRunsList: (value: IDagRunList[]) => void,
     setDagRunId: (value: string) => void,
     setIsLoading: (value: boolean) => void,
-
-    setBlueListDates: (value: string[]) => void,
     setGreyListDates: (value: string[]) => void,
-    setOrangeListDates: (value: string[]) => void,
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
     setDarkGreenListDates: (value: string[]) => void,
@@ -498,9 +495,7 @@ export class SchedulerService {
     setIsLoading(true);
     const start_date = startDate;
     const end_date = endDate;
-    setBlueListDates([]);
     setGreyListDates([]);
-    setOrangeListDates([]);
     setRedListDates([]);
     setGreenListDates([]);
     setDarkGreenListDates([]);
@@ -510,14 +505,12 @@ export class SchedulerService {
       );
 
       let transformDagRunListDataCurrent = [];
-      if (data && data.dag_runs.length > 0) {
+      if (data && data?.dag_runs?.length > 0) {
         transformDagRunListDataCurrent = data.dag_runs.map((dagRun: any) => {
           if (dagRun.start_date !== null) {
             return {
               dagRunId: dagRun.dag_run_id,
-              filteredDate: new Date(dagRun.start_date)
-                .toDateString()
-                .split(' ')[2],
+              filteredDate: new Date(dagRun.start_date),
               state: dagRun.state,
               date: new Date(dagRun.start_date).toDateString(),
               time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
@@ -539,7 +532,7 @@ export class SchedulerService {
         ...transformDagRunListDataCurrent
       ];
 
-      if (data.dag_runs.length + offset !== data.total_entries) {
+      if (data?.dag_runs?.length + offset !== data.total_entries) {
         this.listDagRunsListService(
           composerName,
           dagId,
@@ -548,10 +541,7 @@ export class SchedulerService {
           setDagRunsList,
           setDagRunId,
           setIsLoading,
-
-          setBlueListDates,
           setGreyListDates,
-          setOrangeListDates,
           setRedListDates,
           setGreenListDates,
           setDarkGreenListDates,
@@ -561,20 +551,16 @@ export class SchedulerService {
       } else {
         const transformDagRunListData = allDagRunsListData;
 
-        if (transformDagRunListData.length > 0) {
+        if (transformDagRunListData?.length > 0) {
           // Group by date first, then by status
           const groupedDataByDateStatus = transformDagRunListData.reduce(
             (result: any, item: any) => {
               const date = item.filteredDate;
               const status = item.state;
 
-              if (!result[date]) {
-                result[date] = {};
-              }
+              result[date] ??= {};
 
-              if (!result[date][status]) {
-                result[date][status] = [];
-              }
+              result[date][status] ??= [];
 
               result[date][status].push(item);
 
@@ -583,23 +569,17 @@ export class SchedulerService {
             {}
           );
 
-          const blueList: string[] = [];
           const greyList: string[] = [];
-          const orangeList: string[] = [];
           const redList: string[] = [];
           const greenList: string[] = [];
           const darkGreenList: string[] = [];
 
           Object.keys(groupedDataByDateStatus).forEach(dateValue => {
-            if (groupedDataByDateStatus[dateValue].running) {
-              blueList.push(dateValue);
-            } else if (groupedDataByDateStatus[dateValue].queued) {
-              greyList.push(dateValue);
-            } else if (
-              groupedDataByDateStatus[dateValue].failed &&
-              groupedDataByDateStatus[dateValue].success
+            if (
+              groupedDataByDateStatus[dateValue].running ||
+              groupedDataByDateStatus[dateValue].queued
             ) {
-              orangeList.push(dateValue);
+              greyList.push(dateValue);
             } else if (groupedDataByDateStatus[dateValue].failed) {
               redList.push(dateValue);
             } else if (
@@ -612,9 +592,7 @@ export class SchedulerService {
             }
           });
 
-          setBlueListDates(blueList);
           setGreyListDates(greyList);
-          setOrangeListDates(orangeList);
           setRedListDates(redList);
           setGreenListDates(greenList);
           setDarkGreenListDates(darkGreenList);
@@ -622,9 +600,7 @@ export class SchedulerService {
           setDagRunsList(transformDagRunListData);
         } else {
           setDagRunsList([]);
-          setBlueListDates([]);
           setGreyListDates([]);
-          setOrangeListDates([]);
           setRedListDates([]);
           setGreenListDates([]);
           setDarkGreenListDates([]);
@@ -632,15 +608,13 @@ export class SchedulerService {
         setIsLoading(false);
       }
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      const errorResponse = `Error in listing dag runs..\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
-  static listDagInfoAPIService = async (
+  static readonly listDagInfoAPIService = async (
     setDagList: (value: IDagList[]) => void,
     setIsLoading: (value: boolean) => void,
     setBucketName: (value: string) => void,
@@ -650,7 +624,7 @@ export class SchedulerService {
       const serviceURL = `dagList?composer=${composerSelected}`;
       const formattedResponse: any = await requestAPI(serviceURL);
       let transformDagListData = [];
-      if (formattedResponse.length > 0) {
+      if (formattedResponse?.length > 0) {
         transformDagListData = formattedResponse[0]?.dags?.map(
           (dag: ISchedulerDagData) => {
             return {
@@ -663,14 +637,14 @@ export class SchedulerService {
           }
         );
       } else {
-        const jsonstr = formattedResponse?.error.slice(
+        const jsonstr = formattedResponse?.error?.slice(
           formattedResponse?.error.indexOf('{'),
           formattedResponse?.error.lastIndexOf('}') + 1
         );
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
           toast.error(
-            `Failed to fetch schedule list : ${errorObject.error.message}`,
+            `Failed to fetch schedule list : ${errorObject.error.message ?? errorObject.error}`,
             {
               ...toastifyCustomStyle,
               toastId: 'dagListError'
@@ -678,6 +652,7 @@ export class SchedulerService {
           );
         }
       }
+
       setDagList(transformDagListData);
       setIsLoading(false);
       setBucketName(formattedResponse[1]);
@@ -695,7 +670,7 @@ export class SchedulerService {
       }
     }
   };
-  static listDagInfoAPIServiceForCreateNotebook = async (
+  static readonly listDagInfoAPIServiceForCreateNotebook = async (
     setDagList: (value: IDagList[]) => void,
     composerSelected: string
   ) => {
@@ -703,7 +678,7 @@ export class SchedulerService {
       const serviceURL = `dagList?composer=${composerSelected}`;
       const formattedResponse: any = await requestAPI(serviceURL);
       let transformDagListData = [];
-      if (formattedResponse && formattedResponse[0].dags) {
+      if (formattedResponse?.[0].dags) {
         transformDagListData = formattedResponse[0].dags.map(
           (dag: ISchedulerDagData) => {
             return {
@@ -730,7 +705,7 @@ export class SchedulerService {
       }
     }
   };
-  static handleDownloadOutputNotebookAPIService = async (
+  static readonly handleDownloadOutputNotebookAPIService = async (
     composerName: string,
     dagRunId: string,
     bucketName: string,
@@ -746,24 +721,25 @@ export class SchedulerService {
       });
       dagRunId = decodeURIComponent(dagRunId);
       if (formattedResponse.status === 0) {
-        toast.success(
-          `${dagId}_${dagRunId} downloaded successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`${dagId}_${dagRunId} downloaded successfully`, {
+          autoClose: false
+        });
       } else {
-        toast.error(
-          `Failed to download the ${dagId}_${dagRunId}`,
-          toastifyCustomStyle
-        );
+        Notification.error(`Failed to download the ${dagId}_${dagRunId}`, {
+          autoClose: false
+        });
       }
       setDownloadOutputDagRunId('');
     } catch (error) {
       SchedulerLoggingService.log('Error in Download api', LOG_LEVEL.ERROR);
-      toast.error(`Error in Download api : ${error}`, toastifyCustomStyle);
+      const errorResponse = `Error in Download api : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
       setDownloadOutputDagRunId('');
     }
   };
-  static handleDeleteSchedulerAPIService = async (
+  static readonly handleDeleteSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
     setDagList: (value: IDagList[]) => void,
@@ -784,22 +760,25 @@ export class SchedulerService {
           setBucketName,
           composerSelected
         );
-        toast.success(
+        Notification.success(
           `Deleted job ${dag_id}. It might take a few minutes to for it to be deleted from the list of jobs.`,
-          toastifyCustomStyle
+          {
+            autoClose: false
+          }
         );
       } else {
-        toast.error(`Failed to delete the ${dag_id}`, toastifyCustomStyle);
+        Notification.error(`Failed to delete the ${dag_id}`, {
+          autoClose: false
+        });
       }
     } catch (error) {
       SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
-      toast.error(
-        `Failed to delete the ${dag_id} : ${error}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Failed to delete the ${dag_id} : ${error}`, {
+        autoClose: false
+      });
     }
   };
-  static handleUpdateSchedulerAPIService = async (
+  static readonly handleUpdateSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
     is_status_paused: boolean,
@@ -816,10 +795,9 @@ export class SchedulerService {
         { method: 'POST' }
       );
       if (formattedResponse?.status === 0) {
-        toast.success(
-          `scheduler ${dag_id} updated successfully`,
-          toastifyCustomStyle
-        );
+        Notification.success(`scheduler ${dag_id} updated successfully`, {
+          autoClose: false
+        });
         await SchedulerService.listDagInfoAPIService(
           setDagList,
           setIsLoading,
@@ -827,22 +805,22 @@ export class SchedulerService {
           composerSelected
         );
       } else {
-        toast.error(
-          `Error in pausing the schedule : ${formattedResponse?.error}`,
-          toastifyCustomStyle
-        );
+        const errorResponse = `Error in pausing the schedule : ${formattedResponse?.error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
       setUpdateLoading('');
     } catch (error) {
       setUpdateLoading('');
       SchedulerLoggingService.log('Error in Update api', LOG_LEVEL.ERROR);
-      toast.error(
-        `Error in pausing the schedule : ${error}`,
-        toastifyCustomStyle
-      );
+      const errorResponse = `Error in pausing the schedule : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
-  static listDagTaskInstancesListService = async (
+  static readonly listDagTaskInstancesListService = async (
     composerName: string,
     dagId: string,
     dagRunId: string,
@@ -857,8 +835,7 @@ export class SchedulerService {
         `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}`
       );
       data.task_instances?.sort(
-        (a: any, b: any) =>
-          new Date(a.start_date).getTime() - new Date(b.start_date).getTime()
+        (a: any, b: any) => new Date(a.start_date).getTime() - 12
       );
       let transformDagRunTaskInstanceListData = [];
       transformDagRunTaskInstanceListData = data.task_instances?.map(
@@ -876,15 +853,13 @@ export class SchedulerService {
       setDagTaskInstancesList(transformDagRunTaskInstanceListData);
       setIsLoading(false);
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      const errorResponse = `Error in dag task instances..\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
-  static listDagTaskLogsListService = async (
+  static readonly listDagTaskLogsListService = async (
     composerName: string,
     dagId: string,
     dagRunId: string,
@@ -902,15 +877,13 @@ export class SchedulerService {
       setLogList(data?.content);
       setIsLoadingLogs(false);
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      const errorResponse = `Error in listing task logs..\n${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
-  static handleImportErrordataService = async (
+  static readonly handleImportErrordataService = async (
     composerSelectedList: string,
     setImportErrorData: (value: string[]) => void,
     setImportErrorEntries: (value: number) => void
@@ -922,16 +895,14 @@ export class SchedulerService {
       setImportErrorData(data?.import_errors);
       setImportErrorEntries(data?.total_entries);
     } catch (reason) {
-      if (!toast.isActive('credentialsError')) {
-        toast.error(`Error on GET credentials..\n${reason}`, {
-          ...toastifyCustomStyle,
-          toastId: 'credentialsError'
-        });
-      }
+      const errorResponse = `Error in fetching import errors list : ${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 
-  static triggerDagService = async (
+  static readonly triggerDagService = async (
     dagId: string,
     composerSelectedList: string,
     setTriggerLoading: (value: string) => void
@@ -957,36 +928,37 @@ export class SchedulerService {
             `checkRequiredPackages?composer_environment_name=${composerSelectedList}`
           );
           if (installedPackageList.length > 0) {
-            toast.error(
+            Notification.error(
               `Failed to trigger ${dagId} : required packages are not installed`,
-              toastifyCustomStyle
+              {
+                autoClose: false
+              }
             );
           } else {
-            toast.error(
-              `Failed to trigger ${dagId} : ${data?.error}`,
-              toastifyCustomStyle
-            );
+            Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
+              autoClose: false
+            });
           }
         } else {
-          toast.error(
-            `Failed to trigger ${dagId} : ${data?.error}`,
-            toastifyCustomStyle
-          );
+          Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
+            autoClose: false
+          });
         }
       } else {
-        toast.success(`${dagId} triggered successfully `, toastifyCustomStyle);
+        Notification.success(`${dagId} triggered successfully `, {
+          autoClose: false
+        });
       }
       setTriggerLoading('');
     } catch (reason) {
       setTriggerLoading('');
-      toast.error(
-        `Failed to trigger ${dagId} : ${reason}`,
-        toastifyCustomStyle
-      );
+      Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
+        autoClose: false
+      });
     }
   };
 
-  static listComposersAPICheckService = async () => {
+  static readonly listComposersAPICheckService = async () => {
     try {
       const formattedResponse: any = await requestAPI('composerList');
       return formattedResponse;
@@ -995,14 +967,14 @@ export class SchedulerService {
     }
   };
 
-  static checkRequiredPackagesInstalled = async (
+  static readonly checkRequiredPackagesInstalled = async (
     selectedComposer: string,
     setPackageInstallationMessage: (value: string) => void,
     setPackageInstalledList: (value: string[]) => void,
     setPackageListFlag: (value: boolean) => void,
     setapiErrorMessage: (value: string) => void,
     setCheckRequiredPackagesInstalledFlag: (value: boolean) => void,
-    setDisabaleEnvLocal: (value: boolean) => void,
+    setDisableEnvLocal: (value: boolean) => void,
     signal: any,
     abortControllerRef: any
   ) => {
@@ -1032,17 +1004,17 @@ export class SchedulerService {
       }
 
       setCheckRequiredPackagesInstalledFlag(true);
-      setDisabaleEnvLocal(false);
+      setDisableEnvLocal(false);
     } catch (reason) {
       if (typeof reason === 'object' && reason !== null) {
         if (reason instanceof TypeError) {
           return;
         }
       } else {
-        toast.error(
-          `Failed to installation package list : ${reason}`,
-          toastifyCustomStyle
-        );
+        const errorResponse = `Failed to fetch installation package list : ${reason}`;
+        handleErrorToast({
+          error: errorResponse
+        });
       }
     } finally {
       abortControllerRef.current = null; // Clear the AbortController
