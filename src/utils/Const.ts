@@ -16,6 +16,10 @@
  */
 
 import { ConfigService } from '../services/ConfigService';
+const { version, name } = require('../../package.json');
+
+export const VERSION_DETAIL = version;
+export const PLUGIN_NAME = name;
 export const LOGIN_STATE = '1';
 export const STATUS_SUCCESS = 'SUCCEEDED';
 export const API_HEADER_BEARER = 'Bearer ';
