@@ -720,9 +720,7 @@ export class VertexServices {
     selectedMonth: Dayjs | null,
     setIsLoading: (value: boolean) => void,
     setVertexScheduleRunsList: (value: IVertexScheduleRunList[]) => void,
-    setBlueListDates: (value: string[]) => void,
     setGreyListDates: (value: string[]) => void,
-    setOrangeListDates: (value: string[]) => void,
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
     setDarkGreenListDates: (value: string[]) => void,
@@ -803,25 +801,28 @@ export class VertexServices {
       );
 
       // Initialize grouping lists
-      const blueList: string[] = [];
       const greyList: string[] = [];
-      const orangeList: string[] = [];
       const redList: string[] = [];
       const greenList: string[] = [];
       const darkGreenList: string[] = [];
 
       // Process grouped data
       Object.keys(groupedDataByDateStatus).forEach(dateValue => {
-        if (groupedDataByDateStatus[dateValue].running) {
-          blueList.push(dateValue);
-        } else if (groupedDataByDateStatus[dateValue].queued) {
+        if (
+          groupedDataByDateStatus[dateValue].running ||
+          groupedDataByDateStatus[dateValue].queued ||
+          groupedDataByDateStatus[dateValue].pending ||
+          groupedDataByDateStatus[dateValue].unspecified ||
+          groupedDataByDateStatus[dateValue].paused ||
+          groupedDataByDateStatus[dateValue].updating
+        ) {
           greyList.push(dateValue);
         } else if (
-          groupedDataByDateStatus[dateValue].failed &&
-          groupedDataByDateStatus[dateValue].succeeded
+          groupedDataByDateStatus[dateValue].failed ||
+          groupedDataByDateStatus[dateValue].cancelled ||
+          groupedDataByDateStatus[dateValue].expired ||
+          groupedDataByDateStatus[dateValue].partially
         ) {
-          orangeList.push(dateValue);
-        } else if (groupedDataByDateStatus[dateValue].failed) {
           redList.push(dateValue);
         } else if (
           groupedDataByDateStatus[dateValue].succeeded &&
@@ -834,9 +835,7 @@ export class VertexServices {
       });
 
       // Update state lists with their respective transformations
-      setBlueListDates(blueList);
       setGreyListDates(greyList);
-      setOrangeListDates(orangeList);
       setRedListDates(redList);
       setGreenListDates(greenList);
       setDarkGreenListDates(darkGreenList);

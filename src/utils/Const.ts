@@ -125,3 +125,5 @@ export const DEFAULT_DISK_MIN_SIZE = 10;
 export const DEFAULT_DISK_MAX_SIZE = 65536;
 
 export const DEFAULT_DISK_SIZE = '100';
+
+export const VIEW_CLOUD_LOGS = 'VIEW CLOUD LOGS';
