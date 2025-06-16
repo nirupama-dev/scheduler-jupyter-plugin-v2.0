@@ -1007,7 +1007,7 @@ function ListVertexScheduler({
 
       {vertexScheduleList.length > 0 || nextPageToken ? (
         <>
-          <div className="notebook-templates-list-tabl e-parent clusters-list-table-parent table-space-around scroll-list">
+          <div className="notebook-templates-list-tabl e-parent vertex-list-table-parent table-space-around scroll-list">
             <TableData
               getTableProps={getTableProps}
               headerGroups={headerGroups}
