@@ -732,8 +732,7 @@ export class VertexServices {
     const controller = new AbortController();
     abortControllers.current.push(controller);
     const signal = controller.signal;
-
-    const selected_month = selectedMonth?.toISOString();
+    const selected_month = selectedMonth?.format('YYYY-MM-DDTHH:mm:ssZ[Z]');
     const schedule_id = schedulerData?.name.split('/').pop();
     const serviceURL = 'api/vertex/listNotebookExecutionJobs';
     const formattedResponse: any = await requestAPI(
