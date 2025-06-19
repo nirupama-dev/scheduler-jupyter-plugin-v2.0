@@ -192,7 +192,6 @@ const VertexExecutionHistory = ({
   }, [projectId]);
 
   return (
-    console.log('selected month on main return from history page', selectedMonth),
     <>
       <div className="execution-history-main-wrapper">
         <div className="execution-history-header">
