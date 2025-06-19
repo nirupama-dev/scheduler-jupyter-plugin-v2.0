@@ -29,12 +29,14 @@ import {
   loggedFetch,
   authenticatedFetch,
   jobTimeFormat,
-  elapsedTime
+  elapsedTime,
+  toastifyCustomStyle
 } from '../utils/Config';
 import { Notification } from '@jupyterlab/apputils';
 import 'react-toastify/dist/ReactToastify.css';
 import { SchedulerLoggingService, LOG_LEVEL } from '../services/LoggingService';
 import { handleErrorToast } from '../utils/ErrorUtils';
+import { toast } from 'react-toastify';
 
 interface IRenderActionsData {
   state: ClusterStatus;
@@ -249,18 +251,24 @@ export class SessionService {
         setIsLoading(false);
       }
       if (formattedResponse?.error?.code) {
-        handleErrorToast({
-          error: formattedResponse?.error?.message
-        });
+        if (!toast.isActive('sessionError')) {
+          toast.error(formattedResponse?.error?.message, {
+            ...toastifyCustomStyle,
+            toastId: 'sessionError'
+          });
+        }
         setIsLoading(false);
       }
     } catch (error) {
       setIsLoading(false);
       SchedulerLoggingService.log('Error listing Sessions', LOG_LEVEL.ERROR);
       const errorResponse = `Failed to fetch sessions : ${error}`;
-      handleErrorToast({
-        error: errorResponse
-      });
+      if (!toast.isActive('sessionError')) {
+        toast.error(errorResponse, {
+          ...toastifyCustomStyle,
+          toastId: 'sessionError'
+        });
+      }
     }
   };
 }
