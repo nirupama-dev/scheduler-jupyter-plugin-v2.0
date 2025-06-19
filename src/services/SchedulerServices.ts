@@ -896,9 +896,12 @@ export class SchedulerService {
       setImportErrorEntries(data?.total_entries);
     } catch (reason) {
       const errorResponse = `Error in fetching import errors list : ${reason}`;
-      handleErrorToast({
-        error: errorResponse
-      });
+      if (!toast.isActive('importListError')) {
+        toast.error(errorResponse, {
+          ...toastifyCustomStyle,
+          toastId: 'importListError'
+        });
+      }
     }
   };
 
