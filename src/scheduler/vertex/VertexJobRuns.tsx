@@ -261,7 +261,6 @@ const VertexJobRuns = ({
   };
 
   const scheduleRunsList = async () => {
-    console.log('before api call', selectedMonth)
     await VertexServices.executionHistoryServiceList(
       region,
       schedulerData,
