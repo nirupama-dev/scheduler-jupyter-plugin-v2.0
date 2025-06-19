@@ -92,6 +92,7 @@ const VertexExecutionHistory = ({
         console.error(error);
       });
     setSelectedMonth(dayjs(currentDate));
+    console.log('useeffect month value', dayjs(currentDate));
     setSelectedDate(dayjs(currentDate));
     setExecutionPageFlag(false);
     setExecutionPageListFlag(true);
@@ -120,6 +121,7 @@ const VertexExecutionHistory = ({
   const handleMonthChange = (
     newMonth: React.SetStateAction<dayjs.Dayjs | null>
   ) => {
+    
     const resolvedMonth =
       typeof newMonth === 'function' ? newMonth(today) : newMonth;
 
@@ -136,6 +138,7 @@ const VertexExecutionHistory = ({
     }
     setJobRunId('');
     setVertexScheduleRunsList([]);
+    console.log('selectedMonth from handlemonth change',  resolvedMonth)
     setSelectedMonth(resolvedMonth);
   };
 
@@ -189,6 +192,7 @@ const VertexExecutionHistory = ({
   }, [projectId]);
 
   return (
+    console.log('selected month on main return from history page', selectedMonth),
     <>
       <div className="execution-history-main-wrapper">
         <div className="execution-history-header">
