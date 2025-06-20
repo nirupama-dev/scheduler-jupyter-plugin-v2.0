@@ -67,7 +67,8 @@ function ListVertexScheduler({
   setActivePaginationVariables,
   setApiEnableUrl,
   setVertexScheduleDetails,
-  setListingScreenFlag
+  setListingScreenFlag,
+  createMode
 }: {
   region: string;
   setRegion: (value: string) => void;
@@ -94,6 +95,7 @@ function ListVertexScheduler({
   setApiEnableUrl: any;
   setVertexScheduleDetails: (value: ICreatePayload) => void;
   setListingScreenFlag: (value: boolean) => void;
+  createMode: boolean;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
@@ -930,7 +932,7 @@ function ListVertexScheduler({
     authApi()
       .then(credentials => {
         if (credentials && credentials?.region_id && credentials.project_id) {
-          if (!createCompleted && !activePaginationVariables) {
+          if (!createMode && !activePaginationVariables) {
             setRegion(credentials.region_id);
           }
           setProjectId(credentials.project_id);

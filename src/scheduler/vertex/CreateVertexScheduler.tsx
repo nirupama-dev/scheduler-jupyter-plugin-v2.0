@@ -216,6 +216,7 @@ const CreateVertexScheduler = ({
   const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
     useState<string>('');
   const [diskSizeFlag, setDiskSizeFlag] = useState<boolean>(false);
+  const [createMode, setCreateMode] = useState<boolean>(false);
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -771,13 +772,15 @@ const CreateVertexScheduler = ({
         setCreateCompleted,
         setCreatingVertexScheduler,
         gcsPath,
-        setEditMode
+        setEditMode,
+        setCreateMode
       );
     } else {
       await VertexServices.createVertexSchedulerService(
         payload,
         setCreateCompleted,
-        setCreatingVertexScheduler
+        setCreatingVertexScheduler,
+        setCreateMode
       );
       setEditMode(false);
     }
@@ -988,6 +991,7 @@ const CreateVertexScheduler = ({
           setVertexScheduleDetails={setVertexSchedulerDetails}
           setApiEnableUrl={setApiEnableUrl}
           setListingScreenFlag={setListingScreenFlag}
+          createMode={createMode}
         />
       ) : (
         <div className="submit-job-container text-enable-warning">

@@ -97,7 +97,8 @@ export class VertexServices {
   static readonly createVertexSchedulerService = async (
     payload: ICreatePayload,
     setCreateCompleted: (value: boolean) => void,
-    setCreatingVertexScheduler: (value: boolean) => void
+    setCreatingVertexScheduler: (value: boolean) => void,
+    setCreateMode: (value: boolean) => void
   ) => {
     setCreatingVertexScheduler(true);
     try {
@@ -119,6 +120,7 @@ export class VertexServices {
         );
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
+        setCreateMode(true);
       }
     } catch (reason: any) {
       setCreatingVertexScheduler(false);
@@ -139,7 +141,8 @@ export class VertexServices {
     setCreateCompleted: (value: boolean) => void,
     setCreatingVertexScheduler: (value: boolean) => void,
     gcsPath: string,
-    setEditMode: (value: boolean) => void
+    setEditMode: (value: boolean) => void,
+    setCreateMode: (value: boolean) => void
   ) => {
     setCreatingVertexScheduler(true);
     if (gcsPath) {
@@ -168,6 +171,7 @@ export class VertexServices {
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
         setEditMode(false);
+        setCreateMode(true);
       }
     } catch (reason: any) {
       setCreatingVertexScheduler(false);

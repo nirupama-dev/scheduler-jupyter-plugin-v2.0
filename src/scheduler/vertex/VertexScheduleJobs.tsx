@@ -43,7 +43,8 @@ const VertexScheduleJobs = ({
   setExecutionPageListFlag,
   setVertexScheduleDetails,
   setApiEnableUrl,
-  setListingScreenFlag
+  setListingScreenFlag,
+  createMode
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -61,6 +62,7 @@ const VertexScheduleJobs = ({
   setVertexScheduleDetails: (value: ICreatePayload) => void;
   setApiEnableUrl: any;
   setListingScreenFlag: (value: boolean) => void;
+  createMode: boolean;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] =
     useState<boolean>(false);
@@ -152,6 +154,7 @@ const VertexScheduleJobs = ({
           setApiEnableUrl={setApiEnableUrl}
           setVertexScheduleDetails={setVertexScheduleDetails}
           setListingScreenFlag={setListingScreenFlag}
+          createMode={createMode}
         />
       )}
     </>
@@ -173,6 +176,7 @@ export class NotebookJobs extends SchedulerWidget {
   setVertexScheduleDetails: (value: ICreatePayload) => void;
   setApiEnableUrl: any;
   setListingScreenFlag: (value: boolean) => void;
+  createMode: boolean;
 
   constructor(
     app: JupyterLab,
@@ -189,7 +193,8 @@ export class NotebookJobs extends SchedulerWidget {
     setExecutionPageListFlag: (value: boolean) => void,
     setVertexScheduleDetails: (value: ICreatePayload) => void,
     setApiEnableUrl: any,
-    setListingScreenFlag: (value: boolean) => void
+    setListingScreenFlag: (value: boolean) => void,
+    createMode: boolean
   ) {
     super(themeManager);
     this.app = app;
@@ -207,6 +212,7 @@ export class NotebookJobs extends SchedulerWidget {
     this.setVertexScheduleDetails = setVertexScheduleDetails;
     this.setApiEnableUrl = setApiEnableUrl;
     this.setListingScreenFlag = setListingScreenFlag;
+    this.createMode = createMode;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -225,6 +231,7 @@ export class NotebookJobs extends SchedulerWidget {
         setVertexScheduleDetails={this.setVertexScheduleDetails}
         setApiEnableUrl={this.setApiEnableUrl}
         setListingScreenFlag={this.setListingScreenFlag}
+        createMode={this.createMode}
       />
     );
   }
