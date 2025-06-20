@@ -819,23 +819,27 @@ const CreateVertexScheduler = ({
     if (Object.keys(hostProject).length > 0) {
       sharedNetworkAPI();
     }
-    hostProjectAPI();
-    cloudStorageAPI();
-    serviceAccountAPI();
-    primaryNetworkAPI();
-    authApi()
-      .then(credentials => {
-        if (credentials?.region_id && credentials?.project_id) {
-          setLoaderRegion(false);
-          setRegion(credentials.region_id);
-          setProjectId(credentials.project_id);
-        }
-      })
-      .catch(error => {
-        handleErrorToast({
-          error: error
+
+    if (!createCompleted) {
+      hostProjectAPI();
+      cloudStorageAPI();
+      serviceAccountAPI();
+      primaryNetworkAPI();
+
+      authApi()
+        .then(credentials => {
+          if (credentials?.region_id && credentials?.project_id) {
+            setLoaderRegion(false);
+            setRegion(credentials.region_id);
+            setProjectId(credentials.project_id);
+          }
+        })
+        .catch(error => {
+          handleErrorToast({
+            error: error
+          });
         });
-      });
+    }
   }, [projectId]);
 
   useEffect(() => {
@@ -901,7 +905,9 @@ const CreateVertexScheduler = ({
       setMachineTypeList([]);
     } else {
       machineTypeAPI();
-      subNetworkAPI(primaryNetworkSelected?.name);
+      if (!createCompleted) {
+        subNetworkAPI(primaryNetworkSelected?.name);
+      }
     }
   }, [region]);
 
