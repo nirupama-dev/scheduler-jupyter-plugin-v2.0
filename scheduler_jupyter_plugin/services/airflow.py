@@ -24,6 +24,8 @@ from scheduler_jupyter_plugin.commons.constants import (
     STORAGE_SERVICE_DEFAULT_URL,
     STORAGE_SERVICE_NAME,
     TAGS,
+    STATUS_CODE_500,
+    STATUS_CODE_599
 )
 
 
@@ -79,7 +81,7 @@ class Client:
                 if response.status == 200:
                     resp = await response.json()
                     return resp, airflow_obj.get("bucket")
-                elif response.status >= 500 and response.status <= 599:
+                elif response.status >= STATUS_CODE_500 and response.status <= STATUS_CODE_599:
                     raise RuntimeError(
                         f"{response.reason}"
                     )

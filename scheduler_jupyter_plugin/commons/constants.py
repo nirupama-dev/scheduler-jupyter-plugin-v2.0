@@ -53,3 +53,7 @@ BUCKET_NAME_REGEXP = re.compile("[a-z][a-z0-9_.-]{1,61}[a-z0-9]")
 #  on them in case the generated ID might cause issues with how we generate
 #  output file names.
 DAG_RUN_ID_REGEXP = re.compile("[a-zA-Z0-9_:\\+.-]+")
+
+STATUS_CODE_500 = 500
+STATUS_CODE_599 = 599
+
