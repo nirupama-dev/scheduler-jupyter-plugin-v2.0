@@ -641,10 +641,29 @@ export class SchedulerService {
           formattedResponse?.error.indexOf('{'),
           formattedResponse?.error.lastIndexOf('}') + 1
         );
+        
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
+          if (errorObject && Object.hasOwn(errorObject, 'error') && Object.hasOwn(errorObject.error, 'message')) {
+            toast.error(
+              `Failed to fetch schedule list : ${errorObject.error.message}`,
+              {
+                ...toastifyCustomStyle,
+                toastId: 'dagListError'
+              }
+            );
+          } else {
+            toast.error(
+              `Failed to fetch schedule list : ${formattedResponse.error}`,
+              {
+                ...toastifyCustomStyle,
+                toastId: 'dagListError'
+              }
+            );
+          }
+        } else {
           toast.error(
-            `Failed to fetch schedule list : ${errorObject.error.message ?? errorObject.error}`,
+            `Failed to fetch schedule list : ${formattedResponse.error}`,
             {
               ...toastifyCustomStyle,
               toastId: 'dagListError'

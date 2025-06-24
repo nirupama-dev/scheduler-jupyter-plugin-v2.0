@@ -79,9 +79,13 @@ class Client:
                 if response.status == 200:
                     resp = await response.json()
                     return resp, airflow_obj.get("bucket")
+                elif response.status >= 500 and response.status <= 599:
+                    raise RuntimeError(
+                        f"{response.reason}"
+                    )
                 else:
                     raise Exception(
-                        f"Error listing scheduled jobs: {response.reason} {await response.text()}"
+                        f"{response.reason} {await response.text()}"
                     )
         except Exception as e:
             self.log.exception(f"Error getting dag list: {str(e)}")
