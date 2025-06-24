@@ -31,7 +31,7 @@ import {
   IFormattedResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
-import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
+import { DEFAULT_TIME_ZONE, HTTP_STATUS_FORBIDDEN, pattern } from '../utils/Const';
 import React, { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import { handleErrorToast } from '../utils/ErrorUtils';
@@ -52,7 +52,7 @@ export class VertexServices {
           setMachineTypeList(formattedResponse);
         } else if (formattedResponse.length === undefined) {
           try {
-            if (formattedResponse.error.code === 403) {
+            if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
               // Pattern to check whether string contains link
               const pattern =
                 // eslint-disable-next-line
@@ -223,7 +223,7 @@ export class VertexServices {
         formattedResponse as IFormattedResponse;
 
       // Handle API error
-      if (error?.code === 403) {
+      if (error?.code === HTTP_STATUS_FORBIDDEN) {
         const url = error.message.match(pattern);
         if (url && url.length > 0) {
           setIsApiError(true);

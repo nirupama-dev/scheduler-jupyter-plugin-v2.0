@@ -132,3 +132,9 @@ export const DEFAULT_DISK_MAX_SIZE = 65536;
 export const DEFAULT_DISK_SIZE = '100';
 
 export const VIEW_CLOUD_LOGS = 'VIEW CLOUD LOGS';
+
+export const HTTP_STATUS_FORBIDDEN = 403;
+
+export const HTTP_STATUS_BAD_REQUEST = 400;
+
+export const HTTP_STATUS_NOT_FOUND = 404;

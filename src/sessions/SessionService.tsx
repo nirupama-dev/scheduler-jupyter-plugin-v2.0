@@ -22,7 +22,8 @@ import {
   STATUS_FAIL,
   STATUS_TERMINATED,
   ClusterStatus,
-  gcpServiceUrls
+  gcpServiceUrls,
+  HTTP_STATUS_NOT_FOUND
 } from '../utils/Const';
 import {
   authApi,
@@ -142,7 +143,7 @@ export class SessionService {
       });
 
       const formattedResponse = await response.json();
-      if (formattedResponse.error && formattedResponse.error.code === 404) {
+      if (formattedResponse.error && formattedResponse.error.code === HTTP_STATUS_NOT_FOUND) {
         setErrorView(true);
       }
       setSessionInfo(formattedResponse);

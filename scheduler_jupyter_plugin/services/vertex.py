@@ -22,7 +22,9 @@ from google.cloud import storage
 
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
-    VERTEX_STORAGE_BUCKET,
+    HTTP_STATUS_OK,
+    HTTP_STATUS_FORBIDDEN,
+    HTTP_STATUS_NO_CONTENT
 )
 from scheduler_jupyter_plugin.models.models import (
     DescribeVertexJob,
@@ -165,7 +167,7 @@ class Client:
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
                 else:
@@ -212,7 +214,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     if not resp:
                         return uiconfig
@@ -235,7 +237,7 @@ class Client:
                                 }
                                 uiconfig.append(formatted_config)
                         return uiconfig
-                elif response.status == 403:
+                elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
                 else:
@@ -266,7 +268,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     if not resp:
                         return result
@@ -306,7 +308,7 @@ class Client:
                         resp["schedules"] = schedule_list
                         result.update(resp)
                         return result
-                elif response.status == 403:
+                elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
                 else:
@@ -330,9 +332,9 @@ class Client:
             async with self.client_session.post(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     return await response.json()
-                elif response.status == 204:
+                elif response.status == HTTP_STATUS_NO_CONTENT:
                     return {"message": "Schedule paused successfully"}
                 else:
                     self.log.exception(
@@ -355,9 +357,9 @@ class Client:
             async with self.client_session.post(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     return await response.json()
-                elif response.status == 204:
+                elif response.status == HTTP_STATUS_NO_CONTENT:
                     return {"message": "Schedule resumed successfully"}
                 else:
                     self.log.exception(
@@ -380,9 +382,9 @@ class Client:
             async with self.client_session.delete(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     return await response.json()
-                elif response.status == 204:
+                elif response.status == HTTP_STATUS_NO_CONTENT:
                     return {"message": "Schedule deleted successfully"}
                 else:
                     self.log.exception(
@@ -405,7 +407,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     return await response.json()
                 else:
                     self.log.exception(
@@ -431,7 +433,7 @@ class Client:
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     return await response.json()
                 else:
                     self.log.exception(
@@ -525,7 +527,7 @@ class Client:
             async with self.client_session.patch(
                 api_endpoint, headers=headers, json=payload
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     return await response.json()
                 else:
                     self.log.exception(
@@ -552,7 +554,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     if not resp:
                         return execution_jobs

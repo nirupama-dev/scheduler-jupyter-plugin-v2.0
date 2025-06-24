@@ -16,6 +16,7 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     DATAPROC_SERVICE_NAME,
+    HTTP_STATUS_OK
 )
 
 
@@ -47,7 +48,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
                 else:
@@ -66,7 +67,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
                 else:

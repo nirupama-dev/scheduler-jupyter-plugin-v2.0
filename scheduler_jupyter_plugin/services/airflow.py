@@ -24,8 +24,9 @@ from scheduler_jupyter_plugin.commons.constants import (
     STORAGE_SERVICE_DEFAULT_URL,
     STORAGE_SERVICE_NAME,
     TAGS,
-    STATUS_CODE_500,
-    STATUS_CODE_599
+    HTTP_STATUS_INTERNAL_SERVER_ERROR as HTTP_STATUS_SERVER_ERROR_START,
+    HTTP_STATUS_NETWORK_CONNECT_TIMEOUT as HTTP_STATUS_SERVER_ERROR_END,
+    HTTP_STATUS_OK
 )
 
 
@@ -57,7 +58,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     airflow_uri = resp.get("config", {}).get("airflowUri", "")
                     bucket = resp.get("storageConfig", {}).get("bucket", "")
@@ -78,10 +79,10 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp, airflow_obj.get("bucket")
-                elif response.status >= STATUS_CODE_500 and response.status <= STATUS_CODE_599:
+                elif response.status >= HTTP_STATUS_SERVER_ERROR_START and response.status <= HTTP_STATUS_SERVER_ERROR_END:
                     raise RuntimeError(
                         f"{response.reason}"
                     )
@@ -129,7 +130,7 @@ class Client:
             async with self.client_session.patch(
                 api_endpoint, json=data, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     return 0
                 else:
                     self.log.exception("Error updating status")
@@ -148,7 +149,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
                 else:
@@ -167,7 +168,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
                 else:
@@ -188,7 +189,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.text()
                     return {"content": resp}
                 else:
@@ -210,7 +211,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     self.log.info("Dag file response fetched")
                     return await response.read()
                 else:
@@ -340,7 +341,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
                 else:
@@ -362,7 +363,7 @@ class Client:
             async with self.client_session.post(
                 api_endpoint, headers=self.create_headers(), json=body
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
                 else:
