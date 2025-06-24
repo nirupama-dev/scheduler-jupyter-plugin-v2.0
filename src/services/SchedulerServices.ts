@@ -18,7 +18,12 @@
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { JupyterLab } from '@jupyterlab/application';
-import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN, pattern, scheduleMode } from '../utils/Const';
+import {
+  HTTP_STATUS_BAD_REQUEST,
+  HTTP_STATUS_FORBIDDEN,
+  pattern,
+  scheduleMode
+} from '../utils/Const';
 import {
   IClusterAPIResponse,
   IComposerAPIResponse,
@@ -641,10 +646,14 @@ export class SchedulerService {
           formattedResponse?.error.indexOf('{'),
           formattedResponse?.error.lastIndexOf('}') + 1
         );
-        
+
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
-          if (errorObject && Object.hasOwn(errorObject, 'error') && Object.hasOwn(errorObject.error, 'message')) {
+          if (
+            errorObject &&
+            Object.hasOwn(errorObject, 'error') &&
+            Object.hasOwn(errorObject.error, 'message')
+          ) {
             toast.error(
               `Failed to fetch schedule list : ${errorObject.error.message}`,
               {

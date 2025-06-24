@@ -39,7 +39,7 @@ export default function CustomDate({
     const date_list = dateList
       .map(
         (dateStr: string | number | Date) =>
-          new Date(dateStr).toISOString().split('T')[0]
+          dayjs(dateStr).format('YYYY-MM-DDTHH:mm:ssZ[Z]').split('T')[0]
       )
       .includes(formattedDay);
     return date_list;
