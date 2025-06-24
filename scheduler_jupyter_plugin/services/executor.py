@@ -37,6 +37,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     WRAPPER_PAPPERMILL_FILE,
     UTF8,
     PAYLOAD_JSON_FILE_PATH,
+    HTTP_STATUS_OK
 )
 from scheduler_jupyter_plugin.models.models import DescribeJob
 from scheduler_jupyter_plugin.services import airflow
@@ -83,7 +84,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
                     return gcs_dag_path

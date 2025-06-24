@@ -18,7 +18,7 @@
 import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { JupyterLab } from '@jupyterlab/application';
-import { pattern, scheduleMode } from '../utils/Const';
+import { HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_FORBIDDEN, pattern, scheduleMode } from '../utils/Const';
 import {
   IClusterAPIResponse,
   IComposerAPIResponse,
@@ -194,7 +194,7 @@ export class SchedulerService {
       } else if (formattedResponse.length === undefined) {
         try {
           setComposerList([]);
-          if (formattedResponse.error.code === 403) {
+          if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
             const url = formattedResponse.error.message.match(pattern);
             if (url && url.length > 0) {
               setIsApiError(true);
@@ -641,10 +641,29 @@ export class SchedulerService {
           formattedResponse?.error.indexOf('{'),
           formattedResponse?.error.lastIndexOf('}') + 1
         );
+        
         if (jsonstr) {
           const errorObject = JSON.parse(jsonstr);
+          if (errorObject && Object.hasOwn(errorObject, 'error') && Object.hasOwn(errorObject.error, 'message')) {
+            toast.error(
+              `Failed to fetch schedule list : ${errorObject.error.message}`,
+              {
+                ...toastifyCustomStyle,
+                toastId: 'dagListError'
+              }
+            );
+          } else {
+            toast.error(
+              `Failed to fetch schedule list : ${formattedResponse.error}`,
+              {
+                ...toastifyCustomStyle,
+                toastId: 'dagListError'
+              }
+            );
+          }
+        } else {
           toast.error(
-            `Failed to fetch schedule list : ${errorObject.error.message ?? errorObject.error}`,
+            `Failed to fetch schedule list : ${formattedResponse.error}`,
             {
               ...toastifyCustomStyle,
               toastId: 'dagListError'
@@ -926,7 +945,7 @@ export class SchedulerService {
           errorObject = JSON.parse(jsonstr);
         }
 
-        if (errorObject?.status === 400) {
+        if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
           const installedPackageList: any = await requestAPI(
             `checkRequiredPackages?composer_environment_name=${composerSelectedList}`
           );
