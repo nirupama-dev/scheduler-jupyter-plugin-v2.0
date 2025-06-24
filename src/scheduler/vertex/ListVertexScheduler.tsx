@@ -707,7 +707,7 @@ function ListVertexScheduler({
           {...cell.getCellProps()}
           className="clusters-table-data table-cell-overflow"
         >
-          {dayjs(cell.row.original.createTime).format('lll')}
+          {dayjs(cell.row.original.createTime).format('MMM DD, YYYY h:mm A')}
         </td>
       );
     } else if (cell.column.Header === 'Next Run Date') {
