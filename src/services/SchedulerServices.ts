@@ -938,7 +938,8 @@ export class SchedulerService {
   static readonly triggerDagService = async (
     dagId: string,
     composerSelectedList: string,
-    setTriggerLoading: (value: string) => void
+    setTriggerLoading: (value: string) => void,
+    region: string,
   ) => {
     setTriggerLoading(dagId);
     try {
@@ -958,7 +959,7 @@ export class SchedulerService {
 
         if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
           const installedPackageList: any = await requestAPI(
-            `checkRequiredPackages?composer_environment_name=${composerSelectedList}`
+            `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
           );
           if (installedPackageList.length > 0) {
             Notification.error(
@@ -1016,7 +1017,7 @@ export class SchedulerService {
       'Checking if required packages are installed...'
     );
     requestAPI(
-      `checkRequiredPackages?composer_environment_name=${selectedComposer}&region_id={region}`,
+      `checkRequiredPackages?composer_environment_name=${selectedComposer}&region_id=${region}`,
       { signal }
     )
       .then((installedPackageList: any) => {
