@@ -1006,6 +1006,7 @@ export class SchedulerService {
     setapiErrorMessage: (value: string) => void,
     setCheckRequiredPackagesInstalledFlag: (value: boolean) => void,
     setDisableEnvLocal: (value: boolean) => void,
+    region: string,
     signal: any,
     abortControllerRef: any
   ) => {
@@ -1014,7 +1015,7 @@ export class SchedulerService {
         'Checking if required packages are installed...'
       );
       const installedPackageList: any = await requestAPI(
-        `checkRequiredPackages?composer_environment_name=${selectedComposer}`,
+        `checkRequiredPackages?composer_environment_name=${selectedComposer}&region_id=${region}`,
         { signal }
       );
 
