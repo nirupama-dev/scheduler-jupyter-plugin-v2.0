@@ -410,7 +410,7 @@ class Client:
             await self.airflow_client.list_dag_run_task(
                 composer_environment_name, dag_id, dag_run_id
             )
-        except Exception as ex:
+        except Exception:
             return {"error": f"Invalid DAG run ID {dag_run_id}"}
 
         try:
