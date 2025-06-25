@@ -114,7 +114,7 @@ export function DynamicDropdown(
             ...params.InputProps,
             endAdornment: (
               <>
-                {loaderProjectId && !value && (
+                {loaderProjectId && (
                   <CircularProgress
                     aria-label="Loading Spinner"
                     data-testid="loader"

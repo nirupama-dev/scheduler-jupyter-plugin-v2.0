@@ -578,6 +578,9 @@ const CreateNotebookScheduler = ({
         setRegion(credentials.region_id);
       }
     });
+  }, []);
+
+  useEffect(() => {
     if (!projectId) {
       setRegion('');
       setComposerEnvSelected('');
@@ -689,6 +692,7 @@ const CreateNotebookScheduler = ({
                 onRegionChange={region => handleRegionChange(region)}
                 editMode={disableEnvLocal || editMode}
                 loaderRegion={loaderRegion}
+                setLoaderRegion={setLoaderRegion}
               />
             </div>
             {!region && <ErrorMessage message="Region is required" />}

@@ -23,7 +23,7 @@ import { IVertexCellProps } from '../../utils/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { CircularProgress, Button } from '@mui/material';
 import DeletePopup from '../../utils/DeletePopup';
-import { VERTEX_REGIONS } from '../../utils/Const';
+import { VERTEX_REGIONS, VERTEX_SCHEDULE } from '../../utils/Const';
 import { RegionDropdown } from '../../controls/RegionDropdown';
 import { iconDash } from '../../utils/Icons';
 import { authApi } from '../../utils/Config';
@@ -131,6 +131,7 @@ function ListVertexScheduler({
   const previousScheduleList = useRef(vertexScheduleList);
   const previousNextPageToken = useRef(nextPageToken);
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
+  const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
 
   const columns = useMemo(
     () => [
@@ -929,10 +930,12 @@ function ListVertexScheduler({
   }, [region]);
 
   useEffect(() => {
+    setLoaderRegion(true);
     authApi()
       .then(credentials => {
         if (credentials && credentials?.region_id && credentials.project_id) {
           if (!createMode && !activePaginationVariables) {
+            setLoaderRegion(false);
             setRegion(credentials.region_id);
           }
           setProjectId(credentials.project_id);
@@ -985,6 +988,8 @@ function ListVertexScheduler({
               onRegionChange={region => setRegion(region)}
               regionsList={VERTEX_REGIONS}
               regionDisable={regionDisable}
+              fromPage={VERTEX_SCHEDULE}
+              loaderRegion={loaderRegion}
             />
             {!isLoading && !region && (
               <ErrorMessage message="Region is required" showIcon={false} />
