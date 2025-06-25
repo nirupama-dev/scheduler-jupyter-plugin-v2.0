@@ -297,14 +297,14 @@ class Client:
                     self.log.info(f"{package} is already installed.")
             return packages_to_install
         except subprocess.CalledProcessError:
-            self.log.exception(f"Error checking packages")
+            self.log.exception("Error checking packages")
             raise IOError("Error checking packages")
         except Exception as error:
             self.log.exception(f"Error checking packages: {error}")
             raise IOError(f"Error checking packages: {error}")
 
     async def install_to_composer_environment(
-        self, local_kernel, composer_environment_name, packages_to_install
+        self, local_kernel, composer_environment_name, packages_to_install, region_id
     ):
         try:
             installing_packages = "false"
@@ -312,27 +312,18 @@ class Client:
                 for package in packages_to_install:
                     self.log.info(f"{package} is not installed. Installing...")
                     installing_packages = "true"
-                    install_cmd = f"gcloud composer environments update {composer_environment_name} --location {self.region_id} --update-pypi-package {package}"
-                    install_process = subprocess.Popen(
-                        install_cmd,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        shell=True,
-                    )
-                    install_stdout, install_stderr = install_process.communicate()
-                    if install_process.returncode == 0:
-                        self.log.info(f"{package} installed successfully.")
-                    else:
-                        # decoding bytes class to string and taking out the error part
-                        decoded_message = install_stderr.decode("utf-8")
-                        start_index = decoded_message.find("ERROR")
-                        error = decoded_message[start_index:]
-                        raise Exception(
-                            f"can not create schedule, error in installing the packages, error: {error}"
-                        )
+                    sub_cmd = f"composer environments update {composer_environment_name} --location {region_id} --update-pypi-package {package}"
+                    await async_run_gcloud_subcommand(sub_cmd)
             return {"installing_packages": str(installing_packages)}
+        except subprocess.CalledProcessError as install_error:
+            self.log.exception(
+                f"can not create schedule, error in installing the packages, error: {install_error.stderr}"
+            )
+            raise RuntimeError(
+                f"can not create schedule, error in installing the packages, error: {install_error.stderr}"
+            )
         except Exception as e:
-            self.log.exception(f"error installing {package}: {install_stderr}")
+            self.log.exception(f"error installing {package}: {str(e)}")
             return {"error": str(e)}
 
     def create_payload(self, file_path, project_id, region, input_data):
@@ -360,6 +351,7 @@ class Client:
                     job.local_kernel,
                     job.composer_environment_name,
                     job.packages_to_install,
+                    region_id,
                 )
             if install_packages and install_packages.get("error"):
                 raise Exception(install_packages)
