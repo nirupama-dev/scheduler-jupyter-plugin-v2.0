@@ -20,6 +20,9 @@ from datetime import datetime, timedelta
 from google.cloud import storage
 from google.api_core.exceptions import NotFound
 import google.oauth2.credentials as oauth2
+from google.cloud.jupyter_config.config import (
+    async_run_gcloud_subcommand,
+)
 import aiofiles
 import json
 
@@ -37,7 +40,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     WRAPPER_PAPPERMILL_FILE,
     UTF8,
     PAYLOAD_JSON_FILE_PATH,
-    HTTP_STATUS_OK
+    HTTP_STATUS_OK,
 )
 from scheduler_jupyter_plugin.models.models import DescribeJob
 from scheduler_jupyter_plugin.services import airflow
@@ -280,32 +283,20 @@ class Client:
         shutil.copy2(wrapper_papermill_path, LOCAL_DAG_FILE_LOCATION)
         return file_path
 
-    async def check_package_in_env(self, composer_environment_name):
+    async def check_package_in_env(self, composer_environment_name, region_id):
         try:
             packages = ["apache-airflow-providers-papermill", "ipykernel"]
             packages_to_install = []
-            cmd = f"gcloud beta composer environments list-packages {composer_environment_name} --location {self.region_id}"
-            process = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            cmd = f"beta composer environments list-packages {composer_environment_name} --location {region_id}"
+            process = await async_run_gcloud_subcommand(cmd)
+            installed_packages = set(
+                line.split()[0].lower() for line in process.splitlines()[2:]
             )
-            stdout, stderr = process.communicate()
-            if stderr:
-                self.log.info(f"Error fetching list of packages: {stderr}")
-                # decoding bytes class to string and taking out the error part
-                decoded_message = stderr.decode("utf-8")
-                start_index = decoded_message.find("ERROR")
-                error = decoded_message[start_index:]
-                raise Exception(error)
-            else:
-                decoded_output = stdout.decode(UTF8)
-                installed_packages = set(
-                    line.split()[0].lower() for line in decoded_output.splitlines()[2:]
-                )
-                for package in packages:
-                    if package.lower() not in installed_packages:
-                        packages_to_install.append(package)
-                    else:
-                        self.log.info(f"{package} is already installed.")
+            for package in packages:
+                if package.lower() not in installed_packages:
+                    packages_to_install.append(package)
+                else:
+                    self.log.info(f"{package} is already installed.")
             return packages_to_install
         except Exception as error:
             self.log.exception(f"Error checking packages: {error}")
