@@ -700,7 +700,8 @@ export class SchedulerService {
   };
   static readonly listDagInfoAPIServiceForCreateNotebook = (
     setDagList: (value: IDagList[]) => void,
-    composerSelected: string
+    composerSelected: string,
+    setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>
   ) => {
     const serviceURL = `dagList?composer=${composerSelected}`;
     requestAPI(serviceURL)
@@ -720,18 +721,14 @@ export class SchedulerService {
           );
         }
         setDagList(transformDagListData);
+        setJobNameUniquenessError(false);
       })
       .catch(error => {
         SchedulerLoggingService.log(
           'Error listing dag Scheduler list',
           LOG_LEVEL.ERROR
         );
-        if (!toast.isActive('dagListError')) {
-          toast.error(`Failed to fetch schedule list : ${error}`, {
-            ...toastifyCustomStyle,
-            toastId: 'clusterError'
-          });
-        }
+        setJobNameUniquenessError(true);
       });
   };
 
@@ -939,7 +936,7 @@ export class SchedulerService {
     dagId: string,
     composerSelectedList: string,
     setTriggerLoading: (value: string) => void,
-    region: string,
+    region: string
   ) => {
     setTriggerLoading(dagId);
     try {

@@ -74,6 +74,8 @@ const NotebookSchedulerComponent = ({
   const [loginError, setLoginError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [listingScreenFlag, setListingScreenFlag] = useState<boolean>(false);
+  const [jobNameUniquenessError, setJobNameUniquenessError] =
+    useState<boolean>(false);
 
   const formatTimestamp = (timestamp: number) => {
     const date = new Date(timestamp);
@@ -229,6 +231,12 @@ const NotebookSchedulerComponent = ({
                     showIcon={notebookSelector === 'composer'}
                   />
                 )}
+                {jobNameUniquenessError && !editMode && (
+                  <ErrorMessage
+                    message="Failed to check job name uniqueness"
+                    showIcon={notebookSelector === 'composer'}
+                  />
+                )}
 
                 <div className="create-scheduler-form-element-input-file">
                   <Input
@@ -334,6 +342,8 @@ const NotebookSchedulerComponent = ({
               setSchedulerBtnDisable={setSchedulerBtnDisable}
               abortControllerRef={abortControllerRef}
               setApiEnableUrl={setApiEnableUrl}
+              jobNameUniquenessError={jobNameUniquenessError}
+              setJobNameUniquenessError={setJobNameUniquenessError}
             />
           ) : (
             <CreateVertexScheduler
