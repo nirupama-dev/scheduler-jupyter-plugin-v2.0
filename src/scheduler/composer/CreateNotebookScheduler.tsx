@@ -192,7 +192,7 @@ const CreateNotebookScheduler = ({
     );
   };
 
-  const handleComposerSelected = async (data: string | null) => {
+  const handleComposerSelected = (data: string | null) => {
     setPackageListFlag(false);
     setPackageInstalledList([]);
     setapiErrorMessage('');
@@ -204,14 +204,14 @@ const CreateNotebookScheduler = ({
       const selectedComposer = data.toString();
       setComposerSelected(selectedComposer);
       if (selectedComposer) {
-        const unique = await getDaglist(selectedComposer);
+        const unique = getDaglist(selectedComposer);
         if (!unique) {
           setJobNameUniqueValidation(true);
         }
 
         if (isLocalKernel) {
           setDisableEnvLocal(true);
-          await SchedulerService.checkRequiredPackagesInstalled(
+          SchedulerService.checkRequiredPackagesInstalled(
             selectedComposer,
             setPackageInstallationMessage,
             setPackageInstalledList,
@@ -226,10 +226,11 @@ const CreateNotebookScheduler = ({
       }
     }
   };
-  const getDaglist = async (composer: string) => {
+  
+  const getDaglist = (composer: string) => {
     setDagListCall(true);
     try {
-      await SchedulerService.listDagInfoAPIServiceForCreateNotebook(
+      SchedulerService.listDagInfoAPIServiceForCreateNotebook(
         setDagList,
         composer
       );
@@ -569,7 +570,7 @@ const CreateNotebookScheduler = ({
   }, [projectId]);
 
   useEffect(() => {
-    const checkRequiredPackageApiService = async () => {
+    const checkRequiredPackageApiService = () => {
       setPackageListFlag(false);
       setPackageInstalledList([]);
       setapiErrorMessage('');
@@ -577,7 +578,7 @@ const CreateNotebookScheduler = ({
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
-      await SchedulerService.checkRequiredPackagesInstalled(
+      SchedulerService.checkRequiredPackagesInstalled(
         composerSelected,
         setPackageInstallationMessage,
         setPackageInstalledList,

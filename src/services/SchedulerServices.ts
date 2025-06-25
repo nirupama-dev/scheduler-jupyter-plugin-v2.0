@@ -698,41 +698,43 @@ export class SchedulerService {
       }
     }
   };
-  static readonly listDagInfoAPIServiceForCreateNotebook = async (
+  static readonly listDagInfoAPIServiceForCreateNotebook = (
     setDagList: (value: IDagList[]) => void,
     composerSelected: string
   ) => {
-    try {
-      const serviceURL = `dagList?composer=${composerSelected}`;
-      const formattedResponse: any = await requestAPI(serviceURL);
-      let transformDagListData = [];
-      if (formattedResponse?.[0].dags) {
-        transformDagListData = formattedResponse[0].dags.map(
-          (dag: ISchedulerDagData) => {
-            return {
-              jobid: dag.dag_id,
-              notebookname: dag.dag_id,
-              schedule: dag.timetable_description,
-              status: dag.is_paused ? 'Paused' : 'Active',
-              scheduleInterval: dag.schedule_interval?.value
-            };
-          }
+    const serviceURL = `dagList?composer=${composerSelected}`;
+    requestAPI(serviceURL)
+      .then((formattedResponse: any) => {
+        let transformDagListData = [];
+        if (formattedResponse?.[0].dags) {
+          transformDagListData = formattedResponse[0].dags.map(
+            (dag: ISchedulerDagData) => {
+              return {
+                jobid: dag.dag_id,
+                notebookname: dag.dag_id,
+                schedule: dag.timetable_description,
+                status: dag.is_paused ? 'Paused' : 'Active',
+                scheduleInterval: dag.schedule_interval?.value
+              };
+            }
+          );
+        }
+        setDagList(transformDagListData);
+      })
+      .catch(error => {
+        SchedulerLoggingService.log(
+          'Error listing dag Scheduler list',
+          LOG_LEVEL.ERROR
         );
-      }
-      setDagList(transformDagListData);
-    } catch (error) {
-      SchedulerLoggingService.log(
-        'Error listing dag Scheduler list',
-        LOG_LEVEL.ERROR
-      );
-      if (!toast.isActive('dagListError')) {
-        toast.error(`Failed to fetch schedule list : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'clusterError'
-        });
-      }
-    }
+        if (!toast.isActive('dagListError')) {
+          toast.error(`Failed to fetch schedule list : ${error}`, {
+            ...toastifyCustomStyle,
+            toastId: 'clusterError'
+          });
+        }
+      });
   };
+
   static readonly handleDownloadOutputNotebookAPIService = async (
     composerName: string,
     dagRunId: string,
@@ -1009,46 +1011,49 @@ export class SchedulerService {
     signal: any,
     abortControllerRef: any
   ) => {
-      setPackageInstallationMessage(
-        'Checking if required packages are installed...'
-      );
-      requestAPI(
-        `checkRequiredPackages?composer_environment_name=${selectedComposer}`,
-        { signal }
-      ).then((installedPackageList: any) => {
-if (installedPackageList.length > 0) {
-        setPackageInstallationMessage(
-          installedPackageList.join(', ') +
-            ' packages will get installed on creation of schedule'
-        );
-        setPackageInstalledList(installedPackageList);
-        setPackageListFlag(false);
-        setCheckRequiredPackagesInstalledFlag(true);
-      } else if (Object.hasOwn(installedPackageList, 'error')) {
-        setPackageInstallationMessage('');
-        setapiErrorMessage(installedPackageList.error);
-        setCheckRequiredPackagesInstalledFlag(false);
-      } else {
-        setPackageInstallationMessage('');
-        setPackageInstalledList([]);
-        setPackageListFlag(true);
-        setCheckRequiredPackagesInstalledFlag(true);
-      }
-
-      setDisableEnvLocal(false);
-      }).catch ((reason) => {
-      if (typeof reason === 'object' && reason !== null) {
-        if (reason instanceof TypeError) {
-          return;
+    setPackageInstallationMessage(
+      'Checking if required packages are installed...'
+    );
+    requestAPI(
+      `checkRequiredPackages?composer_environment_name=${selectedComposer}`,
+      { signal }
+    )
+      .then((installedPackageList: any) => {
+        if (installedPackageList.length > 0) {
+          setPackageInstallationMessage(
+            installedPackageList.join(', ') +
+              ' packages will get installed on creation of schedule'
+          );
+          setPackageInstalledList(installedPackageList);
+          setPackageListFlag(false);
+          setCheckRequiredPackagesInstalledFlag(true);
+        } else if (Object.hasOwn(installedPackageList, 'error')) {
+          setPackageInstallationMessage('');
+          setapiErrorMessage(installedPackageList.error);
+          setCheckRequiredPackagesInstalledFlag(false);
+        } else {
+          setPackageInstallationMessage('');
+          setPackageInstalledList([]);
+          setPackageListFlag(true);
+          setCheckRequiredPackagesInstalledFlag(true);
         }
-      } else {
-        const errorResponse = `Failed to fetch installation package list : ${reason}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      }
-    }).finally(() => {
-      abortControllerRef.current = null; // Clear the AbortController
-    });
+
+        setDisableEnvLocal(false);
+      })
+      .catch(reason => {
+        if (typeof reason === 'object' && reason !== null) {
+          if (reason instanceof TypeError) {
+            return;
+          }
+        } else {
+          const errorResponse = `Failed to fetch installation package list : ${reason}`;
+          handleErrorToast({
+            error: errorResponse
+          });
+        }
+      })
+      .finally(() => {
+        abortControllerRef.current = null; // Clear the AbortController
+      });
   };
 }
