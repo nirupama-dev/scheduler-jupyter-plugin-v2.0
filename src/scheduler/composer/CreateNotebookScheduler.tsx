@@ -79,7 +79,9 @@ const CreateNotebookScheduler = ({
   setPackageEditFlag,
   setSchedulerBtnDisable,
   abortControllerRef,
-  setApiEnableUrl
+  setApiEnableUrl,
+  jobNameUniquenessError,
+  setJobNameUniquenessError
 }: {
   themeManager: IThemeManager;
   app: JupyterLab;
@@ -107,6 +109,8 @@ const CreateNotebookScheduler = ({
   setSchedulerBtnDisable: React.Dispatch<React.SetStateAction<boolean>>;
   abortControllerRef: any;
   setApiEnableUrl: any;
+  jobNameUniquenessError: boolean;
+  setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element => {
   const [composerList, setComposerList] = useState<string[]>([]);
   const [composerEnvSelected, setComposerEnvSelected] = useState<string>('');
@@ -235,7 +239,8 @@ const CreateNotebookScheduler = ({
     try {
       SchedulerService.listDagInfoAPIServiceForCreateNotebook(
         setDagList,
-        composer
+        composer,
+        setJobNameUniquenessError
       );
       setDagListCall(false);
       return true;
@@ -412,6 +417,7 @@ const CreateNotebookScheduler = ({
       (!jobNameValidation && !editMode) ||
       (jobNameSpecialValidation && !editMode) ||
       (!jobNameUniqueValidation && !editMode) ||
+      (jobNameUniquenessError && !editMode) ||
       inputFileSelected === '' ||
       parameterDetailUpdated.some(
         item =>
