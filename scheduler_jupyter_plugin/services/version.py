@@ -12,9 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import aiohttp
 import subprocess
 import sys
+
+from scheduler_jupyter_plugin.commons.config import async_run_system_command
 
 
 class Client:
@@ -35,22 +36,20 @@ class Client:
 
     async def get_latest_version(self, package_name):
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(
-                    f"https://pypi.org/pypi/{package_name}/json", timeout=3
-                ) as response:
-                    response.raise_for_status()
-                    data = await response.json()
-                    return data["info"]["version"]
+            api_endpoint = f"https://pypi.org/pypi/{package_name}/json"
+            async with self.client_session.get(api_endpoint, timeout=3) as response:
+                response.raise_for_status()
+                data = await response.json()
+                return data["info"]["version"]
 
         except Exception as e:
             self.log.exception("Error fetching jupyter lab version")
             return {"error": str(e)}
 
-    def upgrade_package(self, package_name):
+    async def upgrade_package(self, package_name):
         try:
             print("installing...................")
-            subprocess.check_call(
+            await async_run_system_command(
                 [sys.executable, "-m", "pip", "install", "--upgrade", package_name]
             )
         except subprocess.CalledProcessError as e:
@@ -58,5 +57,5 @@ class Client:
             raise e
 
     async def update_plugin(self, package_name):
-        self.upgrade_package(package_name)
+        await self.upgrade_package(package_name)
         return {"status": "ok"}
