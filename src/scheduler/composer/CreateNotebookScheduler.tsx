@@ -240,7 +240,9 @@ const CreateNotebookScheduler = ({
       SchedulerService.listDagInfoAPIServiceForCreateNotebook(
         setDagList,
         composer,
-        setJobNameUniquenessError
+        setJobNameUniquenessError,
+        region,
+        projectId
       );
       setDagListCall(false);
       return true;

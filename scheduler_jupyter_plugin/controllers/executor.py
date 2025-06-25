@@ -29,8 +29,8 @@ class ExecutorController(APIHandler):
     async def post(self):
         try:
             input_data = self.get_json_body()
-            project_id = self.get_argument("project_id", default=None)
-            region_id = self.get_argument("region_id", default=None)
+            project_id = self.get_argument("project_id")
+            region_id = self.get_argument("region_id")
             if not re.fullmatch(
                 constants.COMPOSER_ENVIRONMENT_REGEXP,
                 input_data["composer_environment_name"],

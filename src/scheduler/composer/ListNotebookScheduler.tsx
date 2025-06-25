@@ -239,7 +239,9 @@ function ListNotebookScheduler({
       setDagList,
       setIsLoading,
       setBucketName,
-      setUpdateLoading
+      setUpdateLoading,
+      region,
+      projectId
     );
   };
   const handleDeletePopUp = (dag_id: string) => {
@@ -264,6 +266,7 @@ function ListNotebookScheduler({
         jobid,
         composerSelectedList,
         setTriggerLoading,
+        projectId,
         region
       );
     }
@@ -318,7 +321,9 @@ function ListNotebookScheduler({
       selectedDagId,
       setDagList,
       setIsLoading,
-      setBucketName
+      setBucketName,
+      region,
+      projectId
     );
     setDeletePopupOpen(false);
     setDeletingNotebook(false);
@@ -332,7 +337,9 @@ function ListNotebookScheduler({
       setDagList,
       setIsLoading,
       setBucketName,
-      fromPage
+      fromPage,
+      region,
+      projectId
     );
   };
 
@@ -353,7 +360,9 @@ function ListNotebookScheduler({
       setDagList,
       setIsLoading,
       setBucketName,
-      composerSelectedList
+      composerSelectedList,
+      region,
+      projectId
     );
   };
 
@@ -367,7 +376,9 @@ function ListNotebookScheduler({
     await SchedulerService.handleImportErrordataService(
       composerSelectedList,
       setImportErrorData,
-      setImportErrorEntries
+      setImportErrorEntries,
+      projectId,
+      region
     );
   };
 

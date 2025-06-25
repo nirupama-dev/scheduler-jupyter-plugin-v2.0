@@ -623,10 +623,12 @@ export class SchedulerService {
     setDagList: (value: IDagList[]) => void,
     setIsLoading: (value: boolean) => void,
     setBucketName: (value: string) => void,
-    composerSelected: string
+    composerSelected: string,
+    region: string,
+    project: string
   ) => {
     try {
-      const serviceURL = `dagList?composer=${composerSelected}`;
+      const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
       const formattedResponse: any = await requestAPI(serviceURL);
       let transformDagListData = [];
       if (formattedResponse?.length > 0) {
@@ -701,9 +703,11 @@ export class SchedulerService {
   static readonly listDagInfoAPIServiceForCreateNotebook = (
     setDagList: (value: IDagList[]) => void,
     composerSelected: string,
-    setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>
+    setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>,
+    region: string,
+    project: string
   ) => {
-    const serviceURL = `dagList?composer=${composerSelected}`;
+    const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
     requestAPI(serviceURL)
       .then((formattedResponse: any) => {
         let transformDagListData = [];
@@ -772,10 +776,12 @@ export class SchedulerService {
     setDagList: (value: IDagList[]) => void,
     setIsLoading: (value: boolean) => void,
     setBucketName: (value: string) => void,
+    region: string,
+    project: string,
     fromPage?: string | undefined
   ) => {
     try {
-      const serviceURL = `dagDelete?composer=${composerSelected}&dag_id=${dag_id}&from_page=${fromPage}`;
+      const serviceURL = `dagDelete?composer=${composerSelected}&dag_id=${dag_id}&from_page=${fromPage}&project_id=${project}&region_id=${region}`;
       const deleteResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL,
         { method: 'DELETE' }
@@ -785,7 +791,9 @@ export class SchedulerService {
           setDagList,
           setIsLoading,
           setBucketName,
-          composerSelected
+          composerSelected,
+          region,
+          project
         );
         Notification.success(
           `Deleted job ${dag_id}. It might take a few minutes to for it to be deleted from the list of jobs.`,
@@ -812,11 +820,13 @@ export class SchedulerService {
     setDagList: (value: IDagList[]) => void,
     setIsLoading: (value: boolean) => void,
     setBucketName: (value: string) => void,
-    setUpdateLoading: (value: string) => void
+    setUpdateLoading: (value: string) => void,
+    region: string,
+    project: string
   ) => {
     setUpdateLoading(dag_id);
     try {
-      const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}`;
+      const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}&project_id=${project}&region_id=${region}`;
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL,
         { method: 'POST' }
@@ -829,7 +839,9 @@ export class SchedulerService {
           setDagList,
           setIsLoading,
           setBucketName,
-          composerSelected
+          composerSelected,
+          region,
+          project
         );
       } else {
         const errorResponse = `Error in pausing the schedule : ${formattedResponse?.error}`;
@@ -913,11 +925,13 @@ export class SchedulerService {
   static readonly handleImportErrordataService = async (
     composerSelectedList: string,
     setImportErrorData: (value: string[]) => void,
-    setImportErrorEntries: (value: number) => void
+    setImportErrorEntries: (value: number) => void,
+    project: string,
+    region: string
   ) => {
     try {
       const data: any = await requestAPI(
-        `importErrorsList?composer=${composerSelectedList}`
+        `importErrorsList?composer=${composerSelectedList}&project_id=${project}&region_id=${region}`
       );
       setImportErrorData(data?.import_errors);
       setImportErrorEntries(data?.total_entries);
@@ -936,12 +950,13 @@ export class SchedulerService {
     dagId: string,
     composerSelectedList: string,
     setTriggerLoading: (value: string) => void,
+    project: string,
     region: string
   ) => {
     setTriggerLoading(dagId);
     try {
       const data: any = await requestAPI(
-        `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}`,
+        `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
         { method: 'POST' }
       );
       if (data?.error) {
