@@ -439,9 +439,9 @@ class Client:
             self.log.exception(f"Error downloading output notebook file: {str(error)}")
             return {"error": str(error)}
 
-    async def check_required_packages(self, composer_environment_name):
+    async def check_required_packages(self, composer_environment_name, region_id):
         try:
-            res = await self.check_package_in_env(composer_environment_name)
+            res = await self.check_package_in_env(composer_environment_name, region_id)
             return res
         except Exception as e:
             return {"error": str(e)}

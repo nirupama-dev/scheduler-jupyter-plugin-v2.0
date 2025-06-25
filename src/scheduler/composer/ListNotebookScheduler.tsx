@@ -263,7 +263,8 @@ function ListNotebookScheduler({
       await SchedulerService.triggerDagService(
         jobid,
         composerSelectedList,
-        setTriggerLoading
+        setTriggerLoading,
+        region
       );
     }
   };
