@@ -138,7 +138,7 @@ class Client:
             self.log.exception(f"Error uploading file to GCS: {str(error)}")
             raise IOError(str(error))
 
-    def prepare_dag(self, job, gcs_dag_bucket, dag_file):
+    def prepare_dag(self, job, gcs_dag_bucket, dag_file, project_id, region_id):
         self.log.info("Generating dag file")
         DAG_TEMPLATE_CLUSTER_V1 = "pysparkJobTemplate-v1.txt"
         DAG_TEMPLATE_SERVERLESS_V1 = "pysparkBatchTemplate-v1.txt"
@@ -148,8 +148,6 @@ class Client:
             loader=PackageLoader("scheduler_jupyter_plugin", TEMPLATES_FOLDER_PATH),
         )
 
-        gcp_project_id = self.project_id
-        gcp_region_id = self.region_id
         user = gcp_account()
         owner = user.split("@")[0]  # getting username from email
         if job.schedule_value == "":
@@ -182,8 +180,8 @@ class Client:
                 content = template.render(
                     job,
                     inputFilePath=f"gs://{gcs_dag_bucket}/dataproc-notebooks/wrapper_papermill.py",
-                    gcpProjectId=gcp_project_id,
-                    gcpRegion=gcp_region_id,
+                    gcpProjectId=project_id,
+                    gcpRegion=region_id,
                     input_notebook=input_notebook,
                     output_notebook=f"gs://{gcs_dag_bucket}/dataproc-output/{job.name}/output-notebooks/{job.name}_",
                     owner=owner,
@@ -230,8 +228,8 @@ class Client:
                 content = template.render(
                     job,
                     inputFilePath=f"gs://{gcs_dag_bucket}/dataproc-notebooks/wrapper_papermill.py",
-                    gcpProjectId=gcp_project_id,
-                    gcpRegion=gcp_region_id,
+                    gcpProjectId=project_id,
+                    gcpRegion=region_id,
                     input_notebook=input_notebook,
                     output_notebook=f"gs://{gcs_dag_bucket}/dataproc-output/{job.name}/output-notebooks/{job.name}_",
                     owner=owner,
@@ -260,8 +258,8 @@ class Client:
             content = template.render(
                 job,
                 inputFilePath=f"gs://{gcs_dag_bucket}/dataproc-notebooks/wrapper_papermill.py",
-                gcpProjectId=gcp_project_id,
-                gcpRegion=gcp_region_id,
+                gcpProjectId=project_id,
+                gcpRegion=region_id,
                 input_notebook=input_notebook,
                 output_notebook=f"gs://{gcs_dag_bucket}/dataproc-output/{job.name}/output-notebooks/{job.name}_",
                 owner=owner,
@@ -298,6 +296,9 @@ class Client:
                 else:
                     self.log.info(f"{package} is already installed.")
             return packages_to_install
+        except subprocess.CalledProcessError:
+            self.log.exception(f"Error checking packages")
+            raise IOError("Error checking packages")
         except Exception as error:
             self.log.exception(f"Error checking packages: {error}")
             raise IOError(f"Error checking packages: {error}")
@@ -340,7 +341,7 @@ class Client:
         with open(file_path, "w") as f:
             json.dump(payload, f, indent=4)
 
-    async def execute(self, input_data, project_id=None, region_id=None):
+    async def execute(self, input_data, project_id, region_id):
         try:
             job = DescribeJob(**input_data)
             global job_id
@@ -397,7 +398,9 @@ class Client:
                 destination_dir=f"dataproc-notebooks/{job_name}/dag_details",
             )
 
-            file_path = self.prepare_dag(job, gcs_dag_bucket, dag_file)
+            file_path = self.prepare_dag(
+                job, gcs_dag_bucket, dag_file, project_id, region_id
+            )
             await self.upload_to_gcs(
                 gcs_dag_bucket, file_path=file_path, destination_dir="dags"
             )

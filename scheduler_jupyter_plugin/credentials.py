@@ -19,6 +19,7 @@ from google.cloud.jupyter_config.config import (
 
 import logging
 
+
 async def _gcp_credentials():
     """Helper method to get the project configured through gcloud"""
     return await async_get_gcloud_config("credential.access_token")

@@ -24,7 +24,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
-    HTTP_STATUS_NO_CONTENT
+    HTTP_STATUS_NO_CONTENT,
 )
 from scheduler_jupyter_plugin.models.models import (
     DescribeVertexJob,

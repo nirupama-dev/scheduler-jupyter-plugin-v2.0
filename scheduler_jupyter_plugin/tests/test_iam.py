@@ -70,4 +70,3 @@ async def test_list_service_account(monkeypatch, returncode, expected_result, jp
     assert response.code == 200
     payload = json.loads(response.body)
     assert payload == expected_result
-

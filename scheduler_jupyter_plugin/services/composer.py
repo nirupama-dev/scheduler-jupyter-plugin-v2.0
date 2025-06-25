@@ -20,7 +20,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
     HTTP_STATUS_OK,
-    HTTP_STATUS_FORBIDDEN
+    HTTP_STATUS_FORBIDDEN,
 )
 from scheduler_jupyter_plugin.models.models import ComposerEnvironment
 

@@ -16,7 +16,7 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     DATAPROC_SERVICE_NAME,
-    HTTP_STATUS_OK
+    HTTP_STATUS_OK,
 )
 
 
