@@ -85,11 +85,14 @@ class CheckRequiredPackagesController(APIHandler):
     async def get(self):
         try:
             composer_environment_name = self.get_argument("composer_environment_name")
+            region_id = self.get_argument("region_id")
             async with aiohttp.ClientSession() as client_session:
                 client = executor.Client(
                     await credentials.get_cached(), self.log, client_session
                 )
-                result = await client.check_required_packages(composer_environment_name)
+                result = await client.check_required_packages(
+                    composer_environment_name, region_id
+                )
                 self.finish(json.dumps(result))
         except Exception as e:
             self.log.exception(f"Error checking packages: {str(e)}")
