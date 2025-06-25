@@ -99,11 +99,14 @@ class Client:
             self.log.exception(f"Error getting bucket name: {str(e)}")
             raise Exception(f"Error getting composer bucket: {str(e)}")
 
-    async def check_file_exists(self, bucket_name, file_path):
+    async def check_file_exists(self, bucket_name, file_path, project_id):
         try:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
-            bucket = storage.Client().bucket(bucket_name)
+            credentials = oauth2.Credentials(self._access_token)
+            bucket = storage.Client(credentials=credentials, project=project_id).bucket(
+                bucket_name
+            )
             blob = bucket.blob(file_path)
             return blob.exists()
         except Exception as error:
@@ -111,10 +114,16 @@ class Client:
             raise IOError(f"Error creating dag: {error}")
 
     async def upload_to_gcs(
-        self, gcs_dag_bucket, file_path=None, template_name=None, destination_dir=None
+        self,
+        gcs_dag_bucket,
+        project_id,
+        file_path=None,
+        template_name=None,
+        destination_dir=None,
     ):
         try:
-            storage_client = storage.Client()
+            credentials = oauth2.Credentials(self._access_token)
+            storage_client = storage.Client(credentials=credentials, project=project_id)
             bucket = storage_client.bucket(gcs_dag_bucket)
             if template_name:
                 env = Environment(
@@ -357,7 +366,7 @@ class Client:
                 raise RuntimeError(install_packages)
 
             if await self.check_file_exists(
-                gcs_dag_bucket, wrapper_pappermill_file_path
+                gcs_dag_bucket, wrapper_pappermill_file_path, project_id
             ):
                 print(
                     f"The file gs://{gcs_dag_bucket}/{wrapper_pappermill_file_path} exists."
@@ -365,6 +374,7 @@ class Client:
             else:
                 await self.upload_to_gcs(
                     gcs_dag_bucket,
+                    project_id,
                     template_name=WRAPPER_PAPPERMILL_FILE,
                     destination_dir="dataproc-notebooks",
                 )
@@ -375,6 +385,7 @@ class Client:
             if not job.input_filename.startswith(GCS):
                 await self.upload_to_gcs(
                     gcs_dag_bucket,
+                    project_id,
                     file_path=f"./{job.input_filename}",
                     destination_dir=f"dataproc-notebooks/{job_name}/input_notebooks",
                 )
@@ -386,6 +397,7 @@ class Client:
             # uploading payload JSON file to GCS
             await self.upload_to_gcs(
                 gcs_dag_bucket,
+                project_id,
                 file_path=PAYLOAD_JSON_FILE_PATH,
                 destination_dir=f"dataproc-notebooks/{job_name}/dag_details",
             )
@@ -394,7 +406,7 @@ class Client:
                 job, gcs_dag_bucket, dag_file, project_id, region_id
             )
             await self.upload_to_gcs(
-                gcs_dag_bucket, file_path=file_path, destination_dir="dags"
+                gcs_dag_bucket, project_id, file_path=file_path, destination_dir="dags"
             )
             if install_packages.get("installing_packages") == "true":
                 return {"status": 0, "response": "installed python packages"}
