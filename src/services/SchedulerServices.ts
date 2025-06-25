@@ -998,7 +998,7 @@ export class SchedulerService {
     }
   };
 
-  static readonly checkRequiredPackagesInstalled = async (
+  static readonly checkRequiredPackagesInstalled = (
     selectedComposer: string,
     setPackageInstallationMessage: (value: string) => void,
     setPackageInstalledList: (value: string[]) => void,
@@ -1009,34 +1009,34 @@ export class SchedulerService {
     signal: any,
     abortControllerRef: any
   ) => {
-    try {
       setPackageInstallationMessage(
         'Checking if required packages are installed...'
       );
-      const installedPackageList: any = await requestAPI(
+      requestAPI(
         `checkRequiredPackages?composer_environment_name=${selectedComposer}`,
         { signal }
-      );
-
-      if (installedPackageList.length > 0) {
+      ).then((installedPackageList: any) => {
+if (installedPackageList.length > 0) {
         setPackageInstallationMessage(
           installedPackageList.join(', ') +
             ' packages will get installed on creation of schedule'
         );
         setPackageInstalledList(installedPackageList);
         setPackageListFlag(false);
+        setCheckRequiredPackagesInstalledFlag(true);
       } else if (Object.hasOwn(installedPackageList, 'error')) {
         setPackageInstallationMessage('');
         setapiErrorMessage(installedPackageList.error);
+        setCheckRequiredPackagesInstalledFlag(false);
       } else {
         setPackageInstallationMessage('');
         setPackageInstalledList([]);
         setPackageListFlag(true);
+        setCheckRequiredPackagesInstalledFlag(true);
       }
 
-      setCheckRequiredPackagesInstalledFlag(true);
       setDisableEnvLocal(false);
-    } catch (reason) {
+      }).catch ((reason) => {
       if (typeof reason === 'object' && reason !== null) {
         if (reason instanceof TypeError) {
           return;
@@ -1047,8 +1047,8 @@ export class SchedulerService {
           error: errorResponse
         });
       }
-    } finally {
+    }).finally(() => {
       abortControllerRef.current = null; // Clear the AbortController
-    }
+    });
   };
 }
