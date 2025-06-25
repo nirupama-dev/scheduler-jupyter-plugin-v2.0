@@ -354,7 +354,7 @@ class Client:
                     region_id,
                 )
             if install_packages and install_packages.get("error"):
-                raise Exception(install_packages)
+                raise RuntimeError(install_packages)
 
             if await self.check_file_exists(
                 gcs_dag_bucket, wrapper_pappermill_file_path
