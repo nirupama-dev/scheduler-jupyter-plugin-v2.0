@@ -20,6 +20,7 @@ import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { useRegion } from '../services/RegionService';
 import { CircularProgress, Paper, PaperProps } from '@mui/material';
+import { VERTEX_SCHEDULE } from '../utils/Const';
 
 type Props = {
   /** The currently selected project ID */
@@ -30,11 +31,13 @@ type Props = {
   onRegionChange: (projectId: string) => void;
   /** Edit page */
   editMode?: boolean;
-  /** Initial loading flag for region */
-  loaderRegion?: boolean;
   /** List of Regions */
   regionsList?: Array<string>;
   regionDisable?: boolean;
+  fromPage?: string;
+  /** Initial loading flag for region */
+  loaderRegion?: boolean;
+  setLoaderRegion?: (value: boolean) => void;
 };
 
 /**
@@ -46,14 +49,16 @@ export function RegionDropdown(props: Props) {
     region,
     onRegionChange,
     editMode,
-    loaderRegion,
     regionsList,
-    regionDisable
+    regionDisable,
+    fromPage,
+    loaderRegion,
+    setLoaderRegion
   } = props;
   let regionStrList: string[] = [];
 
   if (!regionsList) {
-    const regions = useRegion(projectId);
+    const regions = useRegion(projectId, setLoaderRegion);
 
     regionStrList = useMemo(
       () => regions.map(region => region.name),
@@ -77,7 +82,8 @@ export function RegionDropdown(props: Props) {
             ...params.InputProps,
             endAdornment: (
               <>
-                {loaderRegion && !region ? (
+                {(loaderRegion && fromPage !== VERTEX_SCHEDULE && !region) ||
+                (fromPage === VERTEX_SCHEDULE && loaderRegion && !region) ? (
                   <CircularProgress
                     aria-label="Loading Spinner"
                     data-testid="loader"
@@ -92,7 +98,7 @@ export function RegionDropdown(props: Props) {
       )}
       loading={regionStrList.length <= 0}
       disabled={editMode || regionDisable}
-      disableClearable={loaderRegion && !region}
+      disableClearable={!region}
     />
   );
 }

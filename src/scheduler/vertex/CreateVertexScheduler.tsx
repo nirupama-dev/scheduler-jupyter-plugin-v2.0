@@ -56,7 +56,8 @@ import {
   scheduleMode,
   scheduleValueExpression,
   SHARED_NETWORK_DOC_URL,
-  VERTEX_REGIONS
+  VERTEX_REGIONS,
+  VERTEX_SCHEDULE
 } from '../../utils/Const';
 import LearnMore from '../common/LearnMore';
 import ErrorMessage from '../common/ErrorMessage';
@@ -1001,8 +1002,9 @@ const CreateVertexScheduler = ({
               region={region}
               onRegionChange={region => handleRegionChange(region)}
               editMode={editMode}
-              loaderRegion={loaderRegion}
               regionsList={VERTEX_REGIONS}
+              fromPage={VERTEX_SCHEDULE}
+              loaderRegion={loaderRegion}
             />
           </div>
           {!region && (

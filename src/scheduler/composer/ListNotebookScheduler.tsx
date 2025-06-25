@@ -177,6 +177,7 @@ function ListNotebookScheduler({
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
   const [triggerLoading, setTriggerLoading] = useState('');
   const [updateLoading, setUpdateLoading] = useState('');
+  const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
 
   const columns = React.useMemo(
     () => [
@@ -614,6 +615,16 @@ function ListNotebookScheduler({
   }, [inputNotebookFilePath]);
 
   useEffect(() => {
+    setLoaderProjectId(true);
+    setLoaderRegion(true);
+    authApi().then(credentials => {
+      if (credentials?.project_id && credentials?.region_id) {
+        setLoaderProjectId(false);
+        setLoaderRegion(false);
+        setProjectId(credentials.project_id);
+        setRegion(credentials.region_id);
+      }
+    });
     checkGCSPluginAvailability();
     const loadComposerListAndSelectFirst = async () => {
       await listComposersAPI();
@@ -667,14 +678,6 @@ function ListNotebookScheduler({
   }, [composerSelectedList]);
 
   useEffect(() => {
-    setLoaderProjectId(true);
-    authApi().then(credentials => {
-      if (credentials?.project_id && credentials?.region_id) {
-        setLoaderProjectId(false);
-        setProjectId(credentials.project_id);
-        setRegion(credentials.region_id);
-      }
-    });
     if (!projectId) {
       setRegion('');
       setComposerList([]);
@@ -742,6 +745,8 @@ function ListNotebookScheduler({
                 projectId={projectId}
                 region={region}
                 onRegionChange={region => handleRegionChange(region)}
+                loaderRegion={loaderRegion}
+                setLoaderRegion={setLoaderRegion}
               />
             </div>
             {!region && (
