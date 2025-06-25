@@ -109,7 +109,7 @@ const CreateNotebookScheduler = ({
   setApiEnableUrl: any;
 }): JSX.Element => {
   const [composerList, setComposerList] = useState<string[]>([]);
-  const [composerSelected, setComposerSelected] = useState<string>('');
+  const [composerEnvSelected, setComposerEnvSelected] = useState<string>('');
 
   const [parameterDetail, setParameterDetail] = useState(['']);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState(['']);
@@ -192,26 +192,28 @@ const CreateNotebookScheduler = ({
     );
   };
 
-  const handleComposerSelected = async (data: string | null) => {
+  const handleComposerEnvSelected = (data: string | null) => {
     setPackageListFlag(false);
     setPackageInstalledList([]);
     setapiErrorMessage('');
+    setCheckRequiredPackagesInstalledFlag(false);
+    setPackageInstallationMessage('');
 
     abortControllerRef.current = new AbortController();
     const signal = abortControllerRef.current.signal;
 
     if (data) {
       const selectedComposer = data.toString();
-      setComposerSelected(selectedComposer);
+      setComposerEnvSelected(selectedComposer);
       if (selectedComposer) {
-        const unique = await getDaglist(selectedComposer);
+        const unique = getDaglist(selectedComposer);
         if (!unique) {
           setJobNameUniqueValidation(true);
         }
 
         if (isLocalKernel) {
           setDisableEnvLocal(true);
-          await SchedulerService.checkRequiredPackagesInstalled(
+          SchedulerService.checkRequiredPackagesInstalled(
             selectedComposer,
             setPackageInstallationMessage,
             setPackageInstalledList,
@@ -227,10 +229,11 @@ const CreateNotebookScheduler = ({
       }
     }
   };
-  const getDaglist = async (composer: string) => {
+
+  const getDaglist = (composer: string) => {
     setDagListCall(true);
     try {
-      await SchedulerService.listDagInfoAPIServiceForCreateNotebook(
+      SchedulerService.listDagInfoAPIServiceForCreateNotebook(
         setDagList,
         composer
       );
@@ -349,7 +352,7 @@ const CreateNotebookScheduler = ({
     const randomDagId = uuidv4();
     const payload = {
       input_filename: inputFileSelected,
-      composer_environment_name: composerSelected,
+      composer_environment_name: composerEnvSelected,
       output_formats: outputFormats,
       parameters: parameterDetailUpdated,
       local_kernel: isLocalKernel,
@@ -401,7 +404,10 @@ const CreateNotebookScheduler = ({
       emailError ||
       dagListCall ||
       creatingScheduler ||
-      (!checkRequiredPackagesInstalledFlag && isLocalKernel) ||
+      (isLocalKernel &&
+        (!checkRequiredPackagesInstalledFlag || // Not checked or failed
+          (packageListFlag === false && !packageInstalledList.length) || // API in progress or not called
+          !!apiErrorMessage)) || // There is an error message
       jobNameSelected === '' ||
       (!jobNameValidation && !editMode) ||
       (jobNameSpecialValidation && !editMode) ||
@@ -414,7 +420,7 @@ const CreateNotebookScheduler = ({
             item.split(':')[1]?.length === 0) ||
           (item.split(':')[0]?.length === 0 && item.split(':')[1]?.length > 0)
       ) ||
-      composerSelected === '' ||
+      composerEnvSelected === '' ||
       (selectedMode === 'cluster' &&
         clusterSelected === '' &&
         !isLocalKernel) ||
@@ -510,7 +516,7 @@ const CreateNotebookScheduler = ({
 
     if (!region) {
       setComposerList([]);
-      setComposerSelected('');
+      setComposerEnvSelected('');
       setapiErrorMessage('');
       setPackageInstallationMessage('');
       setPackageListFlag(false);
@@ -518,13 +524,13 @@ const CreateNotebookScheduler = ({
   }, [projectId, region]);
 
   useEffect(() => {
-    if (composerSelected !== '' && dagList.length > 0) {
+    if (composerEnvSelected !== '' && dagList.length > 0) {
       const isUnique = !dagList.some(
         dag => dag.notebookname === jobNameSelected
       );
       setJobNameUniqueValidation(isUnique);
     }
-  }, [dagList, jobNameSelected, composerSelected]);
+  }, [dagList, jobNameSelected, composerEnvSelected]);
 
   useEffect(() => {
     if (context !== '') {
@@ -545,6 +551,11 @@ const CreateNotebookScheduler = ({
    * @param {string} value selected region
    */
   const handleRegionChange = (value: React.SetStateAction<string>) => {
+    setPackageInstalledList([]);
+    setapiErrorMessage('');
+    setPackageInstallationMessage('');
+    setComposerEnvSelected('');
+    setPackageListFlag(false);
     setRegion(value);
   };
 
@@ -561,7 +572,7 @@ const CreateNotebookScheduler = ({
     });
     if (!projectId) {
       setRegion('');
-      setComposerSelected('');
+      setComposerEnvSelected('');
       setComposerList([]);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
@@ -570,7 +581,7 @@ const CreateNotebookScheduler = ({
   }, [projectId]);
 
   useEffect(() => {
-    const checkRequiredPackageApiService = async () => {
+    const checkRequiredPackageApiService = () => {
       setPackageListFlag(false);
       setPackageInstalledList([]);
       setapiErrorMessage('');
@@ -578,8 +589,8 @@ const CreateNotebookScheduler = ({
       abortControllerRef.current = new AbortController();
       const signal = abortControllerRef.current.signal;
 
-      await SchedulerService.checkRequiredPackagesInstalled(
-        composerSelected,
+      SchedulerService.checkRequiredPackagesInstalled(
+        composerEnvSelected,
         setPackageInstallationMessage,
         setPackageInstalledList,
         setPackageListFlag,
@@ -606,7 +617,7 @@ const CreateNotebookScheduler = ({
           settingRegistry={settingRegistry}
           setCreateCompleted={setCreateCompleted}
           setJobNameSelected={setJobNameSelected}
-          setComposerSelected={setComposerSelected}
+          setComposerSelected={setComposerEnvSelected}
           setScheduleMode={setScheduleMode}
           setScheduleValue={setScheduleValue}
           setInputFileSelected={setInputFileSelected}
@@ -635,7 +646,7 @@ const CreateNotebookScheduler = ({
           setIsLocalKernel={setIsLocalKernel}
           setPackageEditFlag={setPackageEditFlag}
           setSchedulerBtnDisable={setSchedulerBtnDisable}
-          composerSelected={composerSelected}
+          composerSelected={composerEnvSelected}
           setApiEnableUrl={setApiEnableUrl}
         />
       ) : (
@@ -678,8 +689,8 @@ const CreateNotebookScheduler = ({
               <Autocomplete
                 className="create-scheduler-style"
                 options={composerList}
-                value={composerSelected}
-                onChange={(_event, val) => handleComposerSelected(val)}
+                value={composerEnvSelected}
+                onChange={(_event, val) => handleComposerEnvSelected(val)}
                 renderInput={params => (
                   <TextField
                     {...params}
@@ -703,9 +714,10 @@ const CreateNotebookScheduler = ({
                 )}
                 disabled={editMode || disableEnvLocal || envApiFlag}
                 disableClearable={!projectId || !region}
+                clearIcon={false}
               />
             </div>
-            {!composerSelected && (
+            {!composerEnvSelected && (
               <ErrorMessage message="Environment is required field" />
             )}
             {apiErrorMessage && isLocalKernel && (
