@@ -219,6 +219,7 @@ const CreateNotebookScheduler = ({
             setapiErrorMessage,
             setCheckRequiredPackagesInstalledFlag,
             setDisableEnvLocal,
+            region,
             signal,
             abortControllerRef
           );
@@ -585,6 +586,7 @@ const CreateNotebookScheduler = ({
         setapiErrorMessage,
         setCheckRequiredPackagesInstalledFlag,
         setDisableEnvLocal,
+        region,
         signal,
         abortControllerRef
       );
