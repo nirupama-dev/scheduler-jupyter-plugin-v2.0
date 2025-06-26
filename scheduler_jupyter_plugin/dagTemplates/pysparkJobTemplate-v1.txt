@@ -24,7 +24,7 @@ default_args = {
     'start_date': '{{start_date}}',
     'retries': '{{retry_count}}',
     'retry_delay': timedelta(minutes=int('{{retry_delay}}')), 
-    'email': {{email | safe}},  # Should be a list, e.g., ['user@example.com']
+    'email': {{email | safe}},
     'email_on_failure': {{email_failure}},     
     'email_on_retry': {{email_delay}},     
     'email_on_success': {{email_success}}
