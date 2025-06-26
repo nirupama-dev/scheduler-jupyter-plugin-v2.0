@@ -140,3 +140,5 @@ export const HTTP_STATUS_BAD_REQUEST = 400;
 export const HTTP_STATUS_NOT_FOUND = 404;
 
 export const VERTEX_SCHEDULE = 'vertex';
+
+export const ABORT_MESSAGE = 'signal is aborted without reason';

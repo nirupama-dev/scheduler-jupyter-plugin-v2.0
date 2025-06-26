@@ -19,6 +19,7 @@ import { requestAPI } from '../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import { JupyterLab } from '@jupyterlab/application';
 import {
+  ABORT_MESSAGE,
   HTTP_STATUS_BAD_REQUEST,
   HTTP_STATUS_FORBIDDEN,
   pattern,
@@ -243,6 +244,7 @@ export class SchedulerService {
       handleErrorToast({
         error: errorResponse
       });
+
       setEnvApiFlag(false);
     }
   };
@@ -627,11 +629,17 @@ export class SchedulerService {
     setBucketName: (value: string) => void,
     composerSelected: string,
     region: string,
-    project: string
+    project: string,
+    abortControllers?: any
   ) => {
     try {
+      // setting controller to abort pending api call
+      const controller = new AbortController();
+      abortControllers.current.push(controller);
+      const signal = controller.signal;
+
       const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
-      const formattedResponse: any = await requestAPI(serviceURL);
+      const formattedResponse: any = await requestAPI(serviceURL, { signal });
       let transformDagListData = [];
       if (formattedResponse?.length > 0) {
         transformDagListData = formattedResponse[0]?.dags?.map(
@@ -689,16 +697,26 @@ export class SchedulerService {
       setIsLoading(false);
       setBucketName(formattedResponse[1]);
     } catch (error) {
+      console.log('error', error);
       setIsLoading(false);
-      SchedulerLoggingService.log(
-        'Error listing dag Scheduler list',
-        LOG_LEVEL.ERROR
-      );
-      if (!toast.isActive('dagListError')) {
-        toast.error(`Failed to fetch schedule list : ${error}`, {
-          ...toastifyCustomStyle,
-          toastId: 'dagListError'
-        });
+      if (typeof error === 'object' && error !== null) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          'Error listing dag Scheduler list',
+          LOG_LEVEL.ERROR
+        );
+        if (!toast.isActive('dagListError')) {
+          toast.error(`Failed to fetch schedule list : ${error}`, {
+            ...toastifyCustomStyle,
+            toastId: 'dagListError'
+          });
+        }
       }
     }
   };

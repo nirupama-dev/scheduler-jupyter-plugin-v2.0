@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { SchedulerWidget } from '../../controls/SchedulerWidget';
 import { JupyterLab } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
@@ -62,7 +62,7 @@ const NotebookJobComponent = ({
   setApiEnableUrl,
   regionSelected,
   projectSelected,
-  createMode,
+  createMode
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -110,6 +110,7 @@ const NotebookJobComponent = ({
   const [bucketName, setBucketName] = useState('');
   const [dagId, setDagId] = useState('');
   const [backComposerName, setBackComposerName] = useState('');
+  const abortControllers = useRef<any>([]); // Array of API signals to abort
 
   const handleDagIdSelection = (composerName: string, dagId: string) => {
     setShowExecutionHistory(true);
@@ -121,6 +122,14 @@ const NotebookJobComponent = ({
     setShowExecutionHistory(false);
     setBackComposerName(composerName);
     setExecutionPageFlag(true);
+  };
+
+  /**
+   * Abort Api calls while moving away from page.
+   */
+  const abortApiCall = () => {
+    abortControllers.current.forEach((controller: any) => controller.abort());
+    abortControllers.current = [];
   };
 
   return (
@@ -179,6 +188,8 @@ const NotebookJobComponent = ({
                 regionSelected={regionSelected}
                 projectSelected={projectSelected}
                 createMode={createMode}
+                abortControllers={abortControllers}
+                abortApiCall={abortApiCall}
               />
             }
           </div>
@@ -215,7 +226,7 @@ export class NotebookJobs extends SchedulerWidget {
     setApiEnableUrl: any,
     regionSelected: string,
     projectSelected: string,
-    createMode: boolean,
+    createMode: boolean
   ) {
     super(themeManager);
     this.app = app;
