@@ -697,6 +697,8 @@ function ListNotebookScheduler({
       setRegion('');
       setComposerList([]);
       setComposerSelectedList('');
+      setImportErrorData([]);
+      setImportErrorEntries(0);
     }
   }, [projectId]);
 
@@ -704,6 +706,8 @@ function ListNotebookScheduler({
     if (!region) {
       setComposerList([]);
       setComposerSelectedList('');
+      setImportErrorData([]);
+      setImportErrorEntries(0);
     } else {
       if (composerSelected) {
         setComposerSelectedList(composerSelected);
