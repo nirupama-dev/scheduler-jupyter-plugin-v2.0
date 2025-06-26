@@ -32,6 +32,7 @@ import {
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
 import {
+  ABORT_MESSAGE,
   DEFAULT_TIME_ZONE,
   HTTP_STATUS_FORBIDDEN,
   pattern
@@ -325,7 +326,10 @@ export class VertexServices {
     } catch (error) {
       setResumeLoading('');
       if (typeof error === 'object' && error !== null) {
-        if (error instanceof TypeError) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -382,7 +386,10 @@ export class VertexServices {
     } catch (error) {
       setResumeLoading('');
       if (typeof error === 'object' && error !== null) {
-        if (error instanceof TypeError) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -432,7 +439,10 @@ export class VertexServices {
     } catch (reason) {
       setTriggerLoading('');
       if (typeof reason === 'object' && reason !== null) {
-        if (reason instanceof TypeError) {
+        if (
+          reason instanceof TypeError &&
+          reason.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -706,7 +716,10 @@ export class VertexServices {
     } catch (reason) {
       setEditScheduleLoading('');
       if (typeof reason === 'object' && reason !== null) {
-        if (reason instanceof TypeError) {
+        if (
+          reason instanceof TypeError &&
+          reason.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -849,7 +862,10 @@ export class VertexServices {
       setVertexScheduleRunsList(transformDagRunListDataCurrent);
     } catch (error) {
       if (typeof error === 'object' && error !== null) {
-        if (error instanceof TypeError) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -889,7 +905,10 @@ export class VertexServices {
       setIsLoading(false);
     } catch (lastRunError: any) {
       if (typeof lastRunError === 'object' && lastRunError !== null) {
-        if (lastRunError instanceof TypeError) {
+        if (
+          lastRunError instanceof TypeError &&
+          lastRunError.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {

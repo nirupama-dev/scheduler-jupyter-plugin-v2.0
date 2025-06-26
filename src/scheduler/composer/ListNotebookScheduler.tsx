@@ -115,7 +115,9 @@ function ListNotebookScheduler({
   setApiEnableUrl,
   regionSelected,
   projectSelected,
-  createMode
+  createMode,
+  abortControllers,
+  abortApiCall
 }: {
   app: JupyterFrontEnd;
   settingRegistry: ISettingRegistry;
@@ -159,6 +161,8 @@ function ListNotebookScheduler({
   regionSelected: string;
   projectSelected: string;
   createMode: boolean;
+  abortControllers: any;
+  abortApiCall: () => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [composerList, setComposerList] = useState<string[]>([]);
@@ -369,7 +373,8 @@ function ListNotebookScheduler({
       setBucketName,
       composerSelectedList,
       region,
-      projectId
+      projectId,
+      abortControllers
     );
   };
 
@@ -611,6 +616,7 @@ function ListNotebookScheduler({
    * @param {string} value selected region
    */
   const handleRegionChange = (value: React.SetStateAction<string>) => {
+    abortApiCall();
     setRegion(value);
     if (setComposerSelected) {
       setComposerSelected('');
@@ -725,9 +731,10 @@ function ListNotebookScheduler({
             >
               <DynamicDropdown
                 value={projectId}
-                onChange={(_, projectId: string | null) =>
-                  setProjectId(projectId ?? '')
-                }
+                onChange={(_, projectId: string | null) => {
+                  abortApiCall();
+                  setProjectId(projectId ?? '');
+                }}
                 fetchFunc={projectListAPI}
                 label="Project ID*"
                 // Always show the clear indicator and hide the dropdown arrow
@@ -793,7 +800,7 @@ function ListNotebookScheduler({
           </div>
         </div>
 
-        {importErrorEntries > 0 && (
+        {importErrorEntries > 0 && projectId && region && (
           <div className="import-error-parent">
             <div
               className="accordion-button"

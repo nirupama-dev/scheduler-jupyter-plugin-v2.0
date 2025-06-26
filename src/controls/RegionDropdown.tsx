@@ -96,7 +96,6 @@ export function RegionDropdown(props: Props) {
           }}
         />
       )}
-      loading={regionStrList.length <= 0}
       disabled={editMode || regionDisable}
       disableClearable={!region}
     />
