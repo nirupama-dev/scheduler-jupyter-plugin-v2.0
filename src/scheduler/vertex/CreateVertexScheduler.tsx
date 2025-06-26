@@ -817,9 +817,9 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     setLoaderRegion(true);
-    if (region !== '') {
-      machineTypeAPI();
-    }
+    // if (region !== '') {
+    //   machineTypeAPI();
+    // }
     if (Object.keys(hostProject).length > 0) {
       sharedNetworkAPI();
     }
@@ -907,6 +907,7 @@ const CreateVertexScheduler = ({
   useEffect(() => {
     if (!region) {
       setMachineTypeList([]);
+      setMachineTypeSelected(null);
     } else {
       machineTypeAPI();
       if (!createCompleted) {
@@ -956,9 +957,12 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     const machineTypeOptions = machineTypeList.map(item => item.machineType);
-    setMachineTypeSelected(
-      machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) || null
-    );
+    if (region) {
+      setMachineTypeSelected(
+        machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) ||
+          null
+      );
+    }
   }, [machineTypeList]);
 
   useEffect(() => {
