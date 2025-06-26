@@ -59,7 +59,10 @@ const NotebookJobComponent = ({
   setPackageEditFlag,
   setSchedulerBtnDisable,
   composerSelected,
-  setApiEnableUrl
+  setApiEnableUrl,
+  regionSelected,
+  projectSelected,
+  createMode,
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -98,6 +101,9 @@ const NotebookJobComponent = ({
   setSchedulerBtnDisable: (value: boolean) => void;
   composerSelected?: string;
   setApiEnableUrl: any;
+  regionSelected: string;
+  projectSelected: string;
+  createMode: boolean;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] = useState(false);
   const [composerName, setComposerName] = useState('');
@@ -170,6 +176,9 @@ const NotebookJobComponent = ({
                 setSchedulerBtnDisable={setSchedulerBtnDisable}
                 composerSelected={composerSelected}
                 setApiEnableUrl={setApiEnableUrl}
+                regionSelected={regionSelected}
+                projectSelected={projectSelected}
+                createMode={createMode}
               />
             }
           </div>
@@ -189,6 +198,9 @@ export class NotebookJobs extends SchedulerWidget {
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   setApiEnableUrl: any;
+  regionSelected: string;
+  projectSelected: string;
+  createMode: boolean;
 
   constructor(
     app: JupyterLab,
@@ -200,7 +212,10 @@ export class NotebookJobs extends SchedulerWidget {
     setIsLocalKernel: (value: boolean) => void,
     setPackageEditFlag: (value: boolean) => void,
     setSchedulerBtnDisable: (value: boolean) => void,
-    setApiEnableUrl: any
+    setApiEnableUrl: any,
+    regionSelected: string,
+    projectSelected: string,
+    createMode: boolean,
   ) {
     super(themeManager);
     this.app = app;
@@ -212,6 +227,9 @@ export class NotebookJobs extends SchedulerWidget {
     this.setPackageEditFlag = setPackageEditFlag;
     this.setSchedulerBtnDisable = setSchedulerBtnDisable;
     this.setApiEnableUrl = setApiEnableUrl;
+    this.regionSelected = regionSelected;
+    this.projectSelected = projectSelected;
+    this.createMode = createMode;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -226,6 +244,9 @@ export class NotebookJobs extends SchedulerWidget {
         setPackageEditFlag={this.setPackageEditFlag}
         setSchedulerBtnDisable={this.setSchedulerBtnDisable}
         setApiEnableUrl={this.setApiEnableUrl}
+        regionSelected={this.regionSelected}
+        projectSelected={this.projectSelected}
+        createMode={this.createMode}
       />
     );
   }

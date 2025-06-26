@@ -112,7 +112,10 @@ function ListNotebookScheduler({
   setPackageEditFlag,
   setSchedulerBtnDisable,
   composerSelected,
-  setApiEnableUrl
+  setApiEnableUrl,
+  regionSelected,
+  projectSelected,
+  createMode,
 }: {
   app: JupyterFrontEnd;
   settingRegistry: ISettingRegistry;
@@ -153,6 +156,9 @@ function ListNotebookScheduler({
   setSchedulerBtnDisable: (value: boolean) => void;
   composerSelected?: string;
   setApiEnableUrl: any;
+  regionSelected: string;
+  projectSelected: string;
+  createMode: boolean;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [composerList, setComposerList] = useState<string[]>([]);
@@ -606,6 +612,9 @@ function ListNotebookScheduler({
    */
   const handleRegionChange = (value: React.SetStateAction<string>) => {
     setRegion(value);
+    if (setComposerSelected) {
+      setComposerSelected('');
+    }
   };
 
   useEffect(() => {
@@ -621,8 +630,8 @@ function ListNotebookScheduler({
       if (credentials?.project_id && credentials?.region_id) {
         setLoaderProjectId(false);
         setLoaderRegion(false);
-        setProjectId(credentials.project_id);
-        setRegion(credentials.region_id);
+        setProjectId(createMode ? projectSelected : credentials.project_id);
+        setRegion(createMode ? regionSelected : credentials.region_id);
       }
     });
     checkGCSPluginAvailability();

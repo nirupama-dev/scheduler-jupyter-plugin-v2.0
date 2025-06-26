@@ -256,7 +256,8 @@ export class SchedulerService {
     region: string,
     selectedMode: string,
     packageInstalledList: string[],
-    setPackageEditFlag: (value: boolean) => void
+    setPackageEditFlag: (value: boolean) => void,
+    setCreateMode: (value: boolean) => void
   ) => {
     setCreatingScheduler(true);
     try {
@@ -301,6 +302,7 @@ export class SchedulerService {
         }
         setCreatingScheduler(false);
         setCreateCompleted(true);
+        setCreateMode(true);
       }
     } catch (reason) {
       setCreatingScheduler(false);
