@@ -615,12 +615,25 @@ function ListNotebookScheduler({
   };
 
   /**
-   * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
+   * Changing the region value and empyting the value of environemnt
    * @param {string} value selected region
    */
   const handleRegionChange = (value: React.SetStateAction<string>) => {
     abortApiCall();
     setRegion(value);
+    if (setComposerSelected) {
+      setComposerSelected('');
+    }
+  };
+
+  /**
+   * Changing the project value and empyting the value of region and environment
+   * @param {string} value selected project name
+   */
+  const handleProjectIdChange = (projectId: string | null) => {
+    abortApiCall();
+    setProjectId(projectId ?? '');
+    setRegion('');
     if (setComposerSelected) {
       setComposerSelected('');
     }
@@ -735,8 +748,7 @@ function ListNotebookScheduler({
               <DynamicDropdown
                 value={projectId}
                 onChange={(_, projectId: string | null) => {
-                  abortApiCall();
-                  setProjectId(projectId ?? '');
+                  handleProjectIdChange(projectId);
                 }}
                 fetchFunc={projectListAPI}
                 label="Project ID*"
