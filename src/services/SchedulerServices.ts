@@ -697,7 +697,6 @@ export class SchedulerService {
       setIsLoading(false);
       setBucketName(formattedResponse[1]);
     } catch (error) {
-      console.log('error', error);
       setIsLoading(false);
       if (typeof error === 'object' && error !== null) {
         if (
