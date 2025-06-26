@@ -168,6 +168,7 @@ const CreateNotebookScheduler = ({
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
+  const [createMode, setCreateMode] = useState<boolean>(false);
 
   const listClustersAPI = async () => {
     await SchedulerService.listClustersAPIService(
@@ -401,7 +402,8 @@ const CreateNotebookScheduler = ({
       region,
       selectedMode,
       packageInstalledList,
-      setPackageEditFlag
+      setPackageEditFlag,
+      setCreateMode
     );
     setEditMode(false);
   };
@@ -659,6 +661,9 @@ const CreateNotebookScheduler = ({
           setSchedulerBtnDisable={setSchedulerBtnDisable}
           composerSelected={composerEnvSelected}
           setApiEnableUrl={setApiEnableUrl}
+          regionSelected={region}
+          projectSelected={projectId}
+          createMode={createMode}
         />
       ) : (
         <div>
