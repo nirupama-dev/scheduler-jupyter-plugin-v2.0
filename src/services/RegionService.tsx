@@ -63,7 +63,9 @@ export function useRegion(
   const currentRegion = useRef(projectId);
 
   useEffect(() => {
-    if (setLoaderRegion && projectId) setLoaderRegion(true);
+    if (setLoaderRegion && projectId) {
+      setLoaderRegion(true);
+    }
     currentRegion.current = projectId;
     authApi()
       .then(credentials => regionListAPI(projectId, credentials))
@@ -74,10 +76,14 @@ export function useRegion(
           return;
         }
         setRegions(items);
-        if (setLoaderRegion) setLoaderRegion(false);
+        if (setLoaderRegion) {
+          setLoaderRegion(false);
+        }
       })
       .catch(error => {
-        if (setLoaderRegion) setLoaderRegion(false);
+        if (setLoaderRegion) {
+          setLoaderRegion(false);
+        }
         console.error(error);
         handleErrorToast({
           error: error.message
