@@ -192,8 +192,8 @@ const CreateNotebookScheduler = ({
       region,
       setIsApiError,
       setApiError,
-      setEnvApiFlag,
-      setApiEnableUrl
+      setApiEnableUrl,
+      setEnvApiFlag
     );
   };
 
