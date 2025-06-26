@@ -355,6 +355,7 @@ function ListNotebookScheduler({
   };
 
   const listComposersAPI = async () => {
+    setIsLoading(true);
     await SchedulerService.listComposersAPIService(
       setComposerList,
       projectId,
