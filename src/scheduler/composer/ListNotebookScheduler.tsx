@@ -362,7 +362,9 @@ function ListNotebookScheduler({
       setIsApiError,
       setApiError,
       setApiEnableUrl,
-      setIsLoading
+      setIsLoading,
+      true,
+      abortControllers
     );
   };
 
@@ -390,7 +392,8 @@ function ListNotebookScheduler({
       setImportErrorData,
       setImportErrorEntries,
       projectId,
-      region
+      region,
+      abortControllers
     );
   };
 

@@ -169,21 +169,40 @@ export class SchedulerService {
       });
     }
   };
+
   static readonly listComposersAPIService = async (
     setComposerList: (value: string[]) => void,
     projectId: string,
     region: string,
     setIsApiError: (value: boolean) => void,
     setApiError: (value: string) => void,
-    setEnvApiFlag: (value: boolean) => void,
     setApiEnableUrl: any,
-    setIsLoading?: (value: boolean) => void
+    setIsLoading?: (value: boolean) => void,
+    enableAbort?: boolean | undefined | null,
+    abortControllers?: any,
+    setEnvApiFlag?: (value: boolean) => void
   ) => {
-    setEnvApiFlag(true);
+    if (setEnvApiFlag) {
+      setEnvApiFlag(true);
+    }
+
     try {
-      const formattedResponse: any = await requestAPI(
-        `composerList?project_id=${projectId}&region_id=${region}`
-      );
+      let formattedResponse: any;
+      if (enableAbort) {
+        // setting controller to abort pending api call
+        const controller = new AbortController();
+        abortControllers.current.push(controller);
+        const signal = controller.signal;
+        formattedResponse = await requestAPI(
+          `composerList?project_id=${projectId}&region_id=${region}`,
+          { signal }
+        );
+      } else {
+        formattedResponse = await requestAPI(
+          `composerList?project_id=${projectId}&region_id=${region}`
+        );
+      }
+
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
         setComposerList([]);
@@ -196,7 +215,9 @@ export class SchedulerService {
         if (setIsLoading) {
           setIsLoading(false);
         }
-        setEnvApiFlag(false);
+        if (setEnvApiFlag) {
+          setEnvApiFlag(false);
+        }
       } else if (formattedResponse.length === undefined) {
         try {
           setComposerList([]);
@@ -223,7 +244,9 @@ export class SchedulerService {
             }
           );
         }
-        setEnvApiFlag(false);
+        if (setEnvApiFlag) {
+          setEnvApiFlag(false);
+        }
       } else {
         setIsApiError(false);
         setApiError('');
@@ -233,19 +256,33 @@ export class SchedulerService {
         });
         composerEnvironmentList.sort();
         setComposerList(composerEnvironmentList);
-        setEnvApiFlag(false);
+
+        if (setEnvApiFlag) {
+          setEnvApiFlag(false);
+        }
       }
     } catch (error) {
-      SchedulerLoggingService.log(
-        'Error listing composer environment list',
-        LOG_LEVEL.ERROR
-      );
-      const errorResponse = `Failed to fetch composer environment list : ${error}`;
-      handleErrorToast({
-        error: errorResponse
-      });
+      if (typeof error === 'object' && error !== null) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          'Error listing composer environment list',
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to fetch composer environment list : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
 
-      setEnvApiFlag(false);
+        if (setEnvApiFlag) {
+          setEnvApiFlag(false);
+        }
+      }
     }
   };
   static readonly createJobSchedulerService = async (
@@ -946,21 +983,37 @@ export class SchedulerService {
     setImportErrorData: (value: string[]) => void,
     setImportErrorEntries: (value: number) => void,
     project: string,
-    region: string
+    region: string,
+    abortControllers: any
   ) => {
+    // setting controller to abort pending api call
+    const controller = new AbortController();
+    abortControllers.current.push(controller);
+    const signal = controller.signal;
+
     try {
       const data: any = await requestAPI(
-        `importErrorsList?composer=${composerSelectedList}&project_id=${project}&region_id=${region}`
+        `importErrorsList?composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
+        { signal }
       );
       setImportErrorData(data?.import_errors);
       setImportErrorEntries(data?.total_entries);
     } catch (reason) {
-      const errorResponse = `Error in fetching import errors list : ${reason}`;
-      if (!toast.isActive('importListError')) {
-        toast.error(errorResponse, {
-          ...toastifyCustomStyle,
-          toastId: 'importListError'
-        });
+      if (typeof reason === 'object' && reason !== null) {
+        if (
+          reason instanceof TypeError &&
+          reason.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      } else {
+        const errorResponse = `Error in fetching import errors list : ${reason}`;
+        if (!toast.isActive('importListError')) {
+          toast.error(errorResponse, {
+            ...toastifyCustomStyle,
+            toastId: 'importListError'
+          });
+        }
       }
     }
   };
