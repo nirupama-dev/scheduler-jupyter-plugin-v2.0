@@ -188,6 +188,8 @@ function ListNotebookScheduler({
   const [triggerLoading, setTriggerLoading] = useState('');
   const [updateLoading, setUpdateLoading] = useState('');
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
+  const isDagInfoApiLoading = useRef(false);
+  const isImportErrorApiLoading = useRef(false);
 
   const columns = React.useMemo(
     () => [
@@ -234,6 +236,7 @@ function ListNotebookScheduler({
     );
   };
   const handleComposerSelected = (data: string | null) => {
+    abortApiCall();
     if (data) {
       const selectedComposer = data.toString();
       setComposerSelectedList(selectedComposer);
@@ -370,6 +373,12 @@ function ListNotebookScheduler({
   };
 
   const listDagInfoAPI = async () => {
+    console.log('Listing DAG info...', isDagInfoApiLoading);
+    if (isDagInfoApiLoading.current) {
+      return;
+    }
+    isDagInfoApiLoading.current = true;
+
     await SchedulerService.listDagInfoAPIService(
       setDagList,
       setIsLoading,
@@ -377,7 +386,8 @@ function ListNotebookScheduler({
       composerSelectedList,
       region,
       projectId,
-      abortControllers
+      abortControllers,
+      isDagInfoApiLoading
     );
   };
 
@@ -388,13 +398,18 @@ function ListNotebookScheduler({
     setImportErrorPopupOpen(false);
   };
   const handleImportErrordata = async () => {
+    if( isImportErrorApiLoading.current) {
+      return;
+    }
+    isImportErrorApiLoading.current = true;
     await SchedulerService.handleImportErrordataService(
       composerSelectedList,
       setImportErrorData,
       setImportErrorEntries,
       projectId,
       region,
-      abortControllers
+      abortControllers,
+      isImportErrorApiLoading
     );
   };
 
@@ -701,6 +716,9 @@ function ListNotebookScheduler({
   }, [composerSelectedList]);
 
   useEffect(() => {
+    //explicitly set the import error data to empty so that it is cleared even when APi call below is aborted.
+    setImportErrorData([]);
+    setImportErrorEntries(0);
     if (composerSelectedList !== '') {
       pollingImportError(handleImportErrordata, false);
     }

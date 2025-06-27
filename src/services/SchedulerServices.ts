@@ -665,7 +665,8 @@ export class SchedulerService {
     composerSelected: string,
     region: string,
     project: string,
-    abortControllers?: any
+    abortControllers?: any,
+    dagInfoApiLoading?:{ current: boolean }
   ) => {
     try {
       // setting controller to abort pending api call
@@ -730,9 +731,15 @@ export class SchedulerService {
 
       setDagList(transformDagListData);
       setIsLoading(false);
+      if (dagInfoApiLoading) {
+        dagInfoApiLoading.current = false;
+      }
       setBucketName(formattedResponse[1]);
     } catch (error) {
       setIsLoading(false);
+      if (dagInfoApiLoading) {
+        dagInfoApiLoading.current = false;
+      }
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -982,7 +989,8 @@ export class SchedulerService {
     setImportErrorEntries: (value: number) => void,
     project: string,
     region: string,
-    abortControllers: any
+    abortControllers: any,
+    isImportErrorLoading: {current: boolean }
   ) => {
     // setting controller to abort pending api call
     const controller = new AbortController();
@@ -996,7 +1004,11 @@ export class SchedulerService {
       );
       setImportErrorData(data?.import_errors);
       setImportErrorEntries(data?.total_entries);
+      if(data){
+        isImportErrorLoading.current = false;// for future development add return statements only after this flag is turned false.
+      }
     } catch (reason) {
+      isImportErrorLoading.current = false; // for future development add return statements only after this flag is turned false.
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&
