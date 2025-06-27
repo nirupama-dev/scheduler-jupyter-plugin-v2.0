@@ -416,11 +416,17 @@ class Client:
             return {"error": str(e)}
 
     async def download_dag_output(
-        self, composer_environment_name, bucket_name, dag_id, dag_run_id
+        self,
+        composer_environment_name,
+        bucket_name,
+        dag_id,
+        dag_run_id,
+        project_id,
+        region_id,
     ):
         try:
             await self.airflow_client.list_dag_run_task(
-                composer_environment_name, dag_id, dag_run_id
+                composer_environment_name, dag_id, dag_run_id, project_id, region_id
             )
         except Exception:
             return {"error": f"Invalid DAG run ID {dag_run_id}"}

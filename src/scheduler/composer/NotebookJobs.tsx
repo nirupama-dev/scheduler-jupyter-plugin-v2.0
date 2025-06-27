@@ -142,6 +142,8 @@ const NotebookJobComponent = ({
           handleBackButton={handleBackButton}
           bucketName={bucketName}
           setExecutionPageFlag={setExecutionPageFlag}
+          projectId={projectId}
+          region={region}
         />
       ) : (
         <div>
