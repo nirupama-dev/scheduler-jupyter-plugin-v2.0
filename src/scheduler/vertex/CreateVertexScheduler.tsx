@@ -954,12 +954,9 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     const machineTypeOptions = machineTypeList.map(item => item.machineType);
-    if (region) {
-      setMachineTypeSelected(
-        machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) ||
-          null
-      );
-    }
+    setMachineTypeSelected(
+      machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) || null
+    );
   }, [machineTypeList]);
 
   useEffect(() => {
