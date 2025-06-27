@@ -226,6 +226,7 @@ const CreateVertexScheduler = ({
   const handleRegionChange = (value: React.SetStateAction<string>) => {
     setRegion(value);
     setMachineTypeSelected(null);
+    setMachineTypeList([]);
     setAcceleratedCount(null);
     setAcceleratorType(null);
   };
@@ -817,9 +818,7 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     setLoaderRegion(true);
-    if (region !== '') {
-      machineTypeAPI();
-    }
+
     if (Object.keys(hostProject).length > 0) {
       sharedNetworkAPI();
     }
@@ -844,7 +843,12 @@ const CreateVertexScheduler = ({
           });
         });
     }
-  }, [projectId]);
+
+    if (!editMode) {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (editMode && vertexSchedulerDetails) {
@@ -898,15 +902,9 @@ const CreateVertexScheduler = ({
   }, [editMode]);
 
   useEffect(() => {
-    if (!editMode) {
-      setStartDate(null);
-      setEndDate(null);
-    }
-  }, []);
-
-  useEffect(() => {
     if (!region) {
       setMachineTypeList([]);
+      setMachineTypeSelected(null);
     } else {
       machineTypeAPI();
       if (!createCompleted) {
@@ -1039,11 +1037,12 @@ const CreateVertexScheduler = ({
                 />
               )}
               clearIcon={false}
-              loading={!region || machineTypeLoading}
+              loading={machineTypeLoading}
+              disabled={!region}
             />
           </div>
 
-          {!machineTypeSelected && !apiError && (
+          {!machineTypeSelected && !apiError && region && (
             <ErrorMessage message="Machine type is required" showIcon={false} />
           )}
 
