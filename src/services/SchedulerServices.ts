@@ -206,15 +206,10 @@ export class SchedulerService {
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
         setComposerList([]);
-        Notification.error(
-          'No composer environment in this project and region',
-          {
-            autoClose: false
-          }
-        );
         if (setIsLoading) {
           setIsLoading(false);
         }
+
         if (setEnvApiFlag) {
           setEnvApiFlag(false);
         }
@@ -248,6 +243,10 @@ export class SchedulerService {
           setEnvApiFlag(false);
         }
       } else {
+        if (setIsLoading) {
+          setIsLoading(false);
+        }
+
         setIsApiError(false);
         setApiError('');
         const composerEnvironmentList: string[] = [];
@@ -345,9 +344,8 @@ export class SchedulerService {
       }
     } catch (reason) {
       setCreatingScheduler(false);
-      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
       handleErrorToast({
-        error: errorResponse
+        error: reason
       });
     }
   };
