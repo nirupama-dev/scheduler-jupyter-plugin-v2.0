@@ -239,6 +239,7 @@ function ListNotebookScheduler({
   };
   const handleComposerSelected = (data: string | null) => {
     abortApiCall();
+    setDagList([]);
     if (data) {
       const selectedComposer = data.toString();
       setComposerEnvSelected(selectedComposer);
@@ -382,7 +383,6 @@ function ListNotebookScheduler({
   };
 
   const listDagInfoAPI = async () => {
-    console.log('Listing DAG info...', isDagInfoApiLoading);
     if (isDagInfoApiLoading.current) {
       return;
     }
@@ -646,6 +646,7 @@ function ListNotebookScheduler({
   const handleRegionChange = (value: string) => {
     abortApiCall();
     setRegion(value);
+    setDagList([]);
     if (setComposerSelected) {
       setComposerSelected('');
       setComposerList([]);
