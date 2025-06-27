@@ -177,7 +177,13 @@ class DagRunController(AirflowHandler):
         offset = self.get_argument("offset")
         end_date = self.get_argument("end_date")
         return await client.list_dag_runs(
-            self.composer_environment, self.dag_id, start_date, end_date, offset
+            self.composer_environment,
+            self.dag_id,
+            start_date,
+            end_date,
+            offset,
+            self.project_id,
+            self.region_id,
         )
 
 
@@ -187,7 +193,11 @@ class DagRunTaskController(AirflowHandler):
 
     async def _handle_get(self, client):
         return await client.list_dag_run_task(
-            self.composer_environment, self.dag_id, self.dag_run_id
+            self.composer_environment,
+            self.dag_id,
+            self.dag_run_id,
+            self.project_id,
+            self.region_id,
         )
 
 
@@ -204,6 +214,8 @@ class DagRunTaskLogsController(AirflowHandler):
             self.dag_run_id,
             task_id,
             task_try_number,
+            self.project_id,
+            self.region_id,
         )
 
 

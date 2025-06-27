@@ -52,7 +52,9 @@ const ListDagRuns = ({
   setDarkGreenListDates,
   bucketName,
   setIsLoading,
-  isLoading
+  isLoading,
+  projectId,
+  region
 }: {
   composerName: string;
   dagId: string;
@@ -68,6 +70,8 @@ const ListDagRuns = ({
   bucketName: string;
   setIsLoading: (value: boolean) => void;
   isLoading: boolean;
+  projectId: string;
+  region: string;
 }): JSX.Element => {
   const [dagRunsList, setDagRunsList] = useState<IDagRunList[]>([]);
   const [dagRunsCurrentDateList, setDagRunsCurrentDateList] = useState([]);
@@ -216,7 +220,9 @@ const ListDagRuns = ({
       dagRunId,
       bucketName,
       dagId,
-      setDownloadOutputDagRunId
+      setDownloadOutputDagRunId,
+      projectId,
+      region
     );
   };
 
@@ -269,7 +275,9 @@ const ListDagRuns = ({
       setGreyListDates,
       setRedListDates,
       setGreenListDates,
-      setDarkGreenListDates
+      setDarkGreenListDates,
+      projectId,
+      region
     );
   };
   const handleSelectedDateChange = () => {

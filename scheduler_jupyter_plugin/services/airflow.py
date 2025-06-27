@@ -148,8 +148,12 @@ class Client:
             self.log.exception(f"Error updating status: {str(e)}")
             return {"error": str(e)}
 
-    async def list_dag_runs(self, composer_name, dag_id, start_date, end_date, offset):
-        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+    async def list_dag_runs(
+        self, composer_name, dag_id, start_date, end_date, offset, project_id, region_id
+    ):
+        airflow_obj = await self.get_airflow_uri_and_bucket(
+            composer_name, project_id, region_id
+        )
         airflow_uri = airflow_obj.get("airflow_uri")
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns?start_date_gte={start_date}&start_date_lte={end_date}&offset={offset}"
@@ -167,8 +171,12 @@ class Client:
             self.log.exception(f"Error fetching dag run list: {str(e)}")
             return {"error": str(e)}
 
-    async def list_dag_run_task(self, composer_name, dag_id, dag_run_id):
-        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+    async def list_dag_run_task(
+        self, composer_name, dag_id, dag_run_id, project_id, region_id
+    ):
+        airflow_obj = await self.get_airflow_uri_and_bucket(
+            composer_name, project_id, region_id
+        )
         airflow_uri = airflow_obj.get("airflow_uri")
         try:
             api_endpoint = (
@@ -189,9 +197,18 @@ class Client:
             return {"error": str(e)}
 
     async def list_dag_run_task_logs(
-        self, composer_name, dag_id, dag_run_id, task_id, task_try_number
+        self,
+        composer_name,
+        dag_id,
+        dag_run_id,
+        task_id,
+        task_try_number,
+        project_id,
+        region_id,
     ):
-        airflow_obj = await self.get_airflow_uri_and_bucket(composer_name)
+        airflow_obj = await self.get_airflow_uri_and_bucket(
+            composer_name, project_id, region_id
+        )
         airflow_uri = airflow_obj.get("airflow_uri")
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/logs/{task_try_number}"
