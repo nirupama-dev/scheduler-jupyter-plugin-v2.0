@@ -177,10 +177,10 @@ export class SchedulerService {
     setIsApiError: (value: boolean) => void,
     setApiError: (value: string) => void,
     setApiEnableUrl: any,
+    setEnvApiFlag: (value: boolean) => void,
     setIsLoading?: (value: boolean) => void,
     enableAbort?: boolean | undefined | null,
-    abortControllers?: any,
-    setEnvApiFlag?: (value: boolean) => void
+    abortControllers?: any
   ) => {
     try {
       let formattedResponse: any;
@@ -290,8 +290,7 @@ export class SchedulerService {
     region: string,
     selectedMode: string,
     packageInstalledList: string[],
-    setPackageEditFlag: (value: boolean) => void,
-    setCreateMode: (value: boolean) => void
+    setPackageEditFlag: (value: boolean) => void
   ) => {
     setCreatingScheduler(true);
     try {
@@ -336,7 +335,6 @@ export class SchedulerService {
         }
         setCreatingScheduler(false);
         setCreateCompleted(true);
-        setCreateMode(true);
       }
     } catch (reason) {
       setCreatingScheduler(false);
@@ -399,9 +397,19 @@ export class SchedulerService {
     setStopCluster?: (value: boolean) => void,
     setTimeZoneSelected?: (value: string) => void,
     setEditMode?: (value: boolean) => void,
-    setIsLoadingKernelDetail?: (value: boolean) => void
+    setIsLoadingKernelDetail?: (value: boolean) => void,
+    region?: string,
+    setRegion?: (value: string) => void,
+    projectId?: string,
+    setProjectId?: (value: string) => void
   ) => {
     setEditDagLoading(dagId);
+    if (region && setRegion) {
+      setRegion(region);
+    }
+    if (projectId && setProjectId) {
+      setProjectId(projectId);
+    }
     try {
       const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
       const formattedResponse: any = await requestAPI(serviceURL, {
@@ -528,6 +536,8 @@ export class SchedulerService {
     setRedListDates: (value: string[]) => void,
     setGreenListDates: (value: string[]) => void,
     setDarkGreenListDates: (value: string[]) => void,
+    projectId: string,
+    region: string,
     currentOffsetValue?: number,
     previousDagRunDataList?: object
   ) => {
@@ -541,7 +551,7 @@ export class SchedulerService {
     setDarkGreenListDates([]);
     try {
       const data: any = await requestAPI(
-        `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${start_date}&end_date=${end_date}&offset=${offset}`
+        `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${start_date}&end_date=${end_date}&offset=${offset}&project_id=${projectId}&region_id=${region}`
       );
 
       let transformDagRunListDataCurrent = [];
@@ -585,6 +595,8 @@ export class SchedulerService {
           setRedListDates,
           setGreenListDates,
           setDarkGreenListDates,
+          projectId,
+          region,
           data.dag_runs.length + offset,
           allDagRunsListData
         );
@@ -661,7 +673,8 @@ export class SchedulerService {
     composerSelected: string,
     region: string,
     project: string,
-    abortControllers?: any
+    abortControllers?: any,
+    dagInfoApiLoading?: { current: boolean }
   ) => {
     try {
       // setting controller to abort pending api call
@@ -726,9 +739,15 @@ export class SchedulerService {
 
       setDagList(transformDagListData);
       setIsLoading(false);
+      if (dagInfoApiLoading) {
+        dagInfoApiLoading.current = false;
+      }
       setBucketName(formattedResponse[1]);
     } catch (error) {
       setIsLoading(false);
+      if (dagInfoApiLoading) {
+        dagInfoApiLoading.current = false;
+      }
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -791,12 +810,14 @@ export class SchedulerService {
     dagRunId: string,
     bucketName: string,
     dagId: string,
-    setDownloadOutputDagRunId: (value: string) => void
+    setDownloadOutputDagRunId: (value: string) => void,
+    projectId: string,
+    region: string
   ) => {
     setDownloadOutputDagRunId(dagRunId);
     try {
       dagRunId = encodeURIComponent(dagRunId);
-      const serviceURL = `downloadOutput?composer=${composerName}&bucket_name=${bucketName}&dag_id=${dagId}&dag_run_id=${dagRunId}`;
+      const serviceURL = `downloadOutput?composer=${composerName}&bucket_name=${bucketName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`;
       const formattedResponse: any = await requestAPI(serviceURL, {
         method: 'POST'
       });
@@ -914,14 +935,16 @@ export class SchedulerService {
     dagId: string,
     dagRunId: string,
     setDagTaskInstancesList: (value: any) => void,
-    setIsLoading: (value: boolean) => void
+    setIsLoading: (value: boolean) => void,
+    projectId: string,
+    region: string
   ) => {
     setDagTaskInstancesList([]);
     setIsLoading(true);
     try {
       dagRunId = encodeURIComponent(dagRunId);
       const data: any = await requestAPI(
-        `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}`
+        `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`
       );
       data.task_instances?.sort(
         (a: any, b: any) => new Date(a.start_date).getTime() - 12
@@ -955,13 +978,15 @@ export class SchedulerService {
     taskId: string,
     tryNumber: number,
     setLogList: (value: string) => void,
-    setIsLoadingLogs: (value: boolean) => void
+    setIsLoadingLogs: (value: boolean) => void,
+    projectId: string,
+    region: string
   ) => {
     try {
       setIsLoadingLogs(true);
       dagRunId = encodeURIComponent(dagRunId);
       const data: any = await requestAPI(
-        `dagRunTaskLogs?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&task_id=${taskId}&task_try_number=${tryNumber}`
+        `dagRunTaskLogs?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&task_id=${taskId}&task_try_number=${tryNumber}&project_id=${projectId}&region_id=${region}`
       );
       setLogList(data?.content);
       setIsLoadingLogs(false);
@@ -978,7 +1003,8 @@ export class SchedulerService {
     setImportErrorEntries: (value: number) => void,
     project: string,
     region: string,
-    abortControllers: any
+    abortControllers: any,
+    isImportErrorLoading: { current: boolean }
   ) => {
     // setting controller to abort pending api call
     const controller = new AbortController();
@@ -992,7 +1018,11 @@ export class SchedulerService {
       );
       setImportErrorData(data?.import_errors);
       setImportErrorEntries(data?.total_entries);
+      if (data) {
+        isImportErrorLoading.current = false; // for future development add return statements only after this flag is turned false.
+      }
     } catch (reason) {
+      isImportErrorLoading.current = false; // for future development add return statements only after this flag is turned false.
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&

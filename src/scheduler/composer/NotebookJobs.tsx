@@ -58,11 +58,13 @@ const NotebookJobComponent = ({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerSelected,
+  composerEnvSelected,
+  setComposerEnvSelected,
   setApiEnableUrl,
-  regionSelected,
-  projectSelected,
-  createMode
+  region,
+  setRegion,
+  projectId,
+  setProjectId
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -99,11 +101,13 @@ const NotebookJobComponent = ({
   setIsLocalKernel: (value: boolean) => void;
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
-  composerSelected?: string;
+  composerEnvSelected: string;
+  setComposerEnvSelected: (value: string) => void;
   setApiEnableUrl: any;
-  regionSelected: string;
-  projectSelected: string;
-  createMode: boolean;
+  region: string;
+  setRegion: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] = useState(false);
   const [composerName, setComposerName] = useState('');
@@ -141,6 +145,8 @@ const NotebookJobComponent = ({
           handleBackButton={handleBackButton}
           bucketName={bucketName}
           setExecutionPageFlag={setExecutionPageFlag}
+          projectId={projectId}
+          region={region}
         />
       ) : (
         <div>
@@ -183,11 +189,13 @@ const NotebookJobComponent = ({
                 setIsLocalKernel={setIsLocalKernel}
                 setPackageEditFlag={setPackageEditFlag}
                 setSchedulerBtnDisable={setSchedulerBtnDisable}
-                composerSelected={composerSelected}
+                composerEnvSelected={composerEnvSelected}
+                setComposerEnvSelected={setComposerEnvSelected}
                 setApiEnableUrl={setApiEnableUrl}
-                regionSelected={regionSelected}
-                projectSelected={projectSelected}
-                createMode={createMode}
+                region={region}
+                setRegion={setRegion}
+                projectId={projectId}
+                setProjectId={setProjectId}
                 abortControllers={abortControllers}
                 abortApiCall={abortApiCall}
               />
@@ -209,9 +217,12 @@ export class NotebookJobs extends SchedulerWidget {
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   setApiEnableUrl: any;
-  regionSelected: string;
-  projectSelected: string;
-  createMode: boolean;
+  composerEnvSelected: string;
+  setComposerEnvSelected: (value: string) => void;
+  region: string;
+  setRegion: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void;
 
   constructor(
     app: JupyterLab,
@@ -224,9 +235,12 @@ export class NotebookJobs extends SchedulerWidget {
     setPackageEditFlag: (value: boolean) => void,
     setSchedulerBtnDisable: (value: boolean) => void,
     setApiEnableUrl: any,
-    regionSelected: string,
-    projectSelected: string,
-    createMode: boolean
+    composerEnvSelected: string,
+    setComposerEnvSelected: (value: string) => void,
+    region: string,
+    setRegion: (value: string) => void,
+    projectId: string,
+    setProjectId: (value: string) => void
   ) {
     super(themeManager);
     this.app = app;
@@ -238,9 +252,12 @@ export class NotebookJobs extends SchedulerWidget {
     this.setPackageEditFlag = setPackageEditFlag;
     this.setSchedulerBtnDisable = setSchedulerBtnDisable;
     this.setApiEnableUrl = setApiEnableUrl;
-    this.regionSelected = regionSelected;
-    this.projectSelected = projectSelected;
-    this.createMode = createMode;
+    this.composerEnvSelected = composerEnvSelected;
+    this.setComposerEnvSelected = setComposerEnvSelected;
+    this.region = region;
+    this.setRegion = setRegion;
+    this.projectId = projectId;
+    this.setProjectId = setProjectId;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -255,9 +272,12 @@ export class NotebookJobs extends SchedulerWidget {
         setPackageEditFlag={this.setPackageEditFlag}
         setSchedulerBtnDisable={this.setSchedulerBtnDisable}
         setApiEnableUrl={this.setApiEnableUrl}
-        regionSelected={this.regionSelected}
-        projectSelected={this.projectSelected}
-        createMode={this.createMode}
+        composerEnvSelected={this.composerEnvSelected}
+        setComposerEnvSelected={this.setComposerEnvSelected}
+        region={this.region}
+        setRegion={this.setRegion}
+        projectId={this.projectId}
+        setProjectId={this.setProjectId}
       />
     );
   }

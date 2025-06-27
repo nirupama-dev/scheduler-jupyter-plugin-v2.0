@@ -50,11 +50,15 @@ const iconExpandMore = new LabIcon({
 const ListDagTaskInstances = ({
   composerName,
   dagId,
-  dagRunId
+  dagRunId,
+  projectId,
+  region
 }: {
   composerName: string;
   dagId: string;
   dagRunId: string;
+  projectId: string;
+  region: string;
 }): JSX.Element => {
   const [dagTaskInstancesList, setDagTaskInstancesList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -88,7 +92,9 @@ const ListDagTaskInstances = ({
       dagId,
       dagRunId,
       setDagTaskInstancesList,
-      setIsLoading
+      setIsLoading,
+      projectId,
+      region
     );
   };
 
@@ -125,7 +131,9 @@ const ListDagTaskInstances = ({
       dagTaskInstancesList[index].taskId,
       iconIndex,
       setLogList,
-      setIsLoadingLogs
+      setIsLoadingLogs,
+      projectId,
+      region
     );
   };
   return (

@@ -39,13 +39,17 @@ const ExecutionHistory = ({
   dagId,
   handleBackButton,
   bucketName,
-  setExecutionPageFlag
+  setExecutionPageFlag,
+  projectId,
+  region
 }: {
   composerName: string;
   dagId: string;
   handleBackButton: () => void;
   bucketName: string;
   setExecutionPageFlag: (value: boolean) => void;
+  projectId: string;
+  region: string;
 }): JSX.Element => {
   const [dagRunId, setDagRunId] = useState('');
   const currentDate = new Date().toLocaleDateString();
@@ -169,6 +173,8 @@ const ExecutionHistory = ({
               bucketName={bucketName}
               setIsLoading={setIsLoading}
               isLoading={isLoading}
+              projectId={projectId}
+              region={region}
             />
           )}
         </div>
@@ -178,6 +184,8 @@ const ExecutionHistory = ({
               composerName={composerName}
               dagId={dagId}
               dagRunId={dagRunId}
+              projectId={projectId}
+              region={region}
             />
           )}
         </div>
