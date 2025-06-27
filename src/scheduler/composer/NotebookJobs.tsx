@@ -58,7 +58,8 @@ const NotebookJobComponent = ({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerSelected,
+  composerEnvSelected,
+  setComposerEnvSelected,
   setApiEnableUrl,
   region,
   setRegion,
@@ -100,7 +101,8 @@ const NotebookJobComponent = ({
   setIsLocalKernel: (value: boolean) => void;
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
-  composerSelected?: string;
+  composerEnvSelected: string;
+  setComposerEnvSelected: (value: string) => void;
   setApiEnableUrl: any;
   region: string;
   setRegion: (value: string) => void;
@@ -184,7 +186,8 @@ const NotebookJobComponent = ({
                 setIsLocalKernel={setIsLocalKernel}
                 setPackageEditFlag={setPackageEditFlag}
                 setSchedulerBtnDisable={setSchedulerBtnDisable}
-                composerSelected={composerSelected}
+                composerEnvSelected={composerEnvSelected}
+                setComposerEnvSelected={setComposerEnvSelected}
                 setApiEnableUrl={setApiEnableUrl}
                 region={region}
                 setRegion={setRegion}
@@ -211,6 +214,8 @@ export class NotebookJobs extends SchedulerWidget {
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   setApiEnableUrl: any;
+  composerEnvSelected: string;
+  setComposerEnvSelected: (value: string) => void;
   region: string;
   setRegion: (value: string) => void;
   projectId: string;
@@ -227,6 +232,8 @@ export class NotebookJobs extends SchedulerWidget {
     setPackageEditFlag: (value: boolean) => void,
     setSchedulerBtnDisable: (value: boolean) => void,
     setApiEnableUrl: any,
+    composerEnvSelected: string,
+    setComposerEnvSelected: (value: string) => void,
     region: string,
     setRegion: (value: string) => void,
     projectId: string,
@@ -242,6 +249,8 @@ export class NotebookJobs extends SchedulerWidget {
     this.setPackageEditFlag = setPackageEditFlag;
     this.setSchedulerBtnDisable = setSchedulerBtnDisable;
     this.setApiEnableUrl = setApiEnableUrl;
+    this.composerEnvSelected = composerEnvSelected;
+    this.setComposerEnvSelected = setComposerEnvSelected;
     this.region = region;
     this.setRegion = setRegion;
     this.projectId = projectId;
@@ -260,6 +269,8 @@ export class NotebookJobs extends SchedulerWidget {
         setPackageEditFlag={this.setPackageEditFlag}
         setSchedulerBtnDisable={this.setSchedulerBtnDisable}
         setApiEnableUrl={this.setApiEnableUrl}
+        composerEnvSelected={this.composerEnvSelected}
+        setComposerEnvSelected={this.setComposerEnvSelected}
         region={this.region}
         setRegion={this.setRegion}
         projectId={this.projectId}

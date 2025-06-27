@@ -111,7 +111,8 @@ function ListNotebookScheduler({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerSelected,
+  composerEnvSelected='',
+  setComposerEnvSelected,
   setApiEnableUrl,
   region= '',
   setRegion,
@@ -157,7 +158,8 @@ function ListNotebookScheduler({
   setIsLocalKernel: (value: boolean) => void;
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
-  composerSelected?: string;
+  composerEnvSelected: string;
+  setComposerEnvSelected: (value: string) => void;
   setApiEnableUrl: any;
   region: string;
   setRegion: (value: string) => void;
@@ -168,7 +170,6 @@ function ListNotebookScheduler({
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [composerList, setComposerList] = useState<string[]>([]);
-  const [composerSelectedList, setComposerSelectedList] = useState<string>('');
   const [dagList, setDagList] = useState<IDagList[]>([]);
   const data = dagList;
   const backselectedEnvironment = backButtonComposerName;
@@ -239,7 +240,7 @@ function ListNotebookScheduler({
     abortApiCall();
     if (data) {
       const selectedComposer = data.toString();
-      setComposerSelectedList(selectedComposer);
+      setComposerEnvSelected(selectedComposer);
     }
   };
   const handleUpdateScheduler = async (
@@ -247,7 +248,7 @@ function ListNotebookScheduler({
     is_status_paused: boolean
   ) => {
     await SchedulerService.handleUpdateSchedulerAPIService(
-      composerSelectedList,
+      composerEnvSelected,
       dag_id,
       is_status_paused,
       setDagList,
@@ -278,7 +279,7 @@ function ListNotebookScheduler({
     if (jobid !== null) {
       await SchedulerService.triggerDagService(
         jobid,
-        composerSelectedList,
+        composerEnvSelected,
         setTriggerLoading,
         projectId,
         region
@@ -291,7 +292,7 @@ function ListNotebookScheduler({
       await SchedulerService.editJobSchedulerService(
         bucketName,
         jobid,
-        composerSelectedList,
+        composerEnvSelected,
         setEditDagLoading,
         setIsLocalKernel,
         setPackageEditFlag,
@@ -335,7 +336,7 @@ function ListNotebookScheduler({
   const handleDeleteScheduler = async () => {
     setDeletingNotebook(true);
     await SchedulerService.handleDeleteSchedulerAPIService(
-      composerSelectedList,
+      composerEnvSelected,
       selectedDagId,
       setDagList,
       setIsLoading,
@@ -350,7 +351,7 @@ function ListNotebookScheduler({
   const handleDeleteImportError = async (dagId: string) => {
     const fromPage = 'importErrorPage';
     await SchedulerService.handleDeleteSchedulerAPIService(
-      composerSelectedList,
+      composerEnvSelected,
       dagId,
       setDagList,
       setIsLoading,
@@ -387,7 +388,7 @@ function ListNotebookScheduler({
       setDagList,
       setIsLoading,
       setBucketName,
-      composerSelectedList,
+      composerEnvSelected,
       region,
       projectId,
       abortControllers,
@@ -407,7 +408,7 @@ function ListNotebookScheduler({
     }
     isImportErrorApiLoading.current = true;
     await SchedulerService.handleImportErrordataService(
-      composerSelectedList,
+      composerEnvSelected,
       setImportErrorData,
       setImportErrorEntries,
       projectId,
@@ -589,7 +590,7 @@ function ListNotebookScheduler({
         <td {...cell.getCellProps()} className="clusters-table-data">
           <span
             onClick={() =>
-              handleDagIdSelection(composerSelectedList, cell.value)
+              handleDagIdSelection(composerEnvSelected, cell.value)
             }
           >
             {cell.value}
@@ -688,56 +689,56 @@ function ListNotebookScheduler({
 
   useEffect(() => {
     if (composerList.length === 0) {
-      setComposerSelectedList('');
+      setComposerEnvSelected('');
       setDagList([]);
     }
     if (
       composerList.length > 0 &&
       backselectedEnvironment === '' &&
-      composerSelected === ''
+      composerEnvSelected === ''
     ) {
-      setComposerSelectedList(composerList[0]);
+      setComposerEnvSelected(composerList[0]);
     }
     if (composerList.length > 0 && backselectedEnvironment !== '') {
-      setComposerSelectedList(backselectedEnvironment);
+      setComposerEnvSelected(backselectedEnvironment);
     }
   }, [composerList]);
 
   useEffect(() => {
-    if (composerSelectedList !== '') {
+    if (composerEnvSelected !== '') {
       setIsLoading(true);
       listDagInfoAPI();
       handleImportErrordata();
     }
-  }, [composerSelectedList]);
+  }, [composerEnvSelected]);
 
   useEffect(() => {
-    if (composerSelectedList !== '') {
+    if (composerEnvSelected !== '') {
       pollingDagList(listDagInfoAPI, false);
     }
     return () => {
       pollingDagList(listDagInfoAPI, true);
     };
-  }, [composerSelectedList]);
+  }, [composerEnvSelected]);
 
   useEffect(() => {
     //explicitly set the import error data to empty so that it is cleared even when APi call below is aborted.
     setImportErrorData([]);
     setImportErrorEntries(0);
-    if (composerSelectedList !== '') {
+    if (composerEnvSelected !== '') {
       pollingImportError(handleImportErrordata, false);
     }
     return () => {
       pollingImportError(handleImportErrordata, true);
     };
-  }, [composerSelectedList]);
+  }, [composerEnvSelected]);
 
   useEffect(() => {
     if (!projectId) {
       setRegion('');
       setDagList([]);
       setComposerList([]);
-      setComposerSelectedList('');
+      setComposerEnvSelected('');
       setImportErrorData([]);
       setImportErrorEntries(0);
     }
@@ -747,12 +748,13 @@ function ListNotebookScheduler({
     if (!region) {
       setComposerList([]);
       setDagList([]);
-      setComposerSelectedList('');
+      setComposerEnvSelected('');
       setImportErrorData([]);
       setImportErrorEntries(0);
     } else {
-      if (composerSelected) {
-        setComposerSelectedList(composerSelected);
+      if (composerEnvSelected) {
+        setComposerEnvSelected(composerEnvSelected);
+
       } else {
         listComposersAPI();
       }
@@ -824,7 +826,7 @@ function ListNotebookScheduler({
           >
             <Autocomplete
               options={composerList}
-              value={composerSelectedList}
+              value={composerEnvSelected}
               onChange={(_event, val) => {
                 handleComposerSelected(val);
               }}
@@ -832,7 +834,7 @@ function ListNotebookScheduler({
                 <TextField {...params} label="Environment*" />
               )}
             />
-            {!composerSelectedList && (
+            {!composerEnvSelected && (
               <ErrorMessage
                 message="Environment is required"
                 showIcon={false}
