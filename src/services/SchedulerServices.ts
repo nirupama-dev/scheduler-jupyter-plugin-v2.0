@@ -182,10 +182,6 @@ export class SchedulerService {
     abortControllers?: any,
     setEnvApiFlag?: (value: boolean) => void
   ) => {
-    if (setEnvApiFlag) {
-      setEnvApiFlag(true);
-    }
-
     try {
       let formattedResponse: any;
       if (enableAbort) {

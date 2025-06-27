@@ -787,6 +787,7 @@ function ListNotebookScheduler({
                 }}
                 popupIcon={null}
                 loaderProjectId={loaderProjectId}
+                disabled={true}
               />
             </div>
             {!projectId && (
