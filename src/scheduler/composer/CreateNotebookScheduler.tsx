@@ -186,7 +186,7 @@ const CreateNotebookScheduler = ({
   };
 
   const listComposersAPI = async () => {
-    setEnvApiFlag(true)
+    setEnvApiFlag(true);
     await SchedulerService.listComposersAPIService(
       setComposerList,
       projectId,
