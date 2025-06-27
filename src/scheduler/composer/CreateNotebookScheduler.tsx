@@ -564,6 +564,7 @@ const CreateNotebookScheduler = ({
     setapiErrorMessage('');
     setPackageInstallationMessage('');
     setComposerEnvSelected('');
+    setComposerList([]);
     setPackageListFlag(false);
     setRegion(value);
   };
@@ -730,12 +731,12 @@ const CreateNotebookScheduler = ({
                     }}
                   />
                 )}
-                disabled={editMode || disableEnvLocal || envApiFlag}
+                disabled={editMode || disableEnvLocal || envApiFlag || !region}
                 disableClearable={!projectId || !region}
                 clearIcon={false}
               />
             </div>
-            {!composerEnvSelected && (
+            {!composerEnvSelected && region && (
               <ErrorMessage message="Environment is required field" />
             )}
             {apiErrorMessage && isLocalKernel && (
