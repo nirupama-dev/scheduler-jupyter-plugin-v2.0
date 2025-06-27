@@ -111,10 +111,10 @@ function ListNotebookScheduler({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerEnvSelected='',
+  composerEnvSelected = '',
   setComposerEnvSelected,
   setApiEnableUrl,
-  region= '',
+  region = '',
   setRegion,
   projectId = '',
   setProjectId,
@@ -191,6 +191,7 @@ function ListNotebookScheduler({
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const isDagInfoApiLoading = useRef(false);
   const isImportErrorApiLoading = useRef(false);
+  const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
 
   const columns = React.useMemo(
     () => [
@@ -363,6 +364,7 @@ function ListNotebookScheduler({
   };
 
   const listComposersAPI = async () => {
+    setEnvApiFlag(true);
     setIsLoading(true);
     await SchedulerService.listComposersAPIService(
       setComposerList,
@@ -371,6 +373,7 @@ function ListNotebookScheduler({
       setIsApiError,
       setApiError,
       setApiEnableUrl,
+      setEnvApiFlag,
       setIsLoading,
       true,
       abortControllers
@@ -403,7 +406,7 @@ function ListNotebookScheduler({
     setImportErrorPopupOpen(false);
   };
   const handleImportErrordata = async () => {
-    if( isImportErrorApiLoading.current) {
+    if (isImportErrorApiLoading.current) {
       return;
     }
     isImportErrorApiLoading.current = true;
@@ -644,6 +647,7 @@ function ListNotebookScheduler({
     setRegion(value);
     if (setComposerSelected) {
       setComposerSelected('');
+      setComposerList([]);
     }
   };
 
@@ -675,7 +679,7 @@ function ListNotebookScheduler({
         setLoaderRegion(false);
         console.log('Setting project and region', projectId, region);
         setProjectId(projectId || credentials.project_id);
-        setRegion(region ||credentials.region_id);
+        setRegion(region || credentials.region_id);
       }
     });
     checkGCSPluginAvailability();
@@ -754,7 +758,6 @@ function ListNotebookScheduler({
     } else {
       if (composerEnvSelected) {
         setComposerEnvSelected(composerEnvSelected);
-
       } else {
         listComposersAPI();
       }
@@ -832,7 +835,25 @@ function ListNotebookScheduler({
                 handleComposerSelected(val);
               }}
               renderInput={params => (
-                <TextField {...params} label="Environment*" />
+                <TextField
+                  {...params}
+                  label="Environment*"
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <>
+                        {composerList.length <= 0 && region && envApiFlag && (
+                          <CircularProgress
+                            aria-label="Loading Spinner"
+                            data-testid="loader"
+                            size={18}
+                          />
+                        )}
+                        {params.InputProps.endAdornment}
+                      </>
+                    )
+                  }}
+                />
               )}
             />
             {!composerEnvSelected && (

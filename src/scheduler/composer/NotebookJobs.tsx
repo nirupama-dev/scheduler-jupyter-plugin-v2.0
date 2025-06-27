@@ -107,7 +107,8 @@ const NotebookJobComponent = ({
   region: string;
   setRegion: (value: string) => void;
   projectId: string;
-  setProjectId: (value: string) => void}): React.JSX.Element => {
+  setProjectId: (value: string) => void;
+}): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] = useState(false);
   const [composerName, setComposerName] = useState('');
   const [bucketName, setBucketName] = useState('');

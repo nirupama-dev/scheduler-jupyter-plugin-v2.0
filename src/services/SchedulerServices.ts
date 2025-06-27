@@ -177,10 +177,10 @@ export class SchedulerService {
     setIsApiError: (value: boolean) => void,
     setApiError: (value: string) => void,
     setApiEnableUrl: any,
+    setEnvApiFlag: (value: boolean) => void,
     setIsLoading?: (value: boolean) => void,
     enableAbort?: boolean | undefined | null,
-    abortControllers?: any,
-    setEnvApiFlag?: (value: boolean) => void
+    abortControllers?: any
   ) => {
     try {
       let formattedResponse: any;

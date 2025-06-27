@@ -402,7 +402,7 @@ const CreateNotebookScheduler = ({
       region,
       selectedMode,
       packageInstalledList,
-      setPackageEditFlag,
+      setPackageEditFlag
     );
     setEditMode(false);
   };
