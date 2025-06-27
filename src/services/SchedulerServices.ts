@@ -295,7 +295,6 @@ export class SchedulerService {
     selectedMode: string,
     packageInstalledList: string[],
     setPackageEditFlag: (value: boolean) => void,
-    setCreateMode: (value: boolean) => void
   ) => {
     setCreatingScheduler(true);
     try {
@@ -340,7 +339,6 @@ export class SchedulerService {
         }
         setCreatingScheduler(false);
         setCreateCompleted(true);
-        setCreateMode(true);
       }
     } catch (reason) {
       setCreatingScheduler(false);
@@ -403,9 +401,19 @@ export class SchedulerService {
     setStopCluster?: (value: boolean) => void,
     setTimeZoneSelected?: (value: string) => void,
     setEditMode?: (value: boolean) => void,
-    setIsLoadingKernelDetail?: (value: boolean) => void
+    setIsLoadingKernelDetail?: (value: boolean) => void,
+    region?: string,
+    setRegion?: (value: string) => void,
+    projectId?: string,
+    setProjectId?: (value: string) => void 
   ) => {
     setEditDagLoading(dagId);
+    if(region && setRegion) {
+      setRegion(region);
+    }
+    if (projectId && setProjectId) {
+      setProjectId(projectId);
+    }
     try {
       const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
       const formattedResponse: any = await requestAPI(serviceURL, {

@@ -113,9 +113,10 @@ function ListNotebookScheduler({
   setSchedulerBtnDisable,
   composerSelected,
   setApiEnableUrl,
-  regionSelected,
-  projectSelected,
-  createMode,
+  region= '',
+  setRegion,
+  projectId = '',
+  setProjectId,
   abortControllers,
   abortApiCall
 }: {
@@ -158,9 +159,10 @@ function ListNotebookScheduler({
   setSchedulerBtnDisable: (value: boolean) => void;
   composerSelected?: string;
   setApiEnableUrl: any;
-  regionSelected: string;
-  projectSelected: string;
-  createMode: boolean;
+  region: string;
+  setRegion: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void;
   abortControllers: any;
   abortApiCall: () => void;
 }) {
@@ -182,8 +184,6 @@ function ListNotebookScheduler({
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
   const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
     useState<boolean>(false);
-  const [projectId, setProjectId] = useState('');
-  const [region, setRegion] = useState<string>('');
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
   const [triggerLoading, setTriggerLoading] = useState('');
   const [updateLoading, setUpdateLoading] = useState('');
@@ -319,7 +319,11 @@ function ListNotebookScheduler({
         setStopCluster,
         setTimeZoneSelected,
         setEditMode,
-        setIsLoadingKernelDetail
+        setIsLoadingKernelDetail,
+        region,
+        setRegion,
+        projectId,
+        setProjectId
       );
     }
   };
@@ -634,7 +638,7 @@ function ListNotebookScheduler({
    * Changing the region value and empyting the value of environemnt
    * @param {string} value selected region
    */
-  const handleRegionChange = (value: React.SetStateAction<string>) => {
+  const handleRegionChange = (value: string) => {
     abortApiCall();
     setRegion(value);
     if (setComposerSelected) {
@@ -668,8 +672,9 @@ function ListNotebookScheduler({
       if (credentials?.project_id && credentials?.region_id) {
         setLoaderProjectId(false);
         setLoaderRegion(false);
-        setProjectId(createMode ? projectSelected : credentials.project_id);
-        setRegion(createMode ? regionSelected : credentials.region_id);
+        console.log('Setting project and region', projectId, region);
+        setProjectId(projectId || credentials.project_id);
+        setRegion(region ||credentials.region_id);
       }
     });
     checkGCSPluginAvailability();
@@ -730,6 +735,7 @@ function ListNotebookScheduler({
   useEffect(() => {
     if (!projectId) {
       setRegion('');
+      setDagList([]);
       setComposerList([]);
       setComposerSelectedList('');
       setImportErrorData([]);
@@ -740,6 +746,7 @@ function ListNotebookScheduler({
   useEffect(() => {
     if (!region) {
       setComposerList([]);
+      setDagList([]);
       setComposerSelectedList('');
       setImportErrorData([]);
       setImportErrorEntries(0);

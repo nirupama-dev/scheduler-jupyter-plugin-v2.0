@@ -60,9 +60,10 @@ const NotebookJobComponent = ({
   setSchedulerBtnDisable,
   composerSelected,
   setApiEnableUrl,
-  regionSelected,
-  projectSelected,
-  createMode
+  region,
+  setRegion,
+  projectId,
+  setProjectId
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -101,10 +102,10 @@ const NotebookJobComponent = ({
   setSchedulerBtnDisable: (value: boolean) => void;
   composerSelected?: string;
   setApiEnableUrl: any;
-  regionSelected: string;
-  projectSelected: string;
-  createMode: boolean;
-}): React.JSX.Element => {
+  region: string;
+  setRegion: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void}): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] = useState(false);
   const [composerName, setComposerName] = useState('');
   const [bucketName, setBucketName] = useState('');
@@ -185,9 +186,10 @@ const NotebookJobComponent = ({
                 setSchedulerBtnDisable={setSchedulerBtnDisable}
                 composerSelected={composerSelected}
                 setApiEnableUrl={setApiEnableUrl}
-                regionSelected={regionSelected}
-                projectSelected={projectSelected}
-                createMode={createMode}
+                region={region}
+                setRegion={setRegion}
+                projectId={projectId}
+                setProjectId={setProjectId}
                 abortControllers={abortControllers}
                 abortApiCall={abortApiCall}
               />
@@ -209,9 +211,10 @@ export class NotebookJobs extends SchedulerWidget {
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   setApiEnableUrl: any;
-  regionSelected: string;
-  projectSelected: string;
-  createMode: boolean;
+  region: string;
+  setRegion: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void;
 
   constructor(
     app: JupyterLab,
@@ -224,9 +227,10 @@ export class NotebookJobs extends SchedulerWidget {
     setPackageEditFlag: (value: boolean) => void,
     setSchedulerBtnDisable: (value: boolean) => void,
     setApiEnableUrl: any,
-    regionSelected: string,
-    projectSelected: string,
-    createMode: boolean
+    region: string,
+    setRegion: (value: string) => void,
+    projectId: string,
+    setProjectId: (value: string) => void
   ) {
     super(themeManager);
     this.app = app;
@@ -238,9 +242,10 @@ export class NotebookJobs extends SchedulerWidget {
     this.setPackageEditFlag = setPackageEditFlag;
     this.setSchedulerBtnDisable = setSchedulerBtnDisable;
     this.setApiEnableUrl = setApiEnableUrl;
-    this.regionSelected = regionSelected;
-    this.projectSelected = projectSelected;
-    this.createMode = createMode;
+    this.region = region;
+    this.setRegion = setRegion;
+    this.projectId = projectId;
+    this.setProjectId = setProjectId;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -255,9 +260,10 @@ export class NotebookJobs extends SchedulerWidget {
         setPackageEditFlag={this.setPackageEditFlag}
         setSchedulerBtnDisable={this.setSchedulerBtnDisable}
         setApiEnableUrl={this.setApiEnableUrl}
-        regionSelected={this.regionSelected}
-        projectSelected={this.projectSelected}
-        createMode={this.createMode}
+        region={this.region}
+        setRegion={this.setRegion}
+        projectId={this.projectId}
+        setProjectId={this.setProjectId}
       />
     );
   }
