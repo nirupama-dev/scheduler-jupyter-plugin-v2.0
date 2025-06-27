@@ -288,6 +288,7 @@ function ListNotebookScheduler({
     }
   };
   const handleEditDags = async (event: React.MouseEvent) => {
+    abortApiCall();
     const jobid = event.currentTarget.getAttribute('data-jobid');
     if (jobid !== null) {
       await SchedulerService.editJobSchedulerService(
