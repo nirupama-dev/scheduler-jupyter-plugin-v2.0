@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { SchedulerWidget } from '../../controls/SchedulerWidget';
 import { JupyterLab } from '@jupyterlab/application';
 import { IThemeManager } from '@jupyterlab/apputils';
@@ -58,8 +58,13 @@ const NotebookJobComponent = ({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerSelected,
-  setApiEnableUrl
+  composerEnvSelected,
+  setComposerEnvSelected,
+  setApiEnableUrl,
+  region,
+  setRegion,
+  projectId,
+  setProjectId
 }: {
   app: JupyterLab;
   themeManager: IThemeManager;
@@ -96,14 +101,20 @@ const NotebookJobComponent = ({
   setIsLocalKernel: (value: boolean) => void;
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
-  composerSelected?: string;
+  composerEnvSelected: string;
+  setComposerEnvSelected: (value: string) => void;
   setApiEnableUrl: any;
+  region: string;
+  setRegion: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void;
 }): React.JSX.Element => {
   const [showExecutionHistory, setShowExecutionHistory] = useState(false);
   const [composerName, setComposerName] = useState('');
   const [bucketName, setBucketName] = useState('');
   const [dagId, setDagId] = useState('');
   const [backComposerName, setBackComposerName] = useState('');
+  const abortControllers = useRef<any>([]); // Array of API signals to abort
 
   const handleDagIdSelection = (composerName: string, dagId: string) => {
     setShowExecutionHistory(true);
@@ -117,6 +128,14 @@ const NotebookJobComponent = ({
     setExecutionPageFlag(true);
   };
 
+  /**
+   * Abort Api calls while moving away from page.
+   */
+  const abortApiCall = () => {
+    abortControllers.current.forEach((controller: any) => controller.abort());
+    abortControllers.current = [];
+  };
+
   return (
     <>
       {showExecutionHistory ? (
@@ -126,6 +145,8 @@ const NotebookJobComponent = ({
           handleBackButton={handleBackButton}
           bucketName={bucketName}
           setExecutionPageFlag={setExecutionPageFlag}
+          projectId={projectId}
+          region={region}
         />
       ) : (
         <div>
@@ -168,8 +189,15 @@ const NotebookJobComponent = ({
                 setIsLocalKernel={setIsLocalKernel}
                 setPackageEditFlag={setPackageEditFlag}
                 setSchedulerBtnDisable={setSchedulerBtnDisable}
-                composerSelected={composerSelected}
+                composerEnvSelected={composerEnvSelected}
+                setComposerEnvSelected={setComposerEnvSelected}
                 setApiEnableUrl={setApiEnableUrl}
+                region={region}
+                setRegion={setRegion}
+                projectId={projectId}
+                setProjectId={setProjectId}
+                abortControllers={abortControllers}
+                abortApiCall={abortApiCall}
               />
             }
           </div>
@@ -189,6 +217,12 @@ export class NotebookJobs extends SchedulerWidget {
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   setApiEnableUrl: any;
+  composerEnvSelected: string;
+  setComposerEnvSelected: (value: string) => void;
+  region: string;
+  setRegion: (value: string) => void;
+  projectId: string;
+  setProjectId: (value: string) => void;
 
   constructor(
     app: JupyterLab,
@@ -200,7 +234,13 @@ export class NotebookJobs extends SchedulerWidget {
     setIsLocalKernel: (value: boolean) => void,
     setPackageEditFlag: (value: boolean) => void,
     setSchedulerBtnDisable: (value: boolean) => void,
-    setApiEnableUrl: any
+    setApiEnableUrl: any,
+    composerEnvSelected: string,
+    setComposerEnvSelected: (value: string) => void,
+    region: string,
+    setRegion: (value: string) => void,
+    projectId: string,
+    setProjectId: (value: string) => void
   ) {
     super(themeManager);
     this.app = app;
@@ -212,6 +252,12 @@ export class NotebookJobs extends SchedulerWidget {
     this.setPackageEditFlag = setPackageEditFlag;
     this.setSchedulerBtnDisable = setSchedulerBtnDisable;
     this.setApiEnableUrl = setApiEnableUrl;
+    this.composerEnvSelected = composerEnvSelected;
+    this.setComposerEnvSelected = setComposerEnvSelected;
+    this.region = region;
+    this.setRegion = setRegion;
+    this.projectId = projectId;
+    this.setProjectId = setProjectId;
   }
   renderInternal(): React.JSX.Element {
     return (
@@ -226,6 +272,12 @@ export class NotebookJobs extends SchedulerWidget {
         setPackageEditFlag={this.setPackageEditFlag}
         setSchedulerBtnDisable={this.setSchedulerBtnDisable}
         setApiEnableUrl={this.setApiEnableUrl}
+        composerEnvSelected={this.composerEnvSelected}
+        setComposerEnvSelected={this.setComposerEnvSelected}
+        region={this.region}
+        setRegion={this.setRegion}
+        projectId={this.projectId}
+        setProjectId={this.setProjectId}
       />
     );
   }

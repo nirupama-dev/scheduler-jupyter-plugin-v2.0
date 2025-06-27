@@ -31,7 +31,12 @@ import {
   IFormattedResponse
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
-import { DEFAULT_TIME_ZONE, pattern } from '../utils/Const';
+import {
+  ABORT_MESSAGE,
+  DEFAULT_TIME_ZONE,
+  HTTP_STATUS_FORBIDDEN,
+  pattern
+} from '../utils/Const';
 import React, { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import { handleErrorToast } from '../utils/ErrorUtils';
@@ -52,7 +57,7 @@ export class VertexServices {
           setMachineTypeList(formattedResponse);
         } else if (formattedResponse.length === undefined) {
           try {
-            if (formattedResponse.error.code === 403) {
+            if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
               // Pattern to check whether string contains link
               const pattern =
                 // eslint-disable-next-line
@@ -97,7 +102,8 @@ export class VertexServices {
   static readonly createVertexSchedulerService = async (
     payload: ICreatePayload,
     setCreateCompleted: (value: boolean) => void,
-    setCreatingVertexScheduler: (value: boolean) => void
+    setCreatingVertexScheduler: (value: boolean) => void,
+    setCreateMode: (value: boolean) => void
   ) => {
     setCreatingVertexScheduler(true);
     try {
@@ -119,6 +125,7 @@ export class VertexServices {
         );
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
+        setCreateMode(true);
       }
     } catch (reason: any) {
       setCreatingVertexScheduler(false);
@@ -139,7 +146,8 @@ export class VertexServices {
     setCreateCompleted: (value: boolean) => void,
     setCreatingVertexScheduler: (value: boolean) => void,
     gcsPath: string,
-    setEditMode: (value: boolean) => void
+    setEditMode: (value: boolean) => void,
+    setCreateMode: (value: boolean) => void
   ) => {
     setCreatingVertexScheduler(true);
     if (gcsPath) {
@@ -168,6 +176,7 @@ export class VertexServices {
         setCreatingVertexScheduler(false);
         setCreateCompleted(true);
         setEditMode(false);
+        setCreateMode(true);
       }
     } catch (reason: any) {
       setCreatingVertexScheduler(false);
@@ -219,7 +228,7 @@ export class VertexServices {
         formattedResponse as IFormattedResponse;
 
       // Handle API error
-      if (error?.code === 403) {
+      if (error?.code === HTTP_STATUS_FORBIDDEN) {
         const url = error.message.match(pattern);
         if (url && url.length > 0) {
           setIsApiError(true);
@@ -317,7 +326,10 @@ export class VertexServices {
     } catch (error) {
       setResumeLoading('');
       if (typeof error === 'object' && error !== null) {
-        if (error instanceof TypeError) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -374,7 +386,10 @@ export class VertexServices {
     } catch (error) {
       setResumeLoading('');
       if (typeof error === 'object' && error !== null) {
-        if (error instanceof TypeError) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -424,7 +439,10 @@ export class VertexServices {
     } catch (reason) {
       setTriggerLoading('');
       if (typeof reason === 'object' && reason !== null) {
-        if (reason instanceof TypeError) {
+        if (
+          reason instanceof TypeError &&
+          reason.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -698,7 +716,10 @@ export class VertexServices {
     } catch (reason) {
       setEditScheduleLoading('');
       if (typeof reason === 'object' && reason !== null) {
-        if (reason instanceof TypeError) {
+        if (
+          reason instanceof TypeError &&
+          reason.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -732,8 +753,7 @@ export class VertexServices {
     const controller = new AbortController();
     abortControllers.current.push(controller);
     const signal = controller.signal;
-
-    const selected_month = selectedMonth?.toISOString();
+    const selected_month = selectedMonth?.format('YYYY-MM-DDTHH:mm:ssZ[Z]');
     const schedule_id = schedulerData?.name.split('/').pop();
     const serviceURL = 'api/vertex/listNotebookExecutionJobs';
     const formattedResponse: any = await requestAPI(
@@ -842,7 +862,10 @@ export class VertexServices {
       setVertexScheduleRunsList(transformDagRunListDataCurrent);
     } catch (error) {
       if (typeof error === 'object' && error !== null) {
-        if (error instanceof TypeError) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {
@@ -882,7 +905,10 @@ export class VertexServices {
       setIsLoading(false);
     } catch (lastRunError: any) {
       if (typeof lastRunError === 'object' && lastRunError !== null) {
-        if (lastRunError instanceof TypeError) {
+        if (
+          lastRunError instanceof TypeError &&
+          lastRunError.toString().includes(ABORT_MESSAGE)
+        ) {
           return;
         }
       } else {

@@ -20,6 +20,9 @@ from datetime import datetime, timedelta
 from google.cloud import storage
 from google.api_core.exceptions import NotFound
 import google.oauth2.credentials as oauth2
+from google.cloud.jupyter_config.config import (
+    async_run_gcloud_subcommand,
+)
 import aiofiles
 import json
 
@@ -37,6 +40,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     WRAPPER_PAPPERMILL_FILE,
     UTF8,
     PAYLOAD_JSON_FILE_PATH,
+    HTTP_STATUS_OK,
 )
 from scheduler_jupyter_plugin.models.models import DescribeJob
 from scheduler_jupyter_plugin.services import airflow
@@ -83,7 +87,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
                     return gcs_dag_path
@@ -95,11 +99,14 @@ class Client:
             self.log.exception(f"Error getting bucket name: {str(e)}")
             raise Exception(f"Error getting composer bucket: {str(e)}")
 
-    async def check_file_exists(self, bucket_name, file_path):
+    async def check_file_exists(self, bucket_name, file_path, project_id):
         try:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
-            bucket = storage.Client().bucket(bucket_name)
+            credentials = oauth2.Credentials(self._access_token)
+            bucket = storage.Client(credentials=credentials, project=project_id).bucket(
+                bucket_name
+            )
             blob = bucket.blob(file_path)
             return blob.exists()
         except Exception as error:
@@ -107,10 +114,16 @@ class Client:
             raise IOError(f"Error creating dag: {error}")
 
     async def upload_to_gcs(
-        self, gcs_dag_bucket, file_path=None, template_name=None, destination_dir=None
+        self,
+        gcs_dag_bucket,
+        project_id,
+        file_path=None,
+        template_name=None,
+        destination_dir=None,
     ):
         try:
-            storage_client = storage.Client()
+            credentials = oauth2.Credentials(self._access_token)
+            storage_client = storage.Client(credentials=credentials, project=project_id)
             bucket = storage_client.bucket(gcs_dag_bucket)
             if template_name:
                 env = Environment(
@@ -134,7 +147,7 @@ class Client:
             self.log.exception(f"Error uploading file to GCS: {str(error)}")
             raise IOError(str(error))
 
-    def prepare_dag(self, job, gcs_dag_bucket, dag_file):
+    def prepare_dag(self, job, gcs_dag_bucket, dag_file, project_id, region_id):
         self.log.info("Generating dag file")
         DAG_TEMPLATE_CLUSTER_V1 = "pysparkJobTemplate-v1.txt"
         DAG_TEMPLATE_SERVERLESS_V1 = "pysparkBatchTemplate-v1.txt"
@@ -144,8 +157,6 @@ class Client:
             loader=PackageLoader("scheduler_jupyter_plugin", TEMPLATES_FOLDER_PATH),
         )
 
-        gcp_project_id = self.project_id
-        gcp_region_id = self.region_id
         user = gcp_account()
         owner = user.split("@")[0]  # getting username from email
         if job.schedule_value == "":
@@ -178,8 +189,8 @@ class Client:
                 content = template.render(
                     job,
                     inputFilePath=f"gs://{gcs_dag_bucket}/dataproc-notebooks/wrapper_papermill.py",
-                    gcpProjectId=gcp_project_id,
-                    gcpRegion=gcp_region_id,
+                    gcpProjectId=project_id,
+                    gcpRegion=region_id,
                     input_notebook=input_notebook,
                     output_notebook=f"gs://{gcs_dag_bucket}/dataproc-output/{job.name}/output-notebooks/{job.name}_",
                     owner=owner,
@@ -226,8 +237,8 @@ class Client:
                 content = template.render(
                     job,
                     inputFilePath=f"gs://{gcs_dag_bucket}/dataproc-notebooks/wrapper_papermill.py",
-                    gcpProjectId=gcp_project_id,
-                    gcpRegion=gcp_region_id,
+                    gcpProjectId=project_id,
+                    gcpRegion=region_id,
                     input_notebook=input_notebook,
                     output_notebook=f"gs://{gcs_dag_bucket}/dataproc-output/{job.name}/output-notebooks/{job.name}_",
                     owner=owner,
@@ -256,8 +267,8 @@ class Client:
             content = template.render(
                 job,
                 inputFilePath=f"gs://{gcs_dag_bucket}/dataproc-notebooks/wrapper_papermill.py",
-                gcpProjectId=gcp_project_id,
-                gcpRegion=gcp_region_id,
+                gcpProjectId=project_id,
+                gcpRegion=region_id,
                 input_notebook=input_notebook,
                 output_notebook=f"gs://{gcs_dag_bucket}/dataproc-output/{job.name}/output-notebooks/{job.name}_",
                 owner=owner,
@@ -279,39 +290,30 @@ class Client:
         shutil.copy2(wrapper_papermill_path, LOCAL_DAG_FILE_LOCATION)
         return file_path
 
-    async def check_package_in_env(self, composer_environment_name):
+    async def check_package_in_env(self, composer_environment_name, region_id):
         try:
             packages = ["apache-airflow-providers-papermill", "ipykernel"]
             packages_to_install = []
-            cmd = f"gcloud beta composer environments list-packages {composer_environment_name} --location {self.region_id}"
-            process = subprocess.Popen(
-                cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True
+            cmd = f"beta composer environments list-packages {composer_environment_name} --location {region_id}"
+            process = await async_run_gcloud_subcommand(cmd)
+            installed_packages = set(
+                line.split()[0].lower() for line in process.splitlines()[2:]
             )
-            stdout, stderr = process.communicate()
-            if stderr:
-                self.log.info(f"Error fetching list of packages: {stderr}")
-                # decoding bytes class to string and taking out the error part
-                decoded_message = stderr.decode("utf-8")
-                start_index = decoded_message.find("ERROR")
-                error = decoded_message[start_index:]
-                raise Exception(error)
-            else:
-                decoded_output = stdout.decode(UTF8)
-                installed_packages = set(
-                    line.split()[0].lower() for line in decoded_output.splitlines()[2:]
-                )
-                for package in packages:
-                    if package.lower() not in installed_packages:
-                        packages_to_install.append(package)
-                    else:
-                        self.log.info(f"{package} is already installed.")
+            for package in packages:
+                if package.lower() not in installed_packages:
+                    packages_to_install.append(package)
+                else:
+                    self.log.info(f"{package} is already installed.")
             return packages_to_install
+        except subprocess.CalledProcessError:
+            self.log.exception("Error checking packages")
+            raise IOError("Error checking packages")
         except Exception as error:
             self.log.exception(f"Error checking packages: {error}")
             raise IOError(f"Error checking packages: {error}")
 
     async def install_to_composer_environment(
-        self, local_kernel, composer_environment_name, packages_to_install
+        self, local_kernel, composer_environment_name, packages_to_install, region_id
     ):
         try:
             installing_packages = "false"
@@ -319,27 +321,18 @@ class Client:
                 for package in packages_to_install:
                     self.log.info(f"{package} is not installed. Installing...")
                     installing_packages = "true"
-                    install_cmd = f"gcloud composer environments update {composer_environment_name} --location {self.region_id} --update-pypi-package {package}"
-                    install_process = subprocess.Popen(
-                        install_cmd,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE,
-                        shell=True,
-                    )
-                    install_stdout, install_stderr = install_process.communicate()
-                    if install_process.returncode == 0:
-                        self.log.info(f"{package} installed successfully.")
-                    else:
-                        # decoding bytes class to string and taking out the error part
-                        decoded_message = install_stderr.decode("utf-8")
-                        start_index = decoded_message.find("ERROR")
-                        error = decoded_message[start_index:]
-                        raise Exception(
-                            f"can not create schedule, error in installing the packages, error: {error}"
-                        )
+                    sub_cmd = f"composer environments update {composer_environment_name} --location {region_id} --update-pypi-package {package}"
+                    await async_run_gcloud_subcommand(sub_cmd)
             return {"installing_packages": str(installing_packages)}
+        except subprocess.CalledProcessError as install_error:
+            self.log.exception(
+                f"can not create schedule, error in installing the packages, error: {install_error.stderr}"
+            )
+            raise RuntimeError(
+                f"can not create schedule, error in installing the packages, error: {install_error.stderr}"
+            )
         except Exception as e:
-            self.log.exception(f"error installing {package}: {install_stderr}")
+            self.log.exception(f"error installing {package}: {str(e)}")
             return {"error": str(e)}
 
     def create_payload(self, file_path, project_id, region, input_data):
@@ -348,7 +341,7 @@ class Client:
         with open(file_path, "w") as f:
             json.dump(payload, f, indent=4)
 
-    async def execute(self, input_data, project_id=None, region_id=None):
+    async def execute(self, input_data, project_id, region_id):
         try:
             job = DescribeJob(**input_data)
             global job_id
@@ -367,12 +360,13 @@ class Client:
                     job.local_kernel,
                     job.composer_environment_name,
                     job.packages_to_install,
+                    region_id,
                 )
             if install_packages and install_packages.get("error"):
-                raise Exception(install_packages)
+                raise RuntimeError(install_packages)
 
             if await self.check_file_exists(
-                gcs_dag_bucket, wrapper_pappermill_file_path
+                gcs_dag_bucket, wrapper_pappermill_file_path, project_id
             ):
                 print(
                     f"The file gs://{gcs_dag_bucket}/{wrapper_pappermill_file_path} exists."
@@ -380,6 +374,7 @@ class Client:
             else:
                 await self.upload_to_gcs(
                     gcs_dag_bucket,
+                    project_id,
                     template_name=WRAPPER_PAPPERMILL_FILE,
                     destination_dir="dataproc-notebooks",
                 )
@@ -390,6 +385,7 @@ class Client:
             if not job.input_filename.startswith(GCS):
                 await self.upload_to_gcs(
                     gcs_dag_bucket,
+                    project_id,
                     file_path=f"./{job.input_filename}",
                     destination_dir=f"dataproc-notebooks/{job_name}/input_notebooks",
                 )
@@ -401,13 +397,16 @@ class Client:
             # uploading payload JSON file to GCS
             await self.upload_to_gcs(
                 gcs_dag_bucket,
+                project_id,
                 file_path=PAYLOAD_JSON_FILE_PATH,
                 destination_dir=f"dataproc-notebooks/{job_name}/dag_details",
             )
 
-            file_path = self.prepare_dag(job, gcs_dag_bucket, dag_file)
+            file_path = self.prepare_dag(
+                job, gcs_dag_bucket, dag_file, project_id, region_id
+            )
             await self.upload_to_gcs(
-                gcs_dag_bucket, file_path=file_path, destination_dir="dags"
+                gcs_dag_bucket, project_id, file_path=file_path, destination_dir="dags"
             )
             if install_packages.get("installing_packages") == "true":
                 return {"status": 0, "response": "installed python packages"}
@@ -417,13 +416,19 @@ class Client:
             return {"error": str(e)}
 
     async def download_dag_output(
-        self, composer_environment_name, bucket_name, dag_id, dag_run_id
+        self,
+        composer_environment_name,
+        bucket_name,
+        dag_id,
+        dag_run_id,
+        project_id,
+        region_id,
     ):
         try:
             await self.airflow_client.list_dag_run_task(
-                composer_environment_name, dag_id, dag_run_id
+                composer_environment_name, dag_id, dag_run_id, project_id, region_id
             )
-        except Exception as ex:
+        except Exception:
             return {"error": f"Invalid DAG run ID {dag_run_id}"}
 
         try:
@@ -447,9 +452,9 @@ class Client:
             self.log.exception(f"Error downloading output notebook file: {str(error)}")
             return {"error": str(error)}
 
-    async def check_required_packages(self, composer_environment_name):
+    async def check_required_packages(self, composer_environment_name, region_id):
         try:
-            res = await self.check_package_in_env(composer_environment_name)
+            res = await self.check_package_in_env(composer_environment_name, region_id)
             return res
         except Exception as e:
             return {"error": str(e)}

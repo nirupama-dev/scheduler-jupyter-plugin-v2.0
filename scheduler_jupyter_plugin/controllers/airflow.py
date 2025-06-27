@@ -56,6 +56,16 @@ class AirflowHandler(APIHandler):
             raise ValueError(f"Invalid bucket name: {bucket_arg}")
         return bucket_arg
 
+    @property
+    def region_id(self):
+        region_id = self.get_argument("region_id")
+        return region_id
+
+    @property
+    def project_id(self):
+        project_id = self.get_argument("project_id")
+        return project_id
+
     def description(self):
         pass
 
@@ -113,7 +123,9 @@ class DagListController(AirflowHandler):
         return "cluster list"
 
     async def _handle_get(self, client):
-        return await client.list_jobs(self.composer_environment)
+        return await client.list_jobs(
+            self.composer_environment, self.project_id, self.region_id
+        )
 
 
 class DagDeleteController(AirflowHandler):
@@ -123,7 +135,11 @@ class DagDeleteController(AirflowHandler):
     async def _handle_delete(self, client):
         from_page = self.get_argument("from_page", default=None)
         delete_response = await client.delete_job(
-            self.composer_environment, self.dag_id, from_page
+            self.composer_environment,
+            self.dag_id,
+            from_page,
+            self.project_id,
+            self.region_id,
         )
         if delete_response != 0:
             raise Exception(
@@ -139,7 +155,11 @@ class DagUpdateController(AirflowHandler):
     async def _handle_post(self, client):
         status = self.get_argument("status")
         update_response = await client.update_job(
-            self.composer_environment, self.dag_id, status
+            self.composer_environment,
+            self.dag_id,
+            status,
+            self.project_id,
+            self.region_id,
         )
         if update_response != 0:
             raise Exception(
@@ -157,7 +177,13 @@ class DagRunController(AirflowHandler):
         offset = self.get_argument("offset")
         end_date = self.get_argument("end_date")
         return await client.list_dag_runs(
-            self.composer_environment, self.dag_id, start_date, end_date, offset
+            self.composer_environment,
+            self.dag_id,
+            start_date,
+            end_date,
+            offset,
+            self.project_id,
+            self.region_id,
         )
 
 
@@ -167,7 +193,11 @@ class DagRunTaskController(AirflowHandler):
 
     async def _handle_get(self, client):
         return await client.list_dag_run_task(
-            self.composer_environment, self.dag_id, self.dag_run_id
+            self.composer_environment,
+            self.dag_id,
+            self.dag_run_id,
+            self.project_id,
+            self.region_id,
         )
 
 
@@ -184,6 +214,8 @@ class DagRunTaskLogsController(AirflowHandler):
             self.dag_run_id,
             task_id,
             task_try_number,
+            self.project_id,
+            self.region_id,
         )
 
 
@@ -200,7 +232,9 @@ class ImportErrorController(AirflowHandler):
         return "import error list"
 
     async def _handle_get(self, client):
-        return await client.list_import_errors(self.composer_environment)
+        return await client.list_import_errors(
+            self.composer_environment, self.project_id, self.region_id
+        )
 
 
 class TriggerDagController(AirflowHandler):
@@ -208,4 +242,6 @@ class TriggerDagController(AirflowHandler):
         return "DAG"
 
     async def _handle_post(self, client):
-        return await client.dag_trigger(self.dag_id, self.composer_environment)
+        return await client.dag_trigger(
+            self.dag_id, self.composer_environment, self.project_id, self.region_id
+        )

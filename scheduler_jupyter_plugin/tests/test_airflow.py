@@ -27,7 +27,9 @@ from scheduler_jupyter_plugin import credentials
 from scheduler_jupyter_plugin.services import airflow
 
 
-async def mock_get_airflow_uri_and_bucket(self, composer_name):
+async def mock_get_airflow_uri_and_bucket(
+    self, composer_name, project_id=None, region_id=None
+):
     return {"airflow_uri": "https://mock_airflow_uri", "bucket": "mock_bucket"}
 
 
@@ -38,10 +40,16 @@ async def test_list_jobs(monkeypatch, jp_fetch):
         airflow.Client, "get_airflow_uri_and_bucket", mock_get_airflow_uri_and_bucket
     )
     mock_composer = "mock-url"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "dagList",
-        params={"composer": mock_composer},
+        params={
+            "composer": mock_composer,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
+        },
     )
 
     assert response.code == 200
@@ -157,6 +165,8 @@ async def test_update_job(monkeypatch, jp_fetch):
     mock_composer = "composer"
     mock_dag_id = "mock_dag_id"
     mock_status = "true"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "dagUpdate",
@@ -164,6 +174,8 @@ async def test_update_job(monkeypatch, jp_fetch):
             "composer": mock_composer,
             "dag_id": mock_dag_id,
             "status": mock_status,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
         method="POST",
         allow_nonstandard_methods=True,
@@ -184,6 +196,8 @@ async def test_list_dag_run(monkeypatch, jp_fetch):
     mock_start_date = "mock_start_date"
     mock_offset = "mock_offset"
     mock_end_date = "mock_end_date"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "dagRun",
@@ -193,6 +207,8 @@ async def test_list_dag_run(monkeypatch, jp_fetch):
             "start_date": mock_start_date,
             "offset": mock_offset,
             "end_date": mock_end_date,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
     )
     assert response.code == 200
@@ -217,6 +233,8 @@ async def test_list_dag_run_task_logs(monkeypatch, jp_fetch):
     mock_dag_run_id = "256"
     mock_task_id = "mock_task_id"
     mock_task_try = "mock_task_try"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "dagRunTaskLogs",
@@ -226,6 +244,8 @@ async def test_list_dag_run_task_logs(monkeypatch, jp_fetch):
             "dag_run_id": mock_dag_run_id,
             "task_id": mock_task_id,
             "task_try_number": mock_task_try,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
     )
     assert response.code == 200
@@ -242,6 +262,8 @@ async def test_list_dag_run_task(monkeypatch, jp_fetch):
     mock_composer = "mock-url"
     mock_dag_id = "mock_dag_id"
     mock_dag_run_id = "257"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "dagRunTask",
@@ -249,6 +271,8 @@ async def test_list_dag_run_task(monkeypatch, jp_fetch):
             "composer": mock_composer,
             "dag_id": mock_dag_id,
             "dag_run_id": mock_dag_run_id,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
     )
     assert response.code == 200
@@ -280,10 +304,16 @@ async def test_list_import_errors(monkeypatch, jp_fetch):
     )
 
     mock_composer = "mock-composer"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "importErrorsList",
-        params={"composer": mock_composer},
+        params={
+            "composer": mock_composer,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
+        },
     )
     assert response.code == 200
     payload = json.loads(response.body)
@@ -302,10 +332,17 @@ async def test_dag_trigger(monkeypatch, jp_fetch):
 
     mock_composer = "mock-url"
     mock_dag_id = "mock_dag_id"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "triggerDag",
-        params={"dag_id": mock_dag_id, "composer": mock_composer},
+        params={
+            "dag_id": mock_dag_id,
+            "composer": mock_composer,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
+        },
         method="POST",
         allow_nonstandard_methods=True,
     )

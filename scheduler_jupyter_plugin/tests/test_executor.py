@@ -117,6 +117,8 @@ async def test_download_dag_output(monkeypatch, returncode, expected_result, jp_
     mock_bucket_name = "mock_bucket"
     mock_dag_id = "mock-dag-id"
     mock_dag_run_id = "258"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
 
     response = await jp_fetch(
         "scheduler-plugin",
@@ -126,6 +128,8 @@ async def test_download_dag_output(monkeypatch, returncode, expected_result, jp_
             "bucket_name": mock_bucket_name,
             "dag_id": mock_dag_id,
             "dag_run_id": mock_dag_run_id,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
         method="POST",
         allow_nonstandard_methods=True,
@@ -140,6 +144,8 @@ async def test_invalid_composer_name(monkeypatch, jp_fetch):
     mock_bucket_name = "mock-bucket"
     mock_dag_id = "mock-dag-id"
     mock_dag_run_id = "258"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "downloadOutput",
@@ -148,6 +154,8 @@ async def test_invalid_composer_name(monkeypatch, jp_fetch):
             "bucket_name": mock_bucket_name,
             "dag_id": mock_dag_id,
             "dag_run_id": mock_dag_run_id,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
         method="POST",
         allow_nonstandard_methods=True,
@@ -164,6 +172,8 @@ async def test_invalid_bucket_name(monkeypatch, jp_fetch):
     mock_bucket_name = "mock/bucket"
     mock_dag_id = "mock-dag-id"
     mock_dag_run_id = "258"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "downloadOutput",
@@ -172,6 +182,8 @@ async def test_invalid_bucket_name(monkeypatch, jp_fetch):
             "bucket_name": mock_bucket_name,
             "dag_id": mock_dag_id,
             "dag_run_id": mock_dag_run_id,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
         method="POST",
         allow_nonstandard_methods=True,
@@ -188,6 +200,8 @@ async def test_invalid_dag_id(monkeypatch, jp_fetch):
     mock_bucket_name = "mock-bucket"
     mock_dag_id = "mock/dag/id"
     mock_dag_run_id = "258"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "downloadOutput",
@@ -196,6 +210,8 @@ async def test_invalid_dag_id(monkeypatch, jp_fetch):
             "bucket_name": mock_bucket_name,
             "dag_id": mock_dag_id,
             "dag_run_id": mock_dag_run_id,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
         method="POST",
         allow_nonstandard_methods=True,
@@ -212,6 +228,8 @@ async def test_invalid_dag_run_id(monkeypatch, jp_fetch):
     mock_bucket_name = "mock-bucket"
     mock_dag_id = "mock-dag-id"
     mock_dag_run_id = "a/b/c/d"
+    mock_project_id = "mock-project-id"
+    mock_region_id = "mock-region-id"
     response = await jp_fetch(
         "scheduler-plugin",
         "downloadOutput",
@@ -220,6 +238,8 @@ async def test_invalid_dag_run_id(monkeypatch, jp_fetch):
             "bucket_name": mock_bucket_name,
             "dag_id": mock_dag_id,
             "dag_run_id": mock_dag_run_id,
+            "project_id": mock_project_id,
+            "region_id": mock_region_id,
         },
         method="POST",
         allow_nonstandard_methods=True,

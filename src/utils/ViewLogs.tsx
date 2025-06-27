@@ -21,6 +21,7 @@ import ViewLogsIcon from '../../style/icons/view_logs_icon.svg';
 import {
   API_HEADER_BEARER,
   API_HEADER_CONTENT_TYPE,
+  HTTP_STATUS_NOT_FOUND,
   SPARK_HISTORY_SERVER,
   VIEW_LOGS_BATCH_URL,
   VIEW_LOGS_CLUSTER_URL,
@@ -111,7 +112,7 @@ function ViewLogs({
             .then((responseResult: IHttpPorts) => {
               if (
                 responseResult.error &&
-                responseResult.error.code === 404 &&
+                responseResult.error.code === HTTP_STATUS_NOT_FOUND &&
                 setErrorView
               ) {
                 setErrorView(true);

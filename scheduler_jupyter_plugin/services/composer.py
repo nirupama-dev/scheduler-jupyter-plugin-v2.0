@@ -19,6 +19,8 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
+    HTTP_STATUS_OK,
+    HTTP_STATUS_FORBIDDEN,
 )
 from scheduler_jupyter_plugin.models.models import ComposerEnvironment
 
@@ -59,7 +61,7 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     if not resp:
                         return environments
@@ -81,7 +83,7 @@ class Client:
                                 )
                             )
                         return environments
-                elif response.status == 403:
+                elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
                 else:

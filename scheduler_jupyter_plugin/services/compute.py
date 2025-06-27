@@ -20,6 +20,8 @@ import google.oauth2.credentials as oauth2
 from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
+    HTTP_STATUS_OK,
+    HTTP_STATUS_NO_CONTENT,
 )
 
 
@@ -141,14 +143,14 @@ class Client:
             async with self.client_session.get(
                 api_endpoint, headers=headers
             ) as response:
-                if response.status == 200:
+                if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     if not resp:
                         return res
                     else:
                         res["name"] = resp.get("name")
                         return res
-                elif response.status == 204:
+                elif response.status == HTTP_STATUS_NO_CONTENT:
                     return res
                 else:
                     self.log.exception("Error getting xpn host")

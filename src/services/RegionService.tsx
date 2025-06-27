@@ -55,11 +55,17 @@ const regionListAPI = async (projectId: string, credentials: any) => {
   }
 };
 
-export function useRegion(projectId: string) {
+export function useRegion(
+  projectId: string,
+  setLoaderRegion: ((value: boolean) => void) | undefined
+) {
   const [regions, setRegions] = useState<IRegions[]>([]);
   const currentRegion = useRef(projectId);
 
   useEffect(() => {
+    if (setLoaderRegion && projectId) {
+      setLoaderRegion(true);
+    }
     currentRegion.current = projectId;
     authApi()
       .then(credentials => regionListAPI(projectId, credentials))
@@ -70,8 +76,14 @@ export function useRegion(projectId: string) {
           return;
         }
         setRegions(items);
+        if (setLoaderRegion) {
+          setLoaderRegion(false);
+        }
       })
       .catch(error => {
+        if (setLoaderRegion) {
+          setLoaderRegion(false);
+        }
         console.error(error);
         handleErrorToast({
           error: error.message

@@ -56,7 +56,8 @@ import {
   scheduleMode,
   scheduleValueExpression,
   SHARED_NETWORK_DOC_URL,
-  VERTEX_REGIONS
+  VERTEX_REGIONS,
+  VERTEX_SCHEDULE
 } from '../../utils/Const';
 import LearnMore from '../common/LearnMore';
 import ErrorMessage from '../common/ErrorMessage';
@@ -216,6 +217,7 @@ const CreateVertexScheduler = ({
   const [errorMessageSubnetworkNetwork, setErrorMessageSubnetworkNetwork] =
     useState<string>('');
   const [diskSizeFlag, setDiskSizeFlag] = useState<boolean>(false);
+  const [createMode, setCreateMode] = useState<boolean>(false);
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -224,6 +226,7 @@ const CreateVertexScheduler = ({
   const handleRegionChange = (value: React.SetStateAction<string>) => {
     setRegion(value);
     setMachineTypeSelected(null);
+    setMachineTypeList([]);
     setAcceleratedCount(null);
     setAcceleratorType(null);
   };
@@ -771,13 +774,15 @@ const CreateVertexScheduler = ({
         setCreateCompleted,
         setCreatingVertexScheduler,
         gcsPath,
-        setEditMode
+        setEditMode,
+        setCreateMode
       );
     } else {
       await VertexServices.createVertexSchedulerService(
         payload,
         setCreateCompleted,
-        setCreatingVertexScheduler
+        setCreatingVertexScheduler,
+        setCreateMode
       );
       setEditMode(false);
     }
@@ -813,30 +818,37 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     setLoaderRegion(true);
-    if (region !== '') {
-      machineTypeAPI();
-    }
+
     if (Object.keys(hostProject).length > 0) {
       sharedNetworkAPI();
     }
-    hostProjectAPI();
-    cloudStorageAPI();
-    serviceAccountAPI();
-    primaryNetworkAPI();
-    authApi()
-      .then(credentials => {
-        if (credentials?.region_id && credentials?.project_id) {
-          setLoaderRegion(false);
-          setRegion(credentials.region_id);
-          setProjectId(credentials.project_id);
-        }
-      })
-      .catch(error => {
-        handleErrorToast({
-          error: error
+
+    if (!createCompleted) {
+      hostProjectAPI();
+      cloudStorageAPI();
+      serviceAccountAPI();
+      primaryNetworkAPI();
+
+      authApi()
+        .then(credentials => {
+          if (credentials?.region_id && credentials?.project_id) {
+            setLoaderRegion(false);
+            setRegion(credentials.region_id);
+            setProjectId(credentials.project_id);
+          }
+        })
+        .catch(error => {
+          handleErrorToast({
+            error: error
+          });
         });
-      });
-  }, [projectId]);
+    }
+
+    if (!editMode) {
+      setStartDate(null);
+      setEndDate(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (editMode && vertexSchedulerDetails) {
@@ -890,18 +902,14 @@ const CreateVertexScheduler = ({
   }, [editMode]);
 
   useEffect(() => {
-    if (!editMode) {
-      setStartDate(null);
-      setEndDate(null);
-    }
-  }, []);
-
-  useEffect(() => {
     if (!region) {
       setMachineTypeList([]);
+      setMachineTypeSelected(null);
     } else {
       machineTypeAPI();
-      subNetworkAPI(primaryNetworkSelected?.name);
+      if (!createCompleted) {
+        subNetworkAPI(primaryNetworkSelected?.name);
+      }
     }
   }, [region]);
 
@@ -982,6 +990,7 @@ const CreateVertexScheduler = ({
           setVertexScheduleDetails={setVertexSchedulerDetails}
           setApiEnableUrl={setApiEnableUrl}
           setListingScreenFlag={setListingScreenFlag}
+          createMode={createMode}
         />
       ) : (
         <div className="submit-job-container text-enable-warning">
@@ -991,8 +1000,9 @@ const CreateVertexScheduler = ({
               region={region}
               onRegionChange={region => handleRegionChange(region)}
               editMode={editMode}
-              loaderRegion={loaderRegion}
               regionsList={VERTEX_REGIONS}
+              fromPage={VERTEX_SCHEDULE}
+              loaderRegion={loaderRegion}
             />
           </div>
           {!region && (
@@ -1027,11 +1037,12 @@ const CreateVertexScheduler = ({
                 />
               )}
               clearIcon={false}
-              loading={!region || machineTypeLoading}
+              loading={machineTypeLoading}
+              disabled={!region}
             />
           </div>
 
-          {!machineTypeSelected && !apiError && (
+          {!machineTypeSelected && !apiError && region && (
             <ErrorMessage message="Machine type is required" showIcon={false} />
           )}
 
