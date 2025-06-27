@@ -686,9 +686,9 @@ const CreateNotebookScheduler = ({
                 popupIcon={null}
                 className={disableEnvLocal || editMode ? 'disable-item' : ''}
                 loaderProjectId={loaderProjectId}
+                disabled={true}
               />
             </div>
-            {!projectId && <ErrorMessage message="Project ID is required" />}
 
             <div className="create-scheduler-form-element scheduler-region-top">
               <RegionDropdown
