@@ -162,7 +162,7 @@ const VertexExecutionHistory = ({
    */
   const handleLogs = async () => {
     const logExplorerUrl = new URL(LOG_EXPLORER_BASE_URL);
-    logExplorerUrl.searchParams.set('query', jobRunId);
+    logExplorerUrl.searchParams.set('query', `SEARCH("${jobRunId}")`);
     if (jobRunsData?.startDate) {
       logExplorerUrl.searchParams.set('cursorTimestamp', jobRunsData.startDate);
     }
