@@ -429,6 +429,7 @@ function ListVertexScheduler({
     newPageToken: string | null | undefined
   ) => {
     setDeletingSchedule(true);
+    resetPaginationVariables(false); // Reset pagination variables to fetch the first page after deletion
     await VertexServices.handleDeleteSchedulerAPIService(
       region,
       uniqueScheduleId,
