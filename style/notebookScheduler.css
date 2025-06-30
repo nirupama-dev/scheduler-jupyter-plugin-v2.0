@@ -596,10 +596,6 @@
   display: flex;
 }
 
-.select-panel-list-view {
-  max-width: 340px;
-}
-
 .disable-item {
   padding-right: 5px;
   color: rgb(245 245 245);
@@ -608,7 +604,7 @@
 }
 
 .select-panel-list-view-lay {
-  width: 294px;
+  max-width: 294px;
 }
 
 .execution-state {

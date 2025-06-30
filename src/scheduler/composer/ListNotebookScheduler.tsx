@@ -771,13 +771,7 @@ function ListNotebookScheduler({
       <div className="select-text-overlay-scheduler">
         <div className="select-panel-list">
           <div>
-            <div
-              className={
-                importErrorEntries > 0
-                  ? 'create-scheduler-form-element select-panel-list-view-lay table-right-space'
-                  : 'create-scheduler-form-element select-panel-list-view table-right-space'
-              }
-            >
+            <div className="create-scheduler-form-element select-panel-list-view-lay table-right-space">
               <DynamicDropdown
                 value={projectId}
                 onChange={(_, projectId: string | null) => {
@@ -803,13 +797,7 @@ function ListNotebookScheduler({
           </div>
 
           <div>
-            <div
-              className={
-                importErrorEntries > 0
-                  ? 'create-scheduler-form-element select-panel-list-view-lay table-right-space'
-                  : 'create-scheduler-form-element select-panel-list-view table-right-space'
-              }
-            >
+            <div className="create-scheduler-form-element select-panel-list-view-lay table-right-space">
               <RegionDropdown
                 projectId={projectId}
                 region={region}
@@ -823,13 +811,7 @@ function ListNotebookScheduler({
             )}
           </div>
 
-          <div
-            className={
-              importErrorEntries > 0
-                ? 'create-scheduler-form-element select-panel-list-view-lay progress-main'
-                : 'create-scheduler-form-element select-panel-list-view'
-            }
-          >
+          <div className="create-scheduler-form-element select-panel-list-view-lay">
             <Autocomplete
               options={composerList}
               value={composerEnvSelected}
