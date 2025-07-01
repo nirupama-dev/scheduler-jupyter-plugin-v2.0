@@ -144,3 +144,5 @@ export const VERTEX_SCHEDULE = 'vertex';
 export const ABORT_MESSAGE = 'signal is aborted without reason';
 
 export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
+
+export const everyMinuteCron = '* * * * *';
