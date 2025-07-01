@@ -208,6 +208,11 @@ export class VertexServices {
     setApiError('');
 
     try {
+      // setting controller to abort pending api call
+      const controller = new AbortController();
+      abortControllers.current.push(controller);
+      const signal = controller.signal;
+
       const serviceURL = 'api/vertex/listSchedules';
       let urlparam = `?region_id=${region}&page_size=${pageLength}`;
       if (newPageToken) {
@@ -215,7 +220,9 @@ export class VertexServices {
       }
 
       // API call
-      const formattedResponse = await requestAPI(serviceURL + urlparam);
+      const formattedResponse = await requestAPI(serviceURL + urlparam, {
+        signal
+      });
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
         setVertexScheduleList([]);
@@ -270,19 +277,28 @@ export class VertexServices {
         setIsLoading(false);
       }
     } catch (error: any) {
-      // Handle errors during the API call
-      setVertexScheduleList([]);
-      setNextPageToken(null);
-      setHasNextPageToken(false);
-      setIsApiError(true);
-      setApiError('An error occurred while fetching schedules.');
-      SchedulerLoggingService.log(
-        `Error listing vertex schedules ${error}`,
-        LOG_LEVEL.ERROR
-      );
-      handleErrorToast({
-        error: error
-      });
+      if (typeof error === 'object' && error !== null) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      } else {
+        // Handle errors during the API call
+        setVertexScheduleList([]);
+        setNextPageToken(null);
+        setHasNextPageToken(false);
+        setIsApiError(true);
+        setApiError('An error occurred while fetching schedules.');
+        SchedulerLoggingService.log(
+          `Error listing vertex schedules ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        handleErrorToast({
+          error: error
+        });
+      }
     } finally {
       setIsLoading(false); // Ensure loading is stopped
     }

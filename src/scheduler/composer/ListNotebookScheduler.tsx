@@ -693,7 +693,6 @@ function ListNotebookScheduler({
       if (credentials?.project_id && credentials?.region_id) {
         setLoaderProjectId(false);
         setLoaderRegion(false);
-        console.log('Setting project and region', projectId, region);
         setProjectId(projectId || credentials.project_id);
         setRegion(region || credentials.region_id);
       }
