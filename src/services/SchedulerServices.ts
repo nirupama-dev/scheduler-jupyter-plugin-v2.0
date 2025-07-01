@@ -239,10 +239,6 @@ export class SchedulerService {
           setEnvApiFlag(false);
         }
       } else {
-        if (setIsLoading) {
-          setIsLoading(false);
-        }
-
         setIsApiError(false);
         setApiError('');
         const composerEnvironmentList: string[] = [];

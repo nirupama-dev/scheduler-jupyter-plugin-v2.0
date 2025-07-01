@@ -192,6 +192,7 @@ function ListNotebookScheduler({
   const isDagInfoApiLoading = useRef(false);
   const isImportErrorApiLoading = useRef(false);
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
+  const [composerChangeFlag, setComposerChangeFlag] = useState<boolean>(false);
 
   const columns = React.useMemo(
     () => [
@@ -237,12 +238,25 @@ function ListNotebookScheduler({
       timerImportError.current
     );
   };
-  const handleComposerSelected = (data: string | null) => {
+  const handleComposerSelected = async (data: string | null) => {
+    setIsLoading(true);
+    setComposerChangeFlag(true);
     abortApiCall();
     setDagList([]);
     if (data) {
       const selectedComposer = data.toString();
       setComposerEnvSelected(selectedComposer);
+      await SchedulerService.listDagInfoAPIService(
+        setDagList,
+        setIsLoading,
+        setBucketName,
+        selectedComposer,
+        region,
+        projectId,
+        abortControllers,
+        isDagInfoApiLoading
+      );
+      setComposerChangeFlag(false);
     }
   };
   const handleUpdateScheduler = async (
@@ -711,7 +725,7 @@ function ListNotebookScheduler({
   }, [composerList]);
 
   useEffect(() => {
-    if (composerEnvSelected !== '') {
+    if (composerEnvSelected !== '' && !composerChangeFlag) {
       setIsLoading(true);
       listDagInfoAPI();
       handleImportErrordata();
