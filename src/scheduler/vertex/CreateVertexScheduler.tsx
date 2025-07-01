@@ -34,13 +34,14 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Cron } from 'react-js-cron';
+import { Cron, PeriodType } from 'react-js-cron';
 import tzdata from 'tzdata';
 import dayjs from 'dayjs';
 import { Input } from '../../controls/MuiWrappedInput';
 import { RegionDropdown } from '../../controls/RegionDropdown';
 import { authApi, currentTime } from '../../utils/Config';
 import {
+  allowedPeriodsCron,
   CORN_EXP_DOC_URL,
   DEFAULT_CLOUD_STORAGE_BUCKET,
   DEFAULT_DISK_MAX_SIZE,
@@ -1650,7 +1651,13 @@ const CreateVertexScheduler = ({
             {scheduleMode === 'runSchedule' &&
               internalScheduleMode === 'userFriendly' && (
                 <div className="create-scheduler-form-element">
-                  <Cron value={scheduleValue} setValue={setScheduleValue} />
+                  <Cron
+                    value={scheduleValue}
+                    setValue={setScheduleValue}
+                    allowedPeriods={
+                      allowedPeriodsCron as PeriodType[] | undefined
+                    }
+                  />
                 </div>
               )}
             {scheduleMode === 'runSchedule' && (
