@@ -239,10 +239,6 @@ export class SchedulerService {
           setEnvApiFlag(false);
         }
       } else {
-        if (setIsLoading) {
-          setIsLoading(false);
-        }
-
         setIsApiError(false);
         setApiError('');
         const composerEnvironmentList: string[] = [];
@@ -744,7 +740,6 @@ export class SchedulerService {
       }
       setBucketName(formattedResponse[1]);
     } catch (error) {
-      setIsLoading(false);
       if (dagInfoApiLoading) {
         dagInfoApiLoading.current = false;
       }
@@ -756,6 +751,7 @@ export class SchedulerService {
           return;
         }
       } else {
+        setIsLoading(false);
         SchedulerLoggingService.log(
           'Error listing dag Scheduler list',
           LOG_LEVEL.ERROR
