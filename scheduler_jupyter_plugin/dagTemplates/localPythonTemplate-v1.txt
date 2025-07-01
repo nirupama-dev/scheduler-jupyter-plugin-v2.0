@@ -64,7 +64,7 @@ def run_notebook_task(**kwargs):
     parameters = '''
     {{parameters}}
     '''
-    if len(parameters)>0:
+    if parameters.strip():
         parameters_dict = convert_parameters(parameters)
     else:
         parameters_dict = {}
