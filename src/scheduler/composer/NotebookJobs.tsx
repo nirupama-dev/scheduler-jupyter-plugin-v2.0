@@ -23,13 +23,13 @@ import ListNotebookScheduler from './ListNotebookScheduler';
 import ExecutionHistory from './ExecutionHistory';
 import { scheduleMode } from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
+import { IComposerAPIResponse } from '../common/SchedulerInteface';
 
 const NotebookJobComponent = ({
   app,
   settingRegistry,
   setCreateCompleted,
   setJobNameSelected,
-  setComposerSelected,
   setScheduleMode,
   setScheduleValue,
   setInputFileSelected,
@@ -71,7 +71,6 @@ const NotebookJobComponent = ({
   settingRegistry: ISettingRegistry;
   setCreateCompleted?: (value: boolean) => void;
   setJobNameSelected?: (value: string) => void;
-  setComposerSelected?: (value: string) => void;
   setScheduleMode?: (value: scheduleMode) => void;
   setScheduleValue?: (value: string) => void;
 
@@ -101,8 +100,8 @@ const NotebookJobComponent = ({
   setIsLocalKernel: (value: boolean) => void;
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
-  composerEnvSelected: string;
-  setComposerEnvSelected: (value: string) => void;
+  composerEnvSelected: IComposerAPIResponse | null;
+  setComposerEnvSelected: (value: IComposerAPIResponse | null) => void;
   setApiEnableUrl: any;
   region: string;
   setRegion: (value: string) => void;
@@ -159,7 +158,6 @@ const NotebookJobComponent = ({
                 backButtonComposerName={backComposerName}
                 setCreateCompleted={setCreateCompleted}
                 setJobNameSelected={setJobNameSelected}
-                setComposerSelected={setComposerSelected}
                 setScheduleMode={setScheduleMode}
                 setScheduleValue={setScheduleValue}
                 setInputFileSelected={setInputFileSelected}
@@ -217,8 +215,8 @@ export class NotebookJobs extends SchedulerWidget {
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
   setApiEnableUrl: any;
-  composerEnvSelected: string;
-  setComposerEnvSelected: (value: string) => void;
+  composerEnvSelected: IComposerAPIResponse | null;
+  setComposerEnvSelected: (value: IComposerAPIResponse | null) => void;
   region: string;
   setRegion: (value: string) => void;
   projectId: string;
@@ -235,8 +233,8 @@ export class NotebookJobs extends SchedulerWidget {
     setPackageEditFlag: (value: boolean) => void,
     setSchedulerBtnDisable: (value: boolean) => void,
     setApiEnableUrl: any,
-    composerEnvSelected: string,
-    setComposerEnvSelected: (value: string) => void,
+    composerEnvSelected: IComposerAPIResponse | null,
+    setComposerEnvSelected: (value: IComposerAPIResponse | null) => void,
     region: string,
     setRegion: (value: string) => void,
     projectId: string,

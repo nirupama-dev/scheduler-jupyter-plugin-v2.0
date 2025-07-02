@@ -48,7 +48,7 @@ import { IComposerAPIResponse, IDagList } from '../common/SchedulerInteface';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
 import { RegionDropdown } from '../../controls/RegionDropdown';
-import { authApi } from '../../utils/Config';
+import { authApi, findEnvironmentSelected } from '../../utils/Config';
 import { iconSuccess, iconWarning } from '../../utils/Icons';
 import { ProgressPopUp } from '../../utils/ProgressPopUp';
 import { toast } from 'react-toastify';
@@ -112,8 +112,11 @@ const CreateNotebookScheduler = ({
   jobNameUniquenessError: boolean;
   setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element => {
-  const [composerEnvData, setComposerEnvData] = useState<IComposerAPIResponse[]>([]);
-  const [composerEnvSelected, setComposerEnvSelected] = useState<IComposerAPIResponse>();
+  const [composerEnvData, setComposerEnvData] = useState<
+    IComposerAPIResponse[]
+  >([]);
+  const [composerEnvSelected, setComposerEnvSelected] =
+    useState<IComposerAPIResponse | null>(null);
 
   const [parameterDetail, setParameterDetail] = useState(['']);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState(['']);
@@ -209,9 +212,17 @@ const CreateNotebookScheduler = ({
 
     if (data) {
       const selectedComposer = data.toString();
-      setComposerEnvSelected(selectedComposer);
-      if (selectedComposer) {
-        const unique = getDaglist(selectedComposer);
+      const selectedEnvironment = findEnvironmentSelected(
+        selectedComposer,
+        composerEnvData
+      );
+
+      if (selectedEnvironment) {
+        setComposerEnvSelected(selectedEnvironment);
+      }
+
+      if (selectedEnvironment?.name) {
+        const unique = getDaglist(selectedEnvironment?.name);
         if (!unique) {
           setJobNameUniqueValidation(true);
         }
@@ -219,7 +230,7 @@ const CreateNotebookScheduler = ({
         if (isLocalKernel) {
           setDisableEnvLocal(true);
           SchedulerService.checkRequiredPackagesInstalled(
-            selectedComposer,
+            selectedEnvironment?.name,
             setPackageInstallationMessage,
             setPackageInstalledList,
             setPackageListFlag,
@@ -360,7 +371,7 @@ const CreateNotebookScheduler = ({
     const randomDagId = uuidv4();
     const payload = {
       input_filename: inputFileSelected,
-      composer_environment_name: composerEnvSelected,
+      composer_environment_name: composerEnvSelected?.name ?? '',
       output_formats: outputFormats,
       parameters: parameterDetailUpdated,
       local_kernel: isLocalKernel,
@@ -429,7 +440,7 @@ const CreateNotebookScheduler = ({
             item.split(':')[1]?.length === 0) ||
           (item.split(':')[0]?.length === 0 && item.split(':')[1]?.length > 0)
       ) ||
-      composerEnvSelected === '' ||
+      composerEnvSelected?.name === '' ||
       (selectedMode === 'cluster' &&
         clusterSelected === '' &&
         !isLocalKernel) ||
@@ -525,7 +536,7 @@ const CreateNotebookScheduler = ({
 
     if (!region) {
       setComposerEnvData([]);
-      setComposerEnvSelected('');
+      setComposerEnvSelected(null);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
       setPackageListFlag(false);
@@ -533,7 +544,7 @@ const CreateNotebookScheduler = ({
   }, [projectId, region]);
 
   useEffect(() => {
-    if (composerEnvSelected !== '' && dagList.length > 0) {
+    if (composerEnvSelected?.name !== '' && dagList.length > 0) {
       const isUnique = !dagList.some(
         dag => dag.notebookname === jobNameSelected
       );
@@ -563,7 +574,7 @@ const CreateNotebookScheduler = ({
     setPackageInstalledList([]);
     setapiErrorMessage('');
     setPackageInstallationMessage('');
-    setComposerEnvSelected('');
+    setComposerEnvSelected(null);
     setComposerEnvData([]);
     setPackageListFlag(false);
     setRegion(value);
@@ -585,7 +596,7 @@ const CreateNotebookScheduler = ({
   useEffect(() => {
     if (!projectId) {
       setRegion('');
-      setComposerEnvSelected('');
+      setComposerEnvSelected(null);
       setComposerEnvData([]);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
@@ -603,7 +614,7 @@ const CreateNotebookScheduler = ({
       const signal = abortControllerRef.current.signal;
 
       SchedulerService.checkRequiredPackagesInstalled(
-        composerEnvSelected,
+        composerEnvSelected?.name || '',
         setPackageInstallationMessage,
         setPackageInstalledList,
         setPackageListFlag,
@@ -630,7 +641,6 @@ const CreateNotebookScheduler = ({
           settingRegistry={settingRegistry}
           setCreateCompleted={setCreateCompleted}
           setJobNameSelected={setJobNameSelected}
-          setComposerSelected={setComposerEnvSelected}
           setScheduleMode={setScheduleMode}
           setScheduleValue={setScheduleValue}
           setInputFileSelected={setInputFileSelected}
@@ -707,8 +717,10 @@ const CreateNotebookScheduler = ({
             <div className="create-scheduler-form-element block-level-seperation ">
               <Autocomplete
                 className="create-scheduler-style"
-                options={composerEnvData}
-                value={composerEnvSelected}
+                options={composerEnvData?.map(
+                  (env: IComposerAPIResponse) => env.name
+                )}
+                value={composerEnvSelected?.name ?? ''}
                 onChange={(_event, val) => handleComposerEnvSelected(val)}
                 renderInput={params => (
                   <TextField
@@ -718,13 +730,15 @@ const CreateNotebookScheduler = ({
                       ...params.InputProps,
                       endAdornment: (
                         <>
-                          {composerEnvData.length <= 0 && region && envApiFlag && (
-                            <CircularProgress
-                              aria-label="Loading Spinner"
-                              data-testid="loader"
-                              size={18}
-                            />
-                          )}
+                          {composerEnvData.length <= 0 &&
+                            region &&
+                            envApiFlag && (
+                              <CircularProgress
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                                size={18}
+                              />
+                            )}
                           {params.InputProps.endAdornment}
                         </>
                       )

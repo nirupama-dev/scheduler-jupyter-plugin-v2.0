@@ -360,13 +360,13 @@ export class SchedulerService {
   static readonly editJobSchedulerService = async (
     bucketName: string,
     dagId: string,
-    composerSelectedList: string,
+    composerEnvSelected: IComposerAPIResponse | null,
     setEditDagLoading: (value: string) => void,
     setIsLocalKernel: (value: boolean) => void,
     setPackageEditFlag: (value: boolean) => void,
     setCreateCompleted?: (value: boolean) => void,
     setJobNameSelected?: (value: string) => void,
-    setComposerSelected?: (value: string) => void,
+    setComposerEnvSelected?: (value: IComposerAPIResponse | null) => void,
     setScheduleMode?: (value: scheduleMode) => void,
     setScheduleValue?: (value: string) => void,
     setInputFileSelected?: (value: string) => void,
@@ -409,7 +409,7 @@ export class SchedulerService {
       if (
         setCreateCompleted &&
         setJobNameSelected &&
-        setComposerSelected &&
+        setComposerEnvSelected &&
         setScheduleMode &&
         setScheduleValue &&
         setInputFileSelected &&
@@ -434,7 +434,7 @@ export class SchedulerService {
         dagId !== null
       ) {
         setJobNameSelected(dagId);
-        setComposerSelected(composerSelectedList);
+        setComposerEnvSelected(composerEnvSelected);
         setInputFileSelected(formattedResponse.input_filename);
 
         if (formattedResponse.mode_selected === 'local') {
