@@ -44,7 +44,7 @@ import NotebookJobComponent from './NotebookJobs';
 import { scheduleMode, scheduleValueExpression } from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import ErrorMessage from '../common/ErrorMessage';
-import { IDagList } from '../common/SchedulerInteface';
+import { IComposerAPIResponse, IDagList } from '../common/SchedulerInteface';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
 import { RegionDropdown } from '../../controls/RegionDropdown';
@@ -112,8 +112,8 @@ const CreateNotebookScheduler = ({
   jobNameUniquenessError: boolean;
   setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element => {
-  const [composerList, setComposerList] = useState<string[]>([]);
-  const [composerEnvSelected, setComposerEnvSelected] = useState<string>('');
+  const [composerEnvData, setComposerEnvData] = useState<IComposerAPIResponse[]>([]);
+  const [composerEnvSelected, setComposerEnvSelected] = useState<IComposerAPIResponse>();
 
   const [parameterDetail, setParameterDetail] = useState(['']);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState(['']);
@@ -187,7 +187,7 @@ const CreateNotebookScheduler = ({
   const listComposersAPI = async () => {
     setEnvApiFlag(true);
     await SchedulerService.listComposersAPIService(
-      setComposerList,
+      setComposerEnvData,
       projectId,
       region,
       setIsApiError,
@@ -524,7 +524,7 @@ const CreateNotebookScheduler = ({
     }
 
     if (!region) {
-      setComposerList([]);
+      setComposerEnvData([]);
       setComposerEnvSelected('');
       setapiErrorMessage('');
       setPackageInstallationMessage('');
@@ -564,7 +564,7 @@ const CreateNotebookScheduler = ({
     setapiErrorMessage('');
     setPackageInstallationMessage('');
     setComposerEnvSelected('');
-    setComposerList([]);
+    setComposerEnvData([]);
     setPackageListFlag(false);
     setRegion(value);
   };
@@ -586,7 +586,7 @@ const CreateNotebookScheduler = ({
     if (!projectId) {
       setRegion('');
       setComposerEnvSelected('');
-      setComposerList([]);
+      setComposerEnvData([]);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
       setPackageListFlag(false);
@@ -707,7 +707,7 @@ const CreateNotebookScheduler = ({
             <div className="create-scheduler-form-element block-level-seperation ">
               <Autocomplete
                 className="create-scheduler-style"
-                options={composerList}
+                options={composerEnvData}
                 value={composerEnvSelected}
                 onChange={(_event, val) => handleComposerEnvSelected(val)}
                 renderInput={params => (
@@ -718,7 +718,7 @@ const CreateNotebookScheduler = ({
                       ...params.InputProps,
                       endAdornment: (
                         <>
-                          {composerList.length <= 0 && region && envApiFlag && (
+                          {composerEnvData.length <= 0 && region && envApiFlag && (
                             <CircularProgress
                               aria-label="Loading Spinner"
                               data-testid="loader"

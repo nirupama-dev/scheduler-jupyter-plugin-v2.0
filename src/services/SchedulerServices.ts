@@ -171,7 +171,7 @@ export class SchedulerService {
   };
 
   static readonly listComposersAPIService = async (
-    setComposerList: (value: string[]) => void,
+    setComposerEnvData: (value: IComposerAPIResponse[]) => void,
     projectId: string,
     region: string,
     setIsApiError: (value: boolean) => void,
@@ -201,7 +201,7 @@ export class SchedulerService {
 
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
-        setComposerList([]);
+        setComposerEnvData([]);
         if (setIsLoading) {
           setIsLoading(false);
         }
@@ -211,7 +211,7 @@ export class SchedulerService {
         }
       } else if (formattedResponse.length === undefined) {
         try {
-          setComposerList([]);
+          setComposerEnvData([]);
           if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
             const url = formattedResponse.error.message.match(pattern);
             if (url && url.length > 0) {
@@ -241,12 +241,7 @@ export class SchedulerService {
       } else {
         setIsApiError(false);
         setApiError('');
-        const composerEnvironmentList: string[] = [];
-        formattedResponse.forEach((data: IComposerAPIResponse) => {
-          composerEnvironmentList.push(data.name);
-        });
-        composerEnvironmentList.sort();
-        setComposerList(composerEnvironmentList);
+        setComposerEnvData(formattedResponse);
 
         if (setEnvApiFlag) {
           setEnvApiFlag(false);

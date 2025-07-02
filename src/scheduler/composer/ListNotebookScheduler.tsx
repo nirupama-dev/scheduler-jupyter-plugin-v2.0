@@ -41,6 +41,7 @@ import ErrorMessage from '../common/ErrorMessage';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
 import { Notification } from '@jupyterlab/apputils';
+import { IComposerAPIResponse } from '../common/SchedulerInteface';
 
 const iconDelete = new LabIcon({
   name: 'launcher:delete-icon',
@@ -111,7 +112,7 @@ function ListNotebookScheduler({
   setIsLocalKernel,
   setPackageEditFlag,
   setSchedulerBtnDisable,
-  composerEnvSelected = '',
+  composerEnvSelected,
   setComposerEnvSelected,
   setApiEnableUrl,
   region = '',
@@ -158,7 +159,7 @@ function ListNotebookScheduler({
   setIsLocalKernel: (value: boolean) => void;
   setPackageEditFlag: (value: boolean) => void;
   setSchedulerBtnDisable: (value: boolean) => void;
-  composerEnvSelected: string;
+  composerEnvSelected: IComposerAPIResponse;
   setComposerEnvSelected: (value: string) => void;
   setApiEnableUrl: any;
   region: string;
@@ -169,7 +170,8 @@ function ListNotebookScheduler({
   abortApiCall: () => void;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [composerList, setComposerList] = useState<string[]>([]);
+  const [composerEnvData, setComposerEnvData] = useState<IComposerAPIResponse[]>([]);
+  const [compo]
   const [dagList, setDagList] = useState<IDagList[]>([]);
   const data = dagList;
   const backselectedEnvironment = backButtonComposerName;
@@ -383,7 +385,7 @@ function ListNotebookScheduler({
     setEnvApiFlag(true);
     setIsLoading(true);
     await SchedulerService.listComposersAPIService(
-      setComposerList,
+      setComposerEnvData,
       projectId,
       region,
       setIsApiError,
@@ -663,7 +665,7 @@ function ListNotebookScheduler({
     setDagList([]);
     if (setComposerSelected) {
       setComposerSelected('');
-      setComposerList([]);
+      setComposerEnvData([]);
     }
   };
 
@@ -707,21 +709,21 @@ function ListNotebookScheduler({
   }, []);
 
   useEffect(() => {
-    if (composerList.length === 0) {
+    if (composerEnvData.length === 0) {
       setComposerEnvSelected('');
       setDagList([]);
     }
     if (
-      composerList.length > 0 &&
+      composerEnvData.length > 0 &&
       backselectedEnvironment === '' &&
       composerEnvSelected === ''
     ) {
-      setComposerEnvSelected(composerList[0]);
+      setComposerEnvSelected(composerEnvData[0]);
     }
-    if (composerList.length > 0 && backselectedEnvironment !== '') {
+    if (composerEnvData.length > 0 && backselectedEnvironment !== '') {
       setComposerEnvSelected(backselectedEnvironment);
     }
-  }, [composerList]);
+  }, [composerEnvData]);
 
   useEffect(() => {
     if (composerEnvSelected !== '' && !composerChangeFlag) {
@@ -756,7 +758,7 @@ function ListNotebookScheduler({
     if (!projectId) {
       setRegion('');
       setDagList([]);
-      setComposerList([]);
+      setComposerEnvData([]);
       setComposerEnvSelected('');
       setImportErrorData([]);
       setImportErrorEntries(0);
@@ -765,7 +767,7 @@ function ListNotebookScheduler({
 
   useEffect(() => {
     if (!region) {
-      setComposerList([]);
+      setComposerEnvData([]);
       setDagList([]);
       setComposerEnvSelected('');
       setImportErrorData([]);
@@ -826,8 +828,8 @@ function ListNotebookScheduler({
 
           <div className="create-scheduler-form-element select-panel-list-view-lay">
             <Autocomplete
-              options={composerList}
-              value={composerEnvSelected}
+              options={composerEnvData.map((env: IComposerAPIResponse) => env.name)}
+              value={composerEnvSelected.name}
               onChange={(_event, val) => {
                 handleComposerSelected(val);
               }}
@@ -839,7 +841,7 @@ function ListNotebookScheduler({
                     ...params.InputProps,
                     endAdornment: (
                       <>
-                        {composerList.length <= 0 && region && envApiFlag && (
+                        {composerEnvData.length <= 0 && region && envApiFlag && (
                           <CircularProgress
                             aria-label="Loading Spinner"
                             data-testid="loader"
