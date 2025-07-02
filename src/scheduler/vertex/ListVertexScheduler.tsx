@@ -439,7 +439,7 @@ function ListVertexScheduler({
     if (deleteResponse && deleteResponse.done) {
       await listVertexScheduleInfoAPI(null); // Refresh the list after deletion
       Notification.success(
-        `Deleted job ${scheduleDisplayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
+        `Deleted job ${scheduleDisplayName}. It might take a few minutes for the job to be deleted from the list of jobs.`,
         {
           autoClose: false
         }
