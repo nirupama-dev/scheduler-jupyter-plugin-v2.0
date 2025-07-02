@@ -78,12 +78,6 @@ export interface IComposerAPIResponse {
   pypi_packages: Record<string, string> | undefined;
 }
 
-// export interface IComposerEnvData {
-//   name: string;
-//   state: string;
-//   pypi_packages: Record<string, string> | undefined;
-// }
-
 export interface IDagRunList {
   dagRunId: string;
   filteredDate: Date;

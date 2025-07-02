@@ -41,7 +41,11 @@ import { KernelSpecAPI } from '@jupyterlab/services';
 import tzdata from 'tzdata';
 import { SchedulerService } from '../../services/SchedulerServices';
 import NotebookJobComponent from './NotebookJobs';
-import { scheduleMode, scheduleValueExpression } from '../../utils/Const';
+import {
+  packages,
+  scheduleMode,
+  scheduleValueExpression
+} from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import ErrorMessage from '../common/ErrorMessage';
 import { IComposerAPIResponse, IDagList } from '../common/SchedulerInteface';
@@ -160,17 +164,14 @@ const CreateNotebookScheduler = ({
   const [packageInstalledList, setPackageInstalledList] = useState<string[]>(
     []
   );
-  const [packageListFlag, setPackageListFlag] = useState<boolean>(false);
   const [apiErrorMessage, setapiErrorMessage] = useState<string>('');
-  const [
-    checkRequiredPackagesInstalledFlag,
-    setCheckRequiredPackagesInstalledFlag
-  ] = useState<boolean>(false);
-  const [disableEnvLocal, setDisableEnvLocal] = useState<boolean>(false);
   const [clusterFlag, setClusterFlag] = useState<boolean>(false);
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
+  const [envStateMessage, setEnvStateMessage] = useState<string>('');
+  const [packageInstalledMessage, setPackageInstalledMessage] =
+    useState<string>('');
 
   const listClustersAPI = async () => {
     await SchedulerService.listClustersAPIService(
@@ -200,15 +201,23 @@ const CreateNotebookScheduler = ({
     );
   };
 
+  const checkRequiredPackages = (env: IComposerAPIResponse | null) => {
+    if (env?.pypi_packages) {
+      setPackageInstalledMessage('Required packages are already installed');
+    } else {
+      setPackageInstallationMessage(
+        packages.join(', ') +
+          ' packages will get installed on creation of schedule'
+      );
+      setPackageInstalledList(packages);
+    }
+  };
+
   const handleComposerEnvSelected = (data: string | null) => {
-    setPackageListFlag(false);
+    setPackageInstalledMessage('');
     setPackageInstalledList([]);
     setapiErrorMessage('');
-    setCheckRequiredPackagesInstalledFlag(false);
     setPackageInstallationMessage('');
-
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
 
     if (data) {
       const selectedComposer = data.toString();
@@ -219,28 +228,21 @@ const CreateNotebookScheduler = ({
 
       if (selectedEnvironment) {
         setComposerEnvSelected(selectedEnvironment);
+        if (selectedEnvironment.state === 'RUNNING') {
+          if (isLocalKernel) {
+            checkRequiredPackages(selectedEnvironment);
+          }
+        } else {
+          setEnvStateMessage(
+            'This environment can not be used at this moment. Try after some time.'
+          );
+        }
       }
 
       if (selectedEnvironment?.name) {
         const unique = getDaglist(selectedEnvironment?.name);
         if (!unique) {
           setJobNameUniqueValidation(true);
-        }
-
-        if (isLocalKernel) {
-          setDisableEnvLocal(true);
-          SchedulerService.checkRequiredPackagesInstalled(
-            selectedEnvironment?.name,
-            setPackageInstallationMessage,
-            setPackageInstalledList,
-            setPackageListFlag,
-            setapiErrorMessage,
-            setCheckRequiredPackagesInstalledFlag,
-            setDisableEnvLocal,
-            region,
-            signal,
-            abortControllerRef
-          );
         }
       }
     }
@@ -392,7 +394,7 @@ const CreateNotebookScheduler = ({
     };
 
     if (packageInstalledList.length > 0 && isLocalKernel) {
-      payload['packages_to_install'] = packageInstalledList;
+      payload['packages_to_install'] = packages;
       toast(ProgressPopUp, {
         autoClose: false,
         closeButton: true,
@@ -423,10 +425,7 @@ const CreateNotebookScheduler = ({
       emailError ||
       dagListCall ||
       creatingScheduler ||
-      (isLocalKernel &&
-        (!checkRequiredPackagesInstalledFlag || // Not checked or failed
-          (packageListFlag === false && !packageInstalledList.length) || // API in progress or not called
-          !!apiErrorMessage)) || // There is an error message
+      (isLocalKernel && (!!apiErrorMessage || !!envStateMessage)) || // There is an error message
       jobNameSelected === '' ||
       (!jobNameValidation && !editMode) ||
       (jobNameSpecialValidation && !editMode) ||
@@ -440,7 +439,7 @@ const CreateNotebookScheduler = ({
             item.split(':')[1]?.length === 0) ||
           (item.split(':')[0]?.length === 0 && item.split(':')[1]?.length > 0)
       ) ||
-      composerEnvSelected?.name === '' ||
+      !composerEnvSelected ||
       (selectedMode === 'cluster' &&
         clusterSelected === '' &&
         !isLocalKernel) ||
@@ -539,7 +538,7 @@ const CreateNotebookScheduler = ({
       setComposerEnvSelected(null);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
-      setPackageListFlag(false);
+      setPackageInstalledMessage('');
     }
   }, [projectId, region]);
 
@@ -576,7 +575,7 @@ const CreateNotebookScheduler = ({
     setPackageInstallationMessage('');
     setComposerEnvSelected(null);
     setComposerEnvData([]);
-    setPackageListFlag(false);
+    setPackageInstalledMessage('');
     setRegion(value);
   };
 
@@ -600,35 +599,14 @@ const CreateNotebookScheduler = ({
       setComposerEnvData([]);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
-      setPackageListFlag(false);
+      setPackageInstalledMessage('');
     }
   }, [projectId]);
 
   useEffect(() => {
-    const checkRequiredPackageApiService = () => {
-      setPackageListFlag(false);
-      setPackageInstalledList([]);
-      setapiErrorMessage('');
-
-      abortControllerRef.current = new AbortController();
-      const signal = abortControllerRef.current.signal;
-
-      SchedulerService.checkRequiredPackagesInstalled(
-        composerEnvSelected?.name || '',
-        setPackageInstallationMessage,
-        setPackageInstalledList,
-        setPackageListFlag,
-        setapiErrorMessage,
-        setCheckRequiredPackagesInstalledFlag,
-        setDisableEnvLocal,
-        region,
-        signal,
-        abortControllerRef
-      );
-    };
-
     if (isLocalKernel && editMode) {
-      checkRequiredPackageApiService();
+      setPackageInstalledList([]);
+      checkRequiredPackages(composerEnvSelected);
     }
   }, [packageEditFlag]);
 
@@ -696,7 +674,7 @@ const CreateNotebookScheduler = ({
                   }
                 }}
                 popupIcon={null}
-                className={disableEnvLocal || editMode ? 'disable-item' : ''}
+                className={editMode ? 'disable-item' : ''}
                 loaderProjectId={loaderProjectId}
                 disabled={true}
               />
@@ -707,7 +685,7 @@ const CreateNotebookScheduler = ({
                 projectId={projectId}
                 region={region}
                 onRegionChange={region => handleRegionChange(region)}
-                editMode={disableEnvLocal || editMode}
+                editMode={editMode}
                 loaderRegion={loaderRegion}
                 setLoaderRegion={setLoaderRegion}
               />
@@ -745,7 +723,7 @@ const CreateNotebookScheduler = ({
                     }}
                   />
                 )}
-                disabled={editMode || disableEnvLocal || envApiFlag || !region}
+                disabled={editMode || envApiFlag || !region}
                 disableClearable={!projectId || !region}
                 clearIcon={false}
               />
@@ -756,35 +734,19 @@ const CreateNotebookScheduler = ({
             {apiErrorMessage && isLocalKernel && (
               <ErrorMessage message={apiErrorMessage} />
             )}
+            {envStateMessage && <ErrorMessage message={envStateMessage} />}
             {packageInstallationMessage && isLocalKernel && (
-              <>
-                {packageInstalledList.length > 0 ? (
-                  <div className="success-message-package success-message-top">
-                    <iconWarning.react
-                      tag="div"
-                      className="icon-white logo-alignment-style success_icon icon-size-status"
-                    />
-                    <div className="success-message-pack warning-font success-message-cl-package warning-message">
-                      {packageInstallationMessage}
-                    </div>
-                  </div>
-                ) : (
-                  !apiErrorMessage && (
-                    <div className="success-message-package success-message-top">
-                      <CircularProgress
-                        size={18}
-                        aria-label="Loading Spinner"
-                        data-testid="loader"
-                      />
-                      <div className="success-message-pack warning-font success-message-cl-package enable-error-text-label">
-                        {packageInstallationMessage}
-                      </div>
-                    </div>
-                  )
-                )}
-              </>
+              <div className="success-message-package success-message-top">
+                <iconWarning.react
+                  tag="div"
+                  className="icon-white logo-alignment-style success_icon icon-size-status"
+                />
+                <div className="success-message-pack warning-font success-message-cl-package warning-message">
+                  {packageInstallationMessage}
+                </div>
+              </div>
             )}
-            {packageListFlag && isLocalKernel && (
+            {packageInstalledMessage && isLocalKernel && (
               <div className="success-message-package log-icon">
                 <iconSuccess.react
                   tag="div"
@@ -792,7 +754,7 @@ const CreateNotebookScheduler = ({
                   className="icon-white logo-alignment-style success_icon icon-size icon-completed"
                 />
                 <div className="warning-success-message">
-                  Required packages are already installed
+                  {packageInstalledMessage}
                 </div>
               </div>
             )}
