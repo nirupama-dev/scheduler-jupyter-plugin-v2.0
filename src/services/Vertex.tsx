@@ -200,7 +200,7 @@ export class VertexServices {
     newPageToken: string | null | undefined, // token of page to be fetched
     setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
     setApiEnableUrl: any,
-    pageLength: number = 50, // number of items to be fetched
+    pageLength: number = 25, // number of items to be fetched
     abortControllers?: any
   ) => {
     setIsLoading(true);
@@ -478,19 +478,6 @@ export class VertexServices {
     region: string,
     scheduleId: string,
     displayName: string,
-    setVertexScheduleList: (
-      value:
-        | IVertexScheduleList[]
-        | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
-    ) => void,
-    setIsLoading: (value: boolean) => void,
-    setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void,
-    setNextPageToken: (value: string | null) => void,
-    newPageToken: string | null | undefined,
-    hasNextPage: (value: boolean) => void,
-    setApiEnableUrl: any,
-    pageLength: number = 50
   ) => {
     try {
       const serviceURL = 'api/vertex/deleteSchedule';
@@ -498,30 +485,8 @@ export class VertexServices {
         serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
         { method: 'DELETE' }
       );
-      if (deleteResponse.done) {
-        await VertexServices.listVertexSchedules(
-          setVertexScheduleList,
-          region,
-          setIsLoading,
-          setIsApiError,
-          setApiError,
-          setNextPageToken,
-          newPageToken,
-          hasNextPage,
-          setApiEnableUrl,
-          pageLength
-        );
-        Notification.success(
-          `Deleted job ${displayName}. It might take a few minutes to for it to be deleted from the list of jobs.`,
-          {
-            autoClose: false
-          }
-        );
-      } else {
-        Notification.error(`Failed to delete the ${displayName}`, {
-          autoClose: false
-        });
-      }
+      return deleteResponse;
+      
     } catch (error) {
       SchedulerLoggingService.log(
         `Error in Delete api ${error}`,
