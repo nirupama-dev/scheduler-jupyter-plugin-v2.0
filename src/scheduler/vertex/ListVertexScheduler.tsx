@@ -175,7 +175,7 @@ function ListVertexScheduler({
     nextToken: string | null | undefined
   ) => {
     setIsLoading(true);
-   
+
     await VertexServices.listVertexSchedules(
       setScheduleList,
       region,
@@ -276,7 +276,6 @@ function ListVertexScheduler({
           vertexScheduleList.length
       ); // Total count is found when we reach the final page
     }
-    
   };
 
   /**
@@ -435,7 +434,7 @@ function ListVertexScheduler({
     const deleteResponse = await VertexServices.handleDeleteSchedulerAPIService(
       region,
       uniqueScheduleId,
-      scheduleDisplayName,
+      scheduleDisplayName
     );
     if (deleteResponse && deleteResponse.done) {
       await listVertexScheduleInfoAPI(null); // Refresh the list after deletion
@@ -448,7 +447,7 @@ function ListVertexScheduler({
     } else {
       Notification.error(`Failed to delete the ${scheduleDisplayName}`, {
         autoClose: false
-      }); 
+      });
     }
     setDeletePopupOpen(false);
     setDeletingSchedule(false);

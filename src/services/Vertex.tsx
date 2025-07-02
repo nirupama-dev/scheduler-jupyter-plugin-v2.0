@@ -477,7 +477,7 @@ export class VertexServices {
   static readonly handleDeleteSchedulerAPIService = async (
     region: string,
     scheduleId: string,
-    displayName: string,
+    displayName: string
   ) => {
     try {
       const serviceURL = 'api/vertex/deleteSchedule';
@@ -486,7 +486,6 @@ export class VertexServices {
         { method: 'DELETE' }
       );
       return deleteResponse;
-      
     } catch (error) {
       SchedulerLoggingService.log(
         `Error in Delete api ${error}`,
