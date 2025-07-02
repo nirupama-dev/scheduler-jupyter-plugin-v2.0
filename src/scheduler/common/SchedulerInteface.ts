@@ -72,8 +72,10 @@ export interface IComposerAPIResponse {
   name: string;
   label: string;
   description: string;
+  state: string;
   file_extensions: [];
   metadata: Record<string, never>;
+  pypi_packages: Record<string, string> | undefined;
 }
 
 export interface IDagRunList {

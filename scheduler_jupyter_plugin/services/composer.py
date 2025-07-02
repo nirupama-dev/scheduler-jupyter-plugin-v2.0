@@ -67,19 +67,20 @@ class Client:
                         return environments
                     else:
                         environment = resp.get("environments", [])
-                        # Extract the 'name' values from the 'environments' list
-                        names = [env["name"] for env in environment]
-                        # Extract the last value after the last slash for each 'name'
-                        last_values = [name.split("/")[-1] for name in names]
-                        for env in last_values:
-                            name = env
+                        for env in environment:
+                            path = env["name"]
+                            name = env["name"].split("/")[-1]
+                            state = env["state"]
+                            pypi_packages = env.get("config", {}).get("softwareConfig", {}).get("pypiPackages", None)
                             environments.append(
                                 ComposerEnvironment(
                                     name=name,
                                     label=name,
                                     description=f"Environment: {name}",
+                                    state=state,
                                     file_extensions=["ipynb"],
-                                    metadata={"path": env},
+                                    metadata={"path": path},
+                                    pypi_packages=pypi_packages
                                 )
                             )
                         return environments
