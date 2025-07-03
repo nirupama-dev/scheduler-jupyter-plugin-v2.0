@@ -43,7 +43,6 @@ import tzdata from 'tzdata';
 import { SchedulerService } from '../../services/SchedulerServices';
 import NotebookJobComponent from './NotebookJobs';
 import {
-  composerEnvironmentStateList,
   composerEnvironmentStateListForCreate,
   packages,
   scheduleMode,
@@ -229,9 +228,8 @@ const CreateNotebookScheduler = ({
     setPackageInstallationMessage('');
 
     if (data) {
-      const selectedComposer = data.toString();
       const selectedEnvironment = findEnvironmentSelected(
-        selectedComposer,
+        data.name,
         composerEnvData
       );
 
@@ -705,7 +703,7 @@ const CreateNotebookScheduler = ({
                 value={composerEnvSelected}
                 onChange={(_event, val) => handleComposerEnvSelected(val)}
                 getOptionDisabled={option =>
-                  !composerEnvironmentStateList.includes(option.state)
+                  composerEnvironmentStateListForCreate !== option.state
                 }
                 getOptionLabel={option => option.name}
                 renderOption={(props, option) => {
