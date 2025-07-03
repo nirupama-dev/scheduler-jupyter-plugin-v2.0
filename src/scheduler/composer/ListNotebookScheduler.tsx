@@ -25,7 +25,7 @@ import {
   findEnvironmentSelected
 } from '../../utils/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { Autocomplete, CircularProgress, TextField } from '@mui/material';
+import { Autocomplete, Box, CircularProgress, TextField } from '@mui/material';
 import deleteIcon from '../../../style/icons/scheduler_delete.svg';
 import { LabIcon } from '@jupyterlab/ui-components';
 import playIcon from '../../../style/icons/scheduler_play.svg';
@@ -248,37 +248,29 @@ function ListNotebookScheduler({
       timerImportError.current
     );
   };
-  const handleComposerSelected = async (data: string | null) => {
+  const handleComposerSelected = async (data: IComposerAPIResponse | null) => {
     setEnvironmentState(false);
     setIsLoading(true);
     abortApiCall();
     setDagList([]);
     if (data) {
-      const selectedComposer = data.toString();
-      const selectedEnvironment = findEnvironmentSelected(
-        selectedComposer,
-        composerEnvData
-      );
-
-      if (selectedEnvironment) {
-        setComposerEnvSelected(selectedEnvironment);
-        if (composerEnvironmentStateList.includes(selectedEnvironment.state)) {
-          setComposerChangeFlag(true);
-          await SchedulerService.listDagInfoAPIService(
-            setDagList,
-            setIsLoading,
-            setBucketName,
-            selectedComposer,
-            region,
-            projectId,
-            abortControllers,
-            isDagInfoApiLoading
-          );
-          setComposerChangeFlag(false);
-        } else {
-          setEnvironmentState(true);
-          setIsLoading(false);
-        }
+      setComposerEnvSelected(data);
+      if (composerEnvironmentStateList.includes(data.state)) {
+        setComposerChangeFlag(true);
+        await SchedulerService.listDagInfoAPIService(
+          setDagList,
+          setIsLoading,
+          setBucketName,
+          data.name,
+          region,
+          projectId,
+          abortControllers,
+          isDagInfoApiLoading
+        );
+        setComposerChangeFlag(false);
+      } else {
+        setEnvironmentState(true);
+        setIsLoading(false);
       }
     }
   };
@@ -761,7 +753,8 @@ function ListNotebookScheduler({
 
   useEffect(() => {
     if (
-      composerEnvSelected && composerEnvSelected?.name !== '' &&
+      composerEnvSelected &&
+      composerEnvSelected?.name !== '' &&
       !composerChangeFlag &&
       composerEnvironmentStateList.includes(composerEnvSelected?.state)
     ) {
@@ -874,12 +867,29 @@ function ListNotebookScheduler({
 
           <div className="create-scheduler-form-element select-panel-list-view-lay">
             <Autocomplete
-              options={composerEnvData.map(
-                (env: IComposerAPIResponse) => env.name
-              )}
-              value={composerEnvSelected?.name ?? ''}
+              options={composerEnvData}
+              value={composerEnvSelected}
               onChange={(_event, val) => {
                 handleComposerSelected(val);
+              }}
+              getOptionDisabled={option =>
+                !composerEnvironmentStateList.includes(option.state)
+              }
+              getOptionLabel={option => option.name}
+              renderOption={(props, option) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <Box key={key} component="li" {...optionProps}>
+                    {composerEnvironmentStateList.includes(option.state) ? (
+                      <div>{option.name}</div>
+                    ) : (
+                      <>
+                        <div className="autocomplete-space">{option.name}</div>
+                        <div>{option.state}</div>
+                      </>
+                    )}
+                  </Box>
+                );
               }}
               renderInput={params => (
                 <TextField
@@ -910,10 +920,6 @@ function ListNotebookScheduler({
                 message="Environment is required"
                 showIcon={false}
               />
-            )}
-
-            {environmentState && (
-              <ErrorMessage message="Environment unusable at this moment. Please try again in a few minutes." showIcon={false} />
             )}
           </div>
         </div>

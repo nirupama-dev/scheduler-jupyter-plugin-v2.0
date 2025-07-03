@@ -147,6 +147,8 @@ export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
 
 export const everyMinuteCron = '* * * * *';
 
-export const packages = ["apache-airflow-providers-papermill", "ipykernel"]
+export const packages = ['apache-airflow-providers-papermill', 'ipykernel'];
 
 export const composerEnvironmentStateList = ['RUNNING', 'UPDATING'];
+
+export const composerEnvironmentStateListForCreate = 'RUNNING';

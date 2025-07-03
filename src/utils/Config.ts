@@ -297,8 +297,11 @@ export const login = async (
   }
 };
 
-export const findEnvironmentSelected = (selectedEnvironment?: string, composerEnvData?: IComposerAPIResponse[]) =>{
-    return composerEnvData?.find(
-      environment => environment.name === selectedEnvironment
-    );
-  }
+export const findEnvironmentSelected = (
+  selectedEnvironment?: string,
+  composerEnvData?: IComposerAPIResponse[]
+) => {
+  return composerEnvData?.find(
+    environment => environment.name === selectedEnvironment
+  );
+};

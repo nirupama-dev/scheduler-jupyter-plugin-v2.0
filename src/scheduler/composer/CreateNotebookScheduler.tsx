@@ -28,7 +28,8 @@ import {
   RadioGroup,
   TextField,
   Typography,
-  Button
+  Button,
+  Box
 } from '@mui/material';
 import { MuiChipsInput } from 'mui-chips-input';
 import { IThemeManager } from '@jupyterlab/apputils';
@@ -42,6 +43,8 @@ import tzdata from 'tzdata';
 import { SchedulerService } from '../../services/SchedulerServices';
 import NotebookJobComponent from './NotebookJobs';
 import {
+  composerEnvironmentStateList,
+  composerEnvironmentStateListForCreate,
   packages,
   scheduleMode,
   scheduleValueExpression
@@ -213,7 +216,7 @@ const CreateNotebookScheduler = ({
     }
   };
 
-  const handleComposerEnvSelected = (data: string | null) => {
+  const handleComposerEnvSelected = (data: IComposerAPIResponse | null) => {
     setPackageInstalledMessage('');
     setPackageInstalledList([]);
     setapiErrorMessage('');
@@ -227,9 +230,9 @@ const CreateNotebookScheduler = ({
       );
 
       if (selectedEnvironment) {
-         if (isLocalKernel) {
-            checkRequiredPackages(selectedEnvironment);
-          }
+        if (isLocalKernel) {
+          checkRequiredPackages(selectedEnvironment);
+        }
         setComposerEnvSelected(selectedEnvironment);
       }
 
@@ -689,11 +692,31 @@ const CreateNotebookScheduler = ({
             <div className="create-scheduler-form-element block-level-seperation ">
               <Autocomplete
                 className="create-scheduler-style"
-                options={composerEnvData?.map(
-                  (env: IComposerAPIResponse) => env.name
-                )}
-                value={composerEnvSelected?.name ?? ''}
+                options={composerEnvData}
+                value={composerEnvSelected}
                 onChange={(_event, val) => handleComposerEnvSelected(val)}
+                getOptionDisabled={option =>
+                  !composerEnvironmentStateList.includes(option.state)
+                }
+                getOptionLabel={option => option.name}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box key={key} component="li" {...optionProps}>
+                      {composerEnvironmentStateListForCreate ===
+                      option.state ? (
+                        <div>{option.name}</div>
+                      ) : (
+                        <>
+                          <div className="autocomplete-space">
+                            {option.name}
+                          </div>
+                          <div>{option.state}</div>
+                        </>
+                      )}
+                    </Box>
+                  );
+                }}
                 renderInput={params => (
                   <TextField
                     {...params}
