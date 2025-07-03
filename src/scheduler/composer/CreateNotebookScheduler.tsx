@@ -172,7 +172,6 @@ const CreateNotebookScheduler = ({
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
-  const [envStateMessage, setEnvStateMessage] = useState<string>('');
   const [packageInstalledMessage, setPackageInstalledMessage] =
     useState<string>('');
 
@@ -422,7 +421,7 @@ const CreateNotebookScheduler = ({
       emailError ||
       dagListCall ||
       creatingScheduler ||
-      (isLocalKernel && (!!apiErrorMessage || !!envStateMessage)) || // There is an error message
+      (isLocalKernel && !!apiErrorMessage) || // There is an error message
       jobNameSelected === '' ||
       (!jobNameValidation && !editMode) ||
       (jobNameSpecialValidation && !editMode) ||
@@ -751,7 +750,6 @@ const CreateNotebookScheduler = ({
             {apiErrorMessage && isLocalKernel && (
               <ErrorMessage message={apiErrorMessage} />
             )}
-            {envStateMessage && <ErrorMessage message={envStateMessage} />}
             {packageInstallationMessage && isLocalKernel && (
               <div className="success-message-package success-message-top">
                 <iconWarning.react
