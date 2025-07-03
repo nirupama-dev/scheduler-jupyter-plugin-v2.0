@@ -204,14 +204,21 @@ const CreateNotebookScheduler = ({
   };
 
   const checkRequiredPackages = (env: IComposerAPIResponse | null) => {
-    if (env?.pypi_packages) {
+    const packages_from_env = env?.pypi_packages;
+    const missingPackages = packages_from_env
+      ? packages.filter(
+          pkg => !Object.prototype.hasOwnProperty.call(packages_from_env, pkg)
+        )
+      : packages.slice(); // If packages_from_env is falsy, all are missing
+
+    if (missingPackages.length === 0) {
       setPackageInstalledMessage('Required packages are already installed');
     } else {
       setPackageInstallationMessage(
-        packages.join(', ') +
-          ' packages will get installed on creation of schedule'
+        missingPackages.join(', ') +
+          ' will get installed on creation of schedule'
       );
-      setPackageInstalledList(packages);
+      setPackageInstalledList(missingPackages);
     }
   };
 
@@ -390,7 +397,7 @@ const CreateNotebookScheduler = ({
     };
 
     if (packageInstalledList.length > 0 && isLocalKernel) {
-      payload['packages_to_install'] = packages;
+      payload['packages_to_install'] = packageInstalledList;
       toast(ProgressPopUp, {
         autoClose: false,
         closeButton: true,
@@ -600,6 +607,9 @@ const CreateNotebookScheduler = ({
   }, [projectId]);
 
   useEffect(() => {
+    setPackageInstalledMessage('');
+    setPackageInstallationMessage('');
+
     if (isLocalKernel && editMode) {
       setPackageInstalledList([]);
       checkRequiredPackages(composerEnvSelected);
