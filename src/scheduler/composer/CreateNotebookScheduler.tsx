@@ -28,7 +28,8 @@ import {
   RadioGroup,
   TextField,
   Typography,
-  Button
+  Button,
+  Box
 } from '@mui/material';
 import { MuiChipsInput } from 'mui-chips-input';
 import { IThemeManager } from '@jupyterlab/apputils';
@@ -41,14 +42,19 @@ import { KernelSpecAPI } from '@jupyterlab/services';
 import tzdata from 'tzdata';
 import { SchedulerService } from '../../services/SchedulerServices';
 import NotebookJobComponent from './NotebookJobs';
-import { scheduleMode, scheduleValueExpression } from '../../utils/Const';
+import {
+  composerEnvironmentStateListForCreate,
+  packages,
+  scheduleMode,
+  scheduleValueExpression
+} from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import ErrorMessage from '../common/ErrorMessage';
-import { IDagList } from '../common/SchedulerInteface';
+import { IComposerAPIResponse, IDagList } from '../common/SchedulerInteface';
 import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
 import { RegionDropdown } from '../../controls/RegionDropdown';
-import { authApi } from '../../utils/Config';
+import { authApi, findEnvironmentSelected } from '../../utils/Config';
 import { iconSuccess, iconWarning } from '../../utils/Icons';
 import { ProgressPopUp } from '../../utils/ProgressPopUp';
 import { toast } from 'react-toastify';
@@ -112,8 +118,11 @@ const CreateNotebookScheduler = ({
   jobNameUniquenessError: boolean;
   setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>;
 }): JSX.Element => {
-  const [composerList, setComposerList] = useState<string[]>([]);
-  const [composerEnvSelected, setComposerEnvSelected] = useState<string>('');
+  const [composerEnvData, setComposerEnvData] = useState<
+    IComposerAPIResponse[]
+  >([]);
+  const [composerEnvSelected, setComposerEnvSelected] =
+    useState<IComposerAPIResponse | null>(null);
 
   const [parameterDetail, setParameterDetail] = useState(['']);
   const [parameterDetailUpdated, setParameterDetailUpdated] = useState(['']);
@@ -157,17 +166,13 @@ const CreateNotebookScheduler = ({
   const [packageInstalledList, setPackageInstalledList] = useState<string[]>(
     []
   );
-  const [packageListFlag, setPackageListFlag] = useState<boolean>(false);
   const [apiErrorMessage, setapiErrorMessage] = useState<string>('');
-  const [
-    checkRequiredPackagesInstalledFlag,
-    setCheckRequiredPackagesInstalledFlag
-  ] = useState<boolean>(false);
-  const [disableEnvLocal, setDisableEnvLocal] = useState<boolean>(false);
   const [clusterFlag, setClusterFlag] = useState<boolean>(false);
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
+  const [packageInstalledMessage, setPackageInstalledMessage] =
+    useState<string>('');
 
   const listClustersAPI = async () => {
     await SchedulerService.listClustersAPIService(
@@ -187,7 +192,7 @@ const CreateNotebookScheduler = ({
   const listComposersAPI = async () => {
     setEnvApiFlag(true);
     await SchedulerService.listComposersAPIService(
-      setComposerList,
+      setComposerEnvData,
       projectId,
       region,
       setIsApiError,
@@ -197,39 +202,48 @@ const CreateNotebookScheduler = ({
     );
   };
 
-  const handleComposerEnvSelected = (data: string | null) => {
-    setPackageListFlag(false);
+  const checkRequiredPackages = (env: IComposerAPIResponse | null) => {
+    const packages_from_env = env?.pypi_packages;
+    const missingPackages = packages_from_env
+      ? packages.filter(
+          pkg => !Object.prototype.hasOwnProperty.call(packages_from_env, pkg)
+        )
+      : packages.slice(); // If packages_from_env is falsy, all are missing
+
+    if (missingPackages.length === 0) {
+      setPackageInstalledMessage('Required packages are already installed');
+    } else {
+      setPackageInstallationMessage(
+        missingPackages.join(', ') +
+          ' will get installed on creation of schedule'
+      );
+      setPackageInstalledList(missingPackages);
+    }
+  };
+
+  const handleComposerEnvSelected = (data: IComposerAPIResponse | null) => {
+    setPackageInstalledMessage('');
     setPackageInstalledList([]);
     setapiErrorMessage('');
-    setCheckRequiredPackagesInstalledFlag(false);
     setPackageInstallationMessage('');
 
-    abortControllerRef.current = new AbortController();
-    const signal = abortControllerRef.current.signal;
-
     if (data) {
-      const selectedComposer = data.toString();
-      setComposerEnvSelected(selectedComposer);
-      if (selectedComposer) {
-        const unique = getDaglist(selectedComposer);
+      const selectedEnvironment = findEnvironmentSelected(
+        data.name,
+        composerEnvData
+      );
+
+      if (selectedEnvironment) {
+        if (isLocalKernel) {
+          checkRequiredPackages(selectedEnvironment);
+        }
+        setComposerEnvSelected(selectedEnvironment);
+      }
+
+      if (selectedEnvironment?.name) {
+        const unique = getDaglist(selectedEnvironment?.name);
         if (!unique) {
           setJobNameUniqueValidation(true);
-        }
-
-        if (isLocalKernel) {
-          setDisableEnvLocal(true);
-          SchedulerService.checkRequiredPackagesInstalled(
-            selectedComposer,
-            setPackageInstallationMessage,
-            setPackageInstalledList,
-            setPackageListFlag,
-            setapiErrorMessage,
-            setCheckRequiredPackagesInstalledFlag,
-            setDisableEnvLocal,
-            region,
-            signal,
-            abortControllerRef
-          );
         }
       }
     }
@@ -360,7 +374,7 @@ const CreateNotebookScheduler = ({
     const randomDagId = uuidv4();
     const payload = {
       input_filename: inputFileSelected,
-      composer_environment_name: composerEnvSelected,
+      composer_environment_name: composerEnvSelected?.name ?? '',
       output_formats: outputFormats,
       parameters: parameterDetailUpdated,
       local_kernel: isLocalKernel,
@@ -412,10 +426,7 @@ const CreateNotebookScheduler = ({
       emailError ||
       dagListCall ||
       creatingScheduler ||
-      (isLocalKernel &&
-        (!checkRequiredPackagesInstalledFlag || // Not checked or failed
-          (packageListFlag === false && !packageInstalledList.length) || // API in progress or not called
-          !!apiErrorMessage)) || // There is an error message
+      (isLocalKernel && !!apiErrorMessage) || // There is an error message
       jobNameSelected === '' ||
       (!jobNameValidation && !editMode) ||
       (jobNameSpecialValidation && !editMode) ||
@@ -429,7 +440,7 @@ const CreateNotebookScheduler = ({
             item.split(':')[1]?.length === 0) ||
           (item.split(':')[0]?.length === 0 && item.split(':')[1]?.length > 0)
       ) ||
-      composerEnvSelected === '' ||
+      !composerEnvSelected ||
       (selectedMode === 'cluster' &&
         clusterSelected === '' &&
         !isLocalKernel) ||
@@ -524,16 +535,16 @@ const CreateNotebookScheduler = ({
     }
 
     if (!region) {
-      setComposerList([]);
-      setComposerEnvSelected('');
+      setComposerEnvData([]);
+      setComposerEnvSelected(null);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
-      setPackageListFlag(false);
+      setPackageInstalledMessage('');
     }
   }, [projectId, region]);
 
   useEffect(() => {
-    if (composerEnvSelected !== '' && dagList.length > 0) {
+    if (composerEnvSelected?.name !== '' && dagList.length > 0) {
       const isUnique = !dagList.some(
         dag => dag.notebookname === jobNameSelected
       );
@@ -563,9 +574,9 @@ const CreateNotebookScheduler = ({
     setPackageInstalledList([]);
     setapiErrorMessage('');
     setPackageInstallationMessage('');
-    setComposerEnvSelected('');
-    setComposerList([]);
-    setPackageListFlag(false);
+    setComposerEnvSelected(null);
+    setComposerEnvData([]);
+    setPackageInstalledMessage('');
     setRegion(value);
   };
 
@@ -585,39 +596,21 @@ const CreateNotebookScheduler = ({
   useEffect(() => {
     if (!projectId) {
       setRegion('');
-      setComposerEnvSelected('');
-      setComposerList([]);
+      setComposerEnvSelected(null);
+      setComposerEnvData([]);
       setapiErrorMessage('');
       setPackageInstallationMessage('');
-      setPackageListFlag(false);
+      setPackageInstalledMessage('');
     }
   }, [projectId]);
 
   useEffect(() => {
-    const checkRequiredPackageApiService = () => {
-      setPackageListFlag(false);
-      setPackageInstalledList([]);
-      setapiErrorMessage('');
-
-      abortControllerRef.current = new AbortController();
-      const signal = abortControllerRef.current.signal;
-
-      SchedulerService.checkRequiredPackagesInstalled(
-        composerEnvSelected,
-        setPackageInstallationMessage,
-        setPackageInstalledList,
-        setPackageListFlag,
-        setapiErrorMessage,
-        setCheckRequiredPackagesInstalledFlag,
-        setDisableEnvLocal,
-        region,
-        signal,
-        abortControllerRef
-      );
-    };
+    setPackageInstalledMessage('');
+    setPackageInstallationMessage('');
 
     if (isLocalKernel && editMode) {
-      checkRequiredPackageApiService();
+      setPackageInstalledList([]);
+      checkRequiredPackages(composerEnvSelected);
     }
   }, [packageEditFlag]);
 
@@ -630,7 +623,6 @@ const CreateNotebookScheduler = ({
           settingRegistry={settingRegistry}
           setCreateCompleted={setCreateCompleted}
           setJobNameSelected={setJobNameSelected}
-          setComposerSelected={setComposerEnvSelected}
           setScheduleMode={setScheduleMode}
           setScheduleValue={setScheduleValue}
           setInputFileSelected={setInputFileSelected}
@@ -686,7 +678,7 @@ const CreateNotebookScheduler = ({
                   }
                 }}
                 popupIcon={null}
-                className={disableEnvLocal || editMode ? 'disable-item' : ''}
+                className={editMode ? 'disable-item' : ''}
                 loaderProjectId={loaderProjectId}
                 disabled={true}
               />
@@ -697,7 +689,7 @@ const CreateNotebookScheduler = ({
                 projectId={projectId}
                 region={region}
                 onRegionChange={region => handleRegionChange(region)}
-                editMode={disableEnvLocal || editMode}
+                editMode={editMode}
                 loaderRegion={loaderRegion}
                 setLoaderRegion={setLoaderRegion}
               />
@@ -707,9 +699,31 @@ const CreateNotebookScheduler = ({
             <div className="create-scheduler-form-element block-level-seperation ">
               <Autocomplete
                 className="create-scheduler-style"
-                options={composerList}
+                options={composerEnvData}
                 value={composerEnvSelected}
                 onChange={(_event, val) => handleComposerEnvSelected(val)}
+                getOptionDisabled={option =>
+                  composerEnvironmentStateListForCreate !== option.state
+                }
+                getOptionLabel={option => option.name}
+                renderOption={(props, option) => {
+                  const { key, ...optionProps } = props;
+                  return (
+                    <Box key={key} component="li" {...optionProps}>
+                      {composerEnvironmentStateListForCreate ===
+                      option.state ? (
+                        <div>{option.name}</div>
+                      ) : (
+                        <>
+                          <div className="autocomplete-space">
+                            {option.name}
+                          </div>
+                          <div>{option.state}</div>
+                        </>
+                      )}
+                    </Box>
+                  );
+                }}
                 renderInput={params => (
                   <TextField
                     {...params}
@@ -718,20 +732,22 @@ const CreateNotebookScheduler = ({
                       ...params.InputProps,
                       endAdornment: (
                         <>
-                          {composerList.length <= 0 && region && envApiFlag && (
-                            <CircularProgress
-                              aria-label="Loading Spinner"
-                              data-testid="loader"
-                              size={18}
-                            />
-                          )}
+                          {composerEnvData.length <= 0 &&
+                            region &&
+                            envApiFlag && (
+                              <CircularProgress
+                                aria-label="Loading Spinner"
+                                data-testid="loader"
+                                size={18}
+                              />
+                            )}
                           {params.InputProps.endAdornment}
                         </>
                       )
                     }}
                   />
                 )}
-                disabled={editMode || disableEnvLocal || envApiFlag || !region}
+                disabled={editMode || envApiFlag || !region}
                 disableClearable={!projectId || !region}
                 clearIcon={false}
               />
@@ -743,34 +759,17 @@ const CreateNotebookScheduler = ({
               <ErrorMessage message={apiErrorMessage} />
             )}
             {packageInstallationMessage && isLocalKernel && (
-              <>
-                {packageInstalledList.length > 0 ? (
-                  <div className="success-message-package success-message-top">
-                    <iconWarning.react
-                      tag="div"
-                      className="icon-white logo-alignment-style success_icon icon-size-status"
-                    />
-                    <div className="success-message-pack warning-font success-message-cl-package warning-message">
-                      {packageInstallationMessage}
-                    </div>
-                  </div>
-                ) : (
-                  !apiErrorMessage && (
-                    <div className="success-message-package success-message-top">
-                      <CircularProgress
-                        size={18}
-                        aria-label="Loading Spinner"
-                        data-testid="loader"
-                      />
-                      <div className="success-message-pack warning-font success-message-cl-package enable-error-text-label">
-                        {packageInstallationMessage}
-                      </div>
-                    </div>
-                  )
-                )}
-              </>
+              <div className="success-message-package success-message-top">
+                <iconWarning.react
+                  tag="div"
+                  className="icon-white logo-alignment-style success_icon icon-size-status"
+                />
+                <div className="success-message-pack warning-font success-message-cl-package warning-message">
+                  {packageInstallationMessage}
+                </div>
+              </div>
             )}
-            {packageListFlag && isLocalKernel && (
+            {packageInstalledMessage && isLocalKernel && (
               <div className="success-message-package log-icon">
                 <iconSuccess.react
                   tag="div"
@@ -778,7 +777,7 @@ const CreateNotebookScheduler = ({
                   className="icon-white logo-alignment-style success_icon icon-size icon-completed"
                 />
                 <div className="warning-success-message">
-                  Required packages are already installed
+                  {packageInstalledMessage}
                 </div>
               </div>
             )}

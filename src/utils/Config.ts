@@ -28,6 +28,7 @@ import {
 } from './Const';
 import { ToastOptions, toast } from 'react-toastify';
 import { requestAPI } from '../handler/Handler';
+import { IComposerAPIResponse } from '../scheduler/common/SchedulerInteface';
 
 /**
  * Authentication function
@@ -294,4 +295,13 @@ export const login = async (
       setLoginError(true);
     }
   }
+};
+
+export const findEnvironmentSelected = (
+  selectedEnvironment?: string,
+  composerEnvData?: IComposerAPIResponse[]
+) => {
+  return composerEnvData?.find(
+    environment => environment.name === selectedEnvironment
+  );
 };
