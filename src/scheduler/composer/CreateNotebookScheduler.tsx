@@ -227,16 +227,10 @@ const CreateNotebookScheduler = ({
       );
 
       if (selectedEnvironment) {
-        setComposerEnvSelected(selectedEnvironment);
-        if (selectedEnvironment.state === 'RUNNING') {
-          if (isLocalKernel) {
+         if (isLocalKernel) {
             checkRequiredPackages(selectedEnvironment);
           }
-        } else {
-          setEnvStateMessage(
-            'This environment can not be used at this moment. Try after some time.'
-          );
-        }
+        setComposerEnvSelected(selectedEnvironment);
       }
 
       if (selectedEnvironment?.name) {
