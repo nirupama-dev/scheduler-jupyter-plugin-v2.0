@@ -202,7 +202,6 @@ function ListNotebookScheduler({
   const isImportErrorApiLoading = useRef(false);
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
   const [composerChangeFlag, setComposerChangeFlag] = useState<boolean>(false);
-  const [environmentState, setEnvironmentState] = useState<boolean>(false);
 
   const columns = React.useMemo(
     () => [
@@ -249,7 +248,6 @@ function ListNotebookScheduler({
     );
   };
   const handleComposerSelected = async (data: IComposerAPIResponse | null) => {
-    setEnvironmentState(false);
     setIsLoading(true);
     abortApiCall();
     setDagList([]);
@@ -269,7 +267,6 @@ function ListNotebookScheduler({
         );
         setComposerChangeFlag(false);
       } else {
-        setEnvironmentState(true);
         setIsLoading(false);
       }
     }
