@@ -166,13 +166,13 @@ const CreateNotebookScheduler = ({
   const [packageInstalledList, setPackageInstalledList] = useState<string[]>(
     []
   );
-  const [apiErrorMessage, setapiErrorMessage] = useState<string>('');
   const [clusterFlag, setClusterFlag] = useState<boolean>(false);
   const [envApiFlag, setEnvApiFlag] = useState<boolean>(false);
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
   const [loaderProjectId, setLoaderProjectId] = useState<boolean>(false);
   const [packageInstalledMessage, setPackageInstalledMessage] =
     useState<string>('');
+  const [envUpdateState, setEnvUpdateState] = useState<boolean>(false);
 
   const listClustersAPI = async () => {
     await SchedulerService.listClustersAPIService(
@@ -224,7 +224,6 @@ const CreateNotebookScheduler = ({
   const handleComposerEnvSelected = (data: IComposerAPIResponse | null) => {
     setPackageInstalledMessage('');
     setPackageInstalledList([]);
-    setapiErrorMessage('');
     setPackageInstallationMessage('');
 
     if (data) {
@@ -426,7 +425,7 @@ const CreateNotebookScheduler = ({
       emailError ||
       dagListCall ||
       creatingScheduler ||
-      (isLocalKernel && !!apiErrorMessage) || // There is an error message
+      (editMode && isLocalKernel && envUpdateState) || // Environment is updating
       jobNameSelected === '' ||
       (!jobNameValidation && !editMode) ||
       (jobNameSpecialValidation && !editMode) ||
@@ -537,9 +536,9 @@ const CreateNotebookScheduler = ({
     if (!region) {
       setComposerEnvData([]);
       setComposerEnvSelected(null);
-      setapiErrorMessage('');
       setPackageInstallationMessage('');
       setPackageInstalledMessage('');
+      setEnvUpdateState(false);
     }
   }, [projectId, region]);
 
@@ -572,12 +571,12 @@ const CreateNotebookScheduler = ({
    */
   const handleRegionChange = (value: React.SetStateAction<string>) => {
     setPackageInstalledList([]);
-    setapiErrorMessage('');
     setPackageInstallationMessage('');
     setComposerEnvSelected(null);
     setComposerEnvData([]);
     setPackageInstalledMessage('');
     setRegion(value);
+    setEnvUpdateState(false);
   };
 
   useEffect(() => {
@@ -598,19 +597,24 @@ const CreateNotebookScheduler = ({
       setRegion('');
       setComposerEnvSelected(null);
       setComposerEnvData([]);
-      setapiErrorMessage('');
       setPackageInstallationMessage('');
       setPackageInstalledMessage('');
+      setEnvUpdateState(false);
     }
   }, [projectId]);
 
   useEffect(() => {
     setPackageInstalledMessage('');
     setPackageInstallationMessage('');
+    setEnvUpdateState(false);
 
     if (isLocalKernel && editMode) {
       setPackageInstalledList([]);
-      checkRequiredPackages(composerEnvSelected);
+      if (composerEnvSelected?.state === 'RUNNING') {
+        checkRequiredPackages(composerEnvSelected);
+      } else {
+        setEnvUpdateState(true);
+      }
     }
   }, [packageEditFlag]);
 
@@ -755,8 +759,10 @@ const CreateNotebookScheduler = ({
             {!composerEnvSelected && region && (
               <ErrorMessage message="Environment is required field" />
             )}
-            {apiErrorMessage && isLocalKernel && (
-              <ErrorMessage message={apiErrorMessage} />
+            {isLocalKernel && editMode && envUpdateState && (
+              <ErrorMessage
+                message={`The selected composer environment state is set to ${composerEnvSelected?.state}. Please try again.`}
+              />
             )}
             {packageInstallationMessage && isLocalKernel && (
               <div className="success-message-package success-message-top">
