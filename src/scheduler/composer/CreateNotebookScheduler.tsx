@@ -714,12 +714,12 @@ const CreateNotebookScheduler = ({
                       option.state ? (
                         <div>{option.name}</div>
                       ) : (
-                        <>
-                          <div className="autocomplete-space">
+                        <div className='env-option-row'>
+                          <div>
                             {option.name}
                           </div>
                           <div>{option.state}</div>
-                        </>
+                        </div>
                       )}
                     </Box>
                   );
