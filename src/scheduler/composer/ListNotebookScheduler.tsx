@@ -880,7 +880,7 @@ function ListNotebookScheduler({
                     {composerEnvironmentStateList.includes(option.state) ? (
                       <div>{option.name}</div>
                     ) : (
-                      <div className='env-option-row'>
+                      <div className="env-option-row">
                         <div>{option.name}</div>
                         <div>{option.state}</div>
                       </div>
