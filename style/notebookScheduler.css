@@ -784,3 +784,9 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .autocomplete-space {
   padding-right: 10px;
 }
+
+.env-option-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}
