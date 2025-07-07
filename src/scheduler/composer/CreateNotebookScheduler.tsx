@@ -202,6 +202,12 @@ const CreateNotebookScheduler = ({
     );
   };
 
+  const getComposerEnvAPI = async () => {
+    return await SchedulerService.getComposerEnvApiService(
+      composerEnvSelected?.metadata?.path
+    );
+  };
+
   const checkRequiredPackages = (env: IComposerAPIResponse | null) => {
     const packages_from_env = env?.pypi_packages;
     const missingPackages = packages_from_env
@@ -458,6 +464,7 @@ const CreateNotebookScheduler = ({
     } else {
       setCreateCompleted(true);
       setEditMode(false);
+      setPackageEditFlag(false);
     }
 
     if (abortControllerRef.current) {
@@ -558,6 +565,9 @@ const CreateNotebookScheduler = ({
   }, [serverlessDataList, clusterList]);
 
   useEffect(() => {
+    setPackageInstalledMessage('');
+    setPackageInstallationMessage('');
+    setEnvUpdateState(false);
     if (selectedMode === 'cluster') {
       listClustersAPI();
     } else {
@@ -604,17 +614,18 @@ const CreateNotebookScheduler = ({
   }, [projectId]);
 
   useEffect(() => {
-    setPackageInstalledMessage('');
-    setPackageInstallationMessage('');
-    setEnvUpdateState(false);
-
     if (isLocalKernel && editMode) {
       setPackageInstalledList([]);
-      if (composerEnvSelected?.state === 'RUNNING') {
-        checkRequiredPackages(composerEnvSelected);
-      } else {
-        setEnvUpdateState(true);
-      }
+      getComposerEnvAPI().then((envData: any) => {
+        if (envData) {
+          setComposerEnvSelected(envData);
+          if (envData?.state === 'RUNNING') {
+            checkRequiredPackages(envData);
+          } else {
+            setEnvUpdateState(true);
+          }
+        }
+      });
     }
   }, [packageEditFlag]);
 

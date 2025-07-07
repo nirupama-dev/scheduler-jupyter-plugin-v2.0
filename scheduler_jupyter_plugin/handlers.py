@@ -156,6 +156,7 @@ def setup_handlers(web_app):
         "getGcpServiceUrls": UrlHandler,
         "log": LogHandler,
         "composerList": composer.EnvironmentListController,
+        "getComposerEnvironment": composer.EnvironmentGetController,
         "dagRun": airflow.DagRunController,
         "dagRunTask": airflow.DagRunTaskController,
         "dagRunTaskLogs": airflow.DagRunTaskLogsController,
