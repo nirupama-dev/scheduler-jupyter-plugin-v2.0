@@ -1099,4 +1099,17 @@ export class SchedulerService {
       return error;
     }
   };
+
+  static readonly getComposerEnvApiService = async (
+    composerEnvName: string | undefined
+  ) => {
+    try {
+      const formattedResponse: any = await requestAPI(
+        `getComposerEnvironment?env_name=${composerEnvName}`
+      );
+      return formattedResponse;
+    } catch (error) {
+      return error;
+    }
+  };
 }
