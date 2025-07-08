@@ -317,17 +317,21 @@ const VertexJobRuns = ({
               Loading History
             </div>
           )}
-          {!isLoading && filteredData.length === 0 && (
-            <div className="no-data-style">
-              No rows to display on{' '}
-              {selectedDate
-                ?.toDate()
-                .toDateString()
-                .split(' ')
-                .slice(1)
-                .join(' ')}
-            </div>
-          )}
+          {!isLoading &&
+            filteredData.length === 0 &&
+            (selectedDate ? (
+              <div className="no-data-style">
+                No rows to display on{' '}
+                {selectedDate
+                  ?.toDate()
+                  .toDateString()
+                  .split(' ')
+                  .slice(1)
+                  .join(' ')}
+              </div>
+            ) : (
+              <div className="no=data-style">No rows to display</div>
+            ))}
         </div>
       )}
     </div>

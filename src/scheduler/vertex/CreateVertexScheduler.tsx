@@ -34,13 +34,14 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
-import { Cron } from 'react-js-cron';
+import { Cron, PeriodType } from 'react-js-cron';
 import tzdata from 'tzdata';
 import dayjs from 'dayjs';
 import { Input } from '../../controls/MuiWrappedInput';
 import { RegionDropdown } from '../../controls/RegionDropdown';
 import { authApi, currentTime } from '../../utils/Config';
 import {
+  allowedPeriodsCron,
   CORN_EXP_DOC_URL,
   DEFAULT_CLOUD_STORAGE_BUCKET,
   DEFAULT_DISK_MAX_SIZE,
@@ -51,6 +52,7 @@ import {
   DEFAULT_PRIMARY_NETWORK,
   DEFAULT_SERVICE_ACCOUNT,
   DISK_TYPE_VALUE,
+  everyMinuteCron,
   internalScheduleMode,
   KERNEL_VALUE,
   scheduleMode,
@@ -696,8 +698,10 @@ const CreateVertexScheduler = ({
           subNetworkSelected === undefined)) ||
       (networkSelected === 'networkShared' && sharedNetworkSelected === null) ||
       (scheduleMode === 'runSchedule' &&
-        internalScheduleMode === 'cronFormat' &&
-        scheduleField === '') ||
+        ((internalScheduleMode === 'cronFormat' &&
+          (scheduleField === '' || scheduleField === everyMinuteCron)) ||
+          (internalScheduleMode === 'userFriendly' &&
+            scheduleValue === everyMinuteCron))) ||
       inputFileSelected === '' ||
       endDateError ||
       isPastEndDate ||
@@ -1635,11 +1639,16 @@ const CreateVertexScheduler = ({
                       showIcon={false}
                     />
                   )}
+                  {scheduleField === everyMinuteCron && (
+                    <ErrorMessage
+                      message="Every minute cron expression not supported"
+                      showIcon={false}
+                    />
+                  )}
                   <div>
                     <span className="tab-description tab-text-sub-cl">
                       Schedules are specified using unix-cron format. E.g. every
-                      minute: "* * * * *", every 3 hours: "0 */3 * * *", every
-                      Monday at 9:00: "0 9 * * 1".
+                      3 hours: "0 */3 * * *", every Monday at 9:00: "0 9 * * 1".
                     </span>
                     <div className="learn-more-url">
                       <LearnMore path={CORN_EXP_DOC_URL} />
@@ -1649,9 +1658,25 @@ const CreateVertexScheduler = ({
               )}
             {scheduleMode === 'runSchedule' &&
               internalScheduleMode === 'userFriendly' && (
-                <div className="create-scheduler-form-element">
-                  <Cron value={scheduleValue} setValue={setScheduleValue} />
-                </div>
+                <>
+                  <div className="create-scheduler-form-element">
+                    <Cron
+                      value={scheduleValue}
+                      setValue={setScheduleValue}
+                      allowedPeriods={
+                        allowedPeriodsCron as PeriodType[] | undefined
+                      }
+                    />
+                  </div>
+                  <div>
+                    {scheduleValue === everyMinuteCron && (
+                      <ErrorMessage
+                        message="Every minute cron expression not supported"
+                        showIcon={false}
+                      />
+                    )}
+                  </div>
+                </>
               )}
             {scheduleMode === 'runSchedule' && (
               <>

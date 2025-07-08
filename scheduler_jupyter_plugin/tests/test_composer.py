@@ -31,10 +31,12 @@ class MockClientSession:
             {
                 "environments": [
                     {
-                        "name": "projects/mock-project/locations/mock-location/environments/env1"
+                        "name": "projects/mock-project/locations/mock-location/environments/env1",
+                        "state": "RUNNING",
                     },
                     {
-                        "name": "projects/mock-project/locations/mock-location/environments/env2"
+                        "name": "projects/mock-project/locations/mock-location/environments/env2",
+                        "state": "UPDATING",
                     },
                 ]
             }

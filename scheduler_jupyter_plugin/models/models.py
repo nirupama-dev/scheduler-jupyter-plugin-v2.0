@@ -27,8 +27,10 @@ class ComposerEnvironment(BaseModel):
     name: str
     label: str
     description: str
+    state: str
     file_extensions: List[str]  # Supported input file types
     metadata: Optional[Dict[str, str]]  # Optional metadata
+    pypi_packages: Optional[Dict[str, str]] = None
 
     def __str__(self):
         return self.json()

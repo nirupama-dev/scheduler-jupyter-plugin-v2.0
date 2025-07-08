@@ -16,6 +16,7 @@
  */
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { Notification } from '@jupyterlab/apputils';
 import { useTable, usePagination } from 'react-table';
 import TableData from '../../utils/TableData';
 import { PaginationComponent } from '../../utils/PaginationComponent';
@@ -174,6 +175,7 @@ function ListVertexScheduler({
     nextToken: string | null | undefined
   ) => {
     setIsLoading(true);
+
     await VertexServices.listVertexSchedules(
       setScheduleList,
       region,
@@ -250,7 +252,6 @@ function ListVertexScheduler({
       ? updatedPageTokenList.length > 1
       : updatedPageTokenList.length > 0; // hasPreviousPage is true if there are more than 1 tokens in the list, which means there is a previous page available.
     setCanPreviousPage(hasPreviousPage); // false only on first page
-
     setPageTokenList([...updatedPageTokenList]); // set the updated token list after pagination
     let startIndex = 1;
     if (hasPreviousPage) {
@@ -429,20 +430,25 @@ function ListVertexScheduler({
     newPageToken: string | null | undefined
   ) => {
     setDeletingSchedule(true);
-    await VertexServices.handleDeleteSchedulerAPIService(
+    resetPaginationVariables(true); // Reset pagination variables to fetch the first page after deletion
+    const deleteResponse = await VertexServices.handleDeleteSchedulerAPIService(
       region,
       uniqueScheduleId,
-      scheduleDisplayName,
-      setScheduleList,
-      setIsLoading,
-      setIsApiError,
-      setApiError,
-      setNextPageToken,
-      newPageToken,
-      setCanNextPage,
-      setApiEnableUrl,
-      scheduleListPageLength
+      scheduleDisplayName
     );
+    if (deleteResponse && deleteResponse.done) {
+      await listVertexScheduleInfoAPI(null); // Refresh the list after deletion
+      Notification.success(
+        `Deleted job ${scheduleDisplayName}. It might take a few minutes for the job to be deleted from the list of jobs.`,
+        {
+          autoClose: false
+        }
+      );
+    } else {
+      Notification.error(`Failed to delete the ${scheduleDisplayName}`, {
+        autoClose: false
+      });
+    }
     setDeletePopupOpen(false);
     setDeletingSchedule(false);
   };
@@ -936,7 +942,9 @@ function ListVertexScheduler({
         if (credentials && credentials?.region_id && credentials.project_id) {
           if (!createMode && !activePaginationVariables) {
             setLoaderRegion(false);
-            setRegion(credentials.region_id);
+            if (!region) {
+              setRegion(credentials.region_id);
+            }
           }
           setProjectId(credentials.project_id);
         }
@@ -964,15 +972,17 @@ function ListVertexScheduler({
   /**
    *
    * @param reloadPagination parameter specifies if the page has to refresh.
-   * Function resets all variables except nextPageToken and last index
+   * Function resets all variables except nextPageToken
    * which would be automatically taken care during rendering.
    */
   const resetPaginationVariables = (reloadPagination: boolean) => {
+    setActivePaginationVariables(null); //
     setIsLoading(true);
     setResetToCurrentPage(reloadPagination);
     setCanPreviousPage(false);
     setCanNextPage(false);
     setCurrentStartIndex(1);
+    setCurrentLastIndex(scheduleListPageLength);
     setTotalCount(0);
     setPageTokenList([]);
   };

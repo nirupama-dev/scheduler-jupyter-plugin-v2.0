@@ -142,3 +142,13 @@ export const HTTP_STATUS_NOT_FOUND = 404;
 export const VERTEX_SCHEDULE = 'vertex';
 
 export const ABORT_MESSAGE = 'signal is aborted without reason';
+
+export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
+
+export const everyMinuteCron = '* * * * *';
+
+export const packages = ['apache-airflow-providers-papermill', 'ipykernel'];
+
+export const composerEnvironmentStateList = ['RUNNING', 'UPDATING'];
+
+export const composerEnvironmentStateListForCreate = 'RUNNING';
