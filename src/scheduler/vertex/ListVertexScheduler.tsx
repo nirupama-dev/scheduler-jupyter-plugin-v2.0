@@ -942,7 +942,9 @@ function ListVertexScheduler({
         if (credentials && credentials?.region_id && credentials.project_id) {
           if (!createMode && !activePaginationVariables) {
             setLoaderRegion(false);
-            setRegion(credentials.region_id);
+            if (!region) {
+              setRegion(credentials.region_id);
+            }
           }
           setProjectId(credentials.project_id);
         }
