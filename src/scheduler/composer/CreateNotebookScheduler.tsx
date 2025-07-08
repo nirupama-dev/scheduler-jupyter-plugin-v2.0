@@ -472,6 +472,24 @@ const CreateNotebookScheduler = ({
     }
   };
 
+  /**
+   * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
+   * @param {string} value selected region
+   */
+  const handleRegionChange = (value: React.SetStateAction<string>) => {
+    setPackageInstalledList([]);
+    setPackageInstallationMessage('');
+    setComposerEnvSelected(null);
+    setComposerEnvData([]);
+    setPackageInstalledMessage('');
+    setRegion(value);
+    setEnvUpdateState(false);
+  };
+
+  /**
+   * Fetching the kernel details based on the session context and setting the selected mode
+   * to serverless or cluster based on the kernel preference.
+   */
   const getKernelDetail = async () => {
     const kernelSpecs: any = await KernelSpecAPI.getSpecs();
     const kernels = kernelSpecs.kernelspecs;
@@ -518,6 +536,9 @@ const CreateNotebookScheduler = ({
     }
   };
 
+  /**
+   * Effect to handle the initial setup of the component.
+   */
   useEffect(() => {
     if (context !== '') {
       setInputFileSelected(context.path);
@@ -535,6 +556,25 @@ const CreateNotebookScheduler = ({
     };
   }, []);
 
+  /**
+   * Effect to fetch the project ID and region from the auth API
+   */
+  useEffect(() => {
+    setLoaderRegion(true);
+    setLoaderProjectId(true);
+    authApi().then(credentials => {
+      if (credentials?.project_id && credentials.region_id) {
+        setLoaderProjectId(false);
+        setProjectId(credentials.project_id);
+        setLoaderRegion(false);
+        setRegion(credentials.region_id);
+      }
+    });
+  }, []);
+
+  /**
+   * Effect to fetch the list of composers based on the project ID and region.
+   */
   useEffect(() => {
     if (projectId && region) {
       listComposersAPI();
@@ -549,6 +589,9 @@ const CreateNotebookScheduler = ({
     }
   }, [projectId, region]);
 
+  /**
+   * Effect to validate the job name uniqueness within the selected composer environment.
+   */
   useEffect(() => {
     if (composerEnvSelected?.name !== '' && dagList.length > 0) {
       const isUnique = !dagList.some(
@@ -558,12 +601,19 @@ const CreateNotebookScheduler = ({
     }
   }, [dagList, jobNameSelected, composerEnvSelected]);
 
+  /**
+   * Effect to fetch the kernel details based on the session context and setting the selected mode
+   * to serverless or cluster based on the kernel preference.
+   */
   useEffect(() => {
     if (context !== '') {
       getKernelDetail();
     }
   }, [serverlessDataList, clusterList]);
 
+  /**
+   * Effect to handle the listClustersAPI or listSessionTemplatesAPI based on the selected mode.
+   */
   useEffect(() => {
     setPackageInstalledMessage('');
     setPackageInstallationMessage('');
@@ -576,32 +626,8 @@ const CreateNotebookScheduler = ({
   }, [selectedMode]);
 
   /**
-   * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
-   * @param {string} value selected region
+   * Effect to reset the region and composer environment selection when the project ID changes.
    */
-  const handleRegionChange = (value: React.SetStateAction<string>) => {
-    setPackageInstalledList([]);
-    setPackageInstallationMessage('');
-    setComposerEnvSelected(null);
-    setComposerEnvData([]);
-    setPackageInstalledMessage('');
-    setRegion(value);
-    setEnvUpdateState(false);
-  };
-
-  useEffect(() => {
-    setLoaderRegion(true);
-    setLoaderProjectId(true);
-    authApi().then(credentials => {
-      if (credentials?.project_id && credentials.region_id) {
-        setLoaderProjectId(false);
-        setProjectId(credentials.project_id);
-        setLoaderRegion(false);
-        setRegion(credentials.region_id);
-      }
-    });
-  }, []);
-
   useEffect(() => {
     if (!projectId) {
       setRegion('');
@@ -613,8 +639,15 @@ const CreateNotebookScheduler = ({
     }
   }, [projectId]);
 
+  /**
+   * Effect to handle the package installation message, check the required packages and composer environment selection
+   * when the packageEditFlag changes.
+   */
   useEffect(() => {
     if (isLocalKernel && editMode) {
+      setPackageInstallationMessage('');
+      setPackageInstalledMessage('');
+      setEnvUpdateState(false);
       setPackageInstalledList([]);
       getComposerEnvAPI().then((envData: any) => {
         if (envData) {
