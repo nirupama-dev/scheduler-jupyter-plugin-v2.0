@@ -25,7 +25,7 @@ gcloud config set compute/region us-central1
 # Install dependencies.
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends git curl
-curl -sL https://deb.nodesource.com/setup_18.x | bash -
+curl -sL https://deb.nodesource.com/setup_18.x | sudo bash -
 sudo apt-get --assume-yes install python3 python3-pip nodejs python3-venv
 
 # Install latest jupyter lab and build.
@@ -36,19 +36,21 @@ pip install jupyterlab build
 # Navigate to repo.
 cd "${KOKORO_ARTIFACTS_DIR}/github/scheduler-jupyter-plugin"
 
-# Rebuild extension Typescript source after making changes
-jlpm install
-jlpm build
 # Aslo build python packages to dist/
 python3 -m build
+echo "Package built into dist/."
 
 # install the build
 pip install dist/*.whl
-jupyter server extension enable scheduler_jupyter_plugin
+echo "Package installed from wheel."
 
 # Run Playwright Tests
 cd ./ui-tests
 jlpm install
 jlpm playwright install
+# Installs low-level dependencies required for playwright to launch browsers.
+jlpm playwright install-deps
 PLAYWRIGHT_JUNIT_OUTPUT_NAME=test-results-latest/sponge_log.xml jlpm playwright test --reporter=junit --output="test-results-latest"
+echo "Playwright tests completed."
+
 deactivate
