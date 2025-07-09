@@ -24,6 +24,8 @@ gcloud config set compute/region us-central1
 
 # Install dependencies.
 sudo apt-get update
+sudo apt-get install -y --no-install-recommends git curl
+curl -sL https://deb.nodesource.com/setup_18.x | bash -
 sudo apt-get --assume-yes install python3 python3-pip nodejs python3-venv
 
 # Install latest jupyter lab and build.
