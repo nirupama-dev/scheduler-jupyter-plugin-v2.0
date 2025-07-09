@@ -27,7 +27,7 @@ sudo apt-get update
 sudo apt-get --assume-yes install python3 python3-pip nodejs python3-venv
 
 # Install latest jupyter lab and build.
-python -m venv latest
+python3 -m venv latest
 source latest/bin/activate
 pip install jupyterlab build
 
@@ -38,7 +38,7 @@ cd "${KOKORO_ARTIFACTS_DIR}/github/scheduler-jupyter-plugin"
 jlpm install
 jlpm build
 # Aslo build python packages to dist/
-python -m build
+python3 -m build
 
 # install the build
 pip install dist/*.whl
