@@ -28,7 +28,14 @@ import {
   Notification
 } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
-
+import { NotebookScheduler } from './scheduler/NotebookScheduler';
+import { NotebookButtonExtension } from './controls/NotebookButtonExtension';
+import {
+  PLUGIN_NAME,
+  TITLE_LAUNCHER_CATEGORY,
+  VERSION_DETAIL
+} from './utils/Const';
+import { iconScheduledNotebooks } from './utils/Icons';
 import { requestAPI } from './handler/Handler';
 
 /**
