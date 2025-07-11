@@ -18,18 +18,18 @@
 import {
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
-  JupyterLab
+  // JupyterLab
 } from '@jupyterlab/application';
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  MainAreaWidget,
+  // MainAreaWidget,
   IThemeManager,
-  Notification
+  // Notification
 } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
 
-import { requestAPI } from './handler/Handler';
+// import { requestAPI } from './handler/Handler';
 
 /**
  * Initialization data for the scheduler-jupyter-plugin extension.
@@ -47,98 +47,98 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ) => {
     console.log('JupyterLab extension scheduler-jupyter-plugin is activated!');
 
-    const { commands } = app;
+    // const { commands } = app;
 
-    const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';
+    // const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';
 
-    async function jupyterVersionCheck() {
-      try {
-        const notificationMessage =
-          'There is a newer version of Scheduler Plugin available. Would you like to update it?';
-        const latestVersion = await requestAPI(
-          `jupyterlabVersion?packageName=${PLUGIN_NAME}`,
-          {
-            method: 'GET'
-          }
-        );
+    // async function jupyterVersionCheck() {
+    //   try {
+    //     const notificationMessage =
+    //       'There is a newer version of Scheduler Plugin available. Would you like to update it?';
+    //     const latestVersion = await requestAPI(
+    //       `jupyterlabVersion?packageName=${PLUGIN_NAME}`,
+    //       {
+    //         method: 'GET'
+    //       }
+    //     );
 
-        if (
-          typeof latestVersion === 'string' &&
-          latestVersion > VERSION_DETAIL
-        ) {
-          Notification.info(notificationMessage, {
-            actions: [
-              {
-                label: 'Update',
-                callback: () => {
-                  console.log('Update JupyterLab to the latest version');
-                  requestAPI(`updatePlugin?packageName=${PLUGIN_NAME}`, {
-                    method: 'POST'
-                  })
-                    .then(() => {
-                      // After successful update, refresh the application
-                      window.location.reload();
-                    })
-                    .catch(updateError => {
-                      Notification.error(`Update failed.${updateError}`);
-                    });
-                },
-                displayType: 'warn'
-              },
-              {
-                label: 'Ignore',
-                callback: () => {
-                  Notification.warning('Update Cancelled by user');
-                },
-                displayType: 'default'
-              }
-            ],
-            autoClose: false
-          });
-        }
-      } catch (error) {
-        Notification.error(`Failed to fetch JupyterLab version:${error}`);
-        throw error;
-      }
-    }
+    //     if (
+    //       typeof latestVersion === 'string' &&
+    //       latestVersion > VERSION_DETAIL
+    //     ) {
+    //       Notification.info(notificationMessage, {
+    //         actions: [
+    //           {
+    //             label: 'Update',
+    //             callback: () => {
+    //               console.log('Update JupyterLab to the latest version');
+    //               requestAPI(`updatePlugin?packageName=${PLUGIN_NAME}`, {
+    //                 method: 'POST'
+    //               })
+    //                 .then(() => {
+    //                   // After successful update, refresh the application
+    //                   window.location.reload();
+    //                 })
+    //                 .catch(updateError => {
+    //                   Notification.error(`Update failed.${updateError}`);
+    //                 });
+    //             },
+    //             displayType: 'warn'
+    //           },
+    //           {
+    //             label: 'Ignore',
+    //             callback: () => {
+    //               Notification.warning('Update Cancelled by user');
+    //             },
+    //             displayType: 'default'
+    //           }
+    //         ],
+    //         autoClose: false
+    //       });
+    //     }
+    //   } catch (error) {
+    //     Notification.error(`Failed to fetch JupyterLab version:${error}`);
+    //     throw error;
+    //   }
+    // }
 
-    commands.addCommand(createNotebookJobsComponentCommand, {
-      caption: 'Scheduled Jobs',
-      label: 'Scheduled Jobs',
-      icon: iconScheduledNotebooks,
-      execute: () => {
-        const content = new NotebookScheduler(
-          app as JupyterLab,
-          themeManager,
-          settingRegistry as ISettingRegistry,
-          ''
-        );
-        const widget = new MainAreaWidget<NotebookScheduler>({ content });
-        widget.title.label = 'Scheduled Jobs';
-        widget.title.icon = iconScheduledNotebooks;
-        app.shell.add(widget, 'main');
-      }
-    });
+    // commands.addCommand(createNotebookJobsComponentCommand, {
+    //   caption: 'Scheduled Jobs',
+    //   label: 'Scheduled Jobs',
+    //   icon: iconScheduledNotebooks,
+    //   execute: () => {
+    //     const content = new NotebookScheduler(
+    //       app as JupyterLab,
+    //       themeManager,
+    //       settingRegistry as ISettingRegistry,
+    //       ''
+    //     );
+    //     const widget = new MainAreaWidget<NotebookScheduler>({ content });
+    //     widget.title.label = 'Scheduled Jobs';
+    //     widget.title.icon = iconScheduledNotebooks;
+    //     app.shell.add(widget, 'main');
+    //   }
+    // });
 
-    app.docRegistry.addWidgetExtension(
-      'Notebook',
-      new NotebookButtonExtension(
-        app as JupyterLab,
-        settingRegistry as ISettingRegistry,
-        launcher,
-        themeManager
-      )
-    );
+    // app.docRegistry.addWidgetExtension(
+    //   'Notebook',
+    //   new NotebookButtonExtension(
+    //     app as JupyterLab,
+    //     settingRegistry as ISettingRegistry,
+    //     launcher,
+    //     themeManager
+    //   )
+    // );
 
-    if (launcher) {
-      launcher.add({
-        command: createNotebookJobsComponentCommand,
-        category: TITLE_LAUNCHER_CATEGORY,
-        rank: 4
-      });
-    }
+    // if (launcher) {
+    //   launcher.add({
+    //     command: createNotebookJobsComponentCommand,
+    //     category: TITLE_LAUNCHER_CATEGORY,
+    //     rank: 4
+    //   });
+    // }
 
-    await jupyterVersionCheck();
+    // await jupyterVersionCheck();
   }
 };
 
