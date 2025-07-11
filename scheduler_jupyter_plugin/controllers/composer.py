@@ -39,3 +39,21 @@ class EnvironmentListController(APIHandler):
         except Exception as e:
             self.log.exception(f"Error fetching composer environments: {str(e)}")
             self.finish({"error": str(e)})
+
+class EnvironmentGetController(APIHandler):
+    @tornado.web.authenticated
+    async def get(self):
+        """Returns details of composer environment"""
+        try:
+            env_name = self.get_argument("env_name")
+            async with aiohttp.ClientSession() as client_session:
+                client = composer.Client(
+                    await credentials.get_cached(), self.log, client_session
+                )
+                environment = await client.get_environment(env_name)
+                self.set_header("Content-Type", "application/json")
+                self.finish(json.dumps(environment, default=lambda x: x.dict()))
+        except Exception as e:
+            self.log.exception(f"Error fetching composer environment: {str(e)}")
+            self.finish({"error": str(e)})
+

@@ -780,3 +780,13 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .calendar-status-icon-double {
   left: 16.2px;
 }
+
+.autocomplete-space {
+  padding-right: 10px;
+}
+
+.env-option-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+}

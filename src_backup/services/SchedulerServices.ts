@@ -171,7 +171,7 @@ export class SchedulerService {
   };
 
   static readonly listComposersAPIService = async (
-    setComposerList: (value: string[]) => void,
+    setComposerEnvData: (value: IComposerAPIResponse[]) => void,
     projectId: string,
     region: string,
     setIsApiError: (value: boolean) => void,
@@ -201,7 +201,7 @@ export class SchedulerService {
 
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
-        setComposerList([]);
+        setComposerEnvData([]);
         if (setIsLoading) {
           setIsLoading(false);
         }
@@ -211,7 +211,7 @@ export class SchedulerService {
         }
       } else if (formattedResponse.length === undefined) {
         try {
-          setComposerList([]);
+          setComposerEnvData([]);
           if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
             const url = formattedResponse.error.message.match(pattern);
             if (url && url.length > 0) {
@@ -241,12 +241,7 @@ export class SchedulerService {
       } else {
         setIsApiError(false);
         setApiError('');
-        const composerEnvironmentList: string[] = [];
-        formattedResponse.forEach((data: IComposerAPIResponse) => {
-          composerEnvironmentList.push(data.name);
-        });
-        composerEnvironmentList.sort();
-        setComposerList(composerEnvironmentList);
+        setComposerEnvData(formattedResponse);
 
         if (setEnvApiFlag) {
           setEnvApiFlag(false);
@@ -365,13 +360,13 @@ export class SchedulerService {
   static readonly editJobSchedulerService = async (
     bucketName: string,
     dagId: string,
-    composerSelectedList: string,
+    composerEnvSelected: IComposerAPIResponse | null,
     setEditDagLoading: (value: string) => void,
     setIsLocalKernel: (value: boolean) => void,
     setPackageEditFlag: (value: boolean) => void,
     setCreateCompleted?: (value: boolean) => void,
     setJobNameSelected?: (value: string) => void,
-    setComposerSelected?: (value: string) => void,
+    setComposerEnvSelected?: (value: IComposerAPIResponse | null) => void,
     setScheduleMode?: (value: scheduleMode) => void,
     setScheduleValue?: (value: string) => void,
     setInputFileSelected?: (value: string) => void,
@@ -414,7 +409,7 @@ export class SchedulerService {
       if (
         setCreateCompleted &&
         setJobNameSelected &&
-        setComposerSelected &&
+        setComposerEnvSelected &&
         setScheduleMode &&
         setScheduleValue &&
         setInputFileSelected &&
@@ -439,7 +434,7 @@ export class SchedulerService {
         dagId !== null
       ) {
         setJobNameSelected(dagId);
-        setComposerSelected(composerSelectedList);
+        setComposerEnvSelected(composerEnvSelected);
         setInputFileSelected(formattedResponse.input_filename);
 
         if (formattedResponse.mode_selected === 'local') {
@@ -1105,61 +1100,16 @@ export class SchedulerService {
     }
   };
 
-  static readonly checkRequiredPackagesInstalled = (
-    selectedComposer: string,
-    setPackageInstallationMessage: (value: string) => void,
-    setPackageInstalledList: (value: string[]) => void,
-    setPackageListFlag: (value: boolean) => void,
-    setapiErrorMessage: (value: string) => void,
-    setCheckRequiredPackagesInstalledFlag: (value: boolean) => void,
-    setDisableEnvLocal: (value: boolean) => void,
-    region: string,
-    signal: any,
-    abortControllerRef: any
+  static readonly getComposerEnvApiService = async (
+    composerEnvName: string | undefined
   ) => {
-    setPackageInstallationMessage(
-      'Checking if required packages are installed...'
-    );
-    requestAPI(
-      `checkRequiredPackages?composer_environment_name=${selectedComposer}&region_id=${region}`,
-      { signal }
-    )
-      .then((installedPackageList: any) => {
-        if (installedPackageList.length > 0) {
-          setPackageInstallationMessage(
-            installedPackageList.join(', ') +
-              ' packages will get installed on creation of schedule'
-          );
-          setPackageInstalledList(installedPackageList);
-          setPackageListFlag(false);
-          setCheckRequiredPackagesInstalledFlag(true);
-        } else if (Object.hasOwn(installedPackageList, 'error')) {
-          setPackageInstallationMessage('');
-          setapiErrorMessage(installedPackageList.error);
-          setCheckRequiredPackagesInstalledFlag(false);
-        } else {
-          setPackageInstallationMessage('');
-          setPackageInstalledList([]);
-          setPackageListFlag(true);
-          setCheckRequiredPackagesInstalledFlag(true);
-        }
-
-        setDisableEnvLocal(false);
-      })
-      .catch(reason => {
-        if (typeof reason === 'object' && reason !== null) {
-          if (reason instanceof TypeError) {
-            return;
-          }
-        } else {
-          const errorResponse = `Failed to fetch installation package list : ${reason}`;
-          handleErrorToast({
-            error: errorResponse
-          });
-        }
-      })
-      .finally(() => {
-        abortControllerRef.current = null; // Clear the AbortController
-      });
+    try {
+      const formattedResponse: any = await requestAPI(
+        `getComposerEnvironment?env_name=${composerEnvName}`
+      );
+      return formattedResponse;
+    } catch (error) {
+      return error;
+    }
   };
 }

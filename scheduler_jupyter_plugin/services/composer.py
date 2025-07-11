@@ -95,3 +95,47 @@ class Client:
         except Exception as e:
             self.log.exception(f"Error fetching environments list: {str(e)}")
             return {"Error fetching environments list": str(e)}
+        
+    async def get_environment(
+        self, env_name
+    ) -> ComposerEnvironment:
+        try:
+            environment = {}
+            composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
+            api_endpoint = f"{composer_url}/v1/{env_name}"
+
+            headers = self.create_headers()
+            async with self.client_session.get(
+                api_endpoint, headers=headers
+            ) as response:
+                if response.status == HTTP_STATUS_OK:
+                    resp = await response.json()
+                    if not resp:
+                        return environment
+                    else:
+                        path = resp.get("name")
+                        name = resp.get("name").split("/")[-1]
+                        state = resp.get("state")
+                        pypi_packages = resp.get("config", {}).get("softwareConfig", {}).get("pypiPackages", None)
+                        environment = ComposerEnvironment(
+                            name=name,
+                            label=name,
+                            description=f"Environment: {name}",
+                            state=state,
+                            file_extensions=["ipynb"],
+                            metadata={"path": path},
+                            pypi_packages=pypi_packages
+                        )
+                            
+                        return environment
+                elif response.status == HTTP_STATUS_FORBIDDEN:
+                    resp = await response.json()
+                    return resp
+                else:
+                    self.log.exception("Error fetching environment")
+                    raise Exception(
+                        f"Error getting composer: {response.reason} {await response.text()}"
+                    )
+        except Exception as e:
+            self.log.exception(f"Error fetching environment: {str(e)}")
+            return {"Error fetching environment": str(e)}

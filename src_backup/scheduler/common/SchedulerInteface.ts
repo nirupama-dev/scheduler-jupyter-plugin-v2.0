@@ -69,7 +69,7 @@ export interface IClusterAPIResponse {
 }
 
 export interface IComposerAPIResponse {
-  name: string;
+  name: string | '';
   label: string;
   description: string;
   state: string;
