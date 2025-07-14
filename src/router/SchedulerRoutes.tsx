@@ -1,7 +1,13 @@
 import React from 'react';
-import { Routes, Route, Navigate, useNavigate, useParams } from 'react-router-dom';
-import {CreateNotebookSchedule} from '../components/notebookScheduler/CreateNotebookSchedule';
- 
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useParams
+} from 'react-router-dom';
+import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
+
 // Dummy ListingScreen for demonstration
 function ListingScreen() {
   const navigate = useNavigate();
@@ -9,11 +15,13 @@ function ListingScreen() {
     <div>
       <h2>Listing Screen</h2>
       <button onClick={() => navigate('/create')}>Go to Create</button>
-      <button onClick={() => navigate('/history/123')}>Go to History for 123</button>
+      <button onClick={() => navigate('/history/123')}>
+        Go to History for 123
+      </button>
     </div>
   );
 }
- 
+
 // Dummy ExecutionHistoryScreen for demonstration
 function ExecutionHistoryScreen() {
   const { id } = useParams();
@@ -24,7 +32,7 @@ function ExecutionHistoryScreen() {
     </div>
   );
 }
- 
+
 export function SchedulerRoutes() {
   return (
     <Routes>

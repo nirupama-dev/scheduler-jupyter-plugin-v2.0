@@ -24,7 +24,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IDisposable } from '@lumino/disposable';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { NotebookScheduler } from './NotebookScheduler';
- 
+
 export class NotebookButtonExtension
   implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
 {
@@ -34,7 +34,7 @@ export class NotebookButtonExtension
     // private launcher: ILauncher,
     private themeManager: IThemeManager
   ) {}
- 
+
   createNew(
     panel: NotebookPanel,
     context: DocumentRegistry.IContext<INotebookModel>
