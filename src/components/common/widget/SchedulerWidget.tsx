@@ -2,7 +2,7 @@ import React from 'react';
 import { ReactWidget, IThemeManager } from '@jupyterlab/apputils';
 import { ThemeOptions, ThemeProvider, createTheme } from '@mui/material';
 import { deepmerge } from '@mui/utils';
- 
+
 const baseStyles: ThemeOptions = {
   components: {
     MuiButton: {
@@ -49,7 +49,7 @@ const baseStyles: ThemeOptions = {
     }
   }
 };
- 
+
 export const lightTheme = createTheme(
   deepmerge(baseStyles, {
     palette: {
@@ -73,7 +73,7 @@ export const lightTheme = createTheme(
     }
   })
 );
- 
+
 export const darkTheme = createTheme(
   deepmerge(baseStyles, {
     palette: {
@@ -87,16 +87,16 @@ export const darkTheme = createTheme(
     }
   })
 );
- 
+
 export abstract class SchedulerWidget extends ReactWidget {
   isLight: boolean = true;
- 
+
   constructor(protected themeManager: IThemeManager) {
     super();
     this.themeManager.themeChanged.connect(this.onThemeChanged, this);
     this.updateIsLight();
   }
- 
+
   private updateIsLight() {
     const prevIsLight = this.isLight;
     const currentTheme = this.themeManager.theme;
@@ -107,25 +107,25 @@ export abstract class SchedulerWidget extends ReactWidget {
     }
     return this.isLight !== prevIsLight;
   }
- 
+
   private onThemeChanged() {
     if (this.updateIsLight()) {
       this.update();
     }
   }
- 
+
   dispose() {
     this.themeManager.themeChanged.disconnect(this.onThemeChanged, this);
     return super.dispose();
   }
- 
+
   protected render(): React.ReactElement {
     return (
-<ThemeProvider theme={this.isLight ? lightTheme : darkTheme}>
+      <ThemeProvider theme={this.isLight ? lightTheme : darkTheme}>
         {this.renderInternal()}
-</ThemeProvider>
+      </ThemeProvider>
     );
   }
- 
+
   protected abstract renderInternal(): React.ReactElement;
 }
