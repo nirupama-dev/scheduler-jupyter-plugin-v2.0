@@ -23,3 +23,12 @@ export interface FormInputProps {
   className?: string;
   options?: Array<{ label: string; value: string }>;
 }
+
+export interface FormInputDropdownProps {
+  name: string;
+  control: any;
+  options: Array<{ label: string; value: string }>;
+  label?: string;
+  setValue?: any;
+  className?: string;
+}
