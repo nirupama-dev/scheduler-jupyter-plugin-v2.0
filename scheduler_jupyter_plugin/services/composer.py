@@ -21,6 +21,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
+    HTTP_STATUS_UNAUTHORIZED,
 )
 from scheduler_jupyter_plugin.models.models import ComposerEnvironment
 
@@ -71,7 +72,11 @@ class Client:
                             path = env["name"]
                             name = env["name"].split("/")[-1]
                             state = env["state"]
-                            pypi_packages = env.get("config", {}).get("softwareConfig", {}).get("pypiPackages", None)
+                            pypi_packages = (
+                                env.get("config", {})
+                                .get("softwareConfig", {})
+                                .get("pypiPackages", None)
+                            )
                             environments.append(
                                 ComposerEnvironment(
                                     name=name,
@@ -80,25 +85,28 @@ class Client:
                                     state=state,
                                     file_extensions=["ipynb"],
                                     metadata={"path": path},
-                                    pypi_packages=pypi_packages
+                                    pypi_packages=pypi_packages,
                                 )
                             )
                         return environments
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
                 else:
                     self.log.exception("Error listing environments")
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error getting composer list: {response.reason} {await response.text()}"
                     )
         except Exception as e:
             self.log.exception(f"Error fetching environments list: {str(e)}")
             return {"Error fetching environments list": str(e)}
-        
-    async def get_environment(
-        self, env_name
-    ) -> ComposerEnvironment:
+
+    async def get_environment(self, env_name) -> ComposerEnvironment:
         try:
             environment = {}
             composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
@@ -116,7 +124,11 @@ class Client:
                         path = resp.get("name")
                         name = resp.get("name").split("/")[-1]
                         state = resp.get("state")
-                        pypi_packages = resp.get("config", {}).get("softwareConfig", {}).get("pypiPackages", None)
+                        pypi_packages = (
+                            resp.get("config", {})
+                            .get("softwareConfig", {})
+                            .get("pypiPackages", None)
+                        )
                         environment = ComposerEnvironment(
                             name=name,
                             label=name,
@@ -124,16 +136,21 @@ class Client:
                             state=state,
                             file_extensions=["ipynb"],
                             metadata={"path": path},
-                            pypi_packages=pypi_packages
+                            pypi_packages=pypi_packages,
                         )
-                            
+
                         return environment
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
                 else:
                     self.log.exception("Error fetching environment")
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error getting composer: {response.reason} {await response.text()}"
                     )
         except Exception as e:

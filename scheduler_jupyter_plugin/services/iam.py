@@ -17,6 +17,7 @@ import proto
 import google.oauth2.credentials as oauth2
 from google.cloud import iam_admin_v1
 from google.cloud.iam_admin_v1 import types
+from google.api_core.exceptions import Unauthenticated
 
 
 class Client:
@@ -46,6 +47,9 @@ class Client:
                 account_list.append(json.loads(proto.Message.to_json(account)))
 
             return account_list
+        except Unauthenticated as e:
+            self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
+            return {"AUTHENTICATION_ERROR": str(e)}
         except Exception as e:
             self.log.exception(f"Error listing service accounts: {str(e)}")
             return {"error": str(e)}

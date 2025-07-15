@@ -21,6 +21,7 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
+    HTTP_STATUS_UNAUTHORIZED,
     STORAGE_SERVICE_DEFAULT_URL,
     STORAGE_SERVICE_NAME,
     TAGS,
@@ -67,13 +68,18 @@ class Client:
                     airflow_uri = resp.get("config", {}).get("airflowUri", "")
                     bucket = resp.get("storageConfig", {}).get("bucket", "")
                     return {"airflow_uri": airflow_uri, "bucket": bucket}
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error getting airflow uri: {response.reason} {await response.text()}"
                     )
         except Exception as e:
             self.log.exception(f"Error getting airflow uri: {str(e)}")
-            raise Exception(f"Error getting airflow uri: {str(e)}")
+            raise RuntimeError(f"Error getting airflow uri: {str(e)}")
 
     async def list_jobs(self, composer_name, project_id, region_id):
         airflow_obj = await self.get_airflow_uri_and_bucket(
@@ -88,13 +94,18 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp, airflow_obj.get("bucket")
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 elif (
                     response.status >= HTTP_STATUS_SERVER_ERROR_START
                     and response.status <= HTTP_STATUS_SERVER_ERROR_END
                 ):
                     raise RuntimeError(f"{response.reason}")
                 else:
-                    raise Exception(f"{response.reason} {await response.text()}")
+                    raise RuntimeError(f"{response.reason} {await response.text()}")
         except Exception as e:
             self.log.exception(f"Error getting dag list: {str(e)}")
             return {"error": str(e)}
@@ -139,6 +150,11 @@ class Client:
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     return 0
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception("Error updating status")
                     return {
@@ -163,8 +179,13 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error displaying BigQuery preview data: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -188,8 +209,13 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error listing dag runs: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -218,8 +244,13 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.text()
                     return {"content": resp}
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error listing dag run task logs: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -240,8 +271,13 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     self.log.info("Dag file response fetched")
                     return await response.read()
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error getting dag file: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -374,8 +410,13 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error listing import errors: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -396,8 +437,13 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error triggering dag: {response.reason} {await response.text()}"
                     )
         except Exception as e:
