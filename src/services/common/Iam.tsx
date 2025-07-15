@@ -14,9 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
-import { handleErrorToast } from '../utils/ErrorUtils';
 
 export class IamServices {
   static readonly serviceAccountAPIService = (

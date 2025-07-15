@@ -18,7 +18,6 @@ import { toast } from 'react-toastify';
 import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from '../common/LoggingService';
-import { toastifyCustomStyle, toastifyCustomWidth } from '../utils/Config';
 import {
   ICreatePayload,
   IVertexScheduleList,
@@ -38,8 +37,12 @@ import {
   pattern
 } from '../../utils/Constants';
 import React, { Dispatch, SetStateAction } from 'react';
-import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import { handleErrorToast } from '../utils/ErrorUtils';
+import {
+  toastifyCustomStyle,
+  toastifyCustomWidth
+} from '../../components/common/notificationHandling/Config';
+import ExpandToastMessage from '../../components/common/notificationHandling/ExpandToastMessage';
+import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 
 export class VertexServices {
   static readonly machineTypeAPIService = (

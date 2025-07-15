@@ -27,17 +27,17 @@ import {
 } from '../../utils/Constants';
 import {
   IClusterAPIResponse,
-  IComposerAPIResponse,
+  IComposerEnvAPIResponse,
+  IComposerCreatePayload,
   IDagList,
   IDagRunList,
-  IPayload,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse
 } from '../../interfaces/ComposerInterface';
 import { Notification } from '@jupyterlab/apputils';
-import { handleErrorToast } from '../utils/ErrorUtils';
 import { toast } from 'react-toastify';
-import { toastifyCustomStyle } from '../utils/Config';
+import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 
 export class SchedulerService {
   static readonly listClustersAPIService = async (
@@ -171,7 +171,7 @@ export class SchedulerService {
   };
 
   static readonly listComposersAPIService = async (
-    setComposerEnvData: (value: IComposerAPIResponse[]) => void,
+    setComposerEnvData: (value: IComposerEnvAPIResponse[]) => void,
     projectId: string,
     region: string,
     setIsApiError: (value: boolean) => void,
@@ -272,7 +272,7 @@ export class SchedulerService {
     }
   };
   static readonly createJobSchedulerService = async (
-    payload: IPayload,
+    payload: IComposerCreatePayload,
     app: JupyterLab,
     setCreateCompleted: (value: boolean) => void,
     setCreatingScheduler: (value: boolean) => void,
@@ -360,13 +360,13 @@ export class SchedulerService {
   static readonly editJobSchedulerService = async (
     bucketName: string,
     dagId: string,
-    composerEnvSelected: IComposerAPIResponse | null,
+    composerEnvSelected: IComposerEnvAPIResponse | null,
     setEditDagLoading: (value: string) => void,
     setIsLocalKernel: (value: boolean) => void,
     setPackageEditFlag: (value: boolean) => void,
     setCreateCompleted?: (value: boolean) => void,
     setJobNameSelected?: (value: string) => void,
-    setComposerEnvSelected?: (value: IComposerAPIResponse | null) => void,
+    setComposerEnvSelected?: (value: IComposerEnvAPIResponse | null) => void,
     setScheduleMode?: (value: scheduleMode) => void,
     setScheduleValue?: (value: string) => void,
     setInputFileSelected?: (value: string) => void,

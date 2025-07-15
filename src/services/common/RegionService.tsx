@@ -21,8 +21,8 @@ import {
   API_HEADER_CONTENT_TYPE,
   gcpServiceUrls
 } from '../../utils/Constants';
-import { authApi } from '../utils/Config';
-import { handleErrorToast } from '../utils/ErrorUtils';
+import { authApi } from '../../components/common/login/Config';
+import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 
 interface IRegions {
   name: string;

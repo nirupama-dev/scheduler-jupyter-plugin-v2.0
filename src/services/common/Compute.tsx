@@ -17,7 +17,7 @@
 import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
-import { handleErrorToast } from '../utils/ErrorUtils';
+import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 
 export class ComputeServices {
   static readonly getParentProjectAPIService = async (

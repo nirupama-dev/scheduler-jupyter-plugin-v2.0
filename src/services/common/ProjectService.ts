@@ -15,20 +15,14 @@
  * limitations under the License.
  */
 
+import { authApi } from '../../components/common/login/Config';
+import { loggedFetch } from '../../components/common/logs/Config';
 import { IProject } from '../../interfaces/CommonInterface';
 import {
   API_HEADER_BEARER,
   API_HEADER_CONTENT_TYPE,
   gcpServiceUrls
 } from '../../utils/Constants';
-
-// import {
-//   API_HEADER_BEARER,
-//   API_HEADER_CONTENT_TYPE,
-//   gcpServiceUrls
-// } from '../utils/Const';
-// import { authApi, loggedFetch } from '../utils/Config';
-// import { IProject } from '../utils/SchedulerJupyterInterfaces';
 
 export const projectListAPI = async (prefix: string): Promise<string[]> => {
   const credentials = await authApi();

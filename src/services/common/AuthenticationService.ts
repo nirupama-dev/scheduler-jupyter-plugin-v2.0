@@ -15,9 +15,9 @@
  * limitations under the License.
  */
 
-import { requestAPI } from "../../handler/Handler";
-import { IAuthCredentials } from "../../interfaces/CommonInterface";
-import { LOGIN_STATE, STATUS_SUCCESS } from "../../utils/Constants";
+import { requestAPI } from '../../handler/Handler';
+import { IAuthCredentials } from '../../interfaces/CommonInterface';
+import { LOGIN_STATE, STATUS_SUCCESS } from '../../utils/Constants';
 
 export class AuthenticationService {
   static readonly loginAPI = async (
