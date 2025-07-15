@@ -13,28 +13,19 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-export interface IAuthCredentials {
-  access_token?: string;
-  project_id?: string;
-  region_id?: string;
-  config_error?: number;
-  login_error?: number;
-}
+import { IAuthCredentials } from '../../../interfaces/CommonInterface';
+import { AuthenticationService } from '../../../services/common/AuthenticationService';
 
-export interface IGcpUrlResponseData {
-  dataproc_url: string;
-  compute_url: string;
-  metastore_url: string;
-  cloudkms_url: string;
-  cloudresourcemanager_url: string;
-  datacatalog_url: string;
-  storage_url: string;
-}
-
-export interface IProject {
-  projectId: string;
-  name: string;
-}
+/**
+ * Authentication function
+ * @param checkApiEnabled
+ * @returns credentials
+ */
+export const authApi = async (
+  checkApiEnabled: boolean = true
+): Promise<IAuthCredentials | undefined> => {
+  const authService = await AuthenticationService.authCredentialsAPI();
+  return authService;
+};

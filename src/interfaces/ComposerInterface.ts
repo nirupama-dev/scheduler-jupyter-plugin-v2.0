@@ -17,7 +17,8 @@
 
 import { ToastOptions } from 'react-toastify';
 
-export interface ICreatePayload {
+
+export interface IComposerCreatePayload {
   input_filename: string;
   composer_environment_name: string;
   output_formats: string[];
