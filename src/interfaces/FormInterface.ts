@@ -15,20 +15,11 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version, name } = require('../../package.json');
-export const VERSION_DETAIL = version;
-export const PLUGIN_NAME = name;
-
-export const SCHEDULER_OPTIONS = [
-  {
-    label: 'Composer',
-    value: 'composer'
-  },
-  {
-    label: 'Vertex',
-    value: 'vertex'
-  }
-];
-
-export const DEFAULT_SCHEDULER_SELECTED = 'composer';
+export interface FormInputProps {
+  name: string;
+  control: any;
+  label?: string;
+  setValue?: any;
+  className?: string;
+  options?: Array<{ label: string; value: string }>;
+}
