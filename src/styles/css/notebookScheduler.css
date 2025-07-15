@@ -1,0 +1,68 @@
+/**
+ * @license
+ * Copyright 2025 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+.component-level {
+  max-height: 100%;
+  font-family: Roboto, sans-serif;
+  overflow: auto;
+  overflow-x: hidden;
+}
+
+.common-fields {
+  margin: 15px 0 0 15px;
+}
+
+.create-scheduler-style {
+  width: 512px;
+  height: 36px;
+  background: var(--jp-layout-color0);
+  margin-top: 10px;
+  outline: none;
+}
+
+.create-job-scheduler-title {
+  padding: 0 15px;
+  height: 48px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 18px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  color: var(--jp-ui-font-color0);
+}
+
+.create-scheduler-form-element-input-file {
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+}
+
+.cluster-details-header {
+  height: 48px;
+  display: flex;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.schedule-radio-btn {
+  flex-direction: row !important;
+  gap: 20px;
+}
+
+.create-scheduler-label-style {
+  font-size: 14px;
+}

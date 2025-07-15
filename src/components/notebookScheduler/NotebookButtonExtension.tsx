@@ -24,6 +24,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IDisposable } from '@lumino/disposable';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { NotebookScheduler } from './NotebookScheduler';
+import { iconNotebookScheduler } from '../../utils/Icons';
 
 export class NotebookButtonExtension
   implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
@@ -40,11 +41,12 @@ export class NotebookButtonExtension
     context: DocumentRegistry.IContext<INotebookModel>
   ): IDisposable {
     const button = new ToolbarButton({
-      label: 'Schedule Job',
+      icon: iconNotebookScheduler,
       onClick: () => {
         const content = new NotebookScheduler(this.themeManager, '/create');
         const widget = new MainAreaWidget({ content });
         widget.title.label = 'Create Scheduled Job';
+        widget.title.icon = iconNotebookScheduler;
         this.app.shell.add(widget, 'main');
       },
       tooltip: 'Schedule this notebook as a job'

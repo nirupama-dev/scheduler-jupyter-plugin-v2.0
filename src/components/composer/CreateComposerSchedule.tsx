@@ -15,22 +15,8 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version, name } = require('../../package.json');
-export const VERSION_DETAIL = version;
-export const PLUGIN_NAME = name;
-// Constants for disk size and cron validation in createVertexSchema
-export const DISK_MIN_SIZE = 10;
-export const DISK_MAX_SIZE = 65536;
-export const EVERY_MINUTE_CRON = '* * * * *';
-export const SCHEDULER_OPTIONS = [
-  {
-    label: 'Composer',
-    value: 'composer'
-  },
-  {
-    label: 'Vertex',
-    value: 'vertex'
-  }
-];
-export const DEFAULT_SCHEDULER_SELECTED = 'composer';
+import React from 'react';
+
+export const CreateComposerSchedule = () => {
+  return <div>CreateComposerSchedule</div>;
+};
