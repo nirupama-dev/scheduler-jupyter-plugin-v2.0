@@ -15,11 +15,35 @@
  * limitations under the License.
  */
 
+import { ConfigService } from '../services/common/ConfigService';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version, name } = require('../../package.json');
 export const VERSION_DETAIL = version;
 export const PLUGIN_NAME = name;
+export const LOGIN_STATE = '1';
+export const STATUS_SUCCESS = 'SUCCEEDED';
+export const API_HEADER_BEARER = 'Bearer ';
+export const API_HEADER_CONTENT_TYPE = 'application/json';
+export type scheduleMode = 'runNow' | 'runSchedule';
+export const gcpServiceUrls = (async () => {
+  return await ConfigService.gcpServiceUrlsAPI();
+})();
+export const ABORT_MESSAGE = 'signal is aborted without reason';
+export const HTTP_STATUS_BAD_REQUEST = 400;
+export const HTTP_STATUS_FORBIDDEN = 403;
 
+// Pattern to check whether string contains link
+export const pattern =
+  // eslint-disable-next-line
+  /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+
+export const DEFAULT_TIME_ZONE = 'UTC';
+
+// Constants for disk size and cron validation in createVertexSchema
+export const DISK_MIN_SIZE = 10;
+export const DISK_MAX_SIZE = 65536;
+export const EVERY_MINUTE_CRON = '* * * * *';
 export const SCHEDULER_OPTIONS = [
   {
     label: 'Composer',
@@ -30,5 +54,4 @@ export const SCHEDULER_OPTIONS = [
     value: 'vertex'
   }
 ];
-
 export const DEFAULT_SCHEDULER_SELECTED = 'composer';

@@ -13,28 +13,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-export interface IAuthCredentials {
-  access_token?: string;
-  project_id?: string;
-  region_id?: string;
-  config_error?: number;
-  login_error?: number;
-}
+import { SchedulerLoggingService } from "../../../services/common/LoggingService";
 
-export interface IGcpUrlResponseData {
-  dataproc_url: string;
-  compute_url: string;
-  metastore_url: string;
-  cloudkms_url: string;
-  cloudresourcemanager_url: string;
-  datacatalog_url: string;
-  storage_url: string;
-}
-
-export interface IProject {
-  projectId: string;
-  name: string;
+/**
+ * Helper method that wraps fetch and logs the request uri and status codes to
+ * jupyter server.
+ */
+export async function loggedFetch(
+  input: RequestInfo | URL,
+  init?: RequestInit
+): Promise<Response> {
+  const resp = await fetch(input, init);
+  // Intentionally not waiting for log response.
+  SchedulerLoggingService.logFetch(input, init, resp);
+  return resp;
 }

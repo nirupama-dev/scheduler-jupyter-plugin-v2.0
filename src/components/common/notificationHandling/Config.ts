@@ -13,28 +13,23 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
-export interface IAuthCredentials {
-  access_token?: string;
-  project_id?: string;
-  region_id?: string;
-  config_error?: number;
-  login_error?: number;
-}
+import { toast, ToastOptions } from "react-toastify";
 
-export interface IGcpUrlResponseData {
-  dataproc_url: string;
-  compute_url: string;
-  metastore_url: string;
-  cloudkms_url: string;
-  cloudresourcemanager_url: string;
-  datacatalog_url: string;
-  storage_url: string;
-}
+export const toastifyCustomStyle: ToastOptions<Record<string, never>> = {
+  hideProgressBar: true,
+  autoClose: 600000,
+  theme: 'dark',
+  position: toast.POSITION.BOTTOM_CENTER
+};
 
-export interface IProject {
-  projectId: string;
-  name: string;
-}
+export const toastifyCustomWidth: ToastOptions<Record<string, never>> = {
+  hideProgressBar: true,
+  autoClose: 600000,
+  theme: 'dark',
+  position: toast.POSITION.BOTTOM_CENTER,
+  style: {
+    width: '150%'
+  }
+};
