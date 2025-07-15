@@ -24,8 +24,6 @@ import {
   useParams
 } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
-import { CreateComposerSchedule } from '../components/composer/CreateComposerSchedule';
-import { CreateVertexSchedule } from '../components/vertex/CreateVertexSchedule';
 
 // Dummy ListingScreen for demonstration
 function ListingScreen() {
@@ -56,10 +54,7 @@ export function SchedulerRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/list" replace />} />
-      <Route path="/create" element={<CreateNotebookSchedule />}>
-        <Route path="/composer" element={<CreateComposerSchedule />} />
-        <Route path="/vertex" element={<CreateVertexSchedule />} />
-      </Route>
+      <Route path="/create" element={<CreateNotebookSchedule />} />
       <Route path="/list" element={<ListingScreen />} />
       <Route path="/history/:id" element={<ExecutionHistoryScreen />} />
     </Routes>
