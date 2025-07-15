@@ -15,11 +15,4 @@
  * limitations under the License.
  */
 
-export interface FormInputProps {
-  name: string;
-  control: any;
-  label?: string;
-  setValue?: any;
-  className?: string;
-  options?: Array<{ label: string; value: string }>;
-}
+import './notebookScheduler.css';

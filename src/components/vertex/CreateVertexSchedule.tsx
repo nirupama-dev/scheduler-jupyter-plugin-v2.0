@@ -15,11 +15,8 @@
  * limitations under the License.
  */
 
-export interface FormInputProps {
-  name: string;
-  control: any;
-  label?: string;
-  setValue?: any;
-  className?: string;
-  options?: Array<{ label: string; value: string }>;
-}
+import React from 'react';
+
+export const CreateVertexSchedule = () => {
+  return <div>CreateVertexSchedule</div>;
+};

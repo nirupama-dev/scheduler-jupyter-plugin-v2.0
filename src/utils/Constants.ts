@@ -21,7 +21,6 @@ import { ConfigService } from '../services/common/ConfigService';
 const { version, name } = require('../../package.json');
 export const VERSION_DETAIL = version;
 export const PLUGIN_NAME = name;
-
 export const LOGIN_STATE = '1';
 export const STATUS_SUCCESS = 'SUCCEEDED';
 export const API_HEADER_BEARER = 'Bearer ';
@@ -40,3 +39,19 @@ export const pattern =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
 
 export const DEFAULT_TIME_ZONE = 'UTC';
+
+// Constants for disk size and cron validation in createVertexSchema
+export const DISK_MIN_SIZE = 10;
+export const DISK_MAX_SIZE = 65536;
+export const EVERY_MINUTE_CRON = '* * * * *';
+export const SCHEDULER_OPTIONS = [
+  {
+    label: 'Composer',
+    value: 'composer'
+  },
+  {
+    label: 'Vertex',
+    value: 'vertex'
+  }
+];
+export const DEFAULT_SCHEDULER_SELECTED = 'composer';
