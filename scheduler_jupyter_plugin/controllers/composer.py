@@ -40,6 +40,7 @@ class EnvironmentListController(APIHandler):
             self.log.exception(f"Error fetching composer environments: {str(e)}")
             self.finish({"error": str(e)})
 
+
 class EnvironmentGetController(APIHandler):
     @tornado.web.authenticated
     async def get(self):
@@ -56,4 +57,3 @@ class EnvironmentGetController(APIHandler):
         except Exception as e:
             self.log.exception(f"Error fetching composer environment: {str(e)}")
             self.finish({"error": str(e)})
-

@@ -16,12 +16,14 @@ import proto
 
 from google.cloud import compute_v1
 import google.oauth2.credentials as oauth2
+from google.auth.exceptions import RefreshError
 
 from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     HTTP_STATUS_OK,
     HTTP_STATUS_NO_CONTENT,
+    HTTP_STATUS_UNAUTHORIZED,
 )
 
 
@@ -58,7 +60,9 @@ class Client:
             for item in response:
                 regions.append(item.name)
             return regions
-
+        except RefreshError as e:
+            self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
+            return {"AUTHENTICATION_ERROR": str(e)}
         except Exception as e:
             self.log.exception(f"Error fetching regions: {str(e)}")
             return {"Error fetching regions": str(e)}
@@ -81,7 +85,9 @@ class Client:
                     )
                 )
             return networks
-
+        except RefreshError as e:
+            self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
+            return {"AUTHENTICATION_ERROR": str(e)}
         except Exception as e:
             self.log.exception(f"Error fetching network: {str(e)}")
             return {"error": str(e)}
@@ -106,7 +112,9 @@ class Client:
                         )
                     )
             return sub_networks
-
+        except RefreshError as e:
+            self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
+            return {"AUTHENTICATION_ERROR": str(e)}
         except Exception as e:
             self.log.exception(f"Error fetching sub network: {str(e)}")
             return {"error": str(e)}
@@ -130,7 +138,9 @@ class Client:
                         )
                     )
             return shared_networks
-
+        except RefreshError as e:
+            self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
+            return {"AUTHENTICATION_ERROR": str(e)}
         except Exception as e:
             self.log.exception(f"Error fetching shared network: {str(e)}")
             return {"Error fetching network shared from host": str(e)}
@@ -152,6 +162,11 @@ class Client:
                         return res
                 elif response.status == HTTP_STATUS_NO_CONTENT:
                     return res
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception("Error getting xpn host")
                     raise Exception(

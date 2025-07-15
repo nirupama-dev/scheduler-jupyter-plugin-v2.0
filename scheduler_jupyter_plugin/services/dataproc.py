@@ -17,6 +17,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     DATAPROC_SERVICE_NAME,
     HTTP_STATUS_OK,
+    HTTP_STATUS_UNAUTHORIZED,
 )
 
 
@@ -51,6 +52,11 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     return {
                         "error": f"Failed to fetch clusters: {response.status} {await response.text()}"
@@ -70,6 +76,11 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     return {
                         "error": f"Failed to fetch runtimes: {response.status} {await response.text()}"

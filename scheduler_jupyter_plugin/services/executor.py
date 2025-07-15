@@ -18,7 +18,7 @@ import subprocess
 import uuid
 from datetime import datetime, timedelta
 from google.cloud import storage
-from google.api_core.exceptions import NotFound
+from google.auth.exceptions import RefreshError
 import google.oauth2.credentials as oauth2
 from google.cloud.jupyter_config.config import (
     async_run_gcloud_subcommand,
@@ -36,6 +36,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
     GCS,
+    HTTP_STATUS_UNAUTHORIZED,
     PACKAGE_NAME,
     WRAPPER_PAPPERMILL_FILE,
     UTF8,
@@ -91,13 +92,18 @@ class Client:
                     resp = await response.json()
                     gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
                     return gcs_dag_path
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error getting composer bucket: {response.reason} {await response.text()}"
                     )
         except Exception as e:
             self.log.exception(f"Error getting bucket name: {str(e)}")
-            raise Exception(f"Error getting composer bucket: {str(e)}")
+            raise RuntimeError(f"Error getting composer bucket: {str(e)}")
 
     async def check_file_exists(self, bucket_name, file_path, project_id):
         try:
@@ -448,6 +454,9 @@ class Client:
                 f"Output notebook file '{original_file_name}' downloaded successfully"
             )
             return 0
+        except RefreshError as e:
+            self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
+            return {"AUTHENTICATION_ERROR": str(e)}
         except Exception as error:
             self.log.exception(f"Error downloading output notebook file: {str(error)}")
             return {"error": str(error)}
