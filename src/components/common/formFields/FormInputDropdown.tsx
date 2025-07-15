@@ -1,7 +1,7 @@
 import React from 'react';
 import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { FormInputProps } from '../../../interfaces/Interface';
+import { FormInputProps } from '../../../interfaces/FormInterface';
 
 const options = [
   {

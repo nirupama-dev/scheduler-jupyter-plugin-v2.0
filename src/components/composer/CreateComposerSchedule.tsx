@@ -15,20 +15,8 @@
  * limitations under the License.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const { version, name } = require('../../package.json');
-export const VERSION_DETAIL = version;
-export const PLUGIN_NAME = name;
+import React from 'react';
 
-export const SCHEDULER_OPTIONS = [
-  {
-    label: 'Composer',
-    value: 'composer'
-  },
-  {
-    label: 'Vertex',
-    value: 'vertex'
-  }
-];
-
-export const DEFAULT_SCHEDULER_SELECTED = 'composer';
+export const CreateComposerSchedule = () => {
+  return <div>CreateComposerSchedule</div>;
+};

@@ -21,22 +21,71 @@
  */
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { iconLeftArrow } from '../../utils/Icons';
+import { FormInputText } from '../common/formFields/FormInputText';
+import { FormInputRadio } from '../common/formFields/FormInputRadio';
+import { SCHEDULER_OPTIONS } from '../../utils/Constants';
+interface IFormInput {
+  textValue: string;
+  radioValue: string;
+  checkboxValue: string[];
+  dateValue: Date;
+  dropdownValue: string;
+}
 
 export const CreateNotebookSchedule = () => {
-  const navigate = useNavigate();
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // ...submit logic...
-    navigate('/list');
-  };
+  const {
+    //handleSubmit, reset,
+    control
+    // //setValue
+  } = useForm<IFormInput>({
+    //defaultValues: defaultValues,
+  });
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Create Schedule</h2>
-      <input type="text" placeholder="Job Name" required />
-      <button type="submit">Submit</button>
-    </form>
+    <div className="component-level">
+      <div className="cluster-details-header">
+        <div
+          role="button"
+          className="back-arrow-icon"
+          //onClick={handleCancel}
+        >
+          <iconLeftArrow.react
+            tag="div"
+            className="icon-white logo-alignment-style"
+          />
+        </div>
+        <div className="create-job-scheduler-title">
+          {
+            // editMode ? 'Update A Scheduled Job' :
+            'Create A Scheduled Job'
+          }
+        </div>
+      </div>
+      <div className="common-fields">
+        <div className="create-scheduler-style">
+          <FormInputText label="Job Name" control={control} name="jobName" />
+        </div>
+
+        <div className="create-scheduler-form-element-input-file">
+          <div className="create-scheduler-style">
+            <FormInputText
+              label="Input File"
+              control={control}
+              name="inputFile"
+            />
+          </div>
+        </div>
+      </div>
+      <div className="create-scheduler-form-element sub-para">
+        <FormInputRadio
+          name="schedulerSelection"
+          control={control}
+          className="schedule-radio-btn"
+          options={SCHEDULER_OPTIONS}
+        />
+      </div>
+    </div>
   );
 };
