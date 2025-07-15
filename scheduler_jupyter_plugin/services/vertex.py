@@ -22,9 +22,11 @@ from google.cloud import storage
 
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
+    CRON_EVERY_MINUTE,
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
     HTTP_STATUS_NO_CONTENT,
+    HTTP_STATUS_UNAUTHORIZED,
 )
 from scheduler_jupyter_plugin.models.models import (
     DescribeVertexJob,
@@ -100,7 +102,7 @@ class Client:
     async def create_schedule(self, job, file_path, bucket_name):
         try:
             schedule_value = (
-                "* * * * *" if job.schedule_value == "" else job.schedule_value
+                CRON_EVERY_MINUTE if job.schedule_value == "" else job.schedule_value
             )
             cron = (
                 schedule_value
@@ -170,12 +172,17 @@ class Client:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
                     return resp
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception("Error creating the schedule")
-                    raise Exception(f"{response.reason} {await response.text()}")
+                    raise RuntimeError(f"{response.reason} {await response.text()}")
         except Exception as e:
             self.log.exception(f"Error creating schedule: {str(e)}")
-            raise Exception(f"Error creating schedule: {str(e)}")
+            raise RuntimeError(f"Error creating schedule: {str(e)}")
 
     async def create_job_schedule(self, input_data):
         try:
@@ -226,17 +233,22 @@ class Client:
                             for machineconfig in resp["notebookRuntimeConfig"][
                                 "machineConfigs"
                             ]:
-                                ramBytes_in_gb = round(
+                                rambytes_in_gb = round(
                                     int(machineconfig.get("ramBytes")) / 1000000000, 2
                                 )
                                 formatted_config = {
-                                    "machineType": f"{machineconfig.get('machineType')} ({machineconfig.get('cpuCount')} CPUs, {ramBytes_in_gb} GB RAM)",
+                                    "machineType": f"{machineconfig.get('machineType')} ({machineconfig.get('cpuCount')} CPUs, {rambytes_in_gb} GB RAM)",
                                     "acceleratorConfigs": machineconfig.get(
                                         "acceleratorConfigs"
                                     ),
                                 }
                                 uiconfig.append(formatted_config)
                         return uiconfig
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
@@ -244,7 +256,7 @@ class Client:
                     self.log.exception(
                         f"Error getting vertex ui config: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error getting vertex ui config: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -283,7 +295,7 @@ class Client:
                                 if (cron and "TZ" in cron)
                                 else cron
                             )
-                            if max_run_count == "1" and cron_value == "* * * * *":
+                            if max_run_count == "1" and cron_value == CRON_EVERY_MINUTE:
                                 schedule_value = "run once"
                             else:
                                 schedule_value = self.parse_schedule(cron)
@@ -308,6 +320,11 @@ class Client:
                         resp["schedules"] = schedule_list
                         result.update(resp)
                         return result
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
@@ -315,7 +332,7 @@ class Client:
                     self.log.exception(
                         f"Error listing schedules: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error listing schedules: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -336,11 +353,16 @@ class Client:
                     return await response.json()
                 elif response.status == HTTP_STATUS_NO_CONTENT:
                     return {"message": "Schedule paused successfully"}
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception(
                         f"Error pausing the schedule: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error pausing the schedule: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -361,11 +383,16 @@ class Client:
                     return await response.json()
                 elif response.status == HTTP_STATUS_NO_CONTENT:
                     return {"message": "Schedule resumed successfully"}
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception(
                         f"Error resuming the schedule: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error resuming the schedule: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -386,11 +413,16 @@ class Client:
                     return await response.json()
                 elif response.status == HTTP_STATUS_NO_CONTENT:
                     return {"message": "Schedule deleted successfully"}
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception(
                         f"Error deleting the schedule: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error deleting the schedule: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -409,11 +441,16 @@ class Client:
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     return await response.json()
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception(
                         f"Error getting the schedule: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error getting the schedule: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -435,11 +472,16 @@ class Client:
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     return await response.json()
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception(
                         f"Error triggering the schedule: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error triggering the schedule: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -460,7 +502,7 @@ class Client:
                 "workbenchRuntime": {},
             }
             schedule_value = (
-                "* * * * *" if data.schedule_value == "" else data.schedule_value
+                CRON_EVERY_MINUTE if data.schedule_value == "" else data.schedule_value
             )
             cron = (
                 schedule_value
@@ -529,11 +571,16 @@ class Client:
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     return await response.json()
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception(
                         f"Error updating the schedule: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error updating the schedule: {response.reason} {await response.text()}"
                     )
         except Exception as e:
@@ -572,11 +619,16 @@ class Client:
                             else:
                                 execution_jobs.append(job)
                         return execution_jobs
+                elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                    self.log.exception(
+                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                    )
+                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
                     self.log.exception(
                         f"Error fetching notebook execution jobs: {response.reason} {await response.text()}"
                     )
-                    raise Exception(
+                    raise RuntimeError(
                         f"Error fetching notebook execution jobs: {response.reason} {await response.text()}"
                     )
         except Exception as e:

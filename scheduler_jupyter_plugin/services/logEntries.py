@@ -14,6 +14,7 @@
 
 from google.cloud import logging
 import google.oauth2.credentials as oauth2
+from google.api_core.exceptions import Unauthenticated
 
 
 class Client:
@@ -62,7 +63,9 @@ class Client:
                     formatted_res["summary"] = log_dict["httpRequest"]["statusMessage"]
                 logs.append(formatted_res)
             return logs
-
+        except Unauthenticated as e:
+            self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
+            return {"AUTHENTICATION_ERROR": str(e)}
         except Exception as e:
             self.log.exception(f"Error fetching log entries: {str(e)}")
             return {"Error fetching log entries": str(e)}

@@ -41,7 +41,6 @@ class DescribeJob(BaseModel):
     composer_environment_name: str = None
     output_formats: Optional[List[str]] = None
     parameters: Optional[List[str]] = None
-    selected_mode: str = None
     serverless_name: object = None
     cluster_name: str = None
     mode_selected: str = None
