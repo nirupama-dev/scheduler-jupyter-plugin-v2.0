@@ -19,3 +19,7 @@
 const { version, name } = require('../../package.json');
 export const VERSION_DETAIL = version;
 export const PLUGIN_NAME = name;
+// Constants for disk size and cron validation in createVertexSchema
+export const DISK_MIN_SIZE = 10;
+export const DISK_MAX_SIZE = 65536;
+export const EVERY_MINUTE_CRON = '* * * * *';
