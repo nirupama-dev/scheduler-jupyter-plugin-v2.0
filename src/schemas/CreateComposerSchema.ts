@@ -27,7 +27,7 @@ const emailSchema = z
 
 export const createComposerSchema = z
   .object({
-    job_name: z
+    jobName: z
       .string()
       .min(1, 'Job Name is required')
       .regex(
@@ -35,15 +35,15 @@ export const createComposerSchema = z
         'Name must contain only letters, numbers, hyphens, and underscores'
       ),
 
-    input_file_name: z.string().min(1, 'Input File Name is required'),
+    inputFileName: z.string().min(1, 'Input File Name is required'),
 
-    project_id: z.string().min(1, 'Project ID is required'),
+    projectId: z.string().min(1, 'Project ID is required'),
 
     region: z.string().min(1, 'Region is required'),
 
     environment: z.string().min(1, 'Environment is required'),
 
-    retry_count: z.preprocess(
+    retryCount: z.preprocess(
       val => (val === '' ? undefined : Number(val)),
       z
         .number()
@@ -53,7 +53,7 @@ export const createComposerSchema = z
         .default(2)
     ),
 
-    retry_delay: z.preprocess(
+    retryDelay: z.preprocess(
       val => (val === '' ? undefined : Number(val)),
       z
         .number()
@@ -63,23 +63,23 @@ export const createComposerSchema = z
         .default(5)
     ),
 
-    email_on_failure: z.boolean().default(false),
-    email_on_retry: z.boolean().default(false),
-    email_on_success: z.boolean().default(false),
+    emailOnFailure: z.boolean().default(false),
+    emailOnRetry: z.boolean().default(false),
+    emailOnSuccess: z.boolean().default(false),
 
     // Email field is now just optional by default
     email: emailSchema, // This field is optional by itself, the required logic is in the superRefine
 
-    run_option: z.enum(['run_now', 'run_on_schedule'], {
+    runOption: z.enum(['runNow', 'runOnSchedule'], {
       errorMap: () => ({ message: 'Please select a run option' })
     }),
 
-    schedule_value: z.string().optional(),
-    time_zone: z.string().optional()
+    scheduleValue: z.string().optional(),
+    timeZone: z.string().optional()
   })
   .superRefine((data, ctx) => {
     // Conditional validation for email based on checkboxes
-    if (data.email_on_failure || data.email_on_retry || data.email_on_success) {
+    if (data.emailOnFailure || data.emailOnRetry || data.emailOnSuccess) {
       if (!data.email || data.email.length === 0) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -90,19 +90,19 @@ export const createComposerSchema = z
     }
 
     // Conditional validation for "Run on Schedule" fields
-    if (data.run_option === 'run_on_schedule') {
-      if (!data.schedule_value) {
+    if (data.runOption === 'runOnSchedule') {
+      if (!data.scheduleValue) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Schedule is required when 'Run on Schedule' is selected",
-          path: ['schedule_value']
+          path: ['scheduleValue']
         });
       }
-      if (!data.time_zone) {
+      if (!data.timeZone) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: "Timezone is required when 'Run on Schedule' is selected",
-          path: ['time_zone']
+          path: ['timeZone']
         });
       }
     }
