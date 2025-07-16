@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+.create-scheduler-label {
+  margin-top: 15px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  display: flex;
+  align-items: center;
+  color: var(--jp-ui-font-color0);
+}
+
+.save-overlay {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  padding: 32px 0 0;
+  gap: 12px;
+  height: 64px;
+}

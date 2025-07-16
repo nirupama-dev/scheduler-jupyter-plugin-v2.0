@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { UseFormSetValue } from 'react-hook-form';
+
 export interface FormInputProps {
   name: string;
   control: any;
@@ -22,6 +24,7 @@ export interface FormInputProps {
   setValue?: any;
   className?: string;
   options?: Array<{ label: string; value: string }>;
+  type?: string;
 }
 
 export interface FormInputDropdownProps {
@@ -31,4 +34,21 @@ export interface FormInputDropdownProps {
   label?: string;
   setValue?: any;
   className?: string;
+}
+
+// Define the shape of a single option
+export interface Option {
+  label: string;
+  value: any;
+  disabled?: boolean; // Add a disabled property
+  defaultChecked?: boolean; // Add a defaultChecked property for initial state
+}
+
+// Define the props for the FormInputMultiCheckbox component
+export interface FormInputCheckboxProps {
+  name: string;
+  control: any; // Type from react-hook-form's useForm hook
+  setValue: UseFormSetValue<any>; // Type from react-hook-form's useForm hook
+  options: Option[]; // Use the new Option interface
+  label?: string;
 }

@@ -94,17 +94,6 @@
   color: var(--jp-ui-font-color0);
 }
 
-.create-scheduler-label {
-  margin-top: 15px;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 28px;
-  display: flex;
-  align-items: center;
-  color: var(--jp-ui-font-color0);
-}
-
 .create-scheduler-style {
   width: 512px;
   height: 36px;
@@ -535,11 +524,6 @@
   padding-top: 6px;
 }
 
-.block-seperation {
-  margin-top: 0;
-  padding-top: 25px;
-}
-
 .progress-message {
   text-align: justify;
 }
@@ -550,11 +534,6 @@
 
 .input-sub-action {
   margin: 0;
-}
-
-.block-level-seperation {
-  padding-top: 8px;
-  margin-top: 0;
 }
 
 .spinner-loader-modal {

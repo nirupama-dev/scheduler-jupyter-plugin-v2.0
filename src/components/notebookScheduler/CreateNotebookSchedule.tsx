@@ -26,6 +26,7 @@ import { iconLeftArrow } from '../../utils/Icons';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import { SCHEDULER_OPTIONS } from '../../utils/Constants';
+import { CreateComposerSchedule } from '../composer/CreateComposerSchedule';
 interface IFormInput {
   textValue: string;
   radioValue: string;
@@ -86,6 +87,7 @@ export const CreateNotebookSchedule = () => {
           options={SCHEDULER_OPTIONS}
         />
       </div>
+      <CreateComposerSchedule />
     </div>
   );
 };

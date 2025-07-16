@@ -26,17 +26,6 @@ import {
 import { Controller } from 'react-hook-form';
 import { FormInputProps } from '../../../interfaces/FormInterface';
 
-const options = [
-  {
-    label: 'Radio Option 1',
-    value: '1'
-  },
-  {
-    label: 'Radio Option 2',
-    value: '2'
-  }
-];
-
 export const FormInputRadio: React.FC<FormInputProps> = ({
   name,
   control,

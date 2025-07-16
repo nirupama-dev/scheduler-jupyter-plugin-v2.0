@@ -21,3 +21,5 @@ import './cluster.css';
 import './notebookScheduler.css';
 import './submitJob.css';
 import './job.css';
+import './createComposerScheduler.css';
+import './common.css';
