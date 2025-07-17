@@ -18,6 +18,7 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { Dispatch, SetStateAction } from 'react';
 
 export class ComputeServices {
   static readonly getParentProjectAPIService = async (
@@ -157,6 +158,32 @@ export class ComputeServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch shared networks list : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      });
+  };
+
+  static readonly regionAPIService = (
+    projectId: string,
+    setRegionOptions: Dispatch<SetStateAction<never[]>>
+  ) => {
+    // const projectId = 'dataproc-jupyter-extension-dev'; // Replace with actual project ID
+    requestAPI(`api/compute/region?project_id=${projectId}`)
+      .then((formattedResponse: any) => {
+        console.log('Formatted response:', formattedResponse);
+        if (formattedResponse.length > 0) {
+          const regionOptions = formattedResponse.map(
+            (region: any) => region.name
+          );
+          regionOptions.sort();
+          setRegionOptions(regionOptions);
+        } else {
+          setRegionOptions([]);
+        }
+      })
+      .catch(error => {
+        const errorResponse = `Failed to fetch region list : ${error}`;
         handleErrorToast({
           error: errorResponse
         });

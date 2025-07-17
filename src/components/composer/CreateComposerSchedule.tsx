@@ -15,30 +15,50 @@
  * limitations under the License.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MuiChipsInput } from 'mui-chips-input';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
-import { useRegion } from '../../services/common/RegionService';
 import { FormInputMultiCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import Cron from 'react-js-cron';
 import { Button } from '@mui/material';
-// import { projectListAPI } from '../../services/common/ProjectService';
+import { ComputeServices } from '../../services/common/Compute';
+import { authApi } from '../common/login/Config';
 
 export const CreateComposerSchedule = () => {
-  const { control, setValue } = useForm<any>();
+  // const [projectId, setProjectId] = useState('');
+  // const [region, setRegion] = useState<string>('');
+  const { control, setValue, getValues } = useForm<any>();
+  const [regionOptions, setRegionOptions] = useState([]);
+  const projectId = getValues('projectId') || '';
 
-  // const projects = projectListAPI(''); // Fetch projects with an empty prefix
-  // console.log(projects);
+  const getRegion = () => {
+    ComputeServices.regionAPIService(projectId, setRegionOptions);
+  };
 
-  const regions = useRegion('	dataproc-jupyter-ext-dev-2');
+  /**
+   * Effect to fetch the project ID and region from the auth API
+   */
+  useEffect(() => {
+    authApi().then(credentials => {
+      if (credentials?.project_id && credentials.region_id) {
+        // setProjectId(credentials.project_id);
+        setValue('projectId', credentials.project_id);
+        // setRegion(credentials.region_id);
+        setValue('regionId', credentials.region_id);
+      }
+    });
+  }, []);
 
-  const regionStrList = useMemo(
-    () => regions.map(region => ({ label: region.name, value: region.name })),
-    [regions]
-  );
+  useEffect(() => {
+    getRegion();
+    console.log('Region options:', regionOptions);
+  }, []);
+
+  // console.log('Project ID:', projectId);
+  // console.log('Region:', region);
 
   return (
     <div className="common-fields">
@@ -48,7 +68,7 @@ export const CreateComposerSchedule = () => {
             name="projectId"
             label="Project ID"
             control={control}
-            options={[]}
+            options={[{ label: projectId, value: projectId }]}
           />
         </div>
       </div>
@@ -58,7 +78,7 @@ export const CreateComposerSchedule = () => {
             name="regionId"
             label="Region"
             control={control}
-            options={regionStrList}
+            options={[]}
           />
         </div>
       </div>

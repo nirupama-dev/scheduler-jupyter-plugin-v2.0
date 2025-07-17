@@ -30,7 +30,7 @@ export interface FormInputProps {
 export interface FormInputDropdownProps {
   name: string;
   control: any;
-  options: Array<{ label: string; value: string }>;
+  options: Array<{ label: string; value: string }> | [];
   label?: string;
   setValue?: any;
   className?: string;

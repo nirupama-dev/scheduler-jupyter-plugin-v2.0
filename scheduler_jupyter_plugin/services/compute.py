@@ -48,13 +48,13 @@ class Client:
             "Authorization": f"Bearer {self._access_token}",
         }
 
-    async def list_region(self):
+    async def list_region(self, project_id):
         try:
             regions = []
             credentials = oauth2.Credentials(token=self._access_token)
             regions_client = compute_v1.RegionsClient(credentials=credentials)
             request = compute_v1.ListRegionsRequest(
-                project=self.project_id,
+                project=project_id,
             )
             response = regions_client.list(request=request)
             for item in response:
