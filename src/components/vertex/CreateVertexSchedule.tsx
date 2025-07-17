@@ -16,7 +16,11 @@
  */
 
 import React from 'react';
+import { ICreateVertexSchedulerProps } from '../../interfaces/VertexInterface';
 
-export const CreateVertexSchedule = () => {
+export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
+  control,
+  errors
+}) => {
   return <div>CreateVertexSchedule</div>;
 };

@@ -16,7 +16,11 @@
  */
 
 import React from 'react';
+import { ICreateComposerSchedulerProps } from '../../interfaces/ComposerInterface';
 
-export const CreateComposerSchedule = () => {
+export const CreateComposerSchedule: React.FC<ICreateComposerSchedulerProps> = ({
+  control,
+  errors
+}) => {
   return <div>CreateComposerSchedule</div>;
 };

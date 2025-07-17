@@ -14,26 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { z } from 'zod';
 
-import { Control, FieldError } from "react-hook-form";
-import { CombinedCreateFormValues } from "../schemas/CreateScheduleCombinedSchema";
+/**
+ * Common schema for creating a notebook job with shared fields.
+ * This schema is extended by both Vertex and Composer schemas.
+ */
+export const createNotebookCommonSchema = z.object({
+  jobName: z.string().min(1, 'Job Name is required.'),
+  inputFile: z.string().min(1, 'Input File is required.'),
+  schedulerSelection: z.enum(['vertex', 'composer'], {
+    errorMap: () => ({ message: 'Please select a scheduler option' }),
+  }),
+});
 
-export interface FormInputProps {
-  name: keyof CombinedCreateFormValues;
-  control: Control<CombinedCreateFormValues>;
-  label?: string;
-  setValue?: any;
-  className?: string;
-  options?: Array<{ label: string; value: string }>;
-  error?: FieldError;
-  [key: string]: any; // Allow additional props
-}
-
-export interface IFormInput {
-  textValue: string;
-  radioValue: string;
-  checkboxValue: string[];
-  dateValue: Date;
-  dropdownValue: string;
-}
-
+export type CommonFormValues = z.infer<typeof createNotebookCommonSchema>;

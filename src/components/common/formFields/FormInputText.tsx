@@ -3,22 +3,22 @@ import { Controller } from 'react-hook-form';
 import TextField from '@mui/material/TextField';
 import { FormInputProps } from '../../../interfaces/FormInterface';
 
-export const FormInputText = ({ name, control, label }: FormInputProps) => {
+export const FormInputText = ({ name, control, label, error }: FormInputProps) => {
   return (
     <Controller
       name={name}
       control={control}
       render={({
         field: { onChange, value },
-        fieldState: { error },
+        fieldState: { error: fieldError },// eslint-disable-next-line @typescript-eslint/no-unused-vars
         formState
       }) => (
         <TextField
-          helperText={error ? error.message : null}
+          helperText={fieldError ? fieldError.message : null}
           size="small"
-          error={!!error}
+          error={!!fieldError}
           onChange={onChange}
-          value={value}
+          value={value ?? ''}
           fullWidth
           label={label}
           variant="outlined"
