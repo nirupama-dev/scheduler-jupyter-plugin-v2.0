@@ -605,7 +605,6 @@ export class VertexServices {
               formattedResponse.createNotebookExecutionJobRequest
                 .notebookExecutionJob.serviceAccount
           },
-          network_option: '',
           network: {
             name: primaryNetwork[primaryNetwork.length - 1],
             link: formattedResponse.createNotebookExecutionJobRequest
