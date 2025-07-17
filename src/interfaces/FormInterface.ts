@@ -27,6 +27,12 @@ export interface FormInputProps {
   type?: string;
 }
 
+// Define the specific option type
+export interface DropdownOption {
+  label: string;
+  value: string;
+}
+
 export interface FormInputDropdownProps {
   name: string;
   control: any;
@@ -34,6 +40,8 @@ export interface FormInputDropdownProps {
   label?: string;
   setValue?: any;
   className?: string;
+  customClass?: string;
+  onChangeCallback?: (value: any) => void;
 }
 
 // Define the shape of a single option
@@ -51,13 +59,4 @@ export interface FormInputCheckboxProps {
   setValue: UseFormSetValue<any>; // Type from react-hook-form's useForm hook
   options: Option[]; // Use the new Option interface
   label?: string;
-}
-
-export interface FormInputDropdownProps {
-  name: string;
-  control: any;
-  options: Array<{ label: string; value: string }>;
-  label?: string;
-  setValue?: any;
-  customClass?: string;
 }

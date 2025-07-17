@@ -21,8 +21,6 @@ import { JupyterLab } from '@jupyterlab/application';
 import {
   ABORT_MESSAGE,
   HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_FORBIDDEN,
-  pattern,
   scheduleMode
 } from '../../utils/Constants';
 import {
@@ -38,6 +36,8 @@ import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
+import { Dispatch, SetStateAction } from 'react';
+import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class SchedulerService {
   static readonly listClustersAPIService = async (
@@ -171,14 +171,9 @@ export class SchedulerService {
   };
 
   static readonly listComposersAPIService = async (
-    setComposerEnvData: (value: IComposerEnvAPIResponse[]) => void,
+    setEnvOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     projectId: string,
     region: string,
-    setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void,
-    setApiEnableUrl: any,
-    setEnvApiFlag: (value: boolean) => void,
-    setIsLoading?: (value: boolean) => void,
     enableAbort?: boolean | undefined | null,
     abortControllers?: any
   ) => {
@@ -201,31 +196,10 @@ export class SchedulerService {
 
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
-        setComposerEnvData([]);
-        if (setIsLoading) {
-          setIsLoading(false);
-        }
-
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
+        setEnvOptions([]);
       } else if (formattedResponse.length === undefined) {
         try {
-          setComposerEnvData([]);
-          if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
-            const url = formattedResponse.error.message.match(pattern);
-            if (url && url.length > 0) {
-              setIsApiError(true);
-              setApiError(formattedResponse.error.message);
-              setApiEnableUrl(url);
-            } else {
-              setApiError(formattedResponse.error.message);
-            }
-
-            if (setIsLoading) {
-              setIsLoading(false);
-            }
-          }
+          setEnvOptions([]);
         } catch (error) {
           console.error('Error parsing error message:', error);
           Notification.error(
@@ -235,17 +209,14 @@ export class SchedulerService {
             }
           );
         }
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
       } else {
-        setIsApiError(false);
-        setApiError('');
-        setComposerEnvData(formattedResponse);
-
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
+        console.log(formattedResponse);
+        const environmentOptions: DropdownOption[] = formattedResponse.map(
+          (env: string) => ({ label: env, value: env })
+        );
+        environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
+        console.log('Environment options:', environmentOptions);
+        setEnvOptions(environmentOptions);
       }
     } catch (error) {
       if (typeof error === 'object' && error !== null) {
@@ -264,10 +235,6 @@ export class SchedulerService {
         handleErrorToast({
           error: errorResponse
         });
-
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
       }
     }
   };

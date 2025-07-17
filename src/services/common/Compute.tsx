@@ -18,6 +18,7 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { DropdownOption } from '../../interfaces/FormInterface';
 import { Dispatch, SetStateAction } from 'react';
 
 export class ComputeServices {
@@ -166,15 +167,14 @@ export class ComputeServices {
 
   static readonly regionAPIService = (
     projectId: string,
-    setRegionOptions: Dispatch<SetStateAction<never[]>>
+    setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>
   ) => {
-    // const projectId = 'dataproc-jupyter-extension-dev'; // Replace with actual project ID
     requestAPI(`api/compute/region?project_id=${projectId}`)
       .then((formattedResponse: any) => {
         console.log('Formatted response:', formattedResponse);
         if (formattedResponse.length > 0) {
-          const regionOptions = formattedResponse.map(
-            (region: any) => region.name
+          const regionOptions: DropdownOption[] = formattedResponse.map(
+            (region: string) => ({ value: region, label: region })
           );
           regionOptions.sort();
           setRegionOptions(regionOptions);

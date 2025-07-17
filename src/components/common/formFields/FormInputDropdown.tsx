@@ -8,7 +8,8 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   control,
   label,
   options = [],
-  customClass = ''
+  customClass = '',
+  onChangeCallback
 }) => {
   const generateSingleOptions = () => {
     return options.map((option: any) => {
@@ -21,14 +22,23 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   };
 
   return (
-    
     <FormControl fullWidth>
       <InputLabel>{label}</InputLabel>
       <Controller
-        render={({ field: { onChange, value } }) => (
-          <Select labelId={`${name}-label`} 
-          // onChange={onChange} value={value} 
-          label={label}>
+        render={({ field: { onChange, value, ...fieldProps } }) => (
+          <Select
+            labelId={`${name}-label`}
+            label={label}
+            onChange={event => {
+              const newValue = event.target.value as string;
+              onChange(newValue);
+              if (onChangeCallback) {
+                onChangeCallback(newValue); // Call your custom callback
+              }
+            }}
+            value={value || ''}
+            {...fieldProps}
+          >
             {generateSingleOptions()}
           </Select>
         )}

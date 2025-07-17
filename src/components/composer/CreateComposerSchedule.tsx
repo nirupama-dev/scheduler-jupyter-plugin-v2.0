@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { MuiChipsInput } from 'mui-chips-input';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
@@ -25,77 +25,148 @@ import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import Cron from 'react-js-cron';
 import { Button } from '@mui/material';
 import { ComputeServices } from '../../services/common/Compute';
+import { SchedulerService } from '../../services/composer/SchedulerServices';
 import { authApi } from '../common/login/Config';
+import { DropdownOption } from '../../interfaces/FormInterface';
+import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
+import { SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
 
 export const CreateComposerSchedule = () => {
-  // const [projectId, setProjectId] = useState('');
-  // const [region, setRegion] = useState<string>('');
-  const { control, setValue, getValues } = useForm<any>();
-  const [regionOptions, setRegionOptions] = useState([]);
-  const projectId = getValues('projectId') || '';
+  const { control, setValue, watch } = useForm<any>();
+  const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
+  const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
 
-  const getRegion = () => {
-    ComputeServices.regionAPIService(projectId, setRegionOptions);
-  };
+  // Watch for changes in project_id and region
+  const selectedProjectId = watch('project_id');
+  const selectedRegion = watch('region');
+
+  console.log('Selected Project ID:', selectedProjectId);
+  console.log('Selected Region:', selectedRegion);
 
   /**
    * Effect to fetch the project ID and region from the auth API
    */
   useEffect(() => {
-    authApi().then(credentials => {
-      if (credentials?.project_id && credentials.region_id) {
-        // setProjectId(credentials.project_id);
-        setValue('projectId', credentials.project_id);
-        // setRegion(credentials.region_id);
-        setValue('regionId', credentials.region_id);
+    const loadInitialCredentials = async () => {
+      try {
+        const credentials = await authApi();
+        if (credentials?.project_id) {
+          setValue('project_id', credentials.project_id);
+          // Region will be handled by the subsequent useEffect and state updates.
+        }
+      } catch (error) {
+        console.error('Failed to load initial auth credentials:', error);
+        handleErrorToast({
+          error: `Failed to load initial credentials: ${error}`
+        });
       }
-    });
-  }, []);
+    };
+    loadInitialCredentials();
+  }, [setValue]);
+
+  // --- Fetch Regions based on selected Project ID ---
+  useEffect(() => {
+    if (selectedProjectId) {
+      ComputeServices.regionAPIService(selectedProjectId, setRegionOptions);
+    } else {
+      setRegionOptions([]); // Clear regions if no project is selected
+    }
+    // Always clear environment when project_id changes
+    setValue('environment', '');
+  }, [selectedProjectId, setValue]);
+
+  // --- Logic to Pre-fill Region from Credentials (after regionOptions are updated) ---
+  // useEffect(() => {
+  //   if (selectedProjectId && regionOptions.length > 0) {
+  //     // Only run if project is selected and regions are fetched
+  //     authApi()
+  //       .then(credentials => {
+  //         if (credentials?.region_id) {
+  //           // Check if the credential's region exists in the *currently available* regionOptions
+  //           const regionExists = regionOptions.find(
+  //             opt => opt.value === credentials.region_id
+  //           );
+  //           if (regionExists) {
+  //             // Only set if the form field for region is currently empty or not matching the prefilled value
+  //             if (selectedRegion === '') {
+  //               setValue('regionId', credentials.region_id);
+  //             }
+  //           }
+  //         }
+  //       })
+  //       .catch(err => console.error('Error checking authApi for region:', err));
+  //   }
+  // }, [regionOptions, selectedRegion, setValue]);
 
   useEffect(() => {
-    getRegion();
-    console.log('Region options:', regionOptions);
-  }, []);
+    if (selectedProjectId && selectedRegion) {
+      SchedulerService.listComposersAPIService(
+        setEnvOptions,
+        selectedProjectId,
+        selectedRegion
+      );
+    } else {
+      setEnvOptions([]);
+    }
+  }, [selectedRegion, setValue]);
 
-  // console.log('Project ID:', projectId);
-  // console.log('Region:', region);
+  // Handle Project ID change: Clear Region and Environment
+  const handleProjectIdChange = useCallback(
+    (value: string) => {
+      console;
+      setValue('projectId', value);
+      // setValue('regionId', '');
+      setRegionOptions([]);
+      setEnvOptions([]);
+    },
+    [setValue]
+  );
+
+  // Handle Region change: Clear Environment
+  const handleRegionChange = useCallback(
+    (value: string) => {
+      console.log('Region changed to:', value);
+      setValue('regionId', value);
+      setEnvOptions([]);
+    },
+    [setValue]
+  );
 
   return (
     <div className="common-fields">
-      <div className="create-scheduler-form-element-input-file">
-        <div className="create-scheduler-style">
-          <FormInputDropdown
-            name="projectId"
-            label="Project ID"
-            control={control}
-            options={[{ label: projectId, value: projectId }]}
-          />
-        </div>
+      <div className="create-scheduler-form-element">
+        <FormInputDropdown
+          name="projectId"
+          label="Project ID"
+          control={control}
+          options={[{ label: selectedProjectId, value: selectedProjectId }]}
+          customClass="create-scheduler-style"
+          onChangeCallback={handleProjectIdChange}
+        />
       </div>
-      <div className="create-scheduler-form-element-input-file">
-        <div className="create-scheduler-style">
-          <FormInputDropdown
-            name="regionId"
-            label="Region"
-            control={control}
-            options={[]}
-          />
-        </div>
+      <div className="create-scheduler-form-element">
+        <FormInputDropdown
+          name="regionId"
+          label="Region"
+          control={control}
+          options={regionOptions}
+          customClass="create-scheduler-style"
+          onChangeCallback={handleRegionChange}
+        />
       </div>
-      <div className="create-scheduler-form-element-input-file">
-        <div className="create-scheduler-style">
-          <FormInputDropdown
-            name="composerEnvironmentName"
-            label="Environment"
-            control={control}
-            options={[]}
-          />
-        </div>
+      <div className="create-scheduler-form-element">
+        <FormInputDropdown
+          name="composerEnvironmentName"
+          label="Environment"
+          control={control}
+          options={envOptions}
+          customClass="create-scheduler-style"
+        />
       </div>
       <div className="create-scheduler-label block-seperation">
         Output formats
       </div>
-      <div className="create-scheduler-form-element-input-file">
+      <div className="create-scheduler-form-element">
         <FormInputMultiCheckbox
           name="outputFormats"
           label="Notebook"
@@ -129,27 +200,25 @@ export const CreateComposerSchedule = () => {
           ]}
         />
       </div>
-      <div className="create-scheduler-form-element-input-file">
-        <div className="create-scheduler-style">
-          <FormInputDropdown
-            name="cluster"
-            label="Cluster*"
-            control={control}
-            options={[]}
-          />
-        </div>
+      <div className="create-scheduler-form-element">
+        <FormInputDropdown
+          name="cluster"
+          label="Cluster*"
+          control={control}
+          options={[]}
+          customClass="create-scheduler-style"
+        />
       </div>
-      <div className="create-scheduler-form-element-input-file">
-        <div className="create-scheduler-style">
-          <FormInputDropdown
-            name="serverless"
-            label="Serverless"
-            control={control}
-            options={[]}
-          />
-        </div>
+      <div className="create-scheduler-form-element">
+        <FormInputDropdown
+          name="serverless"
+          label="Serverless"
+          control={control}
+          options={[]}
+          customClass="create-scheduler-style"
+        />
       </div>
-      <div className="create-scheduler-form-element-input-file">
+      <div className="create-scheduler-form-element">
         <FormInputMultiCheckbox
           name="stopClusterAfterExecution"
           control={control}
@@ -162,7 +231,7 @@ export const CreateComposerSchedule = () => {
           ]}
         />
       </div>
-      <div className="create-scheduler-form-element-input-file">
+      <div className="create-scheduler-form-element">
         <div className="create-scheduler-style">
           <FormInputText
             label="Retry count"
@@ -172,7 +241,7 @@ export const CreateComposerSchedule = () => {
           />
         </div>
       </div>
-      <div className="create-scheduler-form-element-input-file">
+      <div className="create-scheduler-form-element">
         <div className="create-scheduler-style">
           <FormInputText
             label="Retry delay (minutes)"
@@ -182,7 +251,7 @@ export const CreateComposerSchedule = () => {
           />
         </div>
       </div>
-      <div className="create-scheduler-form-element-input-file">
+      <div className="create-scheduler-form-element">
         <FormInputMultiCheckbox
           name="email"
           control={control}
@@ -214,35 +283,25 @@ export const CreateComposerSchedule = () => {
         />
       </div>
       <div className="create-scheduler-label block-seperation">Schedule</div>
-      <div className="create-scheduler-form-element sub-para">
+      <div className="create-scheduler-form-element">
         <FormInputRadio
           name="schedulerSelection"
           control={control}
-          className="schedule-radio-btn"
-          options={[
-            {
-              label: 'Run now',
-              value: 'runNow'
-            },
-            {
-              label: 'Run on a schedule',
-              value: 'runSchedule'
-            }
-          ]}
+          className="network-layout"
+          options={SCHEDULE_MODE_OPTIONS}
         />
       </div>
       <div className="create-scheduler-form-element">
         <Cron value={''} setValue={() => {}} />
       </div>
-      <div className="create-scheduler-form-element-input-file">
-        <div className="create-scheduler-style">
-          <FormInputDropdown
-            name="timeZone"
-            label="Time Zone"
-            control={control}
-            options={[]}
-          />
-        </div>
+      <div className="create-scheduler-form-element">
+        <FormInputDropdown
+          name="timeZone"
+          label="Time Zone"
+          control={control}
+          options={[]}
+          customClass="create-scheduler-style"
+        />
       </div>
       <div className="save-overlay">
         <Button variant="contained" aria-label="Create Schedule">
