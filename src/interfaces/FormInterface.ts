@@ -37,3 +37,12 @@ export interface IFormInput {
   dropdownValue: string;
 }
 
+
+export interface FormInputDropdownProps {
+  name: string;
+  control: any;
+  options: Array<{ label: string; value: string }>;
+  label?: string;
+  setValue?: any;
+  customClass?: string;
+}

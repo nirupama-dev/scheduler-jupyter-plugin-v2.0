@@ -14,10 +14,12 @@ const defaultOptions = [
   }
 ];
 
-export const FormInputDropdown: React.FC<FormInputProps> = ({
+export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   name,
   control,
   label,
+  options = [],
+  customClass = '',
   options = defaultOptions,
   error
 }) => {
@@ -38,7 +40,9 @@ export const FormInputDropdown: React.FC<FormInputProps> = ({
         name={name}
         control={control}
         render={({ field: { onChange, value }, fieldState: { error: fieldError } }) => (
-          <Select onChange={onChange} value={value ?? ''} label={label}>
+          <Select labelId={`${name}-label`} 
+          // onChange={onChange} value={value} 
+          label={label ?? ''} label={label}>
             {generateSingleOptions()}
           </Select>
         )}

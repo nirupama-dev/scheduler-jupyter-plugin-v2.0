@@ -14,5 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import React from 'react';
+import { IPath } from '../../../interfaces/CommonInterface';
 
-import './notebookScheduler.css';
+const LearnMore: React.FC<IPath> = ({ path }) => {
+  return (
+    <div
+      onClick={() => {
+        window.open(`${path}`, '_blank');
+      }}
+    >
+      Learn more
+    </div>
+  );
+};
+
+export default LearnMore;

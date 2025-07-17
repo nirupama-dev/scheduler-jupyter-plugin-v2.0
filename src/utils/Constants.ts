@@ -46,12 +46,71 @@ export const DISK_MAX_SIZE = 65536;
 export const EVERY_MINUTE_CRON = '* * * * *';
 export const SCHEDULER_OPTIONS = [
   {
-    label: 'Composer',
-    value: 'composer'
-  },
-  {
     label: 'Vertex',
     value: 'vertex'
+  },
+  {
+    label: 'Composer',
+    value: 'composer'
   }
 ];
 export const DEFAULT_SCHEDULER_SELECTED = 'composer';
+
+export const DEFAULT_MACHINE_TYPE = [
+  {
+    label: 'n1-standard-4',
+    value: 'n1-standard-4'
+  }
+];
+
+export const NETWORK_CONFIGURATION_LABEL = 'Network Configuration';
+
+export const NETWORK_CONFIGURATION_LABEL_DESCRIPTION =
+  'Establishes connectivity for VM instances in the cluster';
+
+export const NETWORK_OPTIONS = [
+  {
+    label: 'Network in this project',
+    value: 'networkInThisProject'
+  },
+  {
+    label: 'Network shared from host project',
+    value: 'networkSharedFromHostProject'
+  }
+];
+
+export const SHARED_NETWORK_DOC_URL =
+  'https://cloud.google.com/vpc/docs/shared-vpc';
+
+export const SHARED_NETWORK_DESCRIPTION =
+  'Choose a shared VPC network from the project that is different from the clusters project';
+
+export const SCHEDULE_MODE_OPTIONS = [
+  {
+    label: 'Run now',
+    value: 'runNow'
+  },
+  {
+    label: 'Run on schedule',
+    value: 'runSchedule'
+  }
+];
+
+export const RUN_ON_SCHEDULE_OPTIONS = [
+  {
+    label: 'Use UNIX cron format',
+    value: 'useUnixCronFormat'
+  },
+  {
+    label: 'Use user-friendly scheduler',
+    value: 'useUserFriendlyScheduler'
+  }
+];
+
+export const CORN_EXP_DOC_URL =
+  'https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules';
+
+export const SCHEDULE_FORMAT_DESCRIPTION = `Schedules are specified using unix-cron format. E.g. every 3 hours:
+            "0 */3 * * *", every Monday at 9:00: "0 9 * * 1".`;
+
+export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
