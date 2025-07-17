@@ -708,7 +708,8 @@ const CreateVertexScheduler = ({
       endDateError ||
       isPastEndDate ||
       isPastStartDate ||
-      diskSizeFlag
+      diskSizeFlag ||
+      !diskTypeSelected
     );
   };
 
@@ -1212,6 +1213,13 @@ const CreateVertexScheduler = ({
                 )}
                 clearIcon={false}
               />
+              {!diskTypeSelected && (
+                <ErrorMessage
+                  message="Disk type is required"
+                  showIcon={false}
+                  errorWidth={true}
+                />
+              )}
             </div>
             <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
               <Input
