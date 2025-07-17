@@ -38,3 +38,15 @@ export interface IProject {
   projectId: string;
   name: string;
 }
+
+export interface IFormInput {
+  textValue: string;
+  radioValue: string;
+  checkboxValue: string[];
+  dateValue: Date;
+  dropdownValue: string;
+}
+
+export interface IPath {
+  path?: string;
+}

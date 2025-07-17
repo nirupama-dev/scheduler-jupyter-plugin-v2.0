@@ -26,13 +26,8 @@ import { iconLeftArrow } from '../../utils/Icons';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import { SCHEDULER_OPTIONS } from '../../utils/Constants';
-interface IFormInput {
-  textValue: string;
-  radioValue: string;
-  checkboxValue: string[];
-  dateValue: Date;
-  dropdownValue: string;
-}
+import { CreateVertexSchedule } from '../vertex/CreateVertexSchedule';
+import { IFormInput } from '../../interfaces/CommonInterface';
 
 export const CreateNotebookSchedule = () => {
   const {
@@ -77,14 +72,17 @@ export const CreateNotebookSchedule = () => {
             />
           </div>
         </div>
-      </div>
-      <div className="create-scheduler-form-element sub-para">
-        <FormInputRadio
-          name="schedulerSelection"
-          control={control}
-          className="schedule-radio-btn"
-          options={SCHEDULER_OPTIONS}
-        />
+
+        <div className="create-scheduler-form-element sub-para">
+          <FormInputRadio
+            name="schedulerSelection"
+            control={control}
+            className="schedule-radio-btn"
+            options={SCHEDULER_OPTIONS}
+          />
+        </div>
+
+        <CreateVertexSchedule />
       </div>
     </div>
   );
