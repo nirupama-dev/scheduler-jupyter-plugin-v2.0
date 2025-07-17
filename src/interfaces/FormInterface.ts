@@ -15,8 +15,8 @@
  * limitations under the License.
  */
 
-import { Control, FieldError, Path } from "react-hook-form";
-import { CombinedCreateFormValues } from "../schemas/CreateScheduleCombinedSchema";
+import { Control, FieldError, Path } from 'react-hook-form';
+import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 
 export interface FormInputProps {
   name: Path<CombinedCreateFormValues>;
@@ -37,13 +37,12 @@ export interface IFormInput {
   dropdownValue: string;
 }
 
-
 export interface FormInputDropdownProps {
-  name:  Path<CombinedCreateFormValues>;
-  control: Control<CombinedCreateFormValues> ;
+  name: Path<CombinedCreateFormValues>;
+  control: Control<CombinedCreateFormValues>;
   options: Array<{ label: string; value: string }>;
   label?: string;
   setValue?: any;
   customClass?: string;
-  error?: FieldError;  
+  error?: FieldError;
 }

@@ -42,7 +42,6 @@ import { ICreateVertexSchedulerProps } from '../../interfaces/VertexInterface';
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control
 }) => {
-
   return (
     <div>
       <div className="create-scheduler-form-element">
@@ -107,7 +106,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           />
         </div>
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-          <FormInputText label="Disk size*" control={control} name="diskSize" /> {/* Matches schema */}
+          <FormInputText label="Disk size*" control={control} name="diskSize" />{' '}
+          {/* Matches schema */}
         </div>
       </div>
 
@@ -274,7 +274,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         {/* Schedule Input */}
         <div className="create-scheduler-form-element schedule-input-field">
-          <FormInputText label="Schedule*" control={control} name="scheduleValue" /> 
+          <FormInputText
+            label="Schedule*"
+            control={control}
+            name="scheduleValue"
+          />
         </div>
         <div>
           <span className="tab-description tab-text-sub-cl">
@@ -291,7 +295,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           <Cron
             // value=""
             setValue={() => {}}
-            value='0 */3 * * *'
+            value="0 */3 * * *"
             // setValue={setScheduleValue}
             allowedPeriods={allowedPeriodsCron as PeriodType[] | undefined}
           />
@@ -308,12 +312,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         </div>
 
         <div className="create-scheduler-form-element">
-          <FormInputText label="Max runs*" control={control} name="maxRunCount" /> {/* Matches schema */}
+          <FormInputText
+            label="Max runs*"
+            control={control}
+            name="maxRunCount"
+          />{' '}
+          {/* Matches schema */}
         </div>
-
-        
       </div>
     </div>
   );
-
 };

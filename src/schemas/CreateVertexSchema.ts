@@ -22,46 +22,44 @@ import { createNotebookCommonSchema } from './CreateNotebookCommonSchema';
  * Zod schema for Vertex Scheduler form validation.
  */
 export const createVertexSchema = createNotebookCommonSchema.extend({
-    region: z.string().min(1, 'Region is required.'),
-    machineType: z.string().min(1, 'Machine type is required.'),
-    kernelName: z.string().min(1, 'Kernel is required.'),
-    cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
-    serviceAccount: z.string().min(1, 'Service account is required.'),
-    network: z.string().min(1, 'Network is required.'),
-    subnetwork: z.string().min(1, 'Subnetwork is required.'),
-    diskType: z.string().min(1, 'Disk type is required.'),
-    diskSize: z
-      .string()
-      .refine(
-        val => {
-          const num = Number(val);
-          return (
-            !isNaN(num) &&
-            Number.isInteger(num) &&
-            num >= DISK_MIN_SIZE &&
-            num <= DISK_MAX_SIZE
-          );
-        },
-        {
-          message: `Disk size must be an integer between ${DISK_MIN_SIZE} and ${DISK_MAX_SIZE}.`,
-        }
-      ),
-    acceleratorType: z.string().optional().or(z.literal('')),
-    acceleratorCount: z.string().optional(),
-    scheduleMode: z.enum(['runNow', 'runSchedule']),
-    internalScheduleMode: z.enum(['cronFormat', 'userFriendly']).optional(),
-    scheduleField: z.string().optional(),
-    scheduleValue: z.string().optional(),
-    startTime: z.string().optional(),
-    endTime: z.string().optional(),
-    maxRunCount: z.string().optional(),
-    timeZone: z.string().optional(),
-    networkOption: z.enum(['networkInThisProject', 'networkShared']).optional(),
-    primaryNetworkSelected: z.string().optional(),
-    subNetworkSelected: z.string().optional(),
-    sharedNetworkSelected: z.string().optional(),
-    parameters: z.array(z.string()).optional(),
-  });
+  region: z.string().min(1, 'Region is required.'),
+  machineType: z.string().min(1, 'Machine type is required.'),
+  kernelName: z.string().min(1, 'Kernel is required.'),
+  cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
+  serviceAccount: z.string().min(1, 'Service account is required.'),
+  network: z.string().min(1, 'Network is required.'),
+  subnetwork: z.string().min(1, 'Subnetwork is required.'),
+  diskType: z.string().min(1, 'Disk type is required.'),
+  diskSize: z.string().refine(
+    val => {
+      const num = Number(val);
+      return (
+        !isNaN(num) &&
+        Number.isInteger(num) &&
+        num >= DISK_MIN_SIZE &&
+        num <= DISK_MAX_SIZE
+      );
+    },
+    {
+      message: `Disk size must be an integer between ${DISK_MIN_SIZE} and ${DISK_MAX_SIZE}.`
+    }
+  ),
+  acceleratorType: z.string().optional().or(z.literal('')),
+  acceleratorCount: z.string().optional(),
+  scheduleMode: z.enum(['runNow', 'runSchedule']),
+  internalScheduleMode: z.enum(['cronFormat', 'userFriendly']).optional(),
+  scheduleField: z.string().optional(),
+  scheduleValue: z.string().optional(),
+  startTime: z.string().optional(),
+  endTime: z.string().optional(),
+  maxRunCount: z.string().optional(),
+  timeZone: z.string().optional(),
+  networkOption: z.enum(['networkInThisProject', 'networkShared']).optional(),
+  primaryNetworkSelected: z.string().optional(),
+  subNetworkSelected: z.string().optional(),
+  sharedNetworkSelected: z.string().optional(),
+  parameters: z.array(z.string()).optional()
+});
 
 /**
  * TypeScript type for Vertex Scheduler form values.

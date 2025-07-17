@@ -17,7 +17,7 @@ export const combinedCreateFormSchema = z
     if (commonData.schedulerSelection === 'vertex') {
       // Vertex specific validation
       const vertexData = commonData as z.infer<typeof createVertexSchema>;
-      
+
       // Accelerator count validation
       if (vertexData.acceleratorType && vertexData.acceleratorType !== '') {
         if (

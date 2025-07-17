@@ -24,8 +24,8 @@ export const createNotebookCommonSchema = z.object({
   jobName: z.string().min(1, 'Job Name is required.'),
   inputFile: z.string().min(1, 'Input File is required.'),
   schedulerSelection: z.enum(['vertex', 'composer'], {
-    errorMap: () => ({ message: 'Please select a scheduler option' }),
-  }),
+    errorMap: () => ({ message: 'Please select a scheduler option' })
+  })
 });
 
 export type CommonFormValues = z.infer<typeof createNotebookCommonSchema>;

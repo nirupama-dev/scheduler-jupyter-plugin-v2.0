@@ -43,11 +43,11 @@ export interface IVertexSchedulePayload {
   accelerator_type?: string;
   accelerator_count?: string;
   schedule_value?: string; // Optional: only for scheduled jobs
-  time_zone?: string;      // Optional: only for scheduled jobs
-  max_run_count?: string;  // Optional: only for scheduled jobs
-  start_time?: string;      // Optional: only for scheduled jobs
-  end_time?: string;        // Optional: only for scheduled jobs
-  parameters?: string[];    //future enhancement: optional parameters for the job
+  time_zone?: string; // Optional: only for scheduled jobs
+  max_run_count?: string; // Optional: only for scheduled jobs
+  start_time?: string; // Optional: only for scheduled jobs
+  end_time?: string; // Optional: only for scheduled jobs
+  parameters?: string[]; //future enhancement: optional parameters for the job
 }
 
 export interface IMachineType {
@@ -156,5 +156,3 @@ export interface IFormattedResponse {
   nextPageToken?: string;
   error?: { code: number; message: string };
 }
-
-

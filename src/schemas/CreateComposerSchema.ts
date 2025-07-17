@@ -27,47 +27,46 @@ const emailSchema = z
   .optional(); // Removed the specific message here as it will be handled by superRefine
 
 export const createComposerSchema = createNotebookCommonSchema.extend({
+  projectId: z.string().min(1, 'Project ID is required'),
 
-    projectId: z.string().min(1, 'Project ID is required'),
+  region: z.string().min(1, 'Region is required'),
 
-    region: z.string().min(1, 'Region is required'),
+  environment: z.string().min(1, 'Environment is required'),
 
-    environment: z.string().min(1, 'Environment is required'),
+  retryCount: z.preprocess(
+    val => (val === '' ? undefined : Number(val)),
+    z
+      .number()
+      .int()
+      .min(0, 'Retry Count must be a non-negative integer')
+      .optional()
+      .default(2)
+  ),
 
-    retryCount: z.preprocess(
-      val => (val === '' ? undefined : Number(val)),
-      z
-        .number()
-        .int()
-        .min(0, 'Retry Count must be a non-negative integer')
-        .optional()
-        .default(2)
-    ),
+  retryDelay: z.preprocess(
+    val => (val === '' ? undefined : Number(val)),
+    z
+      .number()
+      .int()
+      .min(0, 'Retry Delay must be a non-negative integer')
+      .optional()
+      .default(5)
+  ),
 
-    retryDelay: z.preprocess(
-      val => (val === '' ? undefined : Number(val)),
-      z
-        .number()
-        .int()
-        .min(0, 'Retry Delay must be a non-negative integer')
-        .optional()
-        .default(5)
-    ),
+  emailOnFailure: z.boolean().default(false),
+  emailOnRetry: z.boolean().default(false),
+  emailOnSuccess: z.boolean().default(false),
 
-    emailOnFailure: z.boolean().default(false),
-    emailOnRetry: z.boolean().default(false),
-    emailOnSuccess: z.boolean().default(false),
+  // Email field is now just optional by default
+  email: emailSchema, // This field is optional by itself, the required logic is in the superRefine
 
-    // Email field is now just optional by default
-    email: emailSchema, // This field is optional by itself, the required logic is in the superRefine
+  runOption: z.enum(['runNow', 'runOnSchedule'], {
+    errorMap: () => ({ message: 'Please select a run option' })
+  }),
 
-    runOption: z.enum(['runNow', 'runOnSchedule'], {
-      errorMap: () => ({ message: 'Please select a run option' })
-    }),
-
-    scheduleValue: z.string().optional(),
-    timeZone: z.string().optional()
-    });
+  scheduleValue: z.string().optional(),
+  timeZone: z.string().optional()
+});
 
 // Type inference for your form data
 export type ComposerSchedulerFormValues = z.infer<typeof createComposerSchema>;

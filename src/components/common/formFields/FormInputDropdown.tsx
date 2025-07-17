@@ -1,17 +1,21 @@
 import React from 'react';
-import { FormControl, FormHelperText, InputLabel, MenuItem, Select } from '@mui/material';
+import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select
+} from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { FormInputDropdownProps} from '../../../interfaces/FormInterface';
-
+import { FormInputDropdownProps } from '../../../interfaces/FormInterface';
 
 export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   name,
   control,
   label,
   customClass = '',
-  options =[],
+  options = [],
   error
-  
 }) => {
   const generateSingleOptions = () => {
     return options.map((option: any) => {
@@ -29,16 +33,20 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
       <Controller
         name={name}
         control={control}
-        render={({ field: { onChange, value }, fieldState: { error: fieldError } }) => (
-          <Select labelId={`${name}-label`} 
-          // onChange={onChange} value={value} 
+        render={({
+          field: { onChange, value },
+          fieldState: { error: fieldError }
+        }) => (
+          <Select
+            labelId={`${name}-label`}
+            // onChange={onChange} value={value}
           >
             {generateSingleOptions()}
           </Select>
         )}
-       
       />
-      {error && <FormHelperText>{error.message}</FormHelperText>} {/* Display error message */}
+      {error && <FormHelperText>{error.message}</FormHelperText>}{' '}
+      {/* Display error message */}
     </FormControl>
   );
 };

@@ -32,16 +32,17 @@ import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import { SCHEDULER_OPTIONS } from '../../utils/Constants';
 import { CreateVertexSchedule } from '../vertex/CreateVertexSchedule';
 import { CreateComposerSchedule } from '../composer/CreateComposerSchedule';
-import { combinedCreateFormSchema, CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
+import {
+  combinedCreateFormSchema,
+  CombinedCreateFormValues
+} from '../../schemas/CreateScheduleCombinedSchema';
 import { IVertexSchedulePayload } from '../../interfaces/VertexInterface';
 import { createVertexSchema } from '../../schemas/CreateVertexSchema';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
 import { getInitialFormValues } from '../../utils/FormDefaults';
 
-
 export const CreateNotebookSchedule = () => {
-  
   const scheduleType = 'vertex'; // Default to Vertex, can be changed based on user selection or props
   //function to be added for conditional rendering of scheduler type based on kernal selection.
 
@@ -54,15 +55,14 @@ export const CreateNotebookSchedule = () => {
     control,
     watch,
     formState: { errors },
-    reset,
-      // //setValue
+    reset
+    // //setValue
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
     defaultValues: schedulerFormValues,
-    mode: 'onChange',
+    mode: 'onChange'
   });
   const schedulerSelection = watch('schedulerSelection'); // Get the current value of the radio button
-
 
   const onSubmit = (data: CombinedCreateFormValues) => {
     console.log('Form Data Submitted:', data);
@@ -89,7 +89,7 @@ export const CreateNotebookSchedule = () => {
         max_run_count: vertexData.maxRunCount,
         start_time: vertexData.startTime,
         end_time: vertexData.endTime,
-        parameters: vertexData.parameters,
+        parameters: vertexData.parameters
       };
       console.log('Vertex Payload:', vertexPayload);
       // TODO: Call your Vertex API here with vertexPayload
@@ -111,16 +111,15 @@ export const CreateNotebookSchedule = () => {
         email_recipients: composerData.email, // Assuming 'email' is an array of strings
         run_option: composerData.runOption,
         schedule_value: composerData.scheduleValue,
-        time_zone: composerData.timeZone,
+        time_zone: composerData.timeZone
       };
       console.log('Composer Payload:', composerPayload);
       // TODO: Call your Composer API here with composerPayload
     }
- 
+
     // reset(); // Reset form to default values after submission
     // redirect to list page or show success message
   };
-
 
   // Function to handle cancel action
   const handleCancel = () => {
@@ -130,11 +129,7 @@ export const CreateNotebookSchedule = () => {
   return (
     <div className="component-level">
       <div className="cluster-details-header">
-        <div
-          role="button"
-          className="back-arrow-icon"
-          onClick={handleCancel}
-        >
+        <div role="button" className="back-arrow-icon" onClick={handleCancel}>
           <iconLeftArrow.react
             tag="div"
             className="icon-white logo-alignment-style"
@@ -147,33 +142,38 @@ export const CreateNotebookSchedule = () => {
           }
         </div>
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}> 
-      <div className="common-fields">
-        <div className="create-scheduler-style">
-          <FormInputText label="Job Name" control={control} name="jobName"  error={errors.jobName}/>
-        </div>
-
-        <div className="create-scheduler-form-element-input-file">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="common-fields">
           <div className="create-scheduler-style">
             <FormInputText
-              label="Input File"
+              label="Job Name"
               control={control}
-              name="inputFile"
-              error={errors.inputFile}
+              name="jobName"
+              error={errors.jobName}
             />
           </div>
+
+          <div className="create-scheduler-form-element-input-file">
+            <div className="create-scheduler-style">
+              <FormInputText
+                label="Input File"
+                control={control}
+                name="inputFile"
+                error={errors.inputFile}
+              />
+            </div>
+          </div>
         </div>
-      </div>
-      <div className="create-scheduler-form-element sub-para">
-        <FormInputRadio
-          name="schedulerSelection"
-          control={control}
-          className="schedule-radio-btn"
-          options={SCHEDULER_OPTIONS}
-          error={errors.schedulerSelection}
-        />
-      </div>
-      {/* Conditionally render specific scheduler components */}
+        <div className="create-scheduler-form-element sub-para">
+          <FormInputRadio
+            name="schedulerSelection"
+            control={control}
+            className="schedule-radio-btn"
+            options={SCHEDULER_OPTIONS}
+            error={errors.schedulerSelection}
+          />
+        </div>
+        {/* Conditionally render specific scheduler components */}
         {schedulerSelection === 'vertex' && (
           <CreateVertexSchedule control={control} errors={errors} />
         )}
@@ -182,13 +182,20 @@ export const CreateNotebookSchedule = () => {
         )}
 
         <div className="form-actions" style={{ marginTop: '20px' }}>
-          <button type="submit" style={{ marginRight: '10px', padding: '10px 20px' }}>
+          <button
+            type="submit"
+            style={{ marginRight: '10px', padding: '10px 20px' }}
+          >
             Create Job
           </button>
-          <button type="button" onClick={handleCancel} style={{ padding: '10px 20px' }}>
+          <button
+            type="button"
+            onClick={handleCancel}
+            style={{ padding: '10px 20px' }}
+          >
             Cancel
           </button>
-          </div>
+        </div>
       </form>
     </div>
   );

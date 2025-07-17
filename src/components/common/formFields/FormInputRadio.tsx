@@ -26,7 +26,11 @@ import {
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { FormInputProps } from '../../../interfaces/FormInterface';
-import { NETWORK_OPTIONS, SHARED_NETWORK_DESCRIPTION, SHARED_NETWORK_DOC_URL } from '../../../utils/Constants';
+import {
+  NETWORK_OPTIONS,
+  SHARED_NETWORK_DESCRIPTION,
+  SHARED_NETWORK_DOC_URL
+} from '../../../utils/Constants';
 import LearnMore from '../links/LearnMore';
 
 export const FormInputRadio: React.FC<FormInputProps> = ({
@@ -77,7 +81,8 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
           </RadioGroup>
         )}
       />
-      {error && <FormHelperText>{error.message}</FormHelperText>} {/* Display error message */}
+      {error && <FormHelperText>{error.message}</FormHelperText>}{' '}
+      {/* Display error message */}
     </FormControl>
   );
 };
