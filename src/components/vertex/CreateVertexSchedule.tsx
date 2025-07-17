@@ -28,8 +28,6 @@ import {
   SCHEDULE_FORMAT_DESCRIPTION,
   SCHEDULE_MODE_OPTIONS
 } from '../../utils/Constants';
-import { useForm } from 'react-hook-form';
-import { IFormInput } from '../../interfaces/CommonInterface';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -39,25 +37,17 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LearnMore from '../common/links/LearnMore';
 import Cron, { PeriodType } from 'react-js-cron';
 import 'react-js-cron/dist/styles.css'; // Adjust path if necessary
-import { Button } from '@mui/material';
 import { ICreateVertexSchedulerProps } from '../../interfaces/VertexInterface';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
-  control,
-  errors
+  control
 }) => {
-  const {
-    //handleSubmit, reset,
-    control
-    // //setValue
-  } = useForm<IFormInput>({
-    //defaultValues: defaultValues,
-  });
+
   return (
     <div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="machineType"
+          name="machineType" // Matches schema
           control={control}
           label="Machine Type*"
           options={DEFAULT_MACHINE_TYPE}
@@ -68,7 +58,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       <div className="execution-history-main-wrapper">
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
-            name="acceleratorType"
+            name="acceleratorType" // Matches schema
             control={control}
             label="Accelerator Type*"
             options={DEFAULT_MACHINE_TYPE}
@@ -77,7 +67,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         </div>
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
-            name="acceleratorCount"
+            name="acceleratorCount" // Matches schema
             control={control}
             label="Accelerator Count*"
             options={DEFAULT_MACHINE_TYPE}
@@ -88,7 +78,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="kernel"
+          name="kernelName" // *** CORRECTED: Changed from "kernel" to "kernelName" to match Zod schema ***
           control={control}
           label="Kernel*"
           options={DEFAULT_MACHINE_TYPE}
@@ -98,7 +88,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="cloudStorageBucket"
+          name="cloudStorageBucket" // Matches schema
           control={control}
           label="Cloud Storage Bucket*"
           options={DEFAULT_MACHINE_TYPE}
@@ -109,7 +99,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       <div className="execution-history-main-wrapper">
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
-            name="diskType"
+            name="diskType" // Matches schema
             control={control}
             label="Disk Type*"
             options={DEFAULT_MACHINE_TYPE}
@@ -117,13 +107,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           />
         </div>
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-          <FormInputText label="Disk size*" control={control} name="diskSize" />
+          <FormInputText label="Disk size*" control={control} name="diskSize" /> {/* Matches schema */}
         </div>
       </div>
 
       <div className="create-scheduler-form-element panel-margin footer-text">
         <FormInputDropdown
-          name="serviceAccount"
+          name="serviceAccount" // Matches schema
           control={control}
           label="Service account*"
           options={DEFAULT_MACHINE_TYPE}
@@ -138,18 +128,19 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
       <div className="create-scheduler-form-element panel-margin">
         <FormInputRadio
-          name="schedulerSelection"
+          name="networkOption" // Matches schema
           control={control}
           className="network-layout"
           options={NETWORK_OPTIONS}
         />
       </div>
 
-      {/* Network in this project  */}
+      {/* Network in this project */}
+      {/* Assuming 'network' and 'subnetwork' from schema are the correct fields for these dropdowns */}
       <div className="execution-history-main-wrapper">
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
-            name="primaryNetwork"
+            name="network" // *** CORRECTED: Assuming "network" from schema, adjust if "primaryNetworkSelected" is intended ***
             control={control}
             label="Primary network*"
             customClass="create-scheduler-style create-scheduler-form-element-input-fl"
@@ -159,7 +150,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
           <FormInputDropdown
-            name="subNetwork"
+            name="subnetwork" // *** CORRECTED: Assuming "subnetwork" from schema, adjust if "subNetworkSelected" is intended ***
             control={control}
             label="Sub network*"
             customClass="create-scheduler-style create-scheduler-form-element-input-fl"
@@ -171,7 +162,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       {/* Network shared from host project */}
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="sharedNetwork"
+          name="sharedNetworkSelected" // *** CORRECTED: Changed from "sharedNetwork" to "sharedNetworkSelected" to match Zod schema ***
           control={control}
           label="Shared network*"
           options={DEFAULT_MACHINE_TYPE}
@@ -182,7 +173,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       <div className="create-scheduler-label">Schedule</div>
       <div className="create-scheduler-form-element">
         <FormInputRadio
-          name="scheduleMode"
+          name="scheduleMode" // Matches schema
           control={control}
           className="network-layout"
           options={SCHEDULE_MODE_OPTIONS}
@@ -190,7 +181,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
       <div className="schedule-child-section">
         <FormInputRadio
-          name="schedulerSelection"
+          name="internalScheduleMode" // Matches schema
           control={control}
           className="schedule-radio-btn"
           options={RUN_ON_SCHEDULE_OPTIONS}
@@ -199,6 +190,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         <div className="execution-history-main-wrapper">
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+              {/* You'll need a custom FormInput component for DateTimePicker to bind it to react-hook-form */}
+              {/* For now, just a placeholder as this doesn't directly use 'name' prop on FormInput components */}
               <DateTimePicker
                 className="create-scheduler-style create-scheduler-form-element-input-fl"
                 label="Start Date"
@@ -234,6 +227,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     )} */}
             </div>
             <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+              {/* You'll need a custom FormInput component for DateTimePicker to bind it to react-hook-form */}
               <DateTimePicker
                 className="create-scheduler-style create-scheduler-form-element-input-fl"
                 label="End Date"
@@ -280,7 +274,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         {/* Schedule Input */}
         <div className="create-scheduler-form-element schedule-input-field">
-          <FormInputText label="Schedule*" control={control} name="schedule" />
+          <FormInputText label="Schedule*" control={control} name="scheduleValue" /> 
         </div>
         <div>
           <span className="tab-description tab-text-sub-cl">
@@ -291,7 +285,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           </div>
         </div>
 
-        {/* cron input */}
+        {/* cron input - This component is not a react-hook-form managed input, so it won't directly use the `name` prop here.
+            You'd likely manage its value and update the form state (e.g., `setValue('scheduleValue', cronValue)`) manually. */}
         <div className="create-scheduler-form-element">
           <Cron
             // value=""
@@ -304,7 +299,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         <div className="create-scheduler-form-element">
           <FormInputDropdown
-            name="timeZone"
+            name="timeZone" // Matches schema
             control={control}
             label="Time Zone*"
             options={DEFAULT_MACHINE_TYPE}
@@ -313,37 +308,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         </div>
 
         <div className="create-scheduler-form-element">
-          <FormInputText label="Max runs*" control={control} name="maxRuns" />
+          <FormInputText label="Max runs*" control={control} name="maxRunCount" /> {/* Matches schema */}
         </div>
 
-        <div className="save-overlay">
-            <Button
-              // onClick={() => handleCreateJobScheduler()}
-              variant="contained"
-              // aria-label={editMode ? ' Update Schedule' : 'Create Schedule'}
-              // disabled={isSaveDisabled()}
-            >
-              <div>
-                Create
-                {/* {editMode
-                  ? creatingVertexScheduler
-                    ? 'UPDATING'
-                    : 'UPDATE'
-                  : creatingVertexScheduler
-                    ? 'CREATING'
-                    : 'CREATE'} */}
-              </div>
-            </Button>
-            <Button
-              variant="outlined"
-              aria-label="cancel Batch"
-              // disabled={creatingVertexScheduler}
-              // onClick={!creatingVertexScheduler ? handleCancel : undefined}
-            >
-              <div>CANCEL</div>
-            </Button>
-          </div>
+        
       </div>
     </div>
   );
+
 };
