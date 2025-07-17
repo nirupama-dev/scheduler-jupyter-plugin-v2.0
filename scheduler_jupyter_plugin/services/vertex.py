@@ -143,6 +143,7 @@ class Client:
                                 "diskType": disk_type,
                                 "diskSizeGb": job.disk_size,
                             },
+                            "networkSpec": {}
                         },
                         "gcsNotebookSource": {"uri": notebook_source},
                         "gcsOutputUri": job.cloud_storage_bucket,
