@@ -143,11 +143,6 @@ class Client:
                                 "diskType": disk_type,
                                 "diskSizeGb": job.disk_size,
                             },
-                            "networkSpec": {
-                                "enableInternetAccess": "TRUE",
-                                "network": job.network,
-                                "subnetwork": job.subnetwork,
-                            },
                         },
                         "gcsNotebookSource": {"uri": notebook_source},
                         "gcsOutputUri": job.cloud_storage_bucket,
@@ -163,6 +158,17 @@ class Client:
                 payload["startTime"] = job.start_time
             if job.end_time:
                 payload["endTime"] = job.end_time
+            if job.network:
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["networkSpec"]["network"] = job.network
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["networkSpec"]["enableInternetAccess"] = "TRUE"
+            if job.subnetwork and job.network:
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["networkSpec"]["subnetwork"] = job.subnetwork
 
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
