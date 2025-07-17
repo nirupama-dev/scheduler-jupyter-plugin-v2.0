@@ -856,6 +856,20 @@ const CreateVertexScheduler = ({
   }, []);
 
   useEffect(() => {
+    if (!createCompleted) {
+      authApi()
+        .then(credentials => {
+          if (credentials?.region_id && credentials?.project_id) {
+            setProjectId(credentials.project_id);
+          }
+        })
+        .catch(error => {
+          handleErrorToast({
+            error: error
+          });
+        });
+    }
+
     if (editMode && vertexSchedulerDetails) {
       setJobId(vertexSchedulerDetails.job_id ?? '');
       setInputFileSelected(vertexSchedulerDetails.input_filename);
@@ -890,11 +904,14 @@ const CreateVertexScheduler = ({
       setDiskTypeSelected(vertexSchedulerDetails.disk_type);
       setDiskSize(vertexSchedulerDetails.disk_size);
       setGcsPath(vertexSchedulerDetails.gcs_notebook_source ?? '');
+    }
+  }, [editMode]);
 
-      const primaryNetworkLink = vertexSchedulerDetails.network.link;
-
+  useEffect(() => {
+    if (editMode && projectId) {
+      const primaryNetworkLink = vertexSchedulerDetails?.network.link;
       // eslint-disable-next-line no-useless-escape
-      const projectInNetwork = primaryNetworkLink.match(/projects\/([^\/]+)/);
+      const projectInNetwork = primaryNetworkLink?.match(/projects\/([^\/]+)/);
       if (projectInNetwork?.[1]) {
         if (projectInNetwork[1] === projectId) {
           setNetworkSelected('networkInThisProject');
@@ -902,9 +919,9 @@ const CreateVertexScheduler = ({
           setNetworkSelected('networkShared');
         }
       }
-      setVertexSchedulerDetails(null); // reset the values once loaded so as to accept new values.
+      setVertexSchedulerDetails(null);
     }
-  }, [editMode]);
+  }, [editMode, projectId]);
 
   useEffect(() => {
     if (!region) {
