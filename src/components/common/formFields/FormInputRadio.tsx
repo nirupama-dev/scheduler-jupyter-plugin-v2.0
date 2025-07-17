@@ -25,17 +25,8 @@ import {
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { FormInputProps } from '../../../interfaces/FormInterface';
-
-const options = [
-  {
-    label: 'Radio Option 1',
-    value: '1'
-  },
-  {
-    label: 'Radio Option 2',
-    value: '2'
-  }
-];
+import { NETWORK_OPTIONS, SHARED_NETWORK_DESCRIPTION, SHARED_NETWORK_DOC_URL } from '../../../utils/Constants';
+import LearnMore from '../links/LearnMore';
 
 export const FormInputRadio: React.FC<FormInputProps> = ({
   name,
@@ -45,14 +36,26 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
 }) => {
   const generateRadioOptions = () => {
     return options.map(singleOption => (
-      <FormControlLabel
-        value={singleOption.value}
-        label={
-          <Typography sx={{ fontSize: 13 }}>{singleOption.label}</Typography>
-        }
-        control={<Radio size="small" />}
-        className="create-scheduler-label-style"
-      />
+      <>
+        <FormControlLabel
+          value={singleOption.value}
+          label={
+            <Typography sx={{ fontSize: 13 }}>{singleOption.label}</Typography>
+          }
+          control={<Radio size="small" />}
+          className="create-scheduler-label-style"
+        />
+        {singleOption.label === NETWORK_OPTIONS[1].label && (
+          <>
+            <span className="sub-para tab-text-sub-cl">
+              {SHARED_NETWORK_DESCRIPTION}
+            </span>
+            <div className="learn-more-a-tag learn-more-url">
+              <LearnMore path={SHARED_NETWORK_DOC_URL} />
+            </div>
+          </>
+        )}
+      </>
     ));
   };
 

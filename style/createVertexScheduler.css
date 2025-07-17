@@ -1,0 +1,79 @@
+.execution-history-main-wrapper {
+  display: flex;
+}
+
+.create-scheduler-form-element-input-fl {
+  width: 247px !important;
+}
+
+.create-pr {
+  padding-right: 18px;
+}
+
+.panel-margin {
+  margin: 0;
+}
+
+.footer-text {
+  padding-top: 15px;
+}
+
+.create-job-scheduler-text-para {
+  padding: 20px 0 10px;
+  font-style: normal;
+  font-size: 13px;
+  line-height: 24px;
+  display: flex;
+  align-items: center;
+  color: var(--jp-ui-font-color0);
+}
+
+.create-job-scheduler-sub-title {
+  font-weight: 700;
+}
+
+.network-layout {
+  flex-direction: column !important;
+  gap: 0px !important;
+}
+
+.sub-para {
+  padding-left: 26px;
+}
+
+.tab-text-sub-cl {
+  color: #000000a8;
+  font-size: 12px;
+  padding-top: 5px;
+}
+
+.learn-more-a-tag {
+  padding-left: 27px;
+  cursor: pointer;
+}
+
+.learn-more-url {
+  display: flex;
+  justify-content: flex-start;
+}
+
+
+.create-scheduler-label {
+  margin-top: 15px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+  display: flex;
+  align-items: center;
+  color: var(--jp-ui-font-color0);
+}
+
+.schedule-child-section {
+  width: 512px;
+  margin-left: 30px;
+}
+
+.tab-description {
+  width: 512px;
+}
