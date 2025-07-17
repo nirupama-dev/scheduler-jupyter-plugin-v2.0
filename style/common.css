@@ -10,6 +10,32 @@
   align-items: center;
   color: var(--jp-ui-font-color0);
 }
+.create-scheduler-style {
+  width: 512px;
+  height: 36px;
+  background: var(--jp-layout-color0);
+  margin-top: 10px;
+  outline: none;
+}
+
+.create-scheduler-form-element {
+  margin-top: 15px;
+  width: 512px;
+}
+
+.logo-alignment-style {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-arrow-icon {
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
 
 .save-overlay {
   display: flex;

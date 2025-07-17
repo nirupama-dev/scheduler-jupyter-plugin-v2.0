@@ -26,14 +26,6 @@
   margin: 15px 0 0 15px;
 }
 
-.create-scheduler-style {
-  width: 512px;
-  height: 36px;
-  background: var(--jp-layout-color0);
-  margin-top: 10px;
-  outline: none;
-}
-
 .create-job-scheduler-title {
   padding: 0 15px;
   height: 48px;

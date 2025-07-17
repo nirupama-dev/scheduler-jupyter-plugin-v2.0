@@ -27,13 +27,8 @@ import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import { SCHEDULER_OPTIONS } from '../../utils/Constants';
 import { CreateComposerSchedule } from '../composer/CreateComposerSchedule';
-interface IFormInput {
-  textValue: string;
-  radioValue: string;
-  checkboxValue: string[];
-  dateValue: Date;
-  dropdownValue: string;
-}
+import { CreateVertexSchedule } from '../vertex/CreateVertexSchedule';
+import { IFormInput } from '../../interfaces/CommonInterface';
 
 export const CreateNotebookSchedule = () => {
   const {
@@ -78,16 +73,19 @@ export const CreateNotebookSchedule = () => {
             />
           </div>
         </div>
+
+        <div className="create-scheduler-form-element sub-para">
+          <FormInputRadio
+            name="schedulerSelection"
+            control={control}
+            className="schedule-radio-btn"
+            options={SCHEDULER_OPTIONS}
+          />
+        </div>
+
+        <CreateVertexSchedule />
+        <CreateComposerSchedule />
       </div>
-      <div className="create-scheduler-form-element sub-para">
-        <FormInputRadio
-          name="schedulerSelection"
-          control={control}
-          className="schedule-radio-btn"
-          options={SCHEDULER_OPTIONS}
-        />
-      </div>
-      <CreateComposerSchedule />
     </div>
   );
 };

@@ -52,3 +52,12 @@ export interface FormInputCheckboxProps {
   options: Option[]; // Use the new Option interface
   label?: string;
 }
+
+export interface FormInputDropdownProps {
+  name: string;
+  control: any;
+  options: Array<{ label: string; value: string }>;
+  label?: string;
+  setValue?: any;
+  customClass?: string;
+}

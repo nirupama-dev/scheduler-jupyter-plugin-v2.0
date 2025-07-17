@@ -302,10 +302,6 @@
   margin: 15px 0 0 15px;
 }
 
-.schedule-radio-btn {
-  flex-direction: row !important;
-  gap: 20px;
-}
 
 .scroll-comp-cluster {
   overflow-y: auto;
