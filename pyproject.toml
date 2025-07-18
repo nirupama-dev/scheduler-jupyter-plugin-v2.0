@@ -29,7 +29,7 @@ dependencies = [
     "aiofiles>=22.1.0,<23",
     "aiohttp~=3.9.5",
     "pendulum>=3.0.0",
-    "pydantic~=1.10.0",
+    "pydantic>=2.4.2",
     "google-cloud-logging",
     "google-cloud-compute",
     "google-cloud-iam",

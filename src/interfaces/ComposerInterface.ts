@@ -17,11 +17,13 @@
 
 import { ToastOptions } from 'react-toastify';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
-import { Control, FieldErrors } from 'react-hook-form';
+import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 
 export interface ICreateComposerSchedulerProps {
   control: Control<CombinedCreateFormValues>;
   errors: FieldErrors<CombinedCreateFormValues>;
+  watch: UseFormWatch<CombinedCreateFormValues>;
+  setValue: UseFormSetValue<CombinedCreateFormValues>;
 }
 
 export interface IComposerCreatePayload {

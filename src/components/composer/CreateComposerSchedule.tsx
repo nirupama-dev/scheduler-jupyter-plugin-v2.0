@@ -16,36 +16,30 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
 import { MuiChipsInput } from 'mui-chips-input';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputMultiCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
-import { FormInputRadio } from '../common/formFields/FormInputRadio';
+// import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import Cron from 'react-js-cron';
-import { Button } from '@mui/material';
 import { ComputeServices } from '../../services/common/Compute';
 import { SchedulerService } from '../../services/composer/SchedulerServices';
 import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
-import { SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
+// import { SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
 import { ICreateComposerSchedulerProps } from '../../interfaces/ComposerInterface';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
-> = ({ control, errors }) => {
-  const { control, setValue, watch } = useForm<any>();
+> = ({ control, errors, setValue, watch }) => {
+ 
   const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
 
-  // Watch for changes in project_id and region
-  const selectedProjectId = watch('project_id');
+  // Watch for changes in projectId and region
+  const selectedProjectId = watch('projectId');
   const selectedRegion = watch('region');
-
-  console.log('Selected Project ID:', selectedProjectId);
-  console.log('Selected Region:', selectedRegion);
-
   /**
    * Effect to fetch the project ID and region from the auth API
    */
@@ -54,7 +48,7 @@ export const CreateComposerSchedule: React.FC<
       try {
         const credentials = await authApi();
         if (credentials?.project_id) {
-          setValue('project_id', credentials.project_id);
+          setValue('projectId', credentials.project_id);
           // Region will be handled by the subsequent useEffect and state updates.
         }
       } catch (error) {
@@ -129,7 +123,7 @@ export const CreateComposerSchedule: React.FC<
   const handleRegionChange = useCallback(
     (value: string) => {
       console.log('Region changed to:', value);
-      setValue('regionId', value);
+      setValue('region', value);
       setEnvOptions([]);
     },
     [setValue]
@@ -149,7 +143,7 @@ export const CreateComposerSchedule: React.FC<
       </div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="regionId"
+          name="region"
           label="Region"
           control={control}
           options={regionOptions}
@@ -159,7 +153,7 @@ export const CreateComposerSchedule: React.FC<
       </div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="composerEnvironmentName"
+          name="environment"
           label="Environment"
           control={control}
           options={envOptions}
@@ -187,8 +181,8 @@ export const CreateComposerSchedule: React.FC<
       </div>
       <div className="create-scheduler-label block-seperation">Parameters</div>
       <div className="create-scheduler-form-element sub-para">
-        <FormInputRadio
-          name="schedulerSelection"
+        {/* <FormInputRadio
+          name="executionMode"
           control={control}
           className="schedule-radio-btn"
           options={[
@@ -232,8 +226,8 @@ export const CreateComposerSchedule: React.FC<
               value: ''
             }
           ]}
-        />
-      </div>
+        />*/}
+      </div> 
       <div className="create-scheduler-form-element">
         <div className="create-scheduler-style">
           <FormInputText
@@ -286,14 +280,14 @@ export const CreateComposerSchedule: React.FC<
         />
       </div>
       <div className="create-scheduler-label block-seperation">Schedule</div>
-      <div className="create-scheduler-form-element">
+      {/* <div className="create-scheduler-form-element">
         <FormInputRadio
           name="schedulerSelection"
           control={control}
           className="network-layout"
           options={SCHEDULE_MODE_OPTIONS}
         />
-      </div>
+      </div> */}
       <div className="create-scheduler-form-element">
         <Cron value={''} setValue={() => {}} />
       </div>
@@ -306,14 +300,14 @@ export const CreateComposerSchedule: React.FC<
           customClass="create-scheduler-style"
         />
       </div>
-      <div className="save-overlay">
+      {/* <div className="save-overlay">
         <Button variant="contained" aria-label="Create Schedule">
           <div>CREATE</div>
         </Button>
         <Button variant="outlined" aria-label="cancel Batch">
           <div>CANCEL</div>
         </Button>
-      </div>
+      </div> */}
     </div>
   );
 };

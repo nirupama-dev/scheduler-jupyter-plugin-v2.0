@@ -17,12 +17,14 @@
 
 import dayjs from 'dayjs';
 import { scheduleMode } from '../utils/Constants';
-import { Control, FieldErrors } from 'react-hook-form';
+import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 
 export interface ICreateVertexSchedulerProps {
   control: Control<CombinedCreateFormValues>;
   errors: FieldErrors<CombinedCreateFormValues>;
+  watch: UseFormWatch<CombinedCreateFormValues>;
+  setValue: UseFormSetValue<CombinedCreateFormValues>;
 }
 /*
  * Interface for the payload sent from the Create Vertex Scheduler form to the create API.

@@ -40,7 +40,10 @@ import 'react-js-cron/dist/styles.css'; // Adjust path if necessary
 import { ICreateVertexSchedulerProps } from '../../interfaces/VertexInterface';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
-  control
+  control,
+  errors,
+  watch,
+  setValue
 }) => {
   return (
     <div>

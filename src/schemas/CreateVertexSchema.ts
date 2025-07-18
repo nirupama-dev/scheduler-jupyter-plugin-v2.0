@@ -22,6 +22,7 @@ import { createNotebookCommonSchema } from './CreateNotebookCommonSchema';
  * Zod schema for Vertex Scheduler form validation.
  */
 export const createVertexSchema = createNotebookCommonSchema.extend({
+  schedulerSelection: z.literal('vertex'), // Discriminator property
   region: z.string().min(1, 'Region is required.'),
   machineType: z.string().min(1, 'Machine type is required.'),
   kernelName: z.string().min(1, 'Kernel is required.'),

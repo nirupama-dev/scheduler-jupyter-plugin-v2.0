@@ -27,12 +27,10 @@ const emailSchema = z
   .optional(); // Removed the specific message here as it will be handled by superRefine
 
 export const createComposerSchema = createNotebookCommonSchema.extend({
+  schedulerSelection: z.literal('composer'), // Discriminator property
   projectId: z.string().min(1, 'Project ID is required'),
-
   region: z.string().min(1, 'Region is required'),
-
   environment: z.string().min(1, 'Environment is required'),
-
   retryCount: z.preprocess(
     val => (val === '' ? undefined : Number(val)),
     z
@@ -42,7 +40,6 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
       .optional()
       .default(2)
   ),
-
   retryDelay: z.preprocess(
     val => (val === '' ? undefined : Number(val)),
     z
@@ -52,18 +49,14 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
       .optional()
       .default(5)
   ),
-
   emailOnFailure: z.boolean().default(false),
   emailOnRetry: z.boolean().default(false),
   emailOnSuccess: z.boolean().default(false),
-
   // Email field is now just optional by default
   email: emailSchema, // This field is optional by itself, the required logic is in the superRefine
-
   runOption: z.enum(['runNow', 'runOnSchedule'], {
     errorMap: () => ({ message: 'Please select a run option' })
   }),
-
   scheduleValue: z.string().optional(),
   timeZone: z.string().optional()
 });
