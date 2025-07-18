@@ -212,7 +212,10 @@ export class SchedulerService {
       } else {
         console.log(formattedResponse);
         const environmentOptions: DropdownOption[] = formattedResponse.map(
-          (env: string) => ({ label: env, value: env })
+          (env: IComposerEnvAPIResponse) => ({
+            label: env.label,
+            value: env.name
+          })
         );
         environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
         console.log('Environment options:', environmentOptions);
