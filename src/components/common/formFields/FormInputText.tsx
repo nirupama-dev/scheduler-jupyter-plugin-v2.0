@@ -29,8 +29,8 @@ export const FormInputText = ({
   name,
   control,
   label,
-  type,
-  error
+  error,
+  type
 }: FormInputProps) => {
   return (
     <Controller

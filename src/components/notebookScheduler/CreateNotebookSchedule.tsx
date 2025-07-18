@@ -41,6 +41,7 @@ import { createVertexSchema } from '../../schemas/CreateVertexSchema';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
 import { getInitialFormValues } from '../../utils/FormDefaults';
+import { Button } from '@mui/material';
 
 export const CreateNotebookSchedule = () => {
   const scheduleType = 'vertex'; // Default to Vertex, can be changed based on user selection or props
@@ -55,8 +56,8 @@ export const CreateNotebookSchedule = () => {
     control,
     watch,
     formState: { errors },
-    reset
-    // //setValue
+    reset,
+    setValue
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
     defaultValues: schedulerFormValues,
@@ -65,7 +66,7 @@ export const CreateNotebookSchedule = () => {
   const schedulerSelection = watch('schedulerSelection'); // Get the current value of the radio button
 
   const onSubmit = (data: CombinedCreateFormValues) => {
-    console.log('Form Data Submitted:', data);
+   
     // You can now confidently cast and transform based on schedulerSelection
     if (data.schedulerSelection === 'vertex') {
       const vertexData = data as z.infer<typeof createVertexSchema>;
@@ -132,7 +133,7 @@ export const CreateNotebookSchedule = () => {
         <div role="button" className="back-arrow-icon" onClick={handleCancel}>
           <iconLeftArrow.react
             tag="div"
-            className="icon-white logo-alignment-style"
+            className="logo-alignment-style" //icon-white
           />
         </div>
         <div className="create-job-scheduler-title">
@@ -164,7 +165,7 @@ export const CreateNotebookSchedule = () => {
             </div>
           </div>
         </div>
-        <div className="create-scheduler-form-element sub-para">
+        <div className="create-scheduler-form-element">
           <FormInputRadio
             name="schedulerSelection"
             control={control}
@@ -175,26 +176,19 @@ export const CreateNotebookSchedule = () => {
         </div>
         {/* Conditionally render specific scheduler components */}
         {schedulerSelection === 'vertex' && (
-          <CreateVertexSchedule control={control} errors={errors} />
+          <CreateVertexSchedule control={control} errors={errors} setValue={setValue} watch={watch} />
         )}
         {schedulerSelection === 'composer' && (
-          <CreateComposerSchedule control={control} errors={errors} />
+          <CreateComposerSchedule control={control} errors={errors} setValue={setValue} watch={watch} />
         )}
-
-        <div className="form-actions" style={{ marginTop: '20px' }}>
-          <button
-            type="submit"
-            style={{ marginRight: '10px', padding: '10px 20px' }}
-          >
-            Create Job
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            style={{ padding: '10px 20px' }}
-          >
-            Cancel
-          </button>
+        <div className="save-overlay">
+        <Button variant="contained" aria-label="Create Schedule" type="submit">
+          <div>CREATE</div>
+        </Button>
+        <Button variant="outlined" aria-label="cancel Batch" type='button' onClick={handleCancel}>
+          <div>CANCEL</div>
+        </Button>
+        
         </div>
       </form>
     </div>

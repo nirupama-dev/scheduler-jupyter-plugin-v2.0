@@ -36,6 +36,7 @@ export interface IFormInput {
   checkboxValue: string[];
   dateValue: Date;
   dropdownValue: string;
+  type?: string;
 }
 
 // Define the specific option type
@@ -47,7 +48,7 @@ export interface DropdownOption {
 export interface FormInputDropdownProps {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
-  options: Array<{ label: string; value: string }>;
+  options: Array<{ label: string; value: string }> | [];
   label?: string;
   setValue?: any;
   className?: string;
