@@ -32,6 +32,7 @@ export const gcpServiceUrls = (async () => {
 export const ABORT_MESSAGE = 'signal is aborted without reason';
 export const HTTP_STATUS_BAD_REQUEST = 400;
 export const HTTP_STATUS_FORBIDDEN = 403;
+export const DEFAULT_LABEL_DETAIL = 'client:scheduler-jupyter-plugin';
 
 // Pattern to check whether string contains link
 export const pattern =
@@ -114,3 +115,14 @@ export const SCHEDULE_FORMAT_DESCRIPTION = `Schedules are specified using unix-c
             "0 */3 * * *", every Monday at 9:00: "0 9 * * 1".`;
 
 export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
+
+export const EXECUTION_MODE_OPTIONS = [
+  {
+    label: 'Serverless',
+    value: 'serverless'
+  },
+  {
+    label: 'Cluster',
+    value: 'cluster'
+  }
+];

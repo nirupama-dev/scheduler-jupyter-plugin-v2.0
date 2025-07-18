@@ -29,7 +29,7 @@ import { SchedulerService } from '../../services/composer/SchedulerServices';
 import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
-import { SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
+import { EXECUTION_MODE_OPTIONS, SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
 import { ICreateComposerSchedulerProps } from '../../interfaces/ComposerInterface';
 
 export const CreateComposerSchedule: React.FC<
@@ -142,6 +142,7 @@ export const CreateComposerSchedule: React.FC<
           name="projectId"
           label="Project ID"
           control={control}
+          setValue={setValue}
           options={[{ label: selectedProjectId, value: selectedProjectId }]}
           customClass="create-scheduler-style"
           onChangeCallback={handleProjectIdChange}
@@ -152,6 +153,7 @@ export const CreateComposerSchedule: React.FC<
           name="region"
           label="Region"
           control={control}
+          setValue={setValue}
           options={regionOptions}
           customClass="create-scheduler-style"
           onChangeCallback={handleRegionChange}
@@ -162,6 +164,7 @@ export const CreateComposerSchedule: React.FC<
           name="environment"
           label="Environment"
           control={control}
+          setValue={setValue}
           options={envOptions}
           customClass="create-scheduler-style"
         />
@@ -191,16 +194,7 @@ export const CreateComposerSchedule: React.FC<
           name="schedulerSelection"
           control={control}
           className="schedule-radio-btn"
-          options={[
-            {
-              label: 'Serverless',
-              value: 'serverless'
-            },
-            {
-              label: 'Cluster',
-              value: 'cluster'
-            }
-          ]}
+          options={EXECUTION_MODE_OPTIONS}
         />
       </div>
       {/* <div className="create-scheduler-form-element">
