@@ -30,6 +30,7 @@ import { iconLeftArrow } from '../../utils/Icons';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import { SCHEDULER_OPTIONS } from '../../utils/Constants';
+import { CreateComposerSchedule } from '../composer/CreateComposerSchedule';
 import { CreateVertexSchedule } from '../vertex/CreateVertexSchedule';
 import { CreateComposerSchedule } from '../composer/CreateComposerSchedule';
 import {

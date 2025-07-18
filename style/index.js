@@ -23,4 +23,5 @@
 // import './job.css';
 import './createNotebookSchedule.css';
 import './createVertexScheduler.css';
+import './createComposerScheduler.css';
 import './common.css';

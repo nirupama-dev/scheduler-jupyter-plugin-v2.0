@@ -18,6 +18,8 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { DropdownOption } from '../../interfaces/FormInterface';
+import { Dispatch, SetStateAction } from 'react';
 
 export class ComputeServices {
   static readonly getParentProjectAPIService = async (
@@ -157,6 +159,31 @@ export class ComputeServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch shared networks list : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      });
+  };
+
+  static readonly regionAPIService = (
+    projectId: string,
+    setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>
+  ) => {
+    requestAPI(`api/compute/region?project_id=${projectId}`)
+      .then((formattedResponse: any) => {
+        console.log('Formatted response:', formattedResponse);
+        if (formattedResponse.length > 0) {
+          const regionOptions: DropdownOption[] = formattedResponse.map(
+            (region: string) => ({ value: region, label: region })
+          );
+          regionOptions.sort();
+          setRegionOptions(regionOptions);
+        } else {
+          setRegionOptions([]);
+        }
+      })
+      .catch(error => {
+        const errorResponse = `Failed to fetch region list : ${error}`;
         handleErrorToast({
           error: errorResponse
         });
