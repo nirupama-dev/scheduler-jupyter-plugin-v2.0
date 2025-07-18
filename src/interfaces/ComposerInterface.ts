@@ -16,7 +16,13 @@
  */
 
 import { ToastOptions } from 'react-toastify';
+import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
+import { Control, FieldErrors } from 'react-hook-form';
 
+export interface ICreateComposerSchedulerProps {
+  control: Control<CombinedCreateFormValues>;
+  errors: FieldErrors<CombinedCreateFormValues>;
+}
 
 export interface IComposerCreatePayload {
   input_filename: string;

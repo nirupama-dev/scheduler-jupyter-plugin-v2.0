@@ -15,16 +15,27 @@
  * limitations under the License.
  */
 
-import { UseFormSetValue } from 'react-hook-form';
+import { Control, FieldError, Path, UseFormSetValue } from 'react-hook-form';
+import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 
 export interface FormInputProps {
-  name: string;
-  control: any;
+  name: Path<CombinedCreateFormValues>;
+  control: Control<CombinedCreateFormValues>;
   label?: string;
   setValue?: any;
   className?: string;
   options?: Array<{ label: string; value: string }>;
+  error?: FieldError;
+  [key: string]: any; // Allow additional props
   type?: string;
+}
+
+export interface IFormInput {
+  textValue: string;
+  radioValue: string;
+  checkboxValue: string[];
+  dateValue: Date;
+  dropdownValue: string;
 }
 
 // Define the specific option type
@@ -34,13 +45,14 @@ export interface DropdownOption {
 }
 
 export interface FormInputDropdownProps {
-  name: string;
-  control: any;
-  options: Array<{ label: string; value: string }> | [];
+  name: Path<CombinedCreateFormValues>;
+  control: Control<CombinedCreateFormValues>;
+  options: Array<{ label: string; value: string }>;
   label?: string;
   setValue?: any;
   className?: string;
   customClass?: string;
+  error?: FieldError;
   onChangeCallback?: (value: any) => void;
 }
 

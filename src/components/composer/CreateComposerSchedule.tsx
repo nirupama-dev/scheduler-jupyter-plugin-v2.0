@@ -30,9 +30,12 @@ import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import { SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
+import { ICreateComposerSchedulerProps } from '../../interfaces/ComposerInterface';
 
-export const CreateComposerSchedule = () => {
-  const { control, setValue, watch } = useForm<any>();
+export const CreateComposerSchedule: React.FC<
+  ICreateComposerSchedulerProps
+> = ({ control, errors }) => {
+  const { setValue, watch } = useForm<any>();
   const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
 
@@ -89,7 +92,7 @@ export const CreateComposerSchedule = () => {
   //           if (regionExists) {
   //             // Only set if the form field for region is currently empty or not matching the prefilled value
   //             if (selectedRegion === '') {
-  //               setValue('regionId', credentials.region_id);
+  //               setValue('region', credentials.region_id);
   //             }
   //           }
   //         }
@@ -115,7 +118,7 @@ export const CreateComposerSchedule = () => {
     (value: string) => {
       console;
       setValue('projectId', value);
-      // setValue('regionId', '');
+      // setValue('region', '');
       setRegionOptions([]);
       setEnvOptions([]);
     },
@@ -126,7 +129,7 @@ export const CreateComposerSchedule = () => {
   const handleRegionChange = useCallback(
     (value: string) => {
       console.log('Region changed to:', value);
-      setValue('regionId', value);
+      setValue('region', value);
       setEnvOptions([]);
     },
     [setValue]
@@ -146,7 +149,7 @@ export const CreateComposerSchedule = () => {
       </div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="regionId"
+          name="region"
           label="Region"
           control={control}
           options={regionOptions}
@@ -156,7 +159,7 @@ export const CreateComposerSchedule = () => {
       </div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="composerEnvironmentName"
+          name="environment"
           label="Environment"
           control={control}
           options={envOptions}
@@ -200,7 +203,7 @@ export const CreateComposerSchedule = () => {
           ]}
         />
       </div>
-      <div className="create-scheduler-form-element">
+      {/* <div className="create-scheduler-form-element">
         <FormInputDropdown
           name="cluster"
           label="Cluster*"
@@ -217,7 +220,7 @@ export const CreateComposerSchedule = () => {
           options={[]}
           customClass="create-scheduler-style"
         />
-      </div>
+      </div> */}
       <div className="create-scheduler-form-element">
         <FormInputMultiCheckbox
           name="stopClusterAfterExecution"

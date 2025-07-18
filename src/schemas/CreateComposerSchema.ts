@@ -16,6 +16,7 @@
  */
 
 import { z } from 'zod';
+import { createNotebookCommonSchema } from './CreateNotebookCommonSchema';
 
 // Helper schema for email validation (can remain as is)
 const emailSchema = z
@@ -25,88 +26,47 @@ const emailSchema = z
   .min(1, 'Email is required')
   .optional(); // Removed the specific message here as it will be handled by superRefine
 
-export const createComposerSchema = z
-  .object({
-    jobName: z
-      .string()
-      .min(1, 'Job Name is required')
-      .regex(
-        /^[a-zA-Z0-9_-]+$/,
-        'Name must contain only letters, numbers, hyphens, and underscores'
-      ),
+export const createComposerSchema = createNotebookCommonSchema.extend({
+  projectId: z.string().min(1, 'Project ID is required'),
 
-    inputFileName: z.string().min(1, 'Input File Name is required'),
+  region: z.string().min(1, 'Region is required'),
 
-    projectId: z.string().min(1, 'Project ID is required'),
+  environment: z.string().min(1, 'Environment is required'),
 
-    region: z.string().min(1, 'Region is required'),
+  retryCount: z.preprocess(
+    val => (val === '' ? undefined : Number(val)),
+    z
+      .number()
+      .int()
+      .min(0, 'Retry Count must be a non-negative integer')
+      .optional()
+      .default(2)
+  ),
 
-    environment: z.string().min(1, 'Environment is required'),
+  retryDelay: z.preprocess(
+    val => (val === '' ? undefined : Number(val)),
+    z
+      .number()
+      .int()
+      .min(0, 'Retry Delay must be a non-negative integer')
+      .optional()
+      .default(5)
+  ),
 
-    retryCount: z.preprocess(
-      val => (val === '' ? undefined : Number(val)),
-      z
-        .number()
-        .int()
-        .min(0, 'Retry Count must be a non-negative integer')
-        .optional()
-        .default(2)
-    ),
+  emailOnFailure: z.boolean().default(false),
+  emailOnRetry: z.boolean().default(false),
+  emailOnSuccess: z.boolean().default(false),
 
-    retryDelay: z.preprocess(
-      val => (val === '' ? undefined : Number(val)),
-      z
-        .number()
-        .int()
-        .min(0, 'Retry Delay must be a non-negative integer')
-        .optional()
-        .default(5)
-    ),
+  // Email field is now just optional by default
+  email: emailSchema, // This field is optional by itself, the required logic is in the superRefine
 
-    emailOnFailure: z.boolean().default(false),
-    emailOnRetry: z.boolean().default(false),
-    emailOnSuccess: z.boolean().default(false),
+  runOption: z.enum(['runNow', 'runOnSchedule'], {
+    errorMap: () => ({ message: 'Please select a run option' })
+  }),
 
-    // Email field is now just optional by default
-    email: emailSchema, // This field is optional by itself, the required logic is in the superRefine
-
-    runOption: z.enum(['runNow', 'runOnSchedule'], {
-      errorMap: () => ({ message: 'Please select a run option' })
-    }),
-
-    scheduleValue: z.string().optional(),
-    timeZone: z.string().optional()
-  })
-  .superRefine((data, ctx) => {
-    // Conditional validation for email based on checkboxes
-    if (data.emailOnFailure || data.emailOnRetry || data.emailOnSuccess) {
-      if (!data.email || data.email.length === 0) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'Email recipients is required field',
-          path: ['email']
-        });
-      }
-    }
-
-    // Conditional validation for "Run on Schedule" fields
-    if (data.runOption === 'runOnSchedule') {
-      if (!data.scheduleValue) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Schedule is required when 'Run on Schedule' is selected",
-          path: ['scheduleValue']
-        });
-      }
-      if (!data.timeZone) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Timezone is required when 'Run on Schedule' is selected",
-          path: ['timeZone']
-        });
-      }
-    }
-  });
+  scheduleValue: z.string().optional(),
+  timeZone: z.string().optional()
+});
 
 // Type inference for your form data
-export type CreateJobFormData = z.infer<typeof createComposerSchema>;
+export type ComposerSchedulerFormValues = z.infer<typeof createComposerSchema>;

@@ -29,7 +29,8 @@ export const FormInputText = ({
   name,
   control,
   label,
-  type
+  type,
+  error
 }: FormInputProps) => {
   return (
     <Controller
@@ -37,15 +38,15 @@ export const FormInputText = ({
       control={control}
       render={({
         field: { onChange, value },
-        fieldState: { error },
+        fieldState: { error: fieldError }, // eslint-disable-next-line @typescript-eslint/no-unused-vars
         formState
       }) => (
         <TextField
-          helperText={error ? error.message : null}
+          helperText={fieldError ? fieldError.message : null}
           size="small"
-          error={!!error}
+          error={!!fieldError}
           onChange={onChange}
-          value={value}
+          value={value ?? ''}
           fullWidth
           label={label}
           variant="outlined"
