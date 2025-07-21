@@ -37,7 +37,7 @@ export interface IComposerSchedulePayload {
   parameters: string[];
   serverless_name?: Record<string, never>;
   cluster_name?: string;
-  mode_selected: string;
+  execution_mode: string;
   schedule_value?: string;
   retry_count: number | undefined;
   retry_delay: number | undefined;
@@ -45,7 +45,7 @@ export interface IComposerSchedulePayload {
   email_retry: boolean;
   email_recipients?: string[];
   run_option: 'runNow' | 'runOnSchedule';
-  name: string; //?
+  //name: string; //?
   stop_cluster: boolean;
   time_zone?: string;
   local_kernel?: boolean;

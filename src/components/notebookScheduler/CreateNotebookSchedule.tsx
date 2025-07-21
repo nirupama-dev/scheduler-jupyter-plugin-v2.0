@@ -24,7 +24,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { get, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { iconLeftArrow } from '../../utils/Icons';
 import { FormInputText } from '../common/formFields/FormInputText';
@@ -140,8 +140,8 @@ export const CreateNotebookSchedule = () => {
         output_formats: composerData.outputFormats || [], // Ensure this is an array
         dag_id: composerData.dagId ? composerData.dagId : '', // Assuming this is part of the form data
         parameters: composerData.parameters? composerData.parameters : [], // Ensure this is an array
-        mode_selected: composerData.mode_selected,
-        name: composerData.name
+        execution_mode: composerData.executionMode || 'local', // Default to 'local' if not set
+        stop_cluster: false,
       };
       console.log('Composer Payload:', composerPayload);
       // TODO: Call your Composer API here with composerPayload

@@ -32,6 +32,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   projectId: z.string().min(1, 'Project ID is required'),
   region: z.string().min(1, 'Region is required'),
   environment: z.string().min(1, 'Environment is required'),
+  executionMode: z.enum(['serverless', 'cluster', 'local']).optional(),
   retryCount: z.preprocess(
     val => (val === '' ? undefined : Number(val)),
     z
@@ -68,6 +69,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   parameters: z
     .string()
     .array().optional()
+    
 });
 
 // Type inference for your form data
