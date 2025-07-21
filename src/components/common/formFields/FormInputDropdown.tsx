@@ -8,7 +8,7 @@ import {
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { FormInputDropdownProps } from '../../../interfaces/FormInterface';
- 
+
 export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   name,
   control,
@@ -21,22 +21,22 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   const generateSingleOptions = () => {
     return options.map((option: any) => {
       return (
-<MenuItem key={option.value} value={option.value}>
+        <MenuItem key={option.value} value={option.value}>
           {option.label}
-</MenuItem>
+        </MenuItem>
       );
     });
   };
- 
+
   return (
-<FormControl fullWidth error={!!error}>
-<InputLabel>{label}</InputLabel>
-<Controller
+    <FormControl fullWidth error={!!error}>
+      <InputLabel>{label}</InputLabel>
+      <Controller
         render={({
           field: { onChange, value, ...fieldProps },
           fieldState: { error: fieldError }
         }) => (
-<Select
+          <Select
             labelId={`${name}-label`}
             label={label}
             onChange={event => {
@@ -48,15 +48,15 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
             }}
             value={value || ''}
             {...fieldProps}
->
+          >
             {generateSingleOptions()}
-</Select>
+          </Select>
         )}
         control={control}
         name={name}
       />
       {error && <FormHelperText>{error.message}</FormHelperText>}{' '}
       {/* Display error message */}
-</FormControl>
+    </FormControl>
   );
 };

@@ -18,8 +18,6 @@
 import { Control, FieldError, Path } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 
-import { UseFormSetValue } from 'react-hook-form';
-
 export interface FormInputProps {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
@@ -29,6 +27,7 @@ export interface FormInputProps {
   options?: Array<{ label: string; value: string }>;
   error?: FieldError;
   [key: string]: any; // Allow additional props
+  type?: string;
 }
 
 export interface IFormInput {
@@ -70,7 +69,8 @@ export interface Option {
 export interface FormInputCheckboxProps {
   name: string;
   control: any; // Type from react-hook-form's useForm hook
-  setValue: UseFormSetValue<any>; // Type from react-hook-form's useForm hook
-  options: Option[]; // Use the new Option interface
   label?: string;
+  isChecked?: boolean; // Optional prop to control the checked state
+  disabled?: boolean; // Optional prop to disable the checkbox
+  className?: string; // Optional prop for additional styling
 }
