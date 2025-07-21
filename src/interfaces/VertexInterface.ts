@@ -53,13 +53,30 @@ export interface IVertexSchedulePayload {
 }
 
 export interface IMachineType {
-  machineType: string;
+  machineType: {label:string, value: string};
   acceleratorConfigs: IAcceleratorConfig[];
 }
 
 export interface IAcceleratorConfig {
-  acceleratorType: string;
-  allowedCounts: number[];
+  acceleratorType: {label: string, value: string};
+  allowedCounts: {label: number, value: number}[];
+}
+
+
+export interface ILabelValue<T> {
+  label: T;
+  value: T;
+}
+
+export interface ITransformedAcceleratorConfig {
+  acceleratorType: ILabelValue<string>;
+  allowedCounts: ILabelValue<number>[]; // Array of { label: number, value: number }
+}
+
+// This interface defines the structure of each item in the final transformed array
+export interface IMachineTypeFormatted {
+  machineType: ILabelValue<string>;
+  acceleratorConfigs?: ITransformedAcceleratorConfig[] | null; // Optional, can be array or null
 }
 
 export interface ICreatePayload {

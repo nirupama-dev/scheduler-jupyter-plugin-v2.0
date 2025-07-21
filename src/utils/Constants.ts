@@ -57,13 +57,6 @@ export const SCHEDULER_OPTIONS = [
 ];
 export const DEFAULT_SCHEDULER_SELECTED = 'composer';
 
-export const DEFAULT_MACHINE_TYPE = [
-  {
-    label: 'n1-standard-4',
-    value: 'n1-standard-4'
-  }
-];
-
 export const NETWORK_CONFIGURATION_LABEL = 'Network Configuration';
 
 export const NETWORK_CONFIGURATION_LABEL_DESCRIPTION =
@@ -125,4 +118,80 @@ export const EXECUTION_MODE_OPTIONS = [
     label: 'Cluster',
     value: 'cluster'
   }
+];
+
+export const VERTEX_REGIONS = [
+  {
+    label: 'asia-east2',
+    value: 'asia-east2'
+  },
+  {
+    label: 'asia-northeast1',
+    value: 'asia-northeast1'
+  },
+  {
+    label: 'asia-northeast3',
+    value: 'asia-northeast3'
+  },
+  {
+    label: 'asia-south1',
+    value: 'asia-south1'
+  },
+  {
+    label: 'asia-southeast1',
+    value: 'asia-southeast1'
+  },
+  {
+    label: 'australia-southeast1',
+    value: 'australia-southeast1'
+  },
+  {
+    label: 'europe-west1',
+    value: 'europe-west1'
+  },
+  {
+    label: 'northamerica-northeast1',
+    value: 'northamerica-northeast1'
+  },
+  {
+    label: 'southamerica-east1',
+    value: 'southamerica-east1'
+  },
+  {
+    label: 'us-central1',
+    value: 'us-central1'
+  },
+  {
+    label: 'us-west1',
+    value: 'us-west1'
+  },
+  {
+    label: 'us-west4',
+    value: 'us-west4'
+  }
+];
+
+export const DEFAULT_MACHINE_TYPE = [
+  {
+    label: 'n1-standard-2 (2 CPUs, 8.05 GB RAM)',
+    value: 'n1-standard-2 (2 CPUs, 8.05 GB RAM)'
+  }
+];
+
+export const KERNEL_VALUE = [
+  {
+    label: 'python3',
+    value: 'python3'
+  },
+  {
+    label: 'pytorch',
+    value: 'pytorch'
+  },
+  {
+    label: 'tensorflow',
+    value: 'tensorflow'
+  }
+];
+export const DEFAULT_CLOUD_STORAGE_BUCKET = [
+  { label: 'default-vertex-schedules', value: 'default-vertex-schedules' }
 ];
