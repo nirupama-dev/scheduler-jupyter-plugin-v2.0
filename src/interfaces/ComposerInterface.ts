@@ -26,22 +26,26 @@ export interface ICreateComposerSchedulerProps {
   setValue: UseFormSetValue<CombinedCreateFormValues>;
 }
 
-export interface IComposerCreatePayload {
+export interface IComposerSchedulePayload {
+  job_name: string;
+  dag_id?: string;
   input_filename: string;
+  project_id: string;
+  region: string;
   composer_environment_name: string;
   output_formats: string[];
   parameters: string[];
   serverless_name?: Record<string, never>;
   cluster_name?: string;
   mode_selected: string;
-  schedule_value: string;
+  schedule_value?: string;
   retry_count: number | undefined;
   retry_delay: number | undefined;
   email_failure: boolean;
-  email_delay: boolean;
-  email: string[];
-  name: string;
-  dag_id: string;
+  email_retry: boolean;
+  email_recipients?: string[];
+  run_option: 'runNow' | 'runOnSchedule';
+  name: string; //?
   stop_cluster: boolean;
   time_zone?: string;
   local_kernel?: boolean;

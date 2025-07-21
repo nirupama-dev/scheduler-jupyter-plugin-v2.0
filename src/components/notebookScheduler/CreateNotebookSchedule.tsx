@@ -24,7 +24,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useForm } from 'react-hook-form';
+import { get, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { iconLeftArrow } from '../../utils/Icons';
 import { FormInputText } from '../common/formFields/FormInputText';
@@ -42,6 +42,7 @@ import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
 import { getInitialFormValues } from '../../utils/FormDefaults';
 import { Button } from '@mui/material';
+import { IComposerSchedulePayload } from '../../interfaces/ComposerInterface';
 
 export const CreateNotebookSchedule = () => {
   const scheduleType = 'vertex'; // Default to Vertex, can be changed based on user selection or props
@@ -65,9 +66,31 @@ export const CreateNotebookSchedule = () => {
   });
   const schedulerSelection = watch('schedulerSelection'); // Get the current value of the radio button
 
+  /**
+   * Helper function to get the schedule values from the Vertex scheduler form.
+   * @param vertexData The data from the Vertex scheduler form.
+   * @returns The schedule values as a string or undefined.
+   */
+  const getScheduleValues = (vertexData: z.infer<typeof createVertexSchema>): string | undefined => {
+      if (vertexData.scheduleMode === 'runNow') {
+        return ''; // Or undefined, depending on backend's strictness for empty string vs missing key
+      }
+      if (vertexData.scheduleMode === 'runSchedule' && vertexData.internalScheduleMode === 'cronFormat') {
+        return vertexData.scheduleField;
+      }
+      if (vertexData.scheduleMode === 'runSchedule' && vertexData.internalScheduleMode === 'userFriendly') {
+        return vertexData.scheduleValue;
+      }
+      return undefined; // Fallback
+    };
+
+    /**
+     * 
+     * @param data The form data submitted from the Create Notebook Schedule form.
+     */
   const onSubmit = (data: CombinedCreateFormValues) => {
    
-    // You can now confidently cast and transform based on schedulerSelection
+    //vertex payload creation
     if (data.schedulerSelection === 'vertex') {
       const vertexData = data as z.infer<typeof createVertexSchema>;
       const vertexPayload: IVertexSchedulePayload = {
@@ -85,7 +108,7 @@ export const CreateNotebookSchedule = () => {
         disk_size: vertexData.diskSize,
         accelerator_type: vertexData.acceleratorType,
         accelerator_count: vertexData.acceleratorCount,
-        schedule_value: vertexData.scheduleValue,
+        schedule_value: getScheduleValues(vertexData),
         time_zone: vertexData.timeZone,
         max_run_count: vertexData.maxRunCount,
         start_time: vertexData.startTime,
@@ -94,25 +117,31 @@ export const CreateNotebookSchedule = () => {
       };
       console.log('Vertex Payload:', vertexPayload);
       // TODO: Call your Vertex API here with vertexPayload
+
+      //composer payload creation
     } else if (data.schedulerSelection === 'composer') {
-      // Assuming you have an IComposerSchedulePayload interface similar to IVertexSchedulePayload
       const composerData = data as z.infer<typeof createComposerSchema>;
       // Map composerData to your Composer API payload here
-      const composerPayload = {
+      const composerPayload: IComposerSchedulePayload = {
         job_name: composerData.jobName,
-        input_file_name: composerData.inputFile,
+        input_filename: composerData.inputFile,
         project_id: composerData.projectId,
         region: composerData.region,
-        environment: composerData.environment,
+        composer_environment_name: composerData.environment,
         retry_count: composerData.retryCount,
         retry_delay: composerData.retryDelay,
-        email_on_failure: composerData.emailOnFailure,
-        email_on_retry: composerData.emailOnRetry,
-        email_on_success: composerData.emailOnSuccess,
-        email_recipients: composerData.email, // Assuming 'email' is an array of strings
+        email_failure: composerData.emailOnFailure,
+        email_retry: composerData.emailOnRetry,
+        email_success: composerData.emailOnSuccess,
+        email_recipients: composerData.email_recipients, // Assuming 'email' is an array of strings
         run_option: composerData.runOption,
         schedule_value: composerData.scheduleValue,
-        time_zone: composerData.timeZone
+        time_zone: composerData.timeZone,
+        output_formats: composerData.outputFormats || [], // Ensure this is an array
+        dag_id: composerData.dagId ? composerData.dagId : '', // Assuming this is part of the form data
+        parameters: composerData.parameters? composerData.parameters : [], // Ensure this is an array
+        mode_selected: composerData.mode_selected,
+        name: composerData.name
       };
       console.log('Composer Payload:', composerPayload);
       // TODO: Call your Composer API here with composerPayload

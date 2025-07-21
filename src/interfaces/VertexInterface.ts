@@ -36,10 +36,10 @@ export interface IVertexSchedulePayload {
   kernel_name: string;
   region: string;
   cloud_storage_bucket: string;
-  service_account: string;
+  service_account?: string;
   network_option?: 'networkInThisProject' | 'networkShared';
-  network: string;
-  subnetwork: string;
+  network?: string;
+  subnetwork?: string;
   disk_type: string;
   disk_size: string;
   accelerator_type?: string;

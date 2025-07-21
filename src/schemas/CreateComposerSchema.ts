@@ -28,6 +28,7 @@ const emailSchema = z
 
 export const createComposerSchema = createNotebookCommonSchema.extend({
   schedulerSelection: z.literal('composer'), // Discriminator property
+  dagId: z.string().optional(),
   projectId: z.string().min(1, 'Project ID is required'),
   region: z.string().min(1, 'Region is required'),
   environment: z.string().min(1, 'Environment is required'),
@@ -53,12 +54,20 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   emailOnRetry: z.boolean().default(false),
   emailOnSuccess: z.boolean().default(false),
   // Email field is now just optional by default
-  email: emailSchema, // This field is optional by itself, the required logic is in the superRefine
+  email_recipients: emailSchema, // This field is optional by itself, the required logic is in the superRefine
   runOption: z.enum(['runNow', 'runOnSchedule'], {
     errorMap: () => ({ message: 'Please select a run option' })
   }),
   scheduleValue: z.string().optional(),
-  timeZone: z.string().optional()
+  timeZone: z.string().optional(),
+  outputFormats: z
+    .string()
+    .array()
+    .min(1, 'At least one output format is required')
+    .optional(),
+  parameters: z
+    .string()
+    .array().optional()
 });
 
 // Type inference for your form data

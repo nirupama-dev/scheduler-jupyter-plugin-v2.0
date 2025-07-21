@@ -84,7 +84,7 @@ const getDefaultComposerValues = (): ComposerSchedulerFormValues => ({
   emailOnFailure: false,
   emailOnRetry: false,
   emailOnSuccess: false,
-  email: [], // Default for array of emails
+  email_recipients: [], // Default for array of emails
   runOption: 'runNow',
   scheduleValue: '',
   timeZone: '',

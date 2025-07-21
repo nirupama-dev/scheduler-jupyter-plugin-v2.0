@@ -166,7 +166,7 @@ export const combinedCreateFormSchema = z
         composerData.emailOnRetry ||
         composerData.emailOnSuccess
       ) {
-        if (!composerData.email || composerData.email.length === 0) {
+        if (!composerData.email_recipients || composerData.email_recipients.length === 0) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Email recipients is required field',

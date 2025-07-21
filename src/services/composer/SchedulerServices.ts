@@ -26,7 +26,7 @@ import {
 import {
   IClusterAPIResponse,
   IComposerEnvAPIResponse,
-  IComposerCreatePayload,
+  IComposerSchedulePayload,
   IDagList,
   IDagRunList,
   ISchedulerDagData,
@@ -239,7 +239,7 @@ export class SchedulerService {
     }
   };
   static readonly createJobSchedulerService = async (
-    payload: IComposerCreatePayload,
+    payload: IComposerSchedulePayload,
     app: JupyterLab,
     setCreateCompleted: (value: boolean) => void,
     setCreatingScheduler: (value: boolean) => void,
