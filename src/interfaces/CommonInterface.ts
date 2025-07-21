@@ -50,3 +50,8 @@ export interface IFormInput {
 export interface IPath {
   path?: string;
 }
+
+export interface Parameter {
+  key: string;
+  value: string;
+}

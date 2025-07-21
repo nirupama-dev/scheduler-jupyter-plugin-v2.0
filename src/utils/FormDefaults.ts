@@ -27,9 +27,8 @@ import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema'; /
  * The returned values are used to initialize the form when creating a new schedule or editing an existing schedule.
  */
 
-
 /**
- * 
+ *
  * @returns Default values for the Vertex scheduler form fields.
  * @description
  * This function returns default values for the form fields used in the Vertex scheduler.
@@ -62,11 +61,11 @@ const getDefaultVertexValues = (): VertexSchedulerFormValues => ({
   primaryNetworkSelected: '',
   subNetworkSelected: '',
   sharedNetworkSelected: '',
-  parameters: [],
+  parameters: []
 });
 
 /**
- * 
+ *
  * @returns Default values for the Composer scheduler form fields.
  * @description
  * This function returns default values for the form fields used in the Composer scheduler.
@@ -87,7 +86,7 @@ const getDefaultComposerValues = (): ComposerSchedulerFormValues => ({
   email_recipients: [], // Default for array of emails
   runOption: 'runNow',
   scheduleValue: '',
-  timeZone: '',
+  timeZone: ''
 });
 
 /**
@@ -106,12 +105,14 @@ export const getInitialFormValues = (
 };
 
 /**
- * 
+ *
  * @param existingData Existing data to edit, which should match the CombinedCreateFormValues type.
  * This function merges existing data with default values for the form.
- * @returns 
+ * @returns
  */
-export const getEditFormValues = (existingData: any): CombinedCreateFormValues => {
+export const getEditFormValues = (
+  existingData: any
+): CombinedCreateFormValues => {
   if (existingData.schedulerSelection === 'vertex') {
     return {
       ...getDefaultVertexValues(), // Start with defaults

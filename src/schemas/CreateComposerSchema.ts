@@ -16,7 +16,10 @@
  */
 
 import { z } from 'zod';
-import { createNotebookCommonSchema } from './CreateNotebookCommonSchema';
+import {
+  createNotebookCommonSchema,
+  parameterSchema
+} from './CreateNotebookCommonSchema';
 
 // Helper schema for email validation (can remain as is)
 const emailSchema = z
@@ -66,10 +69,10 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
     .array()
     .min(1, 'At least one output format is required')
     .optional(),
-  parameters: z
-    .string()
-    .array().optional()
-    
+  parameters: z.array(parameterSchema).optional(),
+  cluster: z.string().optional(),
+  serverless: z.string().optional(),
+  stopClusterAfterExecution: z.boolean().optional()
 });
 
 // Type inference for your form data

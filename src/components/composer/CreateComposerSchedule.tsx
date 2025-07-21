@@ -28,16 +28,23 @@ import { SchedulerService } from '../../services/composer/SchedulerServices';
 import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
-// import { EXECUTION_MODE_OPTIONS } from '../../utils/Constants';
 import { ICreateComposerSchedulerProps } from '../../interfaces/ComposerInterface';
-import { SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
+import {
+  EXECUTION_MODE_OPTIONS,
+  SCHEDULE_MODE_OPTIONS
+} from '../../utils/Constants';
 import { FormGroup } from '@mui/material';
+import { AddParameters } from './AddParameters';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
 > = ({ control, errors, setValue, watch }) => {
   const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
+  const [clusterOptions, setClusterOptions] = useState<DropdownOption[]>([]);
+  const [serverlessOptions, setServerlessOptions] = useState<DropdownOption[]>(
+    []
+  );
   const [emailList, setEmailList] = useState<string[]>([]);
 
   const timezones = Object.keys(tzdata.zones).sort();
@@ -53,6 +60,7 @@ export const CreateComposerSchedule: React.FC<
   const emailOnFailure = watch('emailOnFailure');
   const emailOnRetry = watch('emailOnRetry');
   const emailOnSuccess = watch('emailOnSuccess');
+  const executionModeRadio = watch('executionMode');
 
   /**
    * Effect to fetch the project ID and region from the auth API
@@ -121,6 +129,19 @@ export const CreateComposerSchedule: React.FC<
     }
   }, [selectedRegion, setValue]);
 
+  useEffect(() => {
+    if (executionModeRadio === 'cluster') {
+      setValue('serverless', '');
+      SchedulerService.listClustersAPIService(setClusterOptions);
+    } else if (executionModeRadio === 'serverless') {
+      setValue('cluster', '');
+      SchedulerService.listSessionTemplatesAPIService(setServerlessOptions);
+    } else {
+      setClusterOptions([]);
+      setServerlessOptions([]);
+    }
+  }, [executionModeRadio, setValue]);
+
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
     (value: string) => {
@@ -168,6 +189,7 @@ export const CreateComposerSchedule: React.FC<
           options={[{ label: selectedProjectId, value: selectedProjectId }]}
           customClass="create-scheduler-style"
           onChangeCallback={handleProjectIdChange}
+          // error={errors}
         />
       </div>
       <div className="create-scheduler-form-element">
@@ -179,6 +201,7 @@ export const CreateComposerSchedule: React.FC<
           options={regionOptions}
           customClass="create-scheduler-style"
           onChangeCallback={handleRegionChange}
+          error={errors.region}
         />
       </div>
       <div className="create-scheduler-form-element">
@@ -189,6 +212,7 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           customClass="create-scheduler-style"
+          // error={errors.environment}
         />
       </div>
       <div className="create-scheduler-label block-seperation">
@@ -203,46 +227,51 @@ export const CreateComposerSchedule: React.FC<
           disabled={true}
         />
       </div>
-      <div className="create-scheduler-label block-seperation">Parameters</div>
-      {/* <div className="create-scheduler-form-element sub-para"> */}
-      {/* <FormInputRadio
+      <AddParameters control={control} errors={errors} />
+      {/* {executionMode !== 'local ' && ( */}
+      <div className="create-scheduler-form-element sub-para">
+        <FormInputRadio
           name="executionMode"
           control={control}
           className="schedule-radio-btn"
           options={EXECUTION_MODE_OPTIONS}
+          // error={errors.executionMode}
         />
       </div>
-      {/* <div className="create-scheduler-form-element">
-        <FormInputDropdown
-          name="cluster"
-          label="Cluster*"
-          control={control}
-          options={[]}
-          customClass="create-scheduler-style"
-        />
-      </div>
-      <div className="create-scheduler-form-element">
-        <FormInputDropdown
-          name="serverless"
-          label="Serverless"
-          control={control}
-          options={[]}
-          customClass="create-scheduler-style"
-        />
-      </div> */}
-      {/* <div className="create-scheduler-form-element">
-        <FormInputMultiCheckbox
-          name="stopClusterAfterExecution"
-          control={control}
-          setValue={setValue}
-          options={[
-            {
-              label: 'Stop the cluster after notebook execution',
-              value: ''
-            }
-          ]}
-        />
-      </div> */}
+      {executionModeRadio === 'cluster' && (
+        <div className="create-scheduler-form-element">
+          <FormInputDropdown
+            name="cluster"
+            label="Cluster*"
+            control={control}
+            setValue={setValue}
+            options={clusterOptions}
+            customClass="create-scheduler-style"
+          />
+        </div>
+      )}
+      {executionModeRadio === 'serverless' && (
+        <div className="create-scheduler-form-element">
+          <FormInputDropdown
+            name="serverless"
+            label="Serverless"
+            control={control}
+            setValue={setValue}
+            options={serverlessOptions}
+            customClass="create-scheduler-style"
+          />
+        </div>
+      )}
+      {executionModeRadio === 'cluster' && (
+        <div className="create-scheduler-form-element">
+          <FormInputCheckbox
+            name="stopClusterAfterExecution"
+            control={control}
+            label="Stop cluster after execution"
+            className="create-scheduler-label-style"
+          />
+        </div>
+      )}
       <div className="create-scheduler-form-element block-seperation">
         <FormInputText
           label="Retry count"
@@ -250,6 +279,7 @@ export const CreateComposerSchedule: React.FC<
           name="retryCount"
           type="number"
           className="create-scheduler-style"
+          // error={errors.retryCount}
         />
       </div>
       <div className="create-scheduler-form-element">
@@ -259,6 +289,7 @@ export const CreateComposerSchedule: React.FC<
           name="retryDelay"
           type="number"
           className="create-scheduler-style"
+          // error={errors.retryDelay}
         />
       </div>
       <div className="create-scheduler-form-element">
@@ -293,6 +324,7 @@ export const CreateComposerSchedule: React.FC<
             value={emailList}
             inputProps={{ placeholder: '' }}
             label="Email recipients"
+            // error={errors.emailRecipients}
           />
         </div>
       )}
@@ -318,6 +350,7 @@ export const CreateComposerSchedule: React.FC<
               setValue={setValue}
               options={timeZoneOptions}
               customClass="create-scheduler-style"
+              // error={errors.timeZone}
             />
           </div>
         </div>

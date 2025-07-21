@@ -71,25 +71,32 @@ export const CreateNotebookSchedule = () => {
    * @param vertexData The data from the Vertex scheduler form.
    * @returns The schedule values as a string or undefined.
    */
-  const getScheduleValues = (vertexData: z.infer<typeof createVertexSchema>): string | undefined => {
-      if (vertexData.scheduleMode === 'runNow') {
-        return ''; // Or undefined, depending on backend's strictness for empty string vs missing key
-      }
-      if (vertexData.scheduleMode === 'runSchedule' && vertexData.internalScheduleMode === 'cronFormat') {
-        return vertexData.scheduleField;
-      }
-      if (vertexData.scheduleMode === 'runSchedule' && vertexData.internalScheduleMode === 'userFriendly') {
-        return vertexData.scheduleValue;
-      }
-      return undefined; // Fallback
-    };
+  const getScheduleValues = (
+    vertexData: z.infer<typeof createVertexSchema>
+  ): string | undefined => {
+    if (vertexData.scheduleMode === 'runNow') {
+      return ''; // Or undefined, depending on backend's strictness for empty string vs missing key
+    }
+    if (
+      vertexData.scheduleMode === 'runSchedule' &&
+      vertexData.internalScheduleMode === 'cronFormat'
+    ) {
+      return vertexData.scheduleField;
+    }
+    if (
+      vertexData.scheduleMode === 'runSchedule' &&
+      vertexData.internalScheduleMode === 'userFriendly'
+    ) {
+      return vertexData.scheduleValue;
+    }
+    return undefined; // Fallback
+  };
 
-    /**
-     * 
-     * @param data The form data submitted from the Create Notebook Schedule form.
-     */
+  /**
+   *
+   * @param data The form data submitted from the Create Notebook Schedule form.
+   */
   const onSubmit = (data: CombinedCreateFormValues) => {
-   
     //vertex payload creation
     if (data.schedulerSelection === 'vertex') {
       const vertexData = data as z.infer<typeof createVertexSchema>;
@@ -139,9 +146,9 @@ export const CreateNotebookSchedule = () => {
         time_zone: composerData.timeZone,
         output_formats: composerData.outputFormats || [], // Ensure this is an array
         dag_id: composerData.dagId ? composerData.dagId : '', // Assuming this is part of the form data
-        parameters: composerData.parameters? composerData.parameters : [], // Ensure this is an array
+        parameters: [], // Ensure this is an array
         execution_mode: composerData.executionMode || 'local', // Default to 'local' if not set
-        stop_cluster: false,
+        stop_cluster: false
       };
       console.log('Composer Payload:', composerPayload);
       // TODO: Call your Composer API here with composerPayload
@@ -205,19 +212,37 @@ export const CreateNotebookSchedule = () => {
         </div>
         {/* Conditionally render specific scheduler components */}
         {schedulerSelection === 'vertex' && (
-          <CreateVertexSchedule control={control} errors={errors} setValue={setValue} watch={watch} />
+          <CreateVertexSchedule
+            control={control}
+            errors={errors}
+            setValue={setValue}
+            watch={watch}
+          />
         )}
         {schedulerSelection === 'composer' && (
-          <CreateComposerSchedule control={control} errors={errors} setValue={setValue} watch={watch} />
+          <CreateComposerSchedule
+            control={control}
+            errors={errors}
+            setValue={setValue}
+            watch={watch}
+          />
         )}
         <div className="save-overlay">
-        <Button variant="contained" aria-label="Create Schedule" type="submit">
-          <div>CREATE</div>
-        </Button>
-        <Button variant="outlined" aria-label="cancel Batch" type='button' onClick={handleCancel}>
-          <div>CANCEL</div>
-        </Button>
-        
+          <Button
+            variant="contained"
+            aria-label="Create Schedule"
+            type="submit"
+          >
+            <div>CREATE</div>
+          </Button>
+          <Button
+            variant="outlined"
+            aria-label="cancel Batch"
+            type="button"
+            onClick={handleCancel}
+          >
+            <div>CANCEL</div>
+          </Button>
         </div>
       </form>
     </div>

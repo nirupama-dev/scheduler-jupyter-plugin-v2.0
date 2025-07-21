@@ -41,13 +41,11 @@ import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class SchedulerService {
   static readonly listClustersAPIService = async (
-    setClusterList: (value: string[]) => void,
-    setIsLoadingKernelDetail: (value: boolean) => void,
+    setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
   ) => {
     const pageToken = nextPageToken ?? '';
-    setIsLoadingKernelDetail(true);
     try {
       const serviceURL = `clusterList?pageSize=500&pageToken=${pageToken}`;
 
@@ -71,7 +69,7 @@ export class SchedulerService {
 
       if (formattedResponse.nextPageToken) {
         this.listClustersAPIService(
-          setClusterList,
+          setClusterOptions,
           formattedResponse.nextPageToken,
           allClustersData
         );
@@ -79,11 +77,13 @@ export class SchedulerService {
         const transformClusterListData = allClustersData;
 
         const keyLabelStructure = transformClusterListData.map(
-          (obj: { clusterName: string }) => obj.clusterName
+          (obj: { clusterName: string }) => ({
+            label: obj.clusterName,
+            value: obj.clusterName
+          })
         );
 
-        setClusterList(keyLabelStructure);
-        setIsLoadingKernelDetail(false);
+        setClusterOptions(keyLabelStructure);
       }
       if (formattedResponse?.error) {
         handleErrorToast({
@@ -99,8 +99,8 @@ export class SchedulerService {
     }
   };
   static readonly listSessionTemplatesAPIService = async (
-    setServerlessDataList: (value: string[]) => void,
-    setServerlessList: (value: string[]) => void,
+    // setServerlessDataList: (value: string[]) => void,
+    setServerlessOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,
     previousSessionTemplatesList?: object
@@ -136,19 +136,22 @@ export class SchedulerService {
 
       if (formattedResponse.nextPageToken) {
         this.listSessionTemplatesAPIService(
-          setServerlessDataList,
-          setServerlessList,
+          // setServerlessDataList,
+          setServerlessOptions,
           formattedResponse.nextPageToken,
           allSessionTemplatesData
         );
       } else {
         const transformSessionTemplateListData = allSessionTemplatesData;
         const keyLabelStructure = transformSessionTemplateListData.map(
-          (obj: { serverlessName: string }) => obj.serverlessName
+          (obj: { serverlessName: string }) => ({
+            label: obj.serverlessName,
+            value: obj.serverlessName
+          })
         );
 
-        setServerlessDataList(transformSessionTemplateListData);
-        setServerlessList(keyLabelStructure);
+        // setServerlessDataList(transformSessionTemplateListData);
+        setServerlessOptions(keyLabelStructure);
         if (setIsLoadingKernelDetail) {
           setIsLoadingKernelDetail(false);
         }
@@ -426,11 +429,11 @@ export class SchedulerService {
         setClusterSelected(formattedResponse.cluster_name);
         setServerlessSelected(formattedResponse.serverless_name);
         if (formattedResponse.mode_selected === 'serverless') {
-          await this.listSessionTemplatesAPIService(
-            setServerlessDataList,
-            setServerlessList,
-            setIsLoadingKernelDetail
-          );
+          // await this.listSessionTemplatesAPIService(
+          //   setServerlessDataList,
+          //   setServerlessList,
+          //   setIsLoadingKernelDetail
+          // );
           if (serverlessDataList.length > 0) {
             const selectedData: any = serverlessDataList.filter(
               (serverless: any) => {
