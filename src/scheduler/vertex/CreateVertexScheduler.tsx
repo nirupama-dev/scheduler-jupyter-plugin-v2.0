@@ -698,7 +698,6 @@ const CreateVertexScheduler = ({
         subNetworkSelected &&
         (primaryNetworkSelected === null ||
           primaryNetworkSelected === undefined)) ||
-      // (networkSelected === 'networkShared' && sharedNetworkSelected === null) ||
       (scheduleMode === 'runSchedule' &&
         ((internalScheduleMode === 'cronFormat' &&
           (scheduleField === '' || scheduleField === everyMinuteCron)) ||
