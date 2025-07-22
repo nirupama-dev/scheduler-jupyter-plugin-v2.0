@@ -63,7 +63,7 @@ class Client:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(token=self._access_token)
-            storage_client = storage.Client(credentials=credentials)
+            storage_client = storage.Client(credentials=credentials, project=self.project_id)
             storage_client.create_bucket(bucket_name)
         except Exception as error:
             self.log.exception(f"Error in creating Bucket: {error}")
@@ -71,7 +71,8 @@ class Client:
 
     async def upload_to_gcs(self, bucket_name, file_path, job_name):
         input_notebook = file_path.split("/")[-1]
-        storage_client = storage.Client()
+        credentials = oauth2.Credentials(self._access_token)
+        storage_client = storage.Client(credentials=credentials, project=self.project_id)
         bucket = storage_client.bucket(bucket_name)
         blob_name = None
 
