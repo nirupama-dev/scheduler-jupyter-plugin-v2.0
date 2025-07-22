@@ -59,7 +59,9 @@ export const CreateNotebookSchedule = () => {
     watch,
     formState: { errors },
     reset,
-    setValue
+    setValue,
+    getValues,
+    trigger
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
     defaultValues: schedulerFormValues,
@@ -182,6 +184,8 @@ export const CreateNotebookSchedule = () => {
               errors={errors}
               setValue={setValue}
               watch={watch}
+              getValues={getValues}
+              trigger={trigger}
             />
           )}
           {schedulerSelection === 'composer' && (

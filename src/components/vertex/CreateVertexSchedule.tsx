@@ -40,7 +40,10 @@ import LearnMore from '../common/links/LearnMore';
 import Cron, { PeriodType } from 'react-js-cron';
 import 'react-js-cron/dist/styles.css'; // Adjust path if necessary
 import {
+  IAcceleratorConfig,
   ICreateVertexSchedulerProps,
+  ILabelValue,
+  ILoadingStateVertex,
   IMachineType
 } from '../../interfaces/VertexInterface';
 import { authApi } from '../common/login/Config';
@@ -51,11 +54,33 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
   errors,
   watch,
-  setValue
+  setValue,
+  getValues,
+  trigger
 }) => {
   const [machineTypeList, setMachineTypeList] = useState<IMachineType[]>([]);
+  const [loadingState, setLoadingState] = useState<ILoadingStateVertex>({
+    region: false,
+    machineType: false
+    // ... initialize other mandatory properties
+  });
 
   const region = watch('region');
+  const machineType = watch('machineType');
+  const acceleratorType = watch('acceleratorType');
+
+  /**
+   * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
+   * @param {string} value selected region
+   */
+  const handleRegionChange = (value: React.SetStateAction<string>) => {
+    setValue('machineType', '');
+    setMachineTypeList([]);
+    setValue('acceleratorType', '');
+    setValue('acceleratorCount', '');
+    trigger('region');
+    trigger('machineType')
+  };
 
   /**
    * Hosts the machine type API service
@@ -63,7 +88,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const machineTypeAPI = () => {
     VertexServices.machineTypeAPIService(
       region,
-      setMachineTypeList
+      setMachineTypeList,
+      setLoadingState
       // setMachineTypeLoading,
       // setIsApiError,
       // setApiError,
@@ -71,10 +97,25 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     );
   };
 
+  /**
+   * Handles Acceleration Type listing
+   * @param {AcceleratorConfig} acceleratorConfig acceleratorConfigs data
+   */
+  const getAcceleratedType = (acceleratorConfig: IAcceleratorConfig[]) => {
+    return acceleratorConfig.map(
+      (item: { acceleratorType: { label: string; value: string } }) => ({
+        label: item.acceleratorType.value,
+        value: item.acceleratorType.value
+      })
+    );
+  };
+
   useEffect(() => {
+    setLoadingState(prev => ({ ...prev, region: true }));
     authApi()
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
+          setLoadingState(prev => ({ ...prev, region: false }));
           setValue('region', credentials.region_id);
         }
       })
@@ -97,12 +138,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
   useEffect(() => {
     const machineTypeOptions = machineTypeList.map(item => item.machineType);
-    const defaultSelected =
-      machineTypeOptions.find(option => {
-        if (option.value === DEFAULT_MACHINE_TYPE[0].value) {
-          return option.value;
-        }
-      });
+    const defaultSelected = machineTypeOptions.find(option => {
+      if (option.value === DEFAULT_MACHINE_TYPE[0].value) {
+        return option.value;
+      }
+    });
     setValue('machineType', defaultSelected?.value ?? '1');
   }, [machineTypeList, setValue]);
 
@@ -115,6 +155,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           label="Region*"
           options={VERTEX_REGIONS}
           customClass="create-scheduler-style"
+          loading={loadingState.region}
+          onChangeCallback={handleRegionChange}
+          error={errors.region}
         />
       </div>
 
@@ -125,29 +168,65 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           label="Machine Type*"
           options={machineTypeList?.map(item => item.machineType)}
           customClass="create-scheduler-style"
+          loading={loadingState.machineType}
+          // error={errors.machineType}
         />
       </div>
 
-      <div className="execution-history-main-wrapper">
-        <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-          <FormInputDropdown
-            name="acceleratorType" // Matches schema
-            control={control}
-            label="Accelerator Type*"
-            options={DEFAULT_MACHINE_TYPE}
-            customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-          />
-        </div>
-        <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-          <FormInputDropdown
-            name="acceleratorCount" // Matches schema
-            control={control}
-            label="Accelerator Count*"
-            options={DEFAULT_MACHINE_TYPE}
-            customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-          />
-        </div>
-      </div>
+      {machineTypeList.length > 0 &&
+        machineTypeList.map(item => {
+          if (
+            ('acceleratorConfigs' in item &&
+              item.machineType.value === machineType &&
+              item.acceleratorConfigs !== null) ||
+            ('acceleratorConfigs' in item &&
+              machineType &&
+              item.machineType.value.split(' ')[0] === machineType &&
+              item.acceleratorConfigs !== null)
+          ) {
+            return (
+              console.log('item.acceleratorConfigs', item.acceleratorConfigs),
+              (
+                <div className="execution-history-main-wrapper">
+                  <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                    <FormInputDropdown
+                      name="acceleratorType" // Matches schema
+                      control={control}
+                      label="Accelerator Type*"
+                      options={getAcceleratedType(item.acceleratorConfigs)}
+                      customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+                    />
+                  </div>
+                  {item?.acceleratorConfigs?.map(
+                    (element: {
+                      allowedCounts: ILabelValue<number>[];
+                      acceleratorType: ILabelValue<string>;
+                    }) => {
+                      return (
+                        <>
+                          {element.acceleratorType.value === acceleratorType ? (
+                            <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                              <FormInputDropdown
+                                name="acceleratorCount" // Matches schema
+                                control={control}
+                                label="Accelerator Count*"
+                                options={element.allowedCounts.map(item => ({
+                                  label: item.label.toString(),
+                                  value: item.value.toString()
+                                }))}
+                                customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+                              />
+                            </div>
+                          ) : null}
+                        </>
+                      );
+                    }
+                  )}
+                </div>
+              )
+            );
+          }
+        })}
 
       <div className="create-scheduler-form-element">
         <FormInputDropdown

@@ -55,6 +55,7 @@ export interface FormInputDropdownProps {
   customClass?: string;
   error?: FieldError;
   onChangeCallback?: (value: any) => void;
+  loading?: boolean;
 }
 
 // Define the shape of a single option

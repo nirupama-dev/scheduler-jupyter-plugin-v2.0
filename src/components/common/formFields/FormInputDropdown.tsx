@@ -19,7 +19,7 @@ import React from 'react';
 import {
   FormControl,
   FormHelperText,
-  // CircularProgress, // Import for loader
+  CircularProgress, // Import for loader
   TextField, // Used internally by Autocomplete for the input area
   Autocomplete
 } from '@mui/material';
@@ -35,7 +35,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   customClass = '',
   onChangeCallback,
   error,
-  // loading = false, // Default to false
+  loading = false, // Default to false
   // onSearchInputChange,
   // freeSolo = false, // Default to false
   // placeholder = '',
@@ -76,7 +76,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
                   ...params.InputProps,
                   endAdornment: (
                     <React.Fragment>
-                      {/* {loading ? <CircularProgress color="inherit" size={20} /> : null} */}
+                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
                       {params.InputProps.endAdornment}
                     </React.Fragment>
                   ),
