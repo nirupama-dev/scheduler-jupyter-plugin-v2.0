@@ -15,18 +15,20 @@
  * limitations under the License.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import {
   allowedPeriodsCron,
   CORN_EXP_DOC_URL,
   DEFAULT_MACHINE_TYPE,
+  KERNEL_VALUE,
   NETWORK_CONFIGURATION_LABEL,
   NETWORK_CONFIGURATION_LABEL_DESCRIPTION,
   NETWORK_OPTIONS,
   RUN_ON_SCHEDULE_OPTIONS,
   SCHEDULE_FORMAT_DESCRIPTION,
-  SCHEDULE_MODE_OPTIONS
+  SCHEDULE_MODE_OPTIONS,
+  VERTEX_REGIONS
 } from '../../utils/Constants';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
@@ -37,7 +39,13 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LearnMore from '../common/links/LearnMore';
 import Cron, { PeriodType } from 'react-js-cron';
 import 'react-js-cron/dist/styles.css'; // Adjust path if necessary
-import { ICreateVertexSchedulerProps } from '../../interfaces/VertexInterface';
+import {
+  ICreateVertexSchedulerProps,
+  IMachineType
+} from '../../interfaces/VertexInterface';
+import { authApi } from '../common/login/Config';
+import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
+import { VertexServices } from '../../services/vertex/Vertex';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -45,14 +53,77 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   watch,
   setValue
 }) => {
+  const [machineTypeList, setMachineTypeList] = useState<IMachineType[]>([]);
+
+  const region = watch('region');
+
+  /**
+   * Hosts the machine type API service
+   */
+  const machineTypeAPI = () => {
+    VertexServices.machineTypeAPIService(
+      region,
+      setMachineTypeList
+      // setMachineTypeLoading,
+      // setIsApiError,
+      // setApiError,
+      // setApiEnableUrl
+    );
+  };
+
+  useEffect(() => {
+    authApi()
+      .then(credentials => {
+        if (credentials?.region_id && credentials?.project_id) {
+          setValue('region', credentials.region_id);
+        }
+      })
+      .catch(error => {
+        handleErrorToast({
+          error: error
+        });
+      });
+  }, [setValue]);
+
+  useEffect(() => {
+    if (!region) {
+      setMachineTypeList([]);
+      setValue('machineType', '');
+    } else {
+      machineTypeAPI();
+      // subNetworkAPI(primaryNetworkSelected?.name);
+    }
+  }, [region]);
+
+  useEffect(() => {
+    const machineTypeOptions = machineTypeList.map(item => item.machineType);
+    const defaultSelected =
+      machineTypeOptions.find(option => {
+        if (option.value === DEFAULT_MACHINE_TYPE[0].value) {
+          return option.value;
+        }
+      });
+    setValue('machineType', defaultSelected?.value ?? '1');
+  }, [machineTypeList, setValue]);
+
   return (
     <div>
+      <div className="create-scheduler-form-element">
+        <FormInputDropdown
+          name="region" // Matches schema
+          control={control}
+          label="Region*"
+          options={VERTEX_REGIONS}
+          customClass="create-scheduler-style"
+        />
+      </div>
+
       <div className="create-scheduler-form-element">
         <FormInputDropdown
           name="machineType" // Matches schema
           control={control}
           label="Machine Type*"
-          options={DEFAULT_MACHINE_TYPE}
+          options={machineTypeList?.map(item => item.machineType)}
           customClass="create-scheduler-style"
         />
       </div>
@@ -83,7 +154,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           name="kernelName" // *** CORRECTED: Changed from "kernel" to "kernelName" to match Zod schema ***
           control={control}
           label="Kernel*"
-          options={DEFAULT_MACHINE_TYPE}
+          options={KERNEL_VALUE}
           customClass="create-scheduler-style"
         />
       </div>

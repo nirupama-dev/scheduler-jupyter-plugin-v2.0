@@ -19,29 +19,37 @@ import { requestAPI } from '../../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import path from 'path';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { ILabelValue } from '../../interfaces/VertexInterface';
 
 export class StorageServices {
   static readonly cloudStorageAPIService = (
-    setCloudStorageList: (value: string[]) => void,
-    setCloudStorageLoading: (value: boolean) => void,
-    setErrorMessageBucket: (value: string) => void
+    setCloudStorageList: (value: ILabelValue<string>[]) => void
+    // setCloudStorageLoading: (value: boolean) => void,
+    // setErrorMessageBucket: (value: string) => void
   ) => {
-    setCloudStorageLoading(true);
+    // setCloudStorageLoading(true);
     requestAPI('api/storage/listBucket')
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
-          setCloudStorageList(formattedResponse);
+          const cloudStorageBucketList: ILabelValue<string>[] =
+            formattedResponse.map((bucket: string) => {
+              return {
+                label: bucket,
+                value: bucket
+              };
+            });
+          setCloudStorageList(cloudStorageBucketList);
         } else if (formattedResponse.error) {
-          setErrorMessageBucket(formattedResponse.error);
+          // setErrorMessageBucket(formattedResponse.error);
           setCloudStorageList([]);
         } else {
           setCloudStorageList([]);
         }
-        setCloudStorageLoading(false);
+        // setCloudStorageLoading(false);
       })
       .catch(error => {
         setCloudStorageList([]);
-        setCloudStorageLoading(false);
+        // setCloudStorageLoading(false);
         SchedulerLoggingService.log(
           `Error listing cloud storage bucket : ${error}`,
           LOG_LEVEL.ERROR
