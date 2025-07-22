@@ -60,7 +60,9 @@ export const CreateNotebookSchedule = () => {
     watch,
     formState: { errors },
     reset,
-    setValue
+    setValue,
+    getValues,
+    trigger
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
     defaultValues: schedulerFormValues,
@@ -202,49 +204,52 @@ export const CreateNotebookSchedule = () => {
               />
             </div>
           </div>
-        </div>
-        <div className="create-scheduler-form-element">
-          <FormInputRadio
-            name="schedulerSelection"
-            control={control}
-            className="schedule-radio-btn"
-            options={SCHEDULER_OPTIONS}
-            error={errors.schedulerSelection}
-          />
-        </div>
-        {/* Conditionally render specific scheduler components */}
-        {schedulerSelection === 'vertex' && (
-          <CreateVertexSchedule
-            control={control}
-            errors={errors}
-            setValue={setValue}
-            watch={watch}
-          />
-        )}
-        {schedulerSelection === 'composer' && (
-          <CreateComposerSchedule
-            control={control}
-            errors={errors}
-            setValue={setValue}
-            watch={watch}
-          />
-        )}
-        <div className="save-overlay">
-          <Button
-            variant="contained"
-            aria-label="Create Schedule"
-            type="submit"
-          >
-            <div>CREATE</div>
-          </Button>
-          <Button
-            variant="outlined"
-            aria-label="cancel Batch"
-            type="button"
-            onClick={handleCancel}
-          >
-            <div>CANCEL</div>
-          </Button>
+
+          <div className="create-scheduler-form-element">
+            <FormInputRadio
+              name="schedulerSelection"
+              control={control}
+              className="schedule-radio-btn"
+              options={SCHEDULER_OPTIONS}
+              error={errors.schedulerSelection}
+            />
+          </div>
+          {/* Conditionally render specific scheduler components */}
+          {schedulerSelection === 'vertex' && (
+            <CreateVertexSchedule
+              control={control}
+              errors={errors}
+              setValue={setValue}
+              watch={watch}
+              getValues={getValues}
+              trigger={trigger}
+            />
+          )}
+          {schedulerSelection === 'composer' && (
+            <CreateComposerSchedule
+              control={control}
+              errors={errors}
+              setValue={setValue}
+              watch={watch}
+            />
+          )}
+          <div className="save-overlay">
+            <Button
+              variant="contained"
+              aria-label="Create Schedule"
+              type="submit"
+            >
+              <div>CREATE</div>
+            </Button>
+            <Button
+              variant="outlined"
+              aria-label="cancel Batch"
+              type="button"
+              onClick={handleCancel}
+            >
+              <div>CANCEL</div>
+            </Button>
+          </div>
         </div>
       </form>
     </div>

@@ -17,7 +17,14 @@
 
 import dayjs from 'dayjs';
 import { scheduleMode } from '../utils/Constants';
-import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import {
+  Control,
+  FieldErrors,
+  UseFormGetValues,
+  UseFormSetValue,
+  UseFormTrigger,
+  UseFormWatch
+} from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 
 export interface ICreateVertexSchedulerProps {
@@ -25,6 +32,8 @@ export interface ICreateVertexSchedulerProps {
   errors: FieldErrors<CombinedCreateFormValues>;
   watch: UseFormWatch<CombinedCreateFormValues>;
   setValue: UseFormSetValue<CombinedCreateFormValues>;
+  getValues: UseFormGetValues<CombinedCreateFormValues>;
+  trigger: UseFormTrigger<CombinedCreateFormValues>
 }
 /*
  * Interface for the payload sent from the Create Vertex Scheduler form to the create API.
@@ -53,16 +62,17 @@ export interface IVertexSchedulePayload {
 }
 
 export interface IMachineType {
-  machineType: {label:string, value: string};
+  machineType: { label: string; value: string };
   acceleratorConfigs: IAcceleratorConfig[];
 }
-
-export interface IAcceleratorConfig {
-  acceleratorType: {label: string, value: string};
-  allowedCounts: {label: number, value: number}[];
+export interface IAllowedCounts {
+  label: number;
+  value: number;
 }
-
-
+export interface IAcceleratorConfig {
+  acceleratorType: { label: string; value: string };
+  allowedCounts: IAllowedCounts[];
+}
 export interface ILabelValue<T> {
   label: T;
   value: T;
@@ -174,4 +184,9 @@ export interface IFormattedResponse {
   schedules?: IVertexScheduleList[];
   nextPageToken?: string;
   error?: { code: number; message: string };
+}
+
+export interface ILoadingStateVertex {
+  region: boolean;
+  machineType: boolean;
 }

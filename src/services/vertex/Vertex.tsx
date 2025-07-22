@@ -27,7 +27,8 @@ import {
   ISchedulerData,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
-  IFormattedResponse
+  IFormattedResponse,
+  ILoadingStateVertex
 } from '../../interfaces/VertexInterface';
 import dayjs, { Dayjs } from 'dayjs';
 import {
@@ -49,12 +50,14 @@ export class VertexServices {
   static readonly machineTypeAPIService = (
     region: string,
     setMachineTypeList: (value: IMachineType[]) => void,
+    setLoadingState: React.Dispatch<React.SetStateAction<ILoadingStateVertex>>,
     // setMachineTypeLoading: (value: boolean) => void,
     // setIsApiError: (value: boolean) => void,
     // setApiError: (value: string) => void,
     // setApiEnableUrl: any
   ) => {
     // setMachineTypeLoading(true);
+    setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: true }));
     requestAPI(`api/vertex/uiConfig?region_id=${region}`)
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
@@ -90,10 +93,12 @@ export class VertexServices {
           setMachineTypeList([]);
         }
         // setMachineTypeLoading(false);
+        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
       })
       .catch(error => {
         setMachineTypeList([]);
         // setMachineTypeLoading(false);
+        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
         SchedulerLoggingService.log(
           `Error listing machine type list: ${error}`,
           LOG_LEVEL.ERROR
