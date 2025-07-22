@@ -221,7 +221,6 @@ export class SchedulerService {
           })
         );
         environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
-        console.log('Environment options:', environmentOptions);
         setEnvOptions(environmentOptions);
       }
     } catch (error) {

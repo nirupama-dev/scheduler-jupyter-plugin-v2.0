@@ -97,22 +97,15 @@ export const AddParameters: FC<AddParametersProps> = ({ control, errors }) => {
   return (
     <Box
       sx={{
-        p: 2,
-        // border: '1px solid #e0e0e0',
-        // borderRadius: '8px',
         mt: 3,
-        mb: 2
+        mb: 2,
+        width: '512px',
+        boxSizing: 'border-box'
       }}
     >
       <Typography variant="h6" gutterBottom>
         Parameters
       </Typography>
-
-      {/* {fields.length === 0 && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Click "Add Parameter" to define custom key-value pairs.
-        </Typography>
-      )} */}
 
       {fields.map((item, index) => (
         <Box
@@ -121,7 +114,7 @@ export const AddParameters: FC<AddParametersProps> = ({ control, errors }) => {
         >
           {/* Key Input Field */}
           <TextField
-            {...control.register(`parameters.${index}.key` as const)} // Type assertion for react-hook-form
+            {...control.register(`parameters.${index}.key` as const)}
             label="Key"
             variant="outlined"
             size="small"
@@ -135,7 +128,7 @@ export const AddParameters: FC<AddParametersProps> = ({ control, errors }) => {
 
           {/* Value Input Field */}
           <TextField
-            {...control.register(`parameters.${index}.value` as const)} // Type assertion
+            {...control.register(`parameters.${index}.value` as const)}
             label="Value"
             variant="outlined"
             size="small"
@@ -160,9 +153,9 @@ export const AddParameters: FC<AddParametersProps> = ({ control, errors }) => {
 
       {/* Add Parameter Button */}
       <Button
-        variant="contained"
+        variant="outlined"
         startIcon={<AddCircleOutlineIcon />}
-        onClick={() => append({ key: '', value: '' } as Parameter)} // Append a new empty parameter
+        onClick={() => append({ key: '', value: '' } as Parameter)}
         disabled={isAddButtonDisabled}
         sx={{ mt: 1 }}
       >

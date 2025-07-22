@@ -156,7 +156,6 @@ export const CreateComposerSchedule: React.FC<
   // Handle Region change: Clear Environment
   const handleRegionChange = useCallback(
     (value: string) => {
-      console.log('Region changed to:', value);
       setValue('region', value);
       setEnvOptions([]);
     },
