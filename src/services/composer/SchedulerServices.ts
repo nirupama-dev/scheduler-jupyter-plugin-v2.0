@@ -29,6 +29,7 @@ import {
   IComposerSchedulePayload,
   IDagList,
   IDagRunList,
+  ILoadingStateComposer,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse
 } from '../../interfaces/ComposerInterface';
@@ -177,10 +178,12 @@ export class SchedulerService {
     setEnvOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     projectId: string,
     region: string,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>,
     enableAbort?: boolean | undefined | null,
     abortControllers?: any
   ) => {
     try {
+      setLoadingState(prev => ({ ...prev, environment: true }));
       let formattedResponse: any;
       if (enableAbort) {
         // setting controller to abort pending api call
@@ -213,7 +216,6 @@ export class SchedulerService {
           );
         }
       } else {
-        console.log(formattedResponse);
         const environmentOptions: DropdownOption[] = formattedResponse.map(
           (env: IComposerEnvAPIResponse) => ({
             label: env.label,
@@ -222,8 +224,10 @@ export class SchedulerService {
         );
         environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
         setEnvOptions(environmentOptions);
+        setLoadingState(prev => ({ ...prev, environment: false }));
       }
     } catch (error) {
+      setLoadingState(prev => ({ ...prev, environment: false }));
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&

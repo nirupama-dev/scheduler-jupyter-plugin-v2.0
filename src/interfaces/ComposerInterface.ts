@@ -105,3 +105,9 @@ export interface IDagRunList {
 export interface IExpandableToastProps extends ToastOptions {
   message: string;
 }
+
+export interface ILoadingStateComposer {
+  projectId: boolean;
+  region: boolean;
+  environment: boolean;
+}

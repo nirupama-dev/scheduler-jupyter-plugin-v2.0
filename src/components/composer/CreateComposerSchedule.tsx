@@ -28,7 +28,10 @@ import { SchedulerService } from '../../services/composer/SchedulerServices';
 import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
-import { ICreateComposerSchedulerProps } from '../../interfaces/ComposerInterface';
+import {
+  ICreateComposerSchedulerProps,
+  ILoadingStateComposer
+} from '../../interfaces/ComposerInterface';
 import {
   EXECUTION_MODE_OPTIONS,
   SCHEDULE_MODE_OPTIONS
@@ -46,6 +49,12 @@ export const CreateComposerSchedule: React.FC<
     []
   );
   const [emailList, setEmailList] = useState<string[]>([]);
+  const [loadingState, setLoadingState] = useState<ILoadingStateComposer>({
+    projectId: false,
+    region: false,
+    environment: false
+    // ... initialize other mandatory properties
+  });
 
   const timezones = Object.keys(tzdata.zones).sort();
   const timeZoneOptions: DropdownOption[] = timezones.map(zone => ({
@@ -68,11 +77,13 @@ export const CreateComposerSchedule: React.FC<
   useEffect(() => {
     const loadInitialCredentials = async () => {
       try {
+        setLoadingState(prev => ({ ...prev, projectId: true }));
         const credentials = await authApi();
         if (credentials?.project_id) {
           setValue('projectId', credentials.project_id);
           // Region will be handled by the subsequent useEffect and state updates.
         }
+        setLoadingState(prev => ({ ...prev, projectId: false }));
       } catch (error) {
         console.error('Failed to load initial auth credentials:', error);
         handleErrorToast({
@@ -86,7 +97,11 @@ export const CreateComposerSchedule: React.FC<
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
     if (selectedProjectId) {
-      ComputeServices.regionAPIService(selectedProjectId, setRegionOptions);
+      ComputeServices.regionAPIService(
+        selectedProjectId,
+        setRegionOptions,
+        setLoadingState
+      );
     } else {
       setRegionOptions([]); // Clear regions if no project is selected
     }
@@ -122,7 +137,8 @@ export const CreateComposerSchedule: React.FC<
       SchedulerService.listComposersAPIService(
         setEnvOptions,
         selectedProjectId,
-        selectedRegion
+        selectedRegion,
+        setLoadingState
       );
     } else {
       setEnvOptions([]);
@@ -178,7 +194,7 @@ export const CreateComposerSchedule: React.FC<
   };
 
   return (
-    <div className="common-fields">
+    <div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
           name="projectId"
@@ -186,8 +202,10 @@ export const CreateComposerSchedule: React.FC<
           control={control}
           setValue={setValue}
           options={[{ label: selectedProjectId, value: selectedProjectId }]}
+          loading={loadingState.projectId}
           customClass="create-scheduler-style"
           onChangeCallback={handleProjectIdChange}
+          disabled={true}
           // error={errors}
         />
       </div>
@@ -198,6 +216,7 @@ export const CreateComposerSchedule: React.FC<
           control={control}
           setValue={setValue}
           options={regionOptions}
+          loading={loadingState.region}
           customClass="create-scheduler-style"
           onChangeCallback={handleRegionChange}
           error={errors.region}
@@ -210,6 +229,7 @@ export const CreateComposerSchedule: React.FC<
           control={control}
           setValue={setValue}
           options={envOptions}
+          loading={loadingState.environment}
           customClass="create-scheduler-style"
           // error={errors.environment}
         />

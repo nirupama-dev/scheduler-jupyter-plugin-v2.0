@@ -20,6 +20,7 @@ import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { Dispatch, SetStateAction } from 'react';
+import { ILoadingStateComposer } from '../../interfaces/ComposerInterface';
 
 export class ComputeServices {
   static readonly getParentProjectAPIService = async (
@@ -167,8 +168,10 @@ export class ComputeServices {
 
   static readonly regionAPIService = (
     projectId: string,
-    setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>
+    setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>
   ) => {
+    setLoadingState(prev => ({ ...prev, region: true }));
     requestAPI(`api/compute/region?project_id=${projectId}`)
       .then((formattedResponse: any) => {
         console.log('Formatted response:', formattedResponse);
@@ -181,8 +184,10 @@ export class ComputeServices {
         } else {
           setRegionOptions([]);
         }
+        setLoadingState(prev => ({ ...prev, region: false }));
       })
       .catch(error => {
+        setLoadingState(prev => ({ ...prev, region: false }));
         const errorResponse = `Failed to fetch region list : ${error}`;
         handleErrorToast({
           error: errorResponse

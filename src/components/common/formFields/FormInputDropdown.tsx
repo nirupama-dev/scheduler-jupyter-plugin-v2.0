@@ -36,6 +36,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   onChangeCallback,
   error,
   loading = false, // Default to false
+  disabled = false, // Default to false
   // onSearchInputChange,
   // freeSolo = false, // Default to false
   // placeholder = '',
@@ -49,6 +50,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
           <Autocomplete
             {...fieldProps}
             options={options}
+            disabled={disabled}
             getOptionLabel={(option) => option.label} // How to get the label from an option object
             // isOptionEqualToValue={(option, val) => option.value === val} // Essential for matching selected value
             value={options.find(option => option.value === value) || null} // Set value based on full option object
