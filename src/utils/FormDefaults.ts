@@ -40,7 +40,7 @@ const getDefaultVertexValues = (): VertexSchedulerFormValues => ({
   inputFile: '',
   machineType: '',
   kernelName: '',
-  region: '',
+  vertexRegion: '',
   cloudStorageBucket: '',
   serviceAccount: '',
   network: '',
@@ -76,7 +76,7 @@ const getDefaultComposerValues = (): ComposerSchedulerFormValues => ({
   jobName: '',
   inputFile: '',
   projectId: '',
-  region: '',
+  composerRegion: '',
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
   retryDelay: 5, // Matches Zod's default

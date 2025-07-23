@@ -62,7 +62,8 @@ export const CreateNotebookSchedule = () => {
     reset,
     setValue,
     getValues,
-    trigger
+    trigger,
+    setError
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
     defaultValues: schedulerFormValues,
@@ -109,7 +110,7 @@ export const CreateNotebookSchedule = () => {
         display_name: data.jobName,
         machine_type: vertexData.machineType,
         kernel_name: vertexData.kernelName,
-        region: vertexData.region,
+        region: vertexData.vertexRegion,
         cloud_storage_bucket: vertexData.cloudStorageBucket,
         service_account: vertexData.serviceAccount,
         network_option: vertexData.networkOption,
@@ -137,7 +138,7 @@ export const CreateNotebookSchedule = () => {
         job_name: composerData.jobName,
         input_filename: composerData.inputFile,
         project_id: composerData.projectId,
-        region: composerData.region,
+        region: composerData.composerRegion,
         composer_environment_name: composerData.environment,
         retry_count: composerData.retryCount,
         retry_delay: composerData.retryDelay,
@@ -152,7 +153,8 @@ export const CreateNotebookSchedule = () => {
         dag_id: composerData.dagId ? composerData.dagId : '', // Assuming this is part of the form data
         parameters: [], // Ensure this is an array
         execution_mode: composerData.executionMode || 'local', // Default to 'local' if not set
-        stop_cluster: false
+        stop_cluster: false,
+        packages_to_install: []
       };
       console.log('Composer Payload:', composerPayload);
       // TODO: Call your Composer API here with composerPayload
@@ -231,6 +233,7 @@ export const CreateNotebookSchedule = () => {
               errors={errors}
               setValue={setValue}
               watch={watch}
+              setError={setError}
             />
           )}
           <div className="save-overlay">

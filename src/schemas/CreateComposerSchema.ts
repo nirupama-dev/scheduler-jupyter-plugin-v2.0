@@ -33,7 +33,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   schedulerSelection: z.literal('composer'), // Discriminator property
   dagId: z.string().optional(),
   projectId: z.string().min(1, 'Project ID is required'),
-  region: z.string().min(1, 'Region is required'),
+  composerRegion: z.string().min(1, 'Region is required'),
   environment: z.string().min(1, 'Environment is required'),
   executionMode: z.enum(['serverless', 'cluster', 'local']).optional(),
   retryCount: z.preprocess(
