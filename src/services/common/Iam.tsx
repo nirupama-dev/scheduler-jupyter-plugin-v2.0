@@ -14,15 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import { Dispatch, SetStateAction } from 'react';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { requestAPI } from '../../handler/Handler';
+import { ILabelValue } from '../../interfaces/CommonInterface';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 
 export class IamServices {
   static readonly serviceAccountAPIService = (
-    setServiceAccountList: (
-      value: {displayName: string, email: string}[]
-    ) => void,
+    setServiceAccountList: Dispatch<SetStateAction<ILabelValue<string>[]>>,
     // setServiceAccountLoading: (value: boolean) => void,
     // setErrorMessage: (value: string) => void
   ) => {
@@ -31,8 +31,8 @@ export class IamServices {
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
           const serviceAccountList = formattedResponse.map((account: any) => ({
-            displayName: account.displayName,
-            email: account.email
+            label: account.displayName,
+            value: account.email
           }));
           serviceAccountList.sort();
           setServiceAccountList(serviceAccountList);

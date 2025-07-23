@@ -17,8 +17,7 @@
 
 import { Control, FieldError, Path } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
-// import { ILabelValue } from './CommonInterface';
-// import { IServiceAccount } from './VertexInterface';
+import { ILabelValue } from './CommonInterface';
 
 export interface FormInputProps {
   name: Path<CombinedCreateFormValues>;
@@ -30,6 +29,7 @@ export interface FormInputProps {
   error?: FieldError;
   [key: string]: any; // Allow additional props
   type?: string;
+  hostProject?: any;
 }
 
 export interface IFormInput {
@@ -47,10 +47,10 @@ export interface DropdownOption {
   value: string;
 }
 
-export interface FormInputDropdownProps {
+export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
-  options: Array<{ label: string; value: string }> | [] ;
+  options: Array<{ label: string; value: string }> | [];
   label?: string;
   setValue?: any;
   className?: string;
@@ -59,6 +59,9 @@ export interface FormInputDropdownProps {
   onChangeCallback?: (value: any) => void;
   loading?: boolean;
   filterOptions?: any;
+  getOptionLabel?: any;
+  isOptionEqualToValue?: (option: OptionType, value: string | null | undefined) => boolean;
+  getOptionValue?: any;
 }
 
 // Define the shape of a single option

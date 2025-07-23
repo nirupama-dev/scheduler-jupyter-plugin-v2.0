@@ -47,7 +47,7 @@ export interface IVertexSchedulePayload {
   region: string;
   cloud_storage_bucket: string;
   service_account: string;
-  network_option?: 'networkInThisProject' | 'networkShared';
+  network_option?: string;
   network: string;
   subnetwork: string;
   disk_type: string;
@@ -192,4 +192,9 @@ export interface ILoadingStateVertex {
 export interface IServiceAccount {
   displayName: string;
   email: string;
+}
+
+export interface INetworkVertex {
+  name: string;
+  link: string;
 }

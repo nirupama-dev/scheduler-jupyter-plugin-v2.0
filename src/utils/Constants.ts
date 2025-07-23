@@ -55,7 +55,7 @@ export const SCHEDULER_OPTIONS = [
     value: 'composer'
   }
 ];
-export const DEFAULT_SCHEDULER_SELECTED = 'composer';
+export const DEFAULT_SCHEDULER_SELECTED = 'vertex';
 
 export const NETWORK_CONFIGURATION_LABEL = 'Network Configuration';
 
@@ -72,6 +72,9 @@ export const NETWORK_OPTIONS = [
     value: 'networkSharedFromHostProject'
   }
 ];
+export const DEFAULT_NETWORK_SELECTED = 'networkInThisProject';
+
+export const DEFAULT_HOST_PROJECT_NETWORK = 'networkSharedFromHostProject';
 
 export const SHARED_NETWORK_DOC_URL =
   'https://cloud.google.com/vpc/docs/shared-vpc';
@@ -93,11 +96,11 @@ export const SCHEDULE_MODE_OPTIONS = [
 export const RUN_ON_SCHEDULE_OPTIONS = [
   {
     label: 'Use UNIX cron format',
-    value: 'useUnixCronFormat'
+    value: 'cronFormat'
   },
   {
     label: 'Use user-friendly scheduler',
-    value: 'useUserFriendlyScheduler'
+    value: 'userFriendly'
   }
 ];
 
@@ -174,7 +177,7 @@ export const VERTEX_REGIONS = [
 export const DEFAULT_MACHINE_TYPE = [
   {
     label: 'n1-standard-2 (2 CPUs, 8.05 GB RAM)',
-    value: 'n1-standard-2 (2 CPUs, 8.05 GB RAM)'
+    value: 'n1-standard-2'
   }
 ];
 

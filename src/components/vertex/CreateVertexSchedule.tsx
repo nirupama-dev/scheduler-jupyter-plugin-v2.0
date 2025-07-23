@@ -24,6 +24,7 @@ import {
   DEFAULT_DISK_MIN_SIZE,
   DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
+  DEFAULT_NETWORK_SELECTED,
   DISK_TYPE_VALUE,
   KERNEL_VALUE,
   NETWORK_CONFIGURATION_LABEL,
@@ -47,7 +48,7 @@ import {
   IAcceleratorConfig,
   ICreateVertexSchedulerProps,
   ILoadingStateVertex,
-  IMachineType,
+  IMachineType
   // IServiceAccount
 } from '../../interfaces/VertexInterface';
 import { authApi } from '../common/login/Config';
@@ -57,8 +58,10 @@ import { FieldErrors } from 'react-hook-form';
 import { createVertexSchema } from '../../schemas/CreateVertexSchema';
 import z from 'zod';
 import { StorageServices } from '../../services/common/Storage';
-// import { IamServices } from '../../services/common/Iam';
+import { IamServices } from '../../services/common/Iam';
 import { ILabelValue } from '../../interfaces/CommonInterface';
+import { ComputeServices } from '../../services/common/Compute';
+import tzdata from 'tzdata';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -79,9 +82,24 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     ILabelValue<string>[]
   >([]);
   const [searchValue, setSearchValue] = useState<string>('');
-  // const [serviceAccountList, setServiceAccountList] = useState<
-  //   ILabelValue<IServiceAccount> | []
-  // >([]);
+  const [hostProject, setHostProject] = useState<any>({});
+  const [serviceAccountList, setServiceAccountList] = useState<
+    ILabelValue<string>[]
+  >([]);
+  const [primaryNetworkList, setPrimaryNetworkList] = useState<
+    ILabelValue<string>[]
+  >([]);
+
+  const timezones = Object.keys(tzdata.zones)
+    .sort()
+    .map(zones => ({
+      label: zones,
+      value: zones
+    }));
+
+  const [subNetworkList, setSubNetworkList] = useState<ILabelValue<string>[]>(
+    []
+  );
 
   const region = watch('region');
   const machineType = watch('machineType');
@@ -89,6 +107,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const schedulerSelection = watch('schedulerSelection');
   const cloudStorageBucket = watch('cloudStorageBucket');
   const diskSize = watch('diskSize');
+  const networkSelected = watch('networkOption');
+  const scheduleMode = watch('scheduleMode');
+  const internalScheduleMode = watch('internalScheduleMode');
+  const primaryNetwork = watch('primaryNetworkSelected');
 
   // Use a type guard to narrow down the 'errors' object's type
   // because of discrimation need to use this approach for getting machine type error from zod
@@ -158,12 +180,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     );
     // If no exact match is found, add the option to create a new bucket
     if (!exactMatch && inputValue !== '') {
-      filteredOptions.push({label: `Create and Select "${state.inputValue}"`, value: `Create and Select "${state.inputValue}"`});
+      filteredOptions.push({
+        label: `Create and Select "${state.inputValue}"`,
+        value: `Create and Select "${state.inputValue}"`
+      });
     }
 
     return filteredOptions;
   };
-
 
   /**
    * Hosts the cloud storage API service
@@ -182,7 +206,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const newCloudStorageAPI = () => {
     StorageServices.newCloudStorageAPIService(
       searchValue,
-      setLoadingState,
+      setLoadingState
       // setBucketError
     );
   };
@@ -251,18 +275,51 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   /**
    * Hosts the service account API service
    */
-  // const serviceAccountAPI = () => {
-  //   IamServices.serviceAccountAPIService(
-  //     setServiceAccountList,
-  //     // setServiceAccountLoading,
-  //     // setErrorMessageServiceAccount
-  //   );
-  // };
+  const serviceAccountAPI = () => {
+    IamServices.serviceAccountAPIService(
+      setServiceAccountList
+      // setServiceAccountLoading,
+      // setErrorMessageServiceAccount
+    );
+  };
+
+  /**
+   * Hosts the parent project API service
+   */
+  const hostProjectAPI = async () => {
+    await ComputeServices.getParentProjectAPIService(setHostProject);
+  };
+
+  /**
+   * Hosts the primary network API service
+   */
+  const primaryNetworkAPI = () => {
+    ComputeServices.primaryNetworkAPIService(
+      setPrimaryNetworkList
+      // setPrimaryNetworkLoading,
+      // setErrorMessagePrimaryNetwork
+    );
+  };
+
+  /**
+   * Hosts the sub network API service based on the primary network
+   */
+  const subNetworkAPI = (primaryNetwork: string | undefined) => {
+    ComputeServices.subNetworkAPIService(
+      region,
+      primaryNetwork,
+      setSubNetworkList
+      // setSubNetworkLoading,
+      // setErrorMessageSubnetworkNetwork
+    );
+  };
 
   useEffect(() => {
     setLoadingState(prev => ({ ...prev, region: true }));
+    hostProjectAPI();
     cloudStorageAPI();
-    // serviceAccountAPI();
+    serviceAccountAPI();
+    primaryNetworkAPI();
     authApi()
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
@@ -275,8 +332,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           error: error
         });
       });
-
-      setValue('diskSize', DEFAULT_DISK_SIZE);
   }, [setValue]);
 
   useEffect(() => {
@@ -285,14 +340,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       setValue('machineType', '');
     } else {
       machineTypeAPI();
-      // subNetworkAPI(primaryNetworkSelected?.name);
+      subNetworkAPI(primaryNetwork);
     }
   }, [region]);
 
   useEffect(() => {
     handleCloudStorageSelected();
     setSearchValue(cloudStorageBucket);
-  }, [cloudStorageBucket])
+  }, [cloudStorageBucket]);
 
   useEffect(() => {
     const machineTypeOptions = machineTypeList.map(item => item.machineType);
@@ -305,18 +360,17 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, [machineTypeList, setValue]);
 
   useEffect(() => {
-      if (
-        Number(diskSize) >= DEFAULT_DISK_MIN_SIZE &&
-        Number(diskSize) <= DEFAULT_DISK_MAX_SIZE
-      ) {
-        // setDiskSizeFlag(false);
-      } else {
-        // setDiskSizeFlag(true);
-      }
-    }, [diskSize]);
+    if (
+      Number(diskSize) >= DEFAULT_DISK_MIN_SIZE &&
+      Number(diskSize) <= DEFAULT_DISK_MAX_SIZE
+    ) {
+      // setDiskSizeFlag(false);
+    } else {
+      // setDiskSizeFlag(true);
+    }
+  }, [diskSize]);
 
   return (
-    console.log('search value', searchValue, "cloudStorageBucket", cloudStorageBucket),
     <div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
@@ -428,17 +482,21 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           />
         </div>
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-          <FormInputText label="Disk size*" control={control} name="diskSize" onBlurCallback={handleDefaultDiskSize}/>{' '}
-          {/* Matches schema */}
+          <FormInputText
+            label="Disk size*"
+            control={control}
+            name="diskSize"
+            onBlurCallback={handleDefaultDiskSize}
+          />{' '}
         </div>
       </div>
 
       <div className="create-scheduler-form-element panel-margin footer-text">
         <FormInputDropdown
-          name="serviceAccount" // Matches schema
+          name="serviceAccount"
           control={control}
           label="Service account*"
-          options={DEFAULT_MACHINE_TYPE}
+          options={serviceAccountList}
         />
       </div>
 
@@ -450,47 +508,51 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
       <div className="create-scheduler-form-element panel-margin">
         <FormInputRadio
-          name="networkOption" // Matches schema
+          name="networkOption"
           control={control}
           className="network-layout"
           options={NETWORK_OPTIONS}
+          hostProject={hostProject}
         />
       </div>
 
       {/* Network in this project */}
-      {/* Assuming 'network' and 'subnetwork' from schema are the correct fields for these dropdowns */}
-      <div className="execution-history-main-wrapper">
-        <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-          <FormInputDropdown
-            name="network" // *** CORRECTED: Assuming "network" from schema, adjust if "primaryNetworkSelected" is intended ***
-            control={control}
-            label="Primary network*"
-            customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-            options={DEFAULT_MACHINE_TYPE}
-          />
-        </div>
+      {networkSelected == DEFAULT_NETWORK_SELECTED ? (
+        <div className="execution-history-main-wrapper">
+          <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+            <FormInputDropdown
+              name="network"
+              control={control}
+              label="Primary network*"
+              customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+              options={primaryNetworkList}
+            />
+          </div>
 
-        <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
-          <FormInputDropdown
-            name="subnetwork" // *** CORRECTED: Assuming "subnetwork" from schema, adjust if "subNetworkSelected" is intended ***
-            control={control}
-            label="Sub network*"
-            customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-            options={DEFAULT_MACHINE_TYPE}
-          />
+          <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
+            <FormInputDropdown
+              name="subnetwork"
+              control={control}
+              label="Sub network*"
+              customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+              options={subNetworkList}
+            />
+          </div>
         </div>
-      </div>
-
-      {/* Network shared from host project */}
-      <div className="create-scheduler-form-element">
-        <FormInputDropdown
-          name="sharedNetworkSelected" // *** CORRECTED: Changed from "sharedNetwork" to "sharedNetworkSelected" to match Zod schema ***
-          control={control}
-          label="Shared network*"
-          options={DEFAULT_MACHINE_TYPE}
-          customClass="create-scheduler-style"
-        />
-      </div>
+      ) : (
+        <>
+          {/* Network shared from host project */}
+          <div className="create-scheduler-form-element">
+            <FormInputDropdown
+              name="sharedNetworkSelected"
+              control={control}
+              label="Shared network*"
+              options={DEFAULT_MACHINE_TYPE}
+              customClass="create-scheduler-style"
+            />
+          </div>
+        </>
+      )}
 
       <div className="create-scheduler-label">Schedule</div>
       <div className="create-scheduler-form-element">
@@ -501,146 +563,160 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           options={SCHEDULE_MODE_OPTIONS}
         />
       </div>
-      <div className="schedule-child-section">
-        <FormInputRadio
-          name="internalScheduleMode" // Matches schema
-          control={control}
-          className="schedule-radio-btn"
-          options={RUN_ON_SCHEDULE_OPTIONS}
-        />
 
-        <div className="execution-history-main-wrapper">
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-              {/* You'll need a custom FormInput component for DateTimePicker to bind it to react-hook-form */}
-              {/* For now, just a placeholder as this doesn't directly use 'name' prop on FormInput components */}
-              <DateTimePicker
-                className="create-scheduler-style create-scheduler-form-element-input-fl"
-                label="Start Date"
-                // value={startDate}
-                // onChange={newValue => handleStartDate(newValue)}
-                slots={{
-                  openPickerIcon: CalendarMonthIcon
-                }}
-                slotProps={{
-                  actionBar: {
-                    actions: ['clear']
-                  },
-                  tabs: {
-                    hidden: true
-                  },
-                  textField: {
-                    error: false
-                  }
-                }}
-                disablePast
-                closeOnSelect={true}
-                // viewRenderers={{
-                //   hours: renderTimeViewClock,
-                //   minutes: renderTimeViewClock,
-                //   seconds: renderTimeViewClock
-                // }}
-              />
-              {/* {isPastStartDate && (
+      <div className="schedule-child-section">
+        {scheduleMode === SCHEDULE_MODE_OPTIONS[1].value && (
+          <>
+            <FormInputRadio
+              name="internalScheduleMode" // Matches schema
+              control={control}
+              className="schedule-radio-btn"
+              options={RUN_ON_SCHEDULE_OPTIONS}
+            />
+
+            <div className="execution-history-main-wrapper">
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                  {/* You'll need a custom FormInput component for DateTimePicker to bind it to react-hook-form */}
+                  {/* For now, just a placeholder as this doesn't directly use 'name' prop on FormInput components */}
+                  <DateTimePicker
+                    className="create-scheduler-style create-scheduler-form-element-input-fl"
+                    label="Start Date"
+                    // value={startDate}
+                    // onChange={newValue => handleStartDate(newValue)}
+                    slots={{
+                      openPickerIcon: CalendarMonthIcon
+                    }}
+                    slotProps={{
+                      actionBar: {
+                        actions: ['clear']
+                      },
+                      tabs: {
+                        hidden: true
+                      },
+                      textField: {
+                        error: false
+                      }
+                    }}
+                    disablePast
+                    closeOnSelect={true}
+                    // viewRenderers={{
+                    //   hours: renderTimeViewClock,
+                    //   minutes: renderTimeViewClock,
+                    //   seconds: renderTimeViewClock
+                    // }}
+                  />
+                  {/* {isPastStartDate && (
                       <ErrorMessage
                         message="Start date should be greater than current date"
                         showIcon={false}
                       />
                     )} */}
-            </div>
-            <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-              {/* You'll need a custom FormInput component for DateTimePicker to bind it to react-hook-form */}
-              <DateTimePicker
-                className="create-scheduler-style create-scheduler-form-element-input-fl"
-                label="End Date"
-                // value={endDate}
-                // onChange={newValue => handleEndDate(newValue)}
-                slots={{
-                  openPickerIcon: CalendarMonthIcon
-                }}
-                slotProps={{
-                  actionBar: {
-                    actions: ['clear']
-                  },
-                  field: { clearable: true },
-                  tabs: {
-                    hidden: true
-                  },
-                  textField: {
-                    error: false
-                  }
-                }}
-                disablePast
-                closeOnSelect={true}
-                // viewRenderers={{
-                //   hours: renderTimeViewClock,
-                //   minutes: renderTimeViewClock,
-                //   seconds: renderTimeViewClock
-                // }}
-              />
-              {/* {endDateError && (
+                </div>
+                <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                  {/* You'll need a custom FormInput component for DateTimePicker to bind it to react-hook-form */}
+                  <DateTimePicker
+                    className="create-scheduler-style create-scheduler-form-element-input-fl"
+                    label="End Date"
+                    // value={endDate}
+                    // onChange={newValue => handleEndDate(newValue)}
+                    slots={{
+                      openPickerIcon: CalendarMonthIcon
+                    }}
+                    slotProps={{
+                      actionBar: {
+                        actions: ['clear']
+                      },
+                      field: { clearable: true },
+                      tabs: {
+                        hidden: true
+                      },
+                      textField: {
+                        error: false
+                      }
+                    }}
+                    disablePast
+                    closeOnSelect={true}
+                    // viewRenderers={{
+                    //   hours: renderTimeViewClock,
+                    //   minutes: renderTimeViewClock,
+                    //   seconds: renderTimeViewClock
+                    // }}
+                  />
+                  {/* {endDateError && (
                       <ErrorMessage
                         message="End date should be greater than Start date"
                         showIcon={false}
                       />
                     )} */}
-              {/* {isPastEndDate && (
+                  {/* {isPastEndDate && (
                       <ErrorMessage
                         message="End date should be greater than current date"
                         showIcon={false}
                       />
                     )} */}
+                </div>
+              </LocalizationProvider>
             </div>
-          </LocalizationProvider>
-        </div>
+          </>
+        )}
 
-        {/* Schedule Input */}
-        <div className="create-scheduler-form-element schedule-input-field">
-          <FormInputText
-            label="Schedule*"
-            control={control}
-            name="scheduleValue"
-          />
-        </div>
-        <div>
-          <span className="tab-description tab-text-sub-cl">
-            {SCHEDULE_FORMAT_DESCRIPTION}
-          </span>
-          <div className="learn-more-url">
-            <LearnMore path={CORN_EXP_DOC_URL} />
-          </div>
-        </div>
+        {scheduleMode === SCHEDULE_MODE_OPTIONS[1].value &&
+          internalScheduleMode === RUN_ON_SCHEDULE_OPTIONS[0].value && (
+            <>
+              {/* Schedule Input */}
+              <div className="create-scheduler-form-element schedule-input-field">
+                <FormInputText
+                  label="Schedule*"
+                  control={control}
+                  name="scheduleValue"
+                />
+              </div>
+              <div>
+                <span className="tab-description tab-text-sub-cl">
+                  {SCHEDULE_FORMAT_DESCRIPTION}
+                </span>
+                <div className="learn-more-url">
+                  <LearnMore path={CORN_EXP_DOC_URL} />
+                </div>
+              </div>
+            </>
+          )}
 
-        {/* cron input - This component is not a react-hook-form managed input, so it won't directly use the `name` prop here.
-            You'd likely manage its value and update the form state (e.g., `setValue('scheduleValue', cronValue)`) manually. */}
-        <div className="create-scheduler-form-element">
-          <Cron
-            // value=""
-            setValue={() => {}}
-            value="0 */3 * * *"
-            // setValue={setScheduleValue}
-            allowedPeriods={allowedPeriodsCron as PeriodType[] | undefined}
-          />
-        </div>
+        {scheduleMode === SCHEDULE_MODE_OPTIONS[1].value &&
+          internalScheduleMode === RUN_ON_SCHEDULE_OPTIONS[1].value && (
+            <div className="create-scheduler-form-element">
+              <Cron
+                // value=""
+                setValue={() => {}}
+                value="0 */3 * * *"
+                // setValue={setScheduleValue}
+                allowedPeriods={allowedPeriodsCron as PeriodType[] | undefined}
+              />
+            </div>
+          )}
 
-        <div className="create-scheduler-form-element">
-          <FormInputDropdown
-            name="timeZone" // Matches schema
-            control={control}
-            label="Time Zone*"
-            options={DEFAULT_MACHINE_TYPE}
-            customClass="create-scheduler-style"
-          />
-        </div>
+        {scheduleMode === SCHEDULE_MODE_OPTIONS[1].value && (
+          <>
+            <div className="create-scheduler-form-element">
+              <FormInputDropdown
+                name="timeZone"
+                control={control}
+                label="Time Zone*"
+                options={timezones}
+                customClass="create-scheduler-style"
+              />
+            </div>
 
-        <div className="create-scheduler-form-element">
-          <FormInputText
-            label="Max runs*"
-            control={control}
-            name="maxRunCount"
-          />{' '}
-          {/* Matches schema */}
-        </div>
+            <div className="create-scheduler-form-element">
+              <FormInputText
+                label="Max runs*"
+                control={control}
+                name="maxRunCount"
+              />{' '}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

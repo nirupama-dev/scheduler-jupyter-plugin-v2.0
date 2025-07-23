@@ -27,6 +27,7 @@ import {
 import { Controller } from 'react-hook-form';
 import { FormInputProps } from '../../../interfaces/FormInterface';
 import {
+  DEFAULT_HOST_PROJECT_NETWORK,
   NETWORK_OPTIONS,
   SHARED_NETWORK_DESCRIPTION,
   SHARED_NETWORK_DOC_URL
@@ -38,7 +39,8 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
   control,
   className = '',
   options = [],
-  error
+  error,
+  hostProject
 }) => {
   const generateRadioOptions = () => {
     return options.map(singleOption => (
@@ -47,7 +49,14 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
           key={singleOption.value}
           value={singleOption.value}
           label={
-            <Typography sx={{ fontSize: 13 }}>{singleOption.label}</Typography>
+            <Typography sx={{ fontSize: 13 }}>
+              <>
+                {singleOption.label}
+                {singleOption.value === DEFAULT_HOST_PROJECT_NETWORK
+                  ? ` ${Object.keys(hostProject).length !== 0 ? `"${hostProject?.name}"` : ''}`
+                  : null}
+              </>
+            </Typography>
           }
           control={<Radio size="small" />}
           className="create-scheduler-label-style"
