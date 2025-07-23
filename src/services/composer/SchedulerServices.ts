@@ -29,6 +29,7 @@ import {
   IComposerSchedulePayload,
   IDagList,
   IDagRunList,
+  ILoadingStateComposer,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse
 } from '../../interfaces/ComposerInterface';
@@ -41,13 +42,11 @@ import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class SchedulerService {
   static readonly listClustersAPIService = async (
-    setClusterList: (value: string[]) => void,
-    setIsLoadingKernelDetail: (value: boolean) => void,
+    setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
   ) => {
     const pageToken = nextPageToken ?? '';
-    setIsLoadingKernelDetail(true);
     try {
       const serviceURL = `clusterList?pageSize=500&pageToken=${pageToken}`;
 
@@ -71,7 +70,7 @@ export class SchedulerService {
 
       if (formattedResponse.nextPageToken) {
         this.listClustersAPIService(
-          setClusterList,
+          setClusterOptions,
           formattedResponse.nextPageToken,
           allClustersData
         );
@@ -79,11 +78,13 @@ export class SchedulerService {
         const transformClusterListData = allClustersData;
 
         const keyLabelStructure = transformClusterListData.map(
-          (obj: { clusterName: string }) => obj.clusterName
+          (obj: { clusterName: string }) => ({
+            label: obj.clusterName,
+            value: obj.clusterName
+          })
         );
 
-        setClusterList(keyLabelStructure);
-        setIsLoadingKernelDetail(false);
+        setClusterOptions(keyLabelStructure);
       }
       if (formattedResponse?.error) {
         handleErrorToast({
@@ -99,8 +100,8 @@ export class SchedulerService {
     }
   };
   static readonly listSessionTemplatesAPIService = async (
-    setServerlessDataList: (value: string[]) => void,
-    setServerlessList: (value: string[]) => void,
+    // setServerlessDataList: (value: string[]) => void,
+    setServerlessOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,
     previousSessionTemplatesList?: object
@@ -136,19 +137,22 @@ export class SchedulerService {
 
       if (formattedResponse.nextPageToken) {
         this.listSessionTemplatesAPIService(
-          setServerlessDataList,
-          setServerlessList,
+          // setServerlessDataList,
+          setServerlessOptions,
           formattedResponse.nextPageToken,
           allSessionTemplatesData
         );
       } else {
         const transformSessionTemplateListData = allSessionTemplatesData;
         const keyLabelStructure = transformSessionTemplateListData.map(
-          (obj: { serverlessName: string }) => obj.serverlessName
+          (obj: { serverlessName: string }) => ({
+            label: obj.serverlessName,
+            value: obj.serverlessName
+          })
         );
 
-        setServerlessDataList(transformSessionTemplateListData);
-        setServerlessList(keyLabelStructure);
+        // setServerlessDataList(transformSessionTemplateListData);
+        setServerlessOptions(keyLabelStructure);
         if (setIsLoadingKernelDetail) {
           setIsLoadingKernelDetail(false);
         }
@@ -174,10 +178,12 @@ export class SchedulerService {
     setEnvOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     projectId: string,
     region: string,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>,
     enableAbort?: boolean | undefined | null,
     abortControllers?: any
   ) => {
     try {
+      setLoadingState(prev => ({ ...prev, environment: true }));
       let formattedResponse: any;
       if (enableAbort) {
         // setting controller to abort pending api call
@@ -210,7 +216,6 @@ export class SchedulerService {
           );
         }
       } else {
-        console.log(formattedResponse);
         const environmentOptions: DropdownOption[] = formattedResponse.map(
           (env: IComposerEnvAPIResponse) => ({
             label: env.label,
@@ -218,10 +223,11 @@ export class SchedulerService {
           })
         );
         environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
-        console.log('Environment options:', environmentOptions);
         setEnvOptions(environmentOptions);
+        setLoadingState(prev => ({ ...prev, environment: false }));
       }
     } catch (error) {
+      setLoadingState(prev => ({ ...prev, environment: false }));
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -426,11 +432,11 @@ export class SchedulerService {
         setClusterSelected(formattedResponse.cluster_name);
         setServerlessSelected(formattedResponse.serverless_name);
         if (formattedResponse.mode_selected === 'serverless') {
-          await this.listSessionTemplatesAPIService(
-            setServerlessDataList,
-            setServerlessList,
-            setIsLoadingKernelDetail
-          );
+          // await this.listSessionTemplatesAPIService(
+          //   setServerlessDataList,
+          //   setServerlessList,
+          //   setIsLoadingKernelDetail
+          // );
           if (serverlessDataList.length > 0) {
             const selectedData: any = serverlessDataList.filter(
               (serverless: any) => {

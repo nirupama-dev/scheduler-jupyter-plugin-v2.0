@@ -25,4 +25,15 @@ export const createNotebookCommonSchema = z.object({
   inputFile: z.string().min(1, 'Input File is required.'),
 });
 
+const parameterRegex = /^[\p{L}\p{N}_-]+$/u;
+
+export const parameterSchema = z.object({
+  key: z.string()
+    .min(1, "Key is required")
+    .regex(parameterRegex, "Only letters, numbers, hyphens, and underscores are allowed (international characters supported)."),
+  value: z.string()
+    .min(1, "Value is required")
+    .regex(parameterRegex, "Only letters, numbers, hyphens, and underscores are allowed (international characters supported)."),
+});
+
 export type CommonFormValues = z.infer<typeof createNotebookCommonSchema>;

@@ -63,6 +63,11 @@ export interface IPath {
   path?: string;
 }
 
+export interface Parameter {
+  key: string;
+  value: string;
+}
+
 export interface SchedulerInitialKernel {
   schedulerType: SchedulerType;
   executionMode: ExecutionMode;
