@@ -20,7 +20,11 @@ import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import {
   allowedPeriodsCron,
   CORN_EXP_DOC_URL,
+  DEFAULT_DISK_MAX_SIZE,
+  DEFAULT_DISK_MIN_SIZE,
+  DEFAULT_DISK_SIZE,
   DEFAULT_MACHINE_TYPE,
+  DISK_TYPE_VALUE,
   KERNEL_VALUE,
   NETWORK_CONFIGURATION_LABEL,
   NETWORK_CONFIGURATION_LABEL_DESCRIPTION,
@@ -38,17 +42,23 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import LearnMore from '../common/links/LearnMore';
 import Cron, { PeriodType } from 'react-js-cron';
-import 'react-js-cron/dist/styles.css'; // Adjust path if necessary
+import 'react-js-cron/dist/styles.css';
 import {
   IAcceleratorConfig,
   ICreateVertexSchedulerProps,
-  ILabelValue,
   ILoadingStateVertex,
-  IMachineType
+  IMachineType,
+  // IServiceAccount
 } from '../../interfaces/VertexInterface';
 import { authApi } from '../common/login/Config';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import { VertexServices } from '../../services/vertex/Vertex';
+import { FieldErrors } from 'react-hook-form';
+import { createVertexSchema } from '../../schemas/CreateVertexSchema';
+import z from 'zod';
+import { StorageServices } from '../../services/common/Storage';
+// import { IamServices } from '../../services/common/Iam';
+import { ILabelValue } from '../../interfaces/CommonInterface';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -61,13 +71,32 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const [machineTypeList, setMachineTypeList] = useState<IMachineType[]>([]);
   const [loadingState, setLoadingState] = useState<ILoadingStateVertex>({
     region: false,
-    machineType: false
+    machineType: false,
+    cloudStorageBucket: false
     // ... initialize other mandatory properties
   });
+  const [cloudStorageList, setCloudStorageList] = useState<
+    ILabelValue<string>[]
+  >([]);
+  const [searchValue, setSearchValue] = useState<string>('');
+  // const [serviceAccountList, setServiceAccountList] = useState<
+  //   ILabelValue<IServiceAccount> | []
+  // >([]);
 
   const region = watch('region');
   const machineType = watch('machineType');
   const acceleratorType = watch('acceleratorType');
+  const schedulerSelection = watch('schedulerSelection');
+  const cloudStorageBucket = watch('cloudStorageBucket');
+  const diskSize = watch('diskSize');
+
+  // Use a type guard to narrow down the 'errors' object's type
+  // because of discrimation need to use this approach for getting machine type error from zod
+  // TODO DISCUSS
+  const machineTypeError =
+    schedulerSelection === 'vertex'
+      ? (errors as FieldErrors<z.infer<typeof createVertexSchema>>).machineType
+      : undefined;
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -79,7 +108,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     setValue('acceleratorType', '');
     setValue('acceleratorCount', '');
     trigger('region');
-    trigger('machineType')
+    trigger('machineType');
   };
 
   /**
@@ -110,8 +139,130 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     );
   };
 
+  /**
+   * Filters the cloud storage bucket options based on the user's search input.
+   * If no matches are found, adds the option to create a new bucket.
+   * @param {string[]} options - The list of available cloud storage buckets.
+   * @param {any} state - The state object containing the search input value.
+   */
+  const filterOptions = (options: ILabelValue<string>[], state: any) => {
+    const inputValue = state.inputValue.trim().toLowerCase();
+    // If the input value is empty, return the original options
+    const filteredOptions = options.filter(option =>
+      option.value.toLowerCase().includes(inputValue)
+    );
+
+    // If no options match the search input, add the option to create a new bucket
+    const exactMatch = options.some(
+      option => option.value.toLowerCase() === inputValue
+    );
+    // If no exact match is found, add the option to create a new bucket
+    if (!exactMatch && inputValue !== '') {
+      filteredOptions.push({label: `Create and Select "${state.inputValue}"`, value: `Create and Select "${state.inputValue}"`});
+    }
+
+    return filteredOptions;
+  };
+
+
+  /**
+   * Hosts the cloud storage API service
+   */
+  const cloudStorageAPI = () => {
+    StorageServices.cloudStorageAPIService(
+      setCloudStorageList
+      // setCloudStorageLoading,
+      // setErrorMessageBucket
+    );
+  };
+
+  /**
+   * To create the new cloud storage bucket API service
+   */
+  const newCloudStorageAPI = () => {
+    StorageServices.newCloudStorageAPIService(
+      searchValue,
+      setLoadingState,
+      // setBucketError
+    );
+  };
+
+  /**
+   * Creates a new cloud storage bucket.
+   * It calls an API to create the bucket, updates the state with the bucket name,
+   * and then refetches the list of cloud storage buckets.
+   */
+  const createNewBucket = () => {
+    if (!searchValue.trim()) {
+      // If search value is empty
+      return;
+    }
+    // calling an API to create a new cloud storage bucket here
+    newCloudStorageAPI();
+    // Reset the cloud storage value
+    // setCloudStorage(searchValue);
+    setValue('cloudStorageBucket', searchValue);
+    // fetch the cloud storage API again to list down all the values with newly created bucket name
+    cloudStorageAPI();
+  };
+
+  /**
+   * Handles Cloud storage selection
+   * @param {React.SetStateAction<string | null>} value - Selected cloud storage or "Create and Select" option.
+   * @returns {void}
+   */
+  const handleCloudStorageSelected = () => {
+    // setBucketError('');
+
+    if (cloudStorageBucket === `Create and Select "${searchValue}"`) {
+      // setNewBucketOption(true);
+      createNewBucket();
+      // setErrorMessageBucket('');
+    } else {
+      // setCloudStorage(value);
+      setValue('cloudStorageBucket', cloudStorageBucket);
+    }
+  };
+
+  /**
+   * Handles the change in the search input value.
+   * Updates the search value state based on the user's input.
+   *
+   * @param {React.ChangeEvent<{}>} event - The event triggered by the input field change.
+   * @param {string} newValue - The new value entered by the user in the search field.
+   */
+  // const handleSearchChange = (
+  //   event: React.ChangeEvent<object>,
+  //   newValue: string
+  // ) => {
+  //   setSearchValue(newValue);
+  // };
+
+  /**
+   * Handles changes to the Disk Size input field when it is empty.
+   * @param {React.ChangeEvent<HTMLInputElement>} e - The change event triggered by the input field.
+   */
+  const handleDefaultDiskSize = (value: string) => {
+    if (value === '') {
+      setValue('diskSize', DEFAULT_DISK_SIZE);
+    }
+  };
+
+  /**
+   * Hosts the service account API service
+   */
+  // const serviceAccountAPI = () => {
+  //   IamServices.serviceAccountAPIService(
+  //     setServiceAccountList,
+  //     // setServiceAccountLoading,
+  //     // setErrorMessageServiceAccount
+  //   );
+  // };
+
   useEffect(() => {
     setLoadingState(prev => ({ ...prev, region: true }));
+    cloudStorageAPI();
+    // serviceAccountAPI();
     authApi()
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
@@ -124,6 +275,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           error: error
         });
       });
+
+      setValue('diskSize', DEFAULT_DISK_SIZE);
   }, [setValue]);
 
   useEffect(() => {
@@ -137,6 +290,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, [region]);
 
   useEffect(() => {
+    handleCloudStorageSelected();
+    setSearchValue(cloudStorageBucket);
+  }, [cloudStorageBucket])
+
+  useEffect(() => {
     const machineTypeOptions = machineTypeList.map(item => item.machineType);
     const defaultSelected = machineTypeOptions.find(option => {
       if (option.value === DEFAULT_MACHINE_TYPE[0].value) {
@@ -146,7 +304,19 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     setValue('machineType', defaultSelected?.value ?? '1');
   }, [machineTypeList, setValue]);
 
+  useEffect(() => {
+      if (
+        Number(diskSize) >= DEFAULT_DISK_MIN_SIZE &&
+        Number(diskSize) <= DEFAULT_DISK_MAX_SIZE
+      ) {
+        // setDiskSizeFlag(false);
+      } else {
+        // setDiskSizeFlag(true);
+      }
+    }, [diskSize]);
+
   return (
+    console.log('search value', searchValue, "cloudStorageBucket", cloudStorageBucket),
     <div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
@@ -169,7 +339,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           options={machineTypeList?.map(item => item.machineType)}
           customClass="create-scheduler-style"
           loading={loadingState.machineType}
-          // error={errors.machineType}
+          error={machineTypeError}
         />
       </div>
 
@@ -185,52 +355,49 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               item.acceleratorConfigs !== null)
           ) {
             return (
-              console.log('item.acceleratorConfigs', item.acceleratorConfigs),
-              (
-                <div className="execution-history-main-wrapper">
-                  <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-                    <FormInputDropdown
-                      name="acceleratorType" // Matches schema
-                      control={control}
-                      label="Accelerator Type*"
-                      options={getAcceleratedType(item.acceleratorConfigs)}
-                      customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-                    />
-                  </div>
-                  {item?.acceleratorConfigs?.map(
-                    (element: {
-                      allowedCounts: ILabelValue<number>[];
-                      acceleratorType: ILabelValue<string>;
-                    }) => {
-                      return (
-                        <>
-                          {element.acceleratorType.value === acceleratorType ? (
-                            <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-                              <FormInputDropdown
-                                name="acceleratorCount" // Matches schema
-                                control={control}
-                                label="Accelerator Count*"
-                                options={element.allowedCounts.map(item => ({
-                                  label: item.label.toString(),
-                                  value: item.value.toString()
-                                }))}
-                                customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-                              />
-                            </div>
-                          ) : null}
-                        </>
-                      );
-                    }
-                  )}
+              <div className="execution-history-main-wrapper">
+                <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                  <FormInputDropdown
+                    name="acceleratorType" // Matches schema
+                    control={control}
+                    label="Accelerator Type*"
+                    options={getAcceleratedType(item.acceleratorConfigs)}
+                    customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+                  />
                 </div>
-              )
+                {item?.acceleratorConfigs?.map(
+                  (element: {
+                    allowedCounts: ILabelValue<number>[];
+                    acceleratorType: ILabelValue<string>;
+                  }) => {
+                    return (
+                      <>
+                        {element.acceleratorType.value === acceleratorType ? (
+                          <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
+                            <FormInputDropdown
+                              name="acceleratorCount" // Matches schema
+                              control={control}
+                              label="Accelerator Count*"
+                              options={element.allowedCounts.map(item => ({
+                                label: item.label.toString(),
+                                value: item.value.toString()
+                              }))}
+                              customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+                            />
+                          </div>
+                        ) : null}
+                      </>
+                    );
+                  }
+                )}
+              </div>
             );
           }
         })}
 
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="kernelName" // *** CORRECTED: Changed from "kernel" to "kernelName" to match Zod schema ***
+          name="kernelName"
           control={control}
           label="Kernel*"
           options={KERNEL_VALUE}
@@ -240,26 +407,28 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="cloudStorageBucket" // Matches schema
+          name="cloudStorageBucket"
           control={control}
           label="Cloud Storage Bucket*"
-          options={DEFAULT_MACHINE_TYPE}
+          options={cloudStorageList}
           customClass="create-scheduler-style"
+          filterOptions={filterOptions}
+          loading={loadingState.cloudStorageBucket}
         />
       </div>
 
       <div className="execution-history-main-wrapper">
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
-            name="diskType" // Matches schema
+            name="diskType"
             control={control}
             label="Disk Type*"
-            options={DEFAULT_MACHINE_TYPE}
+            options={DISK_TYPE_VALUE}
             customClass="create-scheduler-style"
           />
         </div>
         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-          <FormInputText label="Disk size*" control={control} name="diskSize" />{' '}
+          <FormInputText label="Disk size*" control={control} name="diskSize" onBlurCallback={handleDefaultDiskSize}/>{' '}
           {/* Matches schema */}
         </div>
       </div>

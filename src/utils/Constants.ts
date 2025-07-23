@@ -195,3 +195,32 @@ export const KERNEL_VALUE = [
 export const DEFAULT_CLOUD_STORAGE_BUCKET = [
   { label: 'default-vertex-schedules', value: 'default-vertex-schedules' }
 ];
+
+export const DISK_TYPE_VALUE = [
+  {
+    label: 'pd-standard (Persistent Disk Standard',
+    value: 'pd-standard (Persistent Disk Standard'
+  },
+  {
+    label: 'pd-ssd (Persistent Disk Solid state Drive)',
+    value: 'pd-ssd (Persistent Disk Solid state Drive)'
+  },
+  {
+    label: 'pd-standard (Persistent Disk Hard Disk Drive)',
+    value: 'pd-standard (Persistent Disk Hard Disk Drive)'
+  },
+  {
+    label: 'pd-balanced (Balanced Persistent Disk)',
+    value: 'pd-balanced (Balanced Persistent Disk)'
+  },
+  {
+    label: 'pd-extreme (Extreme Persistent Disk)',
+    value: 'pd-extreme (Extreme Persistent Disk)'
+  }
+];
+
+export const DEFAULT_DISK_SIZE = '100';
+
+export const DEFAULT_DISK_MIN_SIZE = 10;
+
+export const DEFAULT_DISK_MAX_SIZE = 65536;

@@ -50,3 +50,8 @@ export interface IFormInput {
 export interface IPath {
   path?: string;
 }
+
+export interface ILabelValue<T> {
+  label: T;
+  value: T;
+}

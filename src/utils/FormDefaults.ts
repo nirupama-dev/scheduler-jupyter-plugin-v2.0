@@ -17,6 +17,7 @@
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema'; // Import types for clarity
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema'; // Import types for clarity
+import { DEFAULT_DISK_SIZE } from './Constants';
 
 /**
  * Provides default values for the form fields based on the selected scheduler type.
@@ -47,7 +48,7 @@ const getDefaultVertexValues = (): VertexSchedulerFormValues => ({
   network: '',
   subnetwork: '',
   diskType: '',
-  diskSize: '50', // Example string default
+  diskSize: DEFAULT_DISK_SIZE, // Example string default
   acceleratorType: '',
   acceleratorCount: '',
   scheduleMode: 'runNow',

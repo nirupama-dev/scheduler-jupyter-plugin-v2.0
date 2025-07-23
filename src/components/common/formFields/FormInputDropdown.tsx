@@ -35,7 +35,8 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   customClass = '',
   onChangeCallback,
   error,
-  loading = false, // Default to false
+  loading = false, // Default to false,
+  filterOptions
   // onSearchInputChange,
   // freeSolo = false, // Default to false
   // placeholder = '',
@@ -53,7 +54,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
             // isOptionEqualToValue={(option, val) => option.value === val} // Essential for matching selected value
             value={options.find(option => option.value === value) || null} // Set value based on full option object
             onChange={(_, newValue) => {
-              const selectedValue = newValue ? newValue.value : null;
+              const selectedValue = newValue ? newValue.value : '';
               onChange(selectedValue); // react-hook-form update
               if (onChangeCallback) {
                 onChangeCallback(selectedValue); // Custom callback
@@ -85,10 +86,23 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
             )}
             // Optional: If you want to show a message when no options are found and not loading
             // noOptionsText={loading ? 'Loading...' : 'No options found'}
+            renderOption={(props, option) => {
+                // Custom rendering for the "Create new bucket" option
+                if (option.value === 'Create and Select' && name === 'cloudStorageBucket') {
+                  return (
+                    <li {...props} className="custom-add-bucket">
+                      {option.value}
+                    </li>
+                  );
+                }
+
+                return (<li {...props}>{option.value}</li>);
+              }}
+              filterOptions={filterOptions}
           />
         )}
       />
-      {error && <FormHelperText>{error.message}</FormHelperText>}
+      <div>{error && <FormHelperText>{error.message}</FormHelperText>}</div>
     </FormControl>
   );
 };

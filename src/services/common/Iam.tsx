@@ -21,12 +21,12 @@ import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 export class IamServices {
   static readonly serviceAccountAPIService = (
     setServiceAccountList: (
-      value: { displayName: string; email: string }[]
+      value: {displayName: string, email: string}[]
     ) => void,
-    setServiceAccountLoading: (value: boolean) => void,
-    setErrorMessage: (value: string) => void
+    // setServiceAccountLoading: (value: boolean) => void,
+    // setErrorMessage: (value: string) => void
   ) => {
-    setServiceAccountLoading(true);
+    // setServiceAccountLoading(true);
     requestAPI('api/iam/listServiceAccount')
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
@@ -37,16 +37,16 @@ export class IamServices {
           serviceAccountList.sort();
           setServiceAccountList(serviceAccountList);
         } else if (formattedResponse.error) {
-          setErrorMessage(formattedResponse.error);
+          // setErrorMessage(formattedResponse.error);
           setServiceAccountList([]);
         } else {
           setServiceAccountList([]);
         }
-        setServiceAccountLoading(false);
+        // setServiceAccountLoading(false);
       })
       .catch(error => {
         setServiceAccountList([]);
-        setServiceAccountLoading(false);
+        // setServiceAccountLoading(false);
         SchedulerLoggingService.log(
           `Error listing service accounts : ${error}`,
           LOG_LEVEL.ERROR
