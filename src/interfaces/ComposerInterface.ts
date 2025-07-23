@@ -18,6 +18,7 @@
 import { ToastOptions } from 'react-toastify';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
+import { ExecutionMode } from '../types/CommonSchedulerTypes';
 
 export interface ICreateComposerSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -56,6 +57,21 @@ export interface IComposerSchedulePayload {
 export interface IUpdateSchedulerAPIResponse {
   status: number;
   error: string;
+}
+
+export interface IServerlessData {
+  serverlessName: string;
+  serverlessData: any; // Or a more specific type if you know the structure
+}
+
+export interface IKernelDetails {
+  executionMode: ExecutionMode; //local or remote kernels
+  isDataprocKernel: boolean; // Indicates if it's a Dataproc-related kernel (serverless or cluster)
+  kernelDisplayName: string;
+  kernelParentResource?: string; // Optional parent resource for remote kernels
+  selectedServerlessData?: IServerlessData['serverlessData']; // Specific serverless data
+  selectedServerlessName?: string; // Name of the matched serverless instance
+  selectedClusterName?: string; // Name of the matched cluster
 }
 
 export interface ISchedulerDagData {

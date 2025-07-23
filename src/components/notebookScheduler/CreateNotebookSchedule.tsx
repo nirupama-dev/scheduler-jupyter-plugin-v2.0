@@ -23,7 +23,7 @@
  * It is the parent component for CreateVertexSchedule.tsx and CreateComposerSchedule.tsx
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { iconLeftArrow } from '../../utils/Icons';
@@ -36,21 +36,88 @@ import {
   combinedCreateFormSchema,
   CombinedCreateFormValues
 } from '../../schemas/CreateScheduleCombinedSchema';
+import { ISessionContext } from '@jupyterlab/apputils';
+import { Kernel, KernelAPI } from '@jupyterlab/services';
+import { ICreateNotebookScheduleProps, SchedulerInitialKernel } from '../../interfaces/CommonInterface';
+import { ExecutionMode, SchedulerType } from '../../types/CommonSchedulerTypes';
 import { IVertexSchedulePayload } from '../../interfaces/VertexInterface';
 import { createVertexSchema } from '../../schemas/CreateVertexSchema';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
-import { getInitialFormValues } from '../../utils/FormDefaults';
+import { getInitialFormValues as getFormValuesForScheduler } from '../../utils/FormDefaults';
 import { Button } from '@mui/material';
-import { IComposerSchedulePayload } from '../../interfaces/ComposerInterface';
+import { IComposerSchedulePayload, IKernelDetails, IServerlessData } from '../../interfaces/ComposerInterface';
+import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
 
-export const CreateNotebookSchedule = () => {
-  const scheduleType = 'vertex'; // Default to Vertex, can be changed based on user selection or props
-  //function to be added for conditional rendering of scheduler type based on kernal selection.
+/**
+ * CreateNotebookSchedule component
+ * This component renders the form for creating a notebook schedule.
+ * It dynamically loads the appropriate scheduler form based on the selected scheduler type.
+ */
 
+export const CreateNotebookSchedule = (
+  createScheduleProps: ICreateNotebookScheduleProps
+) => {
+  const { sessionContext } = createScheduleProps;
+
+
+// Use a single state object for all initial kernel details
+  const [initialKernelDetails, setInitialKernelDetails] = useState<SchedulerInitialKernel>({
+    schedulerType: 'vertex', // Default
+    executionMode: 'local',  // Default
+    selectedServerlessName: undefined,
+    selectedClusterName: undefined,
+  });
+
+
+
+  /**
+   * Effect to set the initial scheduler type based on the session context.
+   * This runs once when the component mounts.
+   */
+  useEffect(() => {
+   const fetchAndSetInitialSchedulerDetails = async () => {
+      try {
+        const notebookKernalDetails = await getDefaultSchedulerTypeOnLoad(sessionContext);
+
+        // Update the single state object
+        setInitialKernelDetails(notebookKernalDetails);
+
+        // Update react-hook-form value
+        setValue('schedulerSelection', notebookKernalDetails.schedulerType);
+        setValue('executionMode', notebookKernalDetails.executionMode);
+        // setValue('selectedServerlessName', initialKernalDetails.selectedServerlessName);
+        // setValue('selectedClusterName', initialKernalDetails.selectedClusterName);
+
+        console.log('Initial Scheduler Details:', notebookKernalDetails);
+      } catch (error) {
+        console.error('Failed to fetch initial scheduler details:', error);
+        // On error, revert to safe defaults for the state and form
+        const defaultDetails: SchedulerInitialKernel = {
+          schedulerType: 'vertex',
+          executionMode: 'local',
+          selectedServerlessName: undefined,
+          selectedClusterName: undefined,
+        };
+        setInitialKernelDetails(defaultDetails);
+        setValue('schedulerSelection', defaultDetails.schedulerType);
+      }
+    };
+
+    fetchAndSetInitialSchedulerDetails();
+  }, [sessionContext]); // `setValue` should be included in the dependency array
+
+  // Destructure for easier access in JSX
+  const { schedulerType, executionMode, selectedServerlessName, selectedClusterName } = initialKernelDetails;
+
+  /**
+   * Get the initial form values based on the scheduler type.
+   * This ensures that the form is pre-populated with the correct fields for the selected scheduler
+   */
   const schedulerFormValues = useMemo(() => {
-    return getInitialFormValues(scheduleType);
-  }, [scheduleType]); // Recalculate if criteria changes (e.g., in edit mode)
+    // This will now use the dynamically determined schedulerType
+    return getFormValuesForScheduler(initialKernelDetails);
+  }, [schedulerType]);
 
   const {
     handleSubmit,
@@ -71,25 +138,32 @@ export const CreateNotebookSchedule = () => {
    * @param vertexData The data from the Vertex scheduler form.
    * @returns The schedule values as a string or undefined.
    */
-  const getScheduleValues = (vertexData: z.infer<typeof createVertexSchema>): string | undefined => {
-      if (vertexData.scheduleMode === 'runNow') {
-        return ''; // Or undefined, depending on backend's strictness for empty string vs missing key
-      }
-      if (vertexData.scheduleMode === 'runSchedule' && vertexData.internalScheduleMode === 'cronFormat') {
-        return vertexData.scheduleField;
-      }
-      if (vertexData.scheduleMode === 'runSchedule' && vertexData.internalScheduleMode === 'userFriendly') {
-        return vertexData.scheduleValue;
-      }
-      return undefined; // Fallback
-    };
+  const getScheduleValues = (
+    vertexData: z.infer<typeof createVertexSchema>
+  ): string | undefined => {
+    if (vertexData.scheduleMode === 'runNow') {
+      return ''; // Or undefined, depending on backend's strictness for empty string vs missing key
+    }
+    if (
+      vertexData.scheduleMode === 'runSchedule' &&
+      vertexData.internalScheduleMode === 'cronFormat'
+    ) {
+      return vertexData.scheduleField;
+    }
+    if (
+      vertexData.scheduleMode === 'runSchedule' &&
+      vertexData.internalScheduleMode === 'userFriendly'
+    ) {
+      return vertexData.scheduleValue;
+    }
+    return undefined; // Fallback
+  };
 
-    /**
-     * 
-     * @param data The form data submitted from the Create Notebook Schedule form.
-     */
+  /**
+   *
+   * @param data The form data submitted from the Create Notebook Schedule form.
+   */
   const onSubmit = (data: CombinedCreateFormValues) => {
-   
     //vertex payload creation
     if (data.schedulerSelection === 'vertex') {
       const vertexData = data as z.infer<typeof createVertexSchema>;
@@ -139,9 +213,9 @@ export const CreateNotebookSchedule = () => {
         time_zone: composerData.timeZone,
         output_formats: composerData.outputFormats || [], // Ensure this is an array
         dag_id: composerData.dagId ? composerData.dagId : '', // Assuming this is part of the form data
-        parameters: composerData.parameters? composerData.parameters : [], // Ensure this is an array
+        parameters: composerData.parameters ? composerData.parameters : [], // Ensure this is an array
         execution_mode: composerData.executionMode || 'local', // Default to 'local' if not set
-        stop_cluster: false,
+        stop_cluster: false
       };
       console.log('Composer Payload:', composerPayload);
       // TODO: Call your Composer API here with composerPayload
@@ -156,6 +230,7 @@ export const CreateNotebookSchedule = () => {
     reset(schedulerFormValues); // Reset form to default values
     // TODO: Add navigation logic
   };
+
   return (
     <div className="component-level">
       <div className="cluster-details-header">
@@ -205,19 +280,37 @@ export const CreateNotebookSchedule = () => {
         </div>
         {/* Conditionally render specific scheduler components */}
         {schedulerSelection === 'vertex' && (
-          <CreateVertexSchedule control={control} errors={errors} setValue={setValue} watch={watch} />
+          <CreateVertexSchedule
+            control={control}
+            errors={errors}
+            setValue={setValue}
+            watch={watch}
+          />
         )}
         {schedulerSelection === 'composer' && (
-          <CreateComposerSchedule control={control} errors={errors} setValue={setValue} watch={watch} />
+          <CreateComposerSchedule
+            control={control}
+            errors={errors}
+            setValue={setValue}
+            watch={watch}
+          />
         )}
         <div className="save-overlay">
-        <Button variant="contained" aria-label="Create Schedule" type="submit">
-          <div>CREATE</div>
-        </Button>
-        <Button variant="outlined" aria-label="cancel Batch" type='button' onClick={handleCancel}>
-          <div>CANCEL</div>
-        </Button>
-        
+          <Button
+            variant="contained"
+            aria-label="Create Schedule"
+            type="submit"
+          >
+            <div>CREATE</div>
+          </Button>
+          <Button
+            variant="outlined"
+            aria-label="cancel Batch"
+            type="button"
+            onClick={handleCancel}
+          >
+            <div>CANCEL</div>
+          </Button>
         </div>
       </form>
     </div>

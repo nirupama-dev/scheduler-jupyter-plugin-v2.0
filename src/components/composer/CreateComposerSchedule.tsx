@@ -28,7 +28,6 @@ import { SchedulerService } from '../../services/composer/SchedulerServices';
 import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
-// import { EXECUTION_MODE_OPTIONS } from '../../utils/Constants';
 import { ICreateComposerSchedulerProps } from '../../interfaces/ComposerInterface';
 import { SCHEDULE_MODE_OPTIONS } from '../../utils/Constants';
 import { FormGroup } from '@mui/material';

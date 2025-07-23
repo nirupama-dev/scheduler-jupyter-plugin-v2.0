@@ -32,7 +32,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   projectId: z.string().min(1, 'Project ID is required'),
   region: z.string().min(1, 'Region is required'),
   environment: z.string().min(1, 'Environment is required'),
-  executionMode: z.enum(['serverless', 'cluster', 'local']).optional(),
+  executionMode: z.enum(['serverless', 'cluster', 'local']),
   retryCount: z.preprocess(
     val => (val === '' ? undefined : Number(val)),
     z

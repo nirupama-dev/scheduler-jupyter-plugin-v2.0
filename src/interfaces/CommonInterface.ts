@@ -16,6 +16,9 @@
  *
  */
 
+import { ISessionContext } from '@jupyterlab/apputils';
+import { ExecutionMode, SchedulerType } from '../types/CommonSchedulerTypes';
+
 export interface IAuthCredentials {
   access_token?: string;
   project_id?: string;
@@ -23,6 +26,15 @@ export interface IAuthCredentials {
   config_error?: number;
   login_error?: number;
 }
+
+export interface ISchedulerRoutesProps {
+  sessionContext: ISessionContext; 
+}
+
+export interface ICreateNotebookScheduleProps {
+  sessionContext: ISessionContext;
+}
+
 
 export interface IGcpUrlResponseData {
   dataproc_url: string;
@@ -49,4 +61,11 @@ export interface IFormInput {
 
 export interface IPath {
   path?: string;
+}
+
+export interface SchedulerInitialKernel {
+  schedulerType: SchedulerType;
+  executionMode: ExecutionMode;
+  selectedServerlessName?: string;
+  selectedClusterName?: string;
 }

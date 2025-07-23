@@ -23,22 +23,24 @@
 
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { IThemeManager } from '@jupyterlab/apputils';
+import { ISessionContext, IThemeManager } from '@jupyterlab/apputils';
 import { SchedulerRoutes } from '../../router/SchedulerRoutes';
 import { SchedulerWidget } from '../common/widget/SchedulerWidget';
 
 export class NotebookScheduler extends SchedulerWidget {
   private initialRoute: string;
+  private sessionContext: ISessionContext;
 
-  constructor(themeManager: IThemeManager, initialRoute: string = '/list') {
+  constructor(themeManager: IThemeManager, initialRoute: string = '/list', sessionContext: ISessionContext) {
     super(themeManager);
     this.initialRoute = initialRoute;
+    this.sessionContext = sessionContext;
   }
 
   protected renderInternal(): React.ReactElement {
     return (
       <MemoryRouter initialEntries={[this.initialRoute]}>
-        <SchedulerRoutes />
+        <SchedulerRoutes sessionContext={this.sessionContext} />
       </MemoryRouter>
     );
   }

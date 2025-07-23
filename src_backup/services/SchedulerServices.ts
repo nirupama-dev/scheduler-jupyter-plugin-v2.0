@@ -98,6 +98,8 @@ export class SchedulerService {
       });
     }
   };
+
+  
   static readonly listSessionTemplatesAPIService = async (
     setServerlessDataList: (value: string[]) => void,
     setServerlessList: (value: string[]) => void,

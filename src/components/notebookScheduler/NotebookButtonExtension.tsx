@@ -43,7 +43,7 @@ export class NotebookButtonExtension
     const button = new ToolbarButton({
       icon: iconNotebookScheduler,
       onClick: () => {
-        const content = new NotebookScheduler(this.themeManager, '/create');
+        const content = new NotebookScheduler(this.themeManager, '/create', context.sessionContext);
         const widget = new MainAreaWidget({ content });
         widget.title.label = 'Create Scheduled Job';
         widget.title.icon = iconNotebookScheduler;

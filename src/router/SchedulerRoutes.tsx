@@ -24,6 +24,7 @@ import {
   useParams
 } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
+import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 
 // Dummy ListingScreen for demonstration
 function ListingScreen() {
@@ -50,11 +51,15 @@ function ExecutionHistoryScreen() {
   );
 }
 
-export function SchedulerRoutes() {
+export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps) {
+  const { sessionContext } = sessionContextprops;
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/list" replace />} />
-      <Route path="/create" element={<CreateNotebookSchedule />} />
+      <Route
+        path="/create"
+        element={<CreateNotebookSchedule sessionContext={sessionContext} />}
+      />
       <Route path="/list" element={<ListingScreen />} />
       <Route path="/history/:id" element={<ExecutionHistoryScreen />} />
     </Routes>
