@@ -1,8 +1,37 @@
-import { ISessionContext } from "@jupyterlab/apputils";
-import { IKernelDetails } from "../interfaces/ComposerInterface";
-import { ExecutionMode, SchedulerType } from "../types/CommonSchedulerTypes";
-import { Kernel, KernelAPI, KernelSpecAPI } from "@jupyterlab/services";
-import { SchedulerService } from "../services/composer/SchedulerServices";
+/**
+ *
+ * This utility file provides functions to extract kernel details and determine the scheduler type
+ * based on the current JupyterLab session context.
+ */
+import { ISessionContext } from '@jupyterlab/apputils';
+import { IKernelDetails } from '../interfaces/ComposerInterface';
+import { SchedulerType } from '../types/CommonSchedulerTypes';
+import { Kernel, KernelAPI, KernelSpecAPI } from '@jupyterlab/services';
+import { SchedulerService } from '../services/composer/SchedulerServices';
+import { DropdownOption } from '../interfaces/FormInterface';
+import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
+
+
+/**
+ * caching KernelAPI.listRunning() to improve preformance.
+ */
+let cachedRunningKernels: Kernel.IModel[] | null = null;
+let lastFetchTime: number = 0;
+const CACHE_LIFETIME = 10 * 1000; // 5 seconds, adjust as needed
+
+async function getRunningKernelsCached(): Promise<Kernel.IModel[]> {
+  const now = Date.now();
+  if (cachedRunningKernels && (now - lastFetchTime < CACHE_LIFETIME)) {
+    console.debug('Using cached running kernels');
+    return cachedRunningKernels;
+  }
+
+  console.debug('Fetching running kernels (uncached)');
+  const kernels = await KernelAPI.listRunning();
+  cachedRunningKernels = kernels;
+  lastFetchTime = now;
+  return kernels;
+}
 
 /**
  * Retrieves essential kernel details: its execution mode and matching resource names.
@@ -32,73 +61,75 @@ const getKernelDetails = async (
     kernelDisplayName: kernelDisplayName
   };
 
-  // --- 1. Basic Local/No Kernel Check ---
-  if (
-    kernelDisplayName.includes('Local') ||
-    kernelDisplayName.includes('No Kernel')
-  ) {
-    return kernelDetails; // Local or no kernel, return default details that is local
-  }
-
-  // --- 2. Attempt to get details from running kernel (preferred for active session) ---
+  // --- Attempt to get details from running kernel (preferred for active session) ---
   let parentResource: string | undefined;
   try {
     const currentKernelId = sessionContext.session?.kernel?.id;
+    console.log('Current Kernel ID:', currentKernelId);
     if (currentKernelId) {
-      const runningKernels: Kernel.IModel[] = await KernelAPI.listRunning();
+      const runningKernels: Kernel.IModel[] = await getRunningKernelsCached();
+      console.log("runningKernal", runningKernels);
       const runningKernel = runningKernels.find(
         kernel => kernel.id === currentKernelId
       );
-      parentResource = (runningKernel as any)?.metadata?.endpointParentResource as string;
+      console.log('Running Kernel Details:', runningKernel);
+      parentResource = (runningKernel as any)?.metadata
+        ?.endpointParentResource as string;
       kernelDetails.kernelParentResource = parentResource;
-      console.debug('Kernel Parent Resource (from running kernel):', parentResource);
+      console.debug(
+        'Kernel Parent Resource (from running kernel):',
+        parentResource
+      );
+      console.log(
+        'Kernel Parent Resource (from running kernel):',
+        parentResource
+      );
     }
   } catch (error) {
-    console.warn('Could not get running kernel details, falling back to kernel specs:', error);
+    console.warn(
+      'Could not get running kernel details, falling back to kernel specs:',
+      error
+    );
   }
 
-  // --- 3. If running kernel details not found or for more definitive type, check kernel specs ---
-  if (!parentResource && availableKernelSpecs && sessionContext.kernelPreference.name) {
+  //... If running kernel details not found or for more definitive type, check kernel specs ---
+  if (
+    !parentResource &&
+    availableKernelSpecs &&
+    sessionContext.kernelPreference.name
+  ) {
     const kernels = availableKernelSpecs.kernelspecs;
     if (kernels && kernels[sessionContext.kernelPreference.name]) {
-      parentResource = kernels[sessionContext.kernelPreference.name].resources?.endpointParentResource as string;
+      parentResource = kernels[sessionContext.kernelPreference.name].resources
+        ?.endpointParentResource as string;
       kernelDetails.kernelParentResource = parentResource;
-      console.debug('Kernel Parent Resource (from kernel spec):', parentResource);
+      console.log(
+        'Kernel Parent Resource (from kernel specs):',
+        parentResource
+      );
+      console.debug(
+        'Kernel Parent Resource (from kernel spec):',
+        parentResource
+      );
     }
   }
 
-  // --- 4. Determine execution mode and match resources based on parentResource ---
+  // ---  Determine execution mode and match resources based on parentResource ---
   if (parentResource) {
-    if (parentResource.includes('/sessions')) { // Dataproc Serverless Sessions
+    if (parentResource.includes('/sessions')) {
       kernelDetails.executionMode = 'serverless';
       kernelDetails.isDataprocKernel = true;
-      console.debug('Detected Dataproc Serverless Session Kernel');
-
-      // Match against serverlessNamesList (strings)
-      const matchedServerlessName = serverlessNamesList.find(
-        (serverlessName: string) =>
-          kernelDisplayName.includes(serverlessName)
+      kernelDetails.selectedServerlessName = serverlessNamesList.find(
+        serverlessName => kernelDisplayName.includes(serverlessName)
       );
-
-      if (matchedServerlessName) {
-        kernelDetails.selectedServerlessName = matchedServerlessName;
-      }
-    } else if (parentResource.includes('/clusters')) { // Dataproc Clusters
+    } else if (parentResource.includes('/clusters')) {
       kernelDetails.executionMode = 'cluster';
       kernelDetails.isDataprocKernel = true;
-      console.debug('Detected Dataproc Cluster Kernel');
-
-      // Match against clusterList
-      const matchedCluster = clusterList.find((cluster: string) =>
+      kernelDetails.selectedClusterName = clusterList.find(cluster =>
         kernelDisplayName.includes(cluster)
       );
-
-      if (matchedCluster) {
-        kernelDetails.selectedClusterName = matchedCluster;
-      }
     }
   }
-
   return kernelDetails;
 };
 
@@ -119,15 +150,8 @@ const extractSchedulerTypeAndKernelDetails = async (
   serverlessNamesList: string[], // <-- Now expects string[]
   clusterList: string[]
 ): Promise<{
-  schedulerType: SchedulerType;
-  executionMode: ExecutionMode;
-  selectedServerlessName?: string;
-  selectedClusterName?: string;
+  kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults;
 }> => {
-  let schedulerType: SchedulerType = 'vertex'; // Default to vertex
-  let executionMode: ExecutionMode = 'local'; // Default execution mode
-  let selectedServerlessName: string | undefined;
-  let selectedClusterName: string | undefined;
 
   try {
     const kernelDetails = await getKernelDetails(
@@ -136,33 +160,99 @@ const extractSchedulerTypeAndKernelDetails = async (
       serverlessNamesList, // Pass the string array
       clusterList
     );
+    const schedulerType: SchedulerType =
+      kernelDetails.executionMode === 'serverless' ||
+      kernelDetails.executionMode === 'cluster'
+        ? 'composer'
+        : 'vertex';
 
-    executionMode = kernelDetails.executionMode;
-
-    if (kernelDetails.executionMode === 'serverless') {
-      schedulerType = 'composer';
-      selectedServerlessName = kernelDetails.selectedServerlessName;
-    } else if (kernelDetails.executionMode === 'cluster') {
-      schedulerType = 'composer';
-      selectedClusterName = kernelDetails.selectedClusterName;
-    } else {
-      schedulerType = 'vertex'; // Local or unknown defaults to Vertex
-    }
-
-    return {
-      schedulerType,
-      executionMode,
-      selectedServerlessName,
-      selectedClusterName
+    return {kernalAndSchedulerDetails: {
+        schedulerType,
+        kernalDetails: {
+          executionMode: kernelDetails.executionMode,
+          kernelDisplayName: sessionContext.kernelDisplayName,
+          selectedServerlessName: kernelDetails.selectedServerlessName,
+          selectedClusterName: kernelDetails.selectedClusterName,
+          kernelParentResource: kernelDetails.kernelParentResource,
+          isDataprocKernel: kernelDetails.isDataprocKernel,
+        },
+      },
     };
   } catch (error) {
     console.error('Error extracting scheduler type and kernel details:', error);
+    console.log(
+      'GetKernal Details: Falling back to default scheduler type and execution mode.'
+    );
     // Return safe defaults on error
     return {
-      schedulerType: 'vertex',
-      executionMode: 'local'
+      kernalAndSchedulerDetails: {
+        schedulerType: 'vertex',
+        kernalDetails: {
+          executionMode: 'local',
+          kernelDisplayName: sessionContext.kernelDisplayName,
+          selectedServerlessName: undefined,
+          selectedClusterName: undefined,
+          kernelParentResource: undefined,
+          isDataprocKernel: false
+        }
+      }
     };
   }
+};
+
+/**
+ * Promisifies the listClustersAPIService to return a full list of cluster names.
+ * @param initialClusterList Optional initial list of clusters for recursive calls.
+ * @param nextPageToken Optional token for pagination.
+ * @returns Promise resolving to an array of cluster names (strings).
+ */
+const promisifiedListClusters = (): Promise<string[]> => {
+  return new Promise((resolve, reject) => {
+    // This callback will receive the final accumulated list from SchedulerService's internal recursion
+    const setClusterOptionsCallback = (
+      action: React.SetStateAction<DropdownOption[]>
+    ) => {
+      if (typeof action === 'function') {
+        const finalOptions = action([]); // Call the function to get the actual array
+        resolve(finalOptions.map(option => option.value));
+      } else {
+        resolve(action.map(option => option.value));
+      }
+    };
+    console.log('Calling listClustersAPIService');
+
+    SchedulerService.listClustersAPIService(setClusterOptionsCallback).catch(
+      reject
+    ); // Propagate rejections from the service itself
+  });
+};
+
+/**
+ * Promisifies the listSessionTemplatesAPIService to return a full list of serverless names.
+ * @param initialServerlessList Optional initial list of serverless templates for recursive calls.
+ * @param nextPageToken Optional token for pagination.
+ * @returns Promise resolving to an array of serverless names (strings).
+ */
+const promisifiedListSessionTemplates = (): Promise<string[]> => {
+  return new Promise((resolve, reject) => {
+    const setServerlessOptionsCallback = (
+      action: React.SetStateAction<DropdownOption[]>
+    ) => {
+      if (typeof action === 'function') {
+        const finalOptions = action([]);
+        resolve(finalOptions.map(option => option.value));
+      } else {
+        resolve(action.map(option => option.value));
+      }
+    };
+
+    const dummySetIsLoading = (val: boolean) => {}; // No-op
+    console.log('Calling listSessionTemplatesAPIService');
+    SchedulerService.listSessionTemplatesAPIService(
+      setServerlessOptionsCallback,
+      dummySetIsLoading // Pass a dummy function for `setIsLoadingKernelDetail`
+    ).catch(reject); // Propagate rejections from the service itself
+  });
 };
 
 /**
@@ -177,65 +267,76 @@ const extractSchedulerTypeAndKernelDetails = async (
 export const getDefaultSchedulerTypeOnLoad = async (
   sessionContext: ISessionContext
 ): Promise<{
-  schedulerType: SchedulerType;
-  executionMode: ExecutionMode;
-  selectedServerlessName?: string;
-  selectedClusterName?: string;
+  kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults;
 }> => {
-  let availableKernelSpecs: any = null;
-  let fetchedServerlessNamesList: string[] = []; // Store only names now
-  let fetchedClusterList: string[] = [];
-
-  // A simple flag for SchedulerService's setIsLoadingKernelDetail
-  const tempSetIsLoading = (isLoading: boolean) => {
-    console.debug(`MyApiServices internal loading state: ${isLoading}`);
-  };
-
-  try {
-    // 1. Fetch Kernel Specs
-    availableKernelSpecs = await KernelSpecAPI.getSpecs();
-
-    // 2. Fetch Clusters using MyApiServices
-    await new Promise<void>((resolve, reject) => {
-      SchedulerService.listClustersAPIService(
-        (clusters: string[]) => { // Callback for setClusterList receives string[]
-          fetchedClusterList = clusters; // Assign the array directly
-          resolve();
-        },
-        tempSetIsLoading // Callback for setIsLoadingKernelDetail
-      ).catch(reject);
-    });
-
-    // 3. Fetch Session Templates using MyApiServices
-    await new Promise<void>((resolve, reject) => {
-     
-      SchedulerService.listSessionTemplatesAPIService(
-        (serverlessNames: string[]) => { 
-          fetchedServerlessNamesList = serverlessNames; // Assign the array of names
-          resolve();
-        },
-        (serverlessNames: string[]) => { /* This is the second callback, also string[], effectively redundant for our need here */ },
-        tempSetIsLoading
-      ).catch(reject);
-    });
-
-  } catch (error) {
-    console.error('Error fetching initial API data in getDefaultSchedulerTypeOnLoad:', error);
-    // On error during API calls, return default values
-    return {
-      schedulerType: 'vertex',
+  let kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults = {
+    schedulerType: 'vertex',
+    kernalDetails: {
       executionMode: 'local',
+      kernelDisplayName: sessionContext.kernelDisplayName,
       selectedServerlessName: undefined,
       selectedClusterName: undefined,
-    };
+      kernelParentResource: undefined,
+      isDataprocKernel: false
+    }
+  };
+  // Early exit for local or no kernel
+  if (
+    sessionContext.kernelDisplayName.includes('Local') ||
+    sessionContext.kernelDisplayName.includes('No Kernel')
+  ) {
+    return { kernalAndSchedulerDetails };
+  }
+  let availableKernelSpecs: any = null;
+  let fetchedServerlessNamesList: string[] = [];
+  let fetchedClusterList: string[] = [];
+  console.log('getDefaultSchedulerTypeOnLoad called');
+
+  try {
+    availableKernelSpecs = await KernelSpecAPI.getSpecs();
+    console.log('Available Kernel Specs fetched.');
+  } catch (error) {
+    console.error(
+      'Error fetching Kernel Specs. Cannot determine full scheduler details.',
+      error
+    );
+    console.log('Falling back to default scheduler type and execution mode.');
+    return { kernalAndSchedulerDetails }; // Return default values if specs cannot be fetched
   }
 
-  // Now that all data is fetched, process it.
-  // We pass fetchedServerlessNamesList (string[]) to extractSchedulerTypeAndKernelDetails
-  return await extractSchedulerTypeAndKernelDetails(
+  // Fetch cluster and session templates in parallel
+  const [clustersResult, serverlessTemplatesResult] = await Promise.allSettled([
+    promisifiedListClusters(),
+    promisifiedListSessionTemplates()
+  ]);
+
+  if (clustersResult.status === 'fulfilled') {
+    fetchedClusterList = clustersResult.value;
+  } else {
+    console.warn('Failed to fetch cluster list:', clustersResult.reason);
+  }
+
+  if (serverlessTemplatesResult.status === 'fulfilled') {
+    fetchedServerlessNamesList = serverlessTemplatesResult.value;
+  } else {
+    console.warn(
+      'Failed to fetch session templates:',
+      serverlessTemplatesResult.reason
+    );
+  }
+
+  console.log('Processing fetched data...', {
+    availableKernelSpecs,
+    fetchedServerlessNamesList,
+    fetchedClusterList
+  });
+
+  return extractSchedulerTypeAndKernelDetails(
     sessionContext,
     availableKernelSpecs,
-    fetchedServerlessNamesList, // Pass the array of names
+    fetchedServerlessNamesList, // Pass the string array directly
     fetchedClusterList
   );
+
+  
 };

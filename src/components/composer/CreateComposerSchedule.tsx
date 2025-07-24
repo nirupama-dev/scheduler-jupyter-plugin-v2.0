@@ -69,7 +69,7 @@ export const CreateComposerSchedule: React.FC<
   const emailOnFailure = watch('emailOnFailure');
   const emailOnRetry = watch('emailOnRetry');
   const emailOnSuccess = watch('emailOnSuccess');
-  const executionModeRadio = watch('executionMode');
+  const executionMode = watch('executionMode');
 
   /**
    * Effect to fetch the project ID and region from the auth API
@@ -146,17 +146,17 @@ export const CreateComposerSchedule: React.FC<
   }, [selectedRegion, setValue]);
 
   useEffect(() => {
-    if (executionModeRadio === 'cluster') {
+    if (executionMode === 'cluster') {
       setValue('serverless', '');
       SchedulerService.listClustersAPIService(setClusterOptions);
-    } else if (executionModeRadio === 'serverless') {
+    } else if (executionMode === 'serverless') {
       setValue('cluster', '');
       SchedulerService.listSessionTemplatesAPIService(setServerlessOptions);
     } else {
       setClusterOptions([]);
       setServerlessOptions([]);
     }
-  }, [executionModeRadio, setValue]);
+  }, [executionMode, setValue]);
 
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
@@ -247,50 +247,56 @@ export const CreateComposerSchedule: React.FC<
         />
       </div>
       <AddParameters control={control} errors={errors} />
-      {/* {executionMode !== 'local ' && ( */}
-      <div className="create-scheduler-form-element sub-para">
-        <FormInputRadio
-          name="executionMode"
-          control={control}
-          className="schedule-radio-btn"
-          options={EXECUTION_MODE_OPTIONS}
-          // error={errors.executionMode}
-        />
-      </div>
-      {executionModeRadio === 'cluster' && (
-        <div className="create-scheduler-form-element">
-          <FormInputDropdown
-            name="cluster"
-            label="Cluster*"
-            control={control}
-            setValue={setValue}
-            options={clusterOptions}
-            customClass="create-scheduler-style"
-          />
-        </div>
+      
+      {executionMode !== 'local' && (
+        // Start of a single wrapper div
+        <div>
+          <div className="create-scheduler-form-element sub-para">
+            <FormInputRadio
+              name="executionMode"
+              control={control}
+              className="schedule-radio-btn"
+              options={EXECUTION_MODE_OPTIONS}
+              // error={errors.executionMode}
+            />
+          </div>
+          {executionMode === 'cluster' && (
+            <div className="create-scheduler-form-element">
+              <FormInputDropdown
+                name="cluster"
+                label="Cluster"
+                control={control}
+                setValue={setValue}
+                options={clusterOptions}
+                customClass="create-scheduler-style"
+              />
+            </div>
+          )}
+          {executionMode === 'serverless' && (
+            <div className="create-scheduler-form-element">
+              <FormInputDropdown
+                name="serverless"
+                label="Serverless"
+                control={control}
+                setValue={setValue}
+                options={serverlessOptions}
+                customClass="create-scheduler-style"
+              />
+            </div>
+          )}
+          {executionMode === 'cluster' && (
+            <div className="create-scheduler-form-element">
+              <FormInputCheckbox
+                name="stopClusterAfterExecution"
+                control={control}
+                label="Stop cluster after execution"
+                className="create-scheduler-label-style"
+              />
+            </div>
+          )}
+        </div> // End of the single wrapper div
       )}
-      {executionModeRadio === 'serverless' && (
-        <div className="create-scheduler-form-element">
-          <FormInputDropdown
-            name="serverless"
-            label="Serverless"
-            control={control}
-            setValue={setValue}
-            options={serverlessOptions}
-            customClass="create-scheduler-style"
-          />
-        </div>
-      )}
-      {executionModeRadio === 'cluster' && (
-        <div className="create-scheduler-form-element">
-          <FormInputCheckbox
-            name="stopClusterAfterExecution"
-            control={control}
-            label="Stop cluster after execution"
-            className="create-scheduler-label-style"
-          />
-        </div>
-      )}
+
       <div className="create-scheduler-form-element block-seperation">
         <FormInputText
           label="Retry count"

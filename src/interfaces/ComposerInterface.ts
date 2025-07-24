@@ -35,7 +35,7 @@ export interface IComposerSchedulePayload {
   region: string;
   composer_environment_name: string;
   output_formats: string[];
-  parameters: string[];
+  parameters: string;
   serverless_name?: Record<string, never>;
   cluster_name?: string;
   execution_mode: string;
@@ -46,7 +46,6 @@ export interface IComposerSchedulePayload {
   email_retry: boolean;
   email_recipients?: string[];
   run_option: 'runNow' | 'runOnSchedule';
-  //name: string; //?
   stop_cluster: boolean;
   time_zone?: string;
   local_kernel?: boolean;
@@ -69,7 +68,6 @@ export interface IKernelDetails {
   isDataprocKernel: boolean; // Indicates if it's a Dataproc-related kernel (serverless or cluster)
   kernelDisplayName: string;
   kernelParentResource?: string; // Optional parent resource for remote kernels
-  selectedServerlessData?: IServerlessData['serverlessData']; // Specific serverless data
   selectedServerlessName?: string; // Name of the matched serverless instance
   selectedClusterName?: string; // Name of the matched cluster
 }

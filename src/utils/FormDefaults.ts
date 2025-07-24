@@ -17,7 +17,7 @@
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema'; // Import types for clarity
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema'; // Import types for clarity
-import { SchedulerInitialKernel } from '../interfaces/CommonInterface';
+import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 
 /**
  * Provides default values for the form fields based on the selected scheduler type.
@@ -72,13 +72,13 @@ const getDefaultVertexValues = (): VertexSchedulerFormValues => ({
  * This function returns default values for the form fields used in the Composer scheduler.
  * It provides a set of initial values that can be used when creating a new Composer schedule.
  */
-const getDefaultComposerValues = (initialKernelDetails: SchedulerInitialKernel): ComposerSchedulerFormValues => ({
+const getDefaultComposerValues = (initialKernelDetails: INotebookKernalSchdulerDefaults): ComposerSchedulerFormValues => ({
   schedulerSelection: 'composer',
   jobName: '',
   inputFile: '',
   projectId: '',
   region: '',
-  executionMode: initialKernelDetails.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
+  executionMode: initialKernelDetails.kernalDetails.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
   retryDelay: 5, // Matches Zod's default
@@ -87,7 +87,8 @@ const getDefaultComposerValues = (initialKernelDetails: SchedulerInitialKernel):
   emailOnSuccess: false,
   email_recipients: [], // Default for array of emails
   runOption: 'runNow',
-  scheduleValue: '',
+  cluster: initialKernelDetails.kernalDetails.selectedClusterName ?? '',
+  serverless: initialKernelDetails.kernalDetails.selectedServerlessName ?? '',
   timeZone: ''
 });
 
@@ -97,7 +98,7 @@ const getDefaultComposerValues = (initialKernelDetails: SchedulerInitialKernel):
  * @returns CombinedCreateFormValues that match one of the discriminated union branches.
  */
 export const getInitialFormValues = (
- initialKernelDetails: SchedulerInitialKernel
+ initialKernelDetails: INotebookKernalSchdulerDefaults
 ): CombinedCreateFormValues => {
   if (initialKernelDetails.schedulerType === 'composer') {
     return getDefaultComposerValues(initialKernelDetails);

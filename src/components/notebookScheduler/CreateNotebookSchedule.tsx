@@ -38,17 +38,18 @@ import {
   combinedCreateFormSchema,
   CombinedCreateFormValues
 } from '../../schemas/CreateScheduleCombinedSchema';
-import { ISessionContext } from '@jupyterlab/apputils';
-import { Kernel, KernelAPI } from '@jupyterlab/services';
-import { ICreateNotebookScheduleProps, SchedulerInitialKernel } from '../../interfaces/CommonInterface';
-import { ExecutionMode, SchedulerType } from '../../types/CommonSchedulerTypes';
+import {
+  ICreateNotebookScheduleProps,
+  Parameter,
+  INotebookKernalSchdulerDefaults
+} from '../../interfaces/CommonInterface';
 import { IVertexSchedulePayload } from '../../interfaces/VertexInterface';
 import { createVertexSchema } from '../../schemas/CreateVertexSchema';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
 import { getInitialFormValues as getFormValuesForScheduler } from '../../utils/FormDefaults';
 import { Button } from '@mui/material';
-import { IComposerSchedulePayload, IKernelDetails, IServerlessData } from '../../interfaces/ComposerInterface';
+import { IComposerSchedulePayload } from '../../interfaces/ComposerInterface';
 import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
 
 /**
@@ -60,57 +61,96 @@ import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
 export const CreateNotebookSchedule = (
   createScheduleProps: ICreateNotebookScheduleProps
 ) => {
-  const { sessionContext } = createScheduleProps;
+  const {
+    sessionContext,
+    initialKernalScheduleDetails: preFetchedInitialDetails
+  } = createScheduleProps; //sessionContext is used to fetch the initial kernel details
+  const [kernalAndScheduleValue, setKernalAndScheduleValue] =
+    useState<INotebookKernalSchdulerDefaults>(
+      preFetchedInitialDetails || {
+        schedulerType: 'vertex',
+        kernalDetails: {
+          executionMode: 'local',
+          isDataprocKernel: false,
+          kernelDisplayName: ''
+        }
+      }
+    );
 
-
-// Use a single state object for all initial kernel details
-  const [initialKernelDetails, setInitialKernelDetails] = useState<SchedulerInitialKernel>({
-    schedulerType: 'vertex', // Default
-    executionMode: 'local',  // Default
-    selectedServerlessName: undefined,
-    selectedClusterName: undefined,
-  });
-
-
-
+  /**
+   * Function to Extract Kernal details and assign default Scheduler
+   * Initially looks for the prefetched Ker
+   * 
+   */
+  const loadDefaultKernalScheduler = async () => {
+    if (preFetchedInitialDetails) {
+      // Case 1: Details were successfully pre-fetched by the button extension
+      console.log(
+        'Using pre-fetched Initial Scheduler Details:',
+        preFetchedInitialDetails
+      );
+      setKernalAndScheduleValue(preFetchedInitialDetails);
+    } else {
+      // Case 2: Pre-fetched details were not provided (e.g., direct navigation, or button pre-fetch failed silently)
+      // In this scenario, we perform a fallback fetch.
+      console.log(
+        'Pre-fetched details not available. Falling back to internal fetch.'
+      );
+      try {
+        setKernalAndScheduleValue(
+          (await getDefaultSchedulerTypeOnLoad(sessionContext))
+            .kernalAndSchedulerDetails
+        );
+        console.log(
+          'Fallback fetched Initial Scheduler Details:',
+          kernalAndScheduleValue
+        );
+      } catch (error) {
+        console.error(
+          'Failed to fetch initial scheduler details in fallback:',
+          error
+        );
+        // Define a safe default if even the fallback fetch fails
+        setKernalAndScheduleValue({
+          schedulerType: 'vertex',
+          kernalDetails: {
+            executionMode: 'local',
+            isDataprocKernel: false,
+            kernelDisplayName: ''
+          }
+        });
+        // You might want to show a toast/notification here if this happens often
+      }
+    }
+  };
   /**
    * Effect to set the initial scheduler type based on the session context.
    * This runs once when the component mounts.
    */
   useEffect(() => {
-   const fetchAndSetInitialSchedulerDetails = async () => {
-      try {
-        const notebookKernalDetails = await getDefaultSchedulerTypeOnLoad(sessionContext);
+    // This effect runs when preFetchedInitialDetails changes or when the component mounts
+    // and preFetchedInitialDetails is initially null/undefined.
 
-        // Update the single state object
-        setInitialKernelDetails(notebookKernalDetails);
+    loadDefaultKernalScheduler();
 
-        // Update react-hook-form value
-        setValue('schedulerSelection', notebookKernalDetails.schedulerType);
-        setValue('executionMode', notebookKernalDetails.executionMode);
-        // setValue('selectedServerlessName', initialKernalDetails.selectedServerlessName);
-        // setValue('selectedClusterName', initialKernalDetails.selectedClusterName);
-
-        console.log('Initial Scheduler Details:', notebookKernalDetails);
-      } catch (error) {
-        console.error('Failed to fetch initial scheduler details:', error);
-        // On error, revert to safe defaults for the state and form
-        const defaultDetails: SchedulerInitialKernel = {
-          schedulerType: 'vertex',
-          executionMode: 'local',
-          selectedServerlessName: undefined,
-          selectedClusterName: undefined,
-        };
-        setInitialKernelDetails(defaultDetails);
-        setValue('schedulerSelection', defaultDetails.schedulerType);
-      }
-    };
-
-    fetchAndSetInitialSchedulerDetails();
-  }, [sessionContext]); // `setValue` should be included in the dependency array
+    // Set form values using react-hook-form's setValue
+    setValue('schedulerSelection', kernalAndScheduleValue.schedulerType);
+    setValue(
+      'executionMode',
+      kernalAndScheduleValue.kernalDetails.executionMode
+    );
+    setValue(
+      'serverless',
+      kernalAndScheduleValue.kernalDetails.selectedServerlessName
+    );
+    setValue(
+      'cluster',
+      kernalAndScheduleValue.kernalDetails.selectedClusterName
+    );
+  }, [preFetchedInitialDetails, sessionContext]); // Ensure all dependencies are listed
 
   // Destructure for easier access in JSX
-  const { schedulerType, executionMode, selectedServerlessName, selectedClusterName } = initialKernelDetails;
+  const { schedulerType } = kernalAndScheduleValue;
 
   /**
    * Get the initial form values based on the scheduler type.
@@ -118,7 +158,7 @@ export const CreateNotebookSchedule = (
    */
   const schedulerFormValues = useMemo(() => {
     // This will now use the dynamically determined schedulerType
-    return getFormValuesForScheduler(initialKernelDetails);
+    return getFormValuesForScheduler(kernalAndScheduleValue);
   }, [schedulerType]);
 
   const {
@@ -136,7 +176,7 @@ export const CreateNotebookSchedule = (
     mode: 'onChange'
   });
   const schedulerSelection = watch('schedulerSelection'); // Get the current value of the radio button
-
+  console.log('Current Scheduler Selection:', schedulerSelection);
   /**
    * Helper function to get the schedule values from the Vertex scheduler form.
    * @param vertexData The data from the Vertex scheduler form.
@@ -161,6 +201,19 @@ export const CreateNotebookSchedule = (
       return vertexData.scheduleValue;
     }
     return undefined; // Fallback
+  };
+
+  /**
+   * Converts an array of parameters to a string representation.
+   * @param params An array of parameters to convert to a string.
+   * @returns A string representation of the parameters, formatted as "key:value" pairs.
+   */
+  const convertParametersToString = (params: Parameter[]): string => {
+    if (!params || params.length === 0) {
+      return '';
+    }
+
+    return params.map(param => `${param.key}:${param.value}`).join(', ');
   };
 
   /**
@@ -217,7 +270,7 @@ export const CreateNotebookSchedule = (
         time_zone: composerData.timeZone,
         output_formats: composerData.outputFormats || [], // Ensure this is an array
         dag_id: composerData.dagId ? composerData.dagId : '', // Assuming this is part of the form data
-        parameters: composerData.parameters ? composerData.parameters : [], // Ensure this is an array
+        parameters: convertParametersToString(composerData.parameters || []), // Convert parameters to string
         execution_mode: composerData.executionMode || 'local', // Default to 'local' if not set
         stop_cluster: false
       };

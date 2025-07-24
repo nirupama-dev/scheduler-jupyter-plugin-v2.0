@@ -17,7 +17,8 @@
  */
 
 import { ISessionContext } from '@jupyterlab/apputils';
-import { ExecutionMode, SchedulerType } from '../types/CommonSchedulerTypes';
+import { IKernelDetails } from './ComposerInterface';
+import { SchedulerType } from '../types/CommonSchedulerTypes';
 
 export interface IAuthCredentials {
   access_token?: string;
@@ -29,12 +30,8 @@ export interface IAuthCredentials {
 
 export interface ISchedulerRoutesProps {
   sessionContext: ISessionContext; 
+  initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults| null |undefined
 }
-
-export interface ICreateNotebookScheduleProps {
-  sessionContext: ISessionContext;
-}
-
 
 export interface IGcpUrlResponseData {
   dataproc_url: string;
@@ -68,9 +65,14 @@ export interface Parameter {
   value: string;
 }
 
-export interface SchedulerInitialKernel {
+export interface INotebookKernalSchdulerDefaults {
   schedulerType: SchedulerType;
-  executionMode: ExecutionMode;
-  selectedServerlessName?: string;
-  selectedClusterName?: string;
+  kernalDetails: IKernelDetails;
 }
+
+//Remove this if same as ISchedulerRoutesProps
+export interface ICreateNotebookScheduleProps {
+  sessionContext: ISessionContext;
+  initialKernalScheduleDetails?: INotebookKernalSchdulerDefaults|null|undefined;
+}
+

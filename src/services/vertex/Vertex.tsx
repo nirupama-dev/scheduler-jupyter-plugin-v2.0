@@ -61,7 +61,7 @@ export class VertexServices {
     requestAPI(`api/vertex/uiConfig?region_id=${region}`)
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
-          console.log('formattedResponse', formattedResponse);
+          //console.log('formattedResponse', formattedResponse);
           const response:IMachineType[] = formattedResponse.map(uiConfigAPIResponseTransform);
           setMachineTypeList(response);
         } else if (formattedResponse.length === undefined) {

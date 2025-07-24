@@ -52,13 +52,18 @@ function ExecutionHistoryScreen() {
 }
 
 export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps) {
-  const { sessionContext } = sessionContextprops;
+  const { sessionContext, initialKernalSchedulerDetails } = sessionContextprops;
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/list" replace />} />
       <Route
         path="/create"
-        element={<CreateNotebookSchedule sessionContext={sessionContext} />}
+        element={
+          <CreateNotebookSchedule
+            sessionContext={sessionContext}
+            initialKernalScheduleDetails={initialKernalSchedulerDetails}
+          />
+        }
       />
       <Route path="/list" element={<ListingScreen />} />
       <Route path="/history/:id" element={<ExecutionHistoryScreen />} />

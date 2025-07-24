@@ -16,15 +16,22 @@
  */
 
 import { JupyterLab } from '@jupyterlab/application';
-// import { ISettingRegistry } from '@jupyterlab/settingregistry';
-// import { ILauncher } from '@jupyterlab/launcher';
-import { IThemeManager, MainAreaWidget } from '@jupyterlab/apputils';
+
+import { ISessionContext, IThemeManager, MainAreaWidget } from '@jupyterlab/apputils';
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IDisposable } from '@lumino/disposable';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { NotebookScheduler } from './NotebookScheduler';
-import { iconNotebookScheduler } from '../../utils/Icons';
+import { customAnimatedSpinnerIcon, iconNotebookScheduler } from '../../utils/Icons';
+import {
+  // ... other imports
+  showDialog, // Import showDialog
+  Dialog // Import Dialog
+} from '@jupyterlab/apputils';
+import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
+import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface'; 
+
 
 export class NotebookButtonExtension
   implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
@@ -33,8 +40,13 @@ export class NotebookButtonExtension
     private app: JupyterLab,
     // private settingRegistry: ISettingRegistry,
     // private launcher: ILauncher,
-    private themeManager: IThemeManager
-  ) {}
+    private themeManager: IThemeManager,
+    private schedulerButton: ToolbarButton | null  // Store a reference to the button
+  ) {
+    this.app = app;
+    this.themeManager = themeManager;
+    this.schedulerButton= schedulerButton
+  }
 
   createNew(
     panel: NotebookPanel,
@@ -42,16 +54,81 @@ export class NotebookButtonExtension
   ): IDisposable {
     const button = new ToolbarButton({
       icon: iconNotebookScheduler,
-      onClick: () => {
-        const content = new NotebookScheduler(this.themeManager, '/create', context.sessionContext);
-        const widget = new MainAreaWidget({ content });
-        widget.title.label = 'Create Scheduled Job';
-        widget.title.icon = iconNotebookScheduler;
-        this.app.shell.add(widget, 'main');
+      onClick: async () => { // Make onClick async to await onNotebookSchedulerButtonClick
+        // Ensure the button reference is available before proceeding
+        if (!this.schedulerButton) {
+            console.error('Scheduler button reference not found in onClick. This should not happen after assignment.');
+            return;
+        }
+        await this.onNotebookSchedulerButtonClick(context.sessionContext)
+    
       },
+      // onClick: async() => {
+      //   await this.onNotebookSchedulerButtonClick();
+      //   const content = new NotebookScheduler(this.themeManager, '/create', context.sessionContext);
+      //   const widget = new MainAreaWidget({ content });
+      //   widget.title.label = 'Create Scheduled Job';
+      //   widget.title.icon = iconNotebookScheduler;
+      //   this.app.shell.add(widget, 'main');
+      // },
       tooltip: 'Schedule this notebook as a job'
     });
     panel.toolbar.insertItem(1000, 'notebookScheduler', button);
+    this.schedulerButton = button; // Store the reference to the button
     return button;
+  }
+
+ // Pass sessionContext as an argument because `this.context` is not available in this class directly
+ private onNotebookSchedulerButtonClick = async (sessionContext: ISessionContext): Promise<void> => {
+    // Ensure the button is present before attempting to modify it
+    if (!this.schedulerButton) {
+      console.error('Scheduler button not initialized.');
+      return;
+    }
+
+    // 1. Show loader on the button and disable it
+    this.schedulerButton.title.icon = customAnimatedSpinnerIcon;
+    this.schedulerButton.title.iconClass=''; // Clear any previous icon class'
+    this.schedulerButton.node.classList.add('jp-mod-inprogress'); // Add class for styling if needed
+    this.schedulerButton.enabled = false;
+
+    let initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults | null = null;
+    let hasError = false;
+
+    try {
+      // 2. Pre-fetch the initial kernel details
+      initialKernalSchedulerDetails = (await getDefaultSchedulerTypeOnLoad(sessionContext)).kernalAndSchedulerDetails;
+      console.log('Prefetched Initial Scheduler Details for button:', initialKernalSchedulerDetails);
+
+    } catch (error) {
+      console.error('Failed to pre-fetch initial scheduler details:', error);
+      hasError = true;
+      // Show an error dialog to the user
+      await showDialog({
+        title: 'Error Scheduling Notebook',
+        body: `Failed to load scheduler configurations. Please check your network connection and permissions. Error: ${error}`,
+        buttons: [Dialog.okButton()]
+      });
+    } finally {
+      // 3. Revert button state regardless of success or failure
+      this.schedulerButton.title.icon = iconNotebookScheduler;
+      this.schedulerButton.title.iconClass = '';
+      this.schedulerButton.node.classList.remove('jp-mod-inprogress');
+      this.schedulerButton.enabled = true;
+    }
+
+    // 4. Only proceed to open the form if successful
+    if (initialKernalSchedulerDetails && !hasError) {
+      const content = new NotebookScheduler(
+        this.themeManager,
+        '/create',
+        sessionContext, // Pass sessionContext
+        initialKernalSchedulerDetails // Pass the pre-fetched data
+      );
+      const widget = new MainAreaWidget({ content });
+      widget.title.label = 'Create Scheduled Job';
+      widget.title.icon = iconNotebookScheduler;
+      this.app.shell.add(widget, 'main');
+    }
   }
 }

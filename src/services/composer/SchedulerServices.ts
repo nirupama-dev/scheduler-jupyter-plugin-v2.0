@@ -100,7 +100,6 @@ export class SchedulerService {
     }
   };
   static readonly listSessionTemplatesAPIService = async (
-    // setServerlessDataList: (value: string[]) => void,
     setServerlessOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,

@@ -26,21 +26,31 @@ import { MemoryRouter } from 'react-router-dom';
 import { ISessionContext, IThemeManager } from '@jupyterlab/apputils';
 import { SchedulerRoutes } from '../../router/SchedulerRoutes';
 import { SchedulerWidget } from '../common/widget/SchedulerWidget';
+import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface';
 
 export class NotebookScheduler extends SchedulerWidget {
   private initialRoute: string;
   private sessionContext: ISessionContext;
+  private initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults|null|undefined;
 
-  constructor(themeManager: IThemeManager, initialRoute: string = '/list', sessionContext: ISessionContext) {
+  constructor(
+    themeManager: IThemeManager,
+    initialRoute: string = '/list',
+    sessionContext: ISessionContext,
+    initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults|null|undefined
+  ) {
     super(themeManager);
     this.initialRoute = initialRoute;
     this.sessionContext = sessionContext;
+    this.initialKernalSchedulerDetails = initialKernalSchedulerDetails||null||undefined;
   }
-
   protected renderInternal(): React.ReactElement {
     return (
       <MemoryRouter initialEntries={[this.initialRoute]}>
-        <SchedulerRoutes sessionContext={this.sessionContext} />
+        <SchedulerRoutes
+          sessionContext={this.sessionContext}
+          initialKernalSchedulerDetails={this.initialKernalSchedulerDetails}
+        />
       </MemoryRouter>
     );
   }

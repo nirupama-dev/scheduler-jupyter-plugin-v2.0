@@ -25,7 +25,8 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   // MainAreaWidget,
   IThemeManager,
-  Notification
+  Notification,
+  ToolbarButton
 } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
 import { NotebookButtonExtension } from './components/notebookScheduler/NotebookButtonExtension';
@@ -45,6 +46,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry | null,
     themeManager: IThemeManager,
+    schedulerButton: ToolbarButton|null,
     launcher: ILauncher
   ) => {
     console.log('JupyterLab extension scheduler-jupyter-plugin is activated!');
@@ -128,7 +130,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
         app as JupyterLab,
         // settingRegistry as ISettingRegistry,
         // launcher,
-        themeManager
+        themeManager,
+        schedulerButton
       )
     );
 
