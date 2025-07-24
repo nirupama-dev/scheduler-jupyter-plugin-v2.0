@@ -72,6 +72,7 @@ const NotebookSchedulerComponent = ({
   const abortControllerRef = useRef<any>(null);
   const [apiEnableUrl, setApiEnableUrl] = useState<any>(null);
   const [loginError, setLoginError] = useState<boolean>(false);
+  const [configError, setConfigError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [listingScreenFlag, setListingScreenFlag] = useState<boolean>(false);
   const [jobNameUniquenessError, setJobNameUniquenessError] =
@@ -100,7 +101,7 @@ const NotebookSchedulerComponent = ({
 
   useEffect(() => {
     getKernelDetails();
-    checkConfig(setLoginError, setIsLoading);
+    checkConfig(setLoginError, setIsLoading, setConfigError);
   }, []);
 
   const handleJobNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -172,6 +173,7 @@ const NotebookSchedulerComponent = ({
           <LoginErrorComponent
             setLoginError={setLoginError}
             loginError={loginError}
+            configError={configError}
           />
         </div>
       ) : (

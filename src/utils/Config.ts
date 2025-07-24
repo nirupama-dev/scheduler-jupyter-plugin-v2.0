@@ -44,13 +44,17 @@ export const authApi = async (
 
 export const checkConfig = async (
   setLoginError: React.Dispatch<React.SetStateAction<boolean>>,
-  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setConfigError: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<void> => {
   const credentials: IAuthCredentials | undefined = await authApi();
   if (credentials) {
     if (credentials.login_error === 1) {
       setLoginError(true);
       setIsLoading(false);
+    }
+    if (credentials.config_error === 1) {
+      setConfigError(true);
     }
     setIsLoading(false);
   }
