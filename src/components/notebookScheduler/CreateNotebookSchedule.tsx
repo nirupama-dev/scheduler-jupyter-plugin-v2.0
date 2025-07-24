@@ -233,7 +233,7 @@ export const CreateNotebookSchedule = (
         region: vertexData.vertexRegion,
         cloud_storage_bucket: vertexData.cloudStorageBucket,
         service_account: vertexData.serviceAccount,
-        network_option: vertexData.networkOption,
+        network_option: vertexData.networkOption ||'networkInThisProject',
         network: vertexData.network,
         subnetwork: vertexData.subnetwork,
         disk_type: vertexData.diskType,

@@ -62,6 +62,7 @@ export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
   getOptionLabel?: any;
   isOptionEqualToValue?: (option: OptionType, value: string | null | undefined) => boolean;
   getOptionValue?: any;
+  disabled?:boolean
 }
 
 // Define the shape of a single option

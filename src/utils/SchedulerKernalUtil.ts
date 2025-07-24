@@ -245,12 +245,9 @@ const promisifiedListSessionTemplates = (): Promise<string[]> => {
         resolve(action.map(option => option.value));
       }
     };
-
-    const dummySetIsLoading = (val: boolean) => {}; // No-op
     console.log('Calling listSessionTemplatesAPIService');
     SchedulerService.listSessionTemplatesAPIService(
       setServerlessOptionsCallback,
-      dummySetIsLoading // Pass a dummy function for `setIsLoadingKernelDetail`
     ).catch(reject); // Propagate rejections from the service itself
   });
 };

@@ -36,7 +36,8 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   onChangeCallback,
   error,
   loading = false, // Default to false,
-  filterOptions
+  filterOptions,
+  disabled
   // onSearchInputChange,
   // freeSolo = false, // Default to false
   // placeholder = '',

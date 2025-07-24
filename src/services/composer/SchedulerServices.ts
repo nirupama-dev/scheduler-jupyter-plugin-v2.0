@@ -43,13 +43,15 @@ import { DropdownOption } from '../../interfaces/FormInterface';
 export class SchedulerService {
   static readonly listClustersAPIService = async (
     setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
-    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>,
+    setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
   ) => {
     const pageToken = nextPageToken ?? '';
     try {
-      setLoadingState(prev => ({ ...prev, cluster: true }));
+      if (setLoadingState) {
+        setLoadingState(prev => ({ ...prev, cluster: true }));
+      }
       const serviceURL = `clusterList?pageSize=500&pageToken=${pageToken}`;
 
       const formattedResponse: any = await requestAPI(serviceURL);
@@ -92,10 +94,14 @@ export class SchedulerService {
         handleErrorToast({
           error: formattedResponse?.error
         });
-        setLoadingState(prev => ({ ...prev, cluster: false }));
+        if (setLoadingState) {
+          setLoadingState(prev => ({ ...prev, cluster: false }));
+        }
       }
     } catch (error) {
-      setLoadingState(prev => ({ ...prev, cluster: false }));
+      if (setLoadingState) {
+        setLoadingState(prev => ({ ...prev, cluster: false }));
+      }
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
       const errorResponse = `Failed to fetch clusters : ${error}`;
       handleErrorToast({
@@ -105,7 +111,7 @@ export class SchedulerService {
   };
   static readonly listSessionTemplatesAPIService = async (
     setServerlessOptions: Dispatch<SetStateAction<DropdownOption[]>>,
-    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>,
+    setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
     setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,
     previousSessionTemplatesList?: object
@@ -115,7 +121,9 @@ export class SchedulerService {
       setIsLoadingKernelDetail(true);
     }
     try {
-      setLoadingState(prev => ({ ...prev, serverless: true }));
+      if (setLoadingState) {
+        setLoadingState(prev => ({ ...prev, serverless: true }));
+      }
       const serviceURL = `runtimeList?pageSize=500&pageToken=${pageToken}`;
 
       const formattedResponse: any = await requestAPI(serviceURL);
@@ -166,10 +174,14 @@ export class SchedulerService {
         handleErrorToast({
           error: formattedResponse?.error
         });
-        setLoadingState(prev => ({ ...prev, serverless: false }));
+        if (setLoadingState) {
+          setLoadingState(prev => ({ ...prev, serverless: false }));
+        }
       }
     } catch (error) {
-      setLoadingState(prev => ({ ...prev, serverless: false }));
+      if (setLoadingState) {
+        setLoadingState(prev => ({ ...prev, serverless: false }));
+      }
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
