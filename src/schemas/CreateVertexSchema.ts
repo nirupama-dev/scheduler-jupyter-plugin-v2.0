@@ -23,7 +23,7 @@ import { createNotebookCommonSchema } from './CreateNotebookCommonSchema';
  */
 export const createVertexSchema = createNotebookCommonSchema.extend({
   schedulerSelection: z.literal('vertex'), // Discriminator property
-  region: z.string().nonempty('Region is required.').min(1, 'Region is required.'),
+  vertexRegion: z.string().nonempty('Region is required.').min(1, 'Region is required.'),
   machineType: z.string().min(1, 'Machine type is required.'),
   kernelName: z.string().min(1, 'Kernel is required.'),
   cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),

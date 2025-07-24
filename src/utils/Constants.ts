@@ -33,6 +33,7 @@ export const ABORT_MESSAGE = 'signal is aborted without reason';
 export const HTTP_STATUS_BAD_REQUEST = 400;
 export const HTTP_STATUS_FORBIDDEN = 403;
 export const DEFAULT_LABEL_DETAIL = 'client:scheduler-jupyter-plugin';
+export const PACKAGES = ['apache-airflow-providers-papermill', 'ipykernel'];
 
 // Pattern to check whether string contains link
 export const pattern =

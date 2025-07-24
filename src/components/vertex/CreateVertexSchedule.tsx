@@ -65,7 +65,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     // ... initialize other mandatory properties
   });
 
-  const region = watch('region');
+  const region = watch('vertexRegion');
   const machineType = watch('machineType');
   const acceleratorType = watch('acceleratorType');
 
@@ -78,8 +78,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     setMachineTypeList([]);
     setValue('acceleratorType', '');
     setValue('acceleratorCount', '');
-    trigger('region');
-    trigger('machineType')
+    trigger('vertexRegion');
+    trigger('machineType');
   };
 
   /**
@@ -116,7 +116,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
           setLoadingState(prev => ({ ...prev, region: false }));
-          setValue('region', credentials.region_id);
+          setValue('vertexRegion', credentials.region_id);
         }
       })
       .catch(error => {
@@ -150,14 +150,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     <div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="region" // Matches schema
+          name="vertexRegion" // Matches schema
           control={control}
           label="Region*"
           options={VERTEX_REGIONS}
           customClass="create-scheduler-style"
           loading={loadingState.region}
           onChangeCallback={handleRegionChange}
-          error={errors.region}
+          // error={errors.vertexRegion}
         />
       </div>
 

@@ -41,7 +41,7 @@ const getDefaultVertexValues = (): VertexSchedulerFormValues => ({
   inputFile: '',
   machineType: '',
   kernelName: '',
-  region: '',
+  vertexRegion: '',
   cloudStorageBucket: '',
   serviceAccount: '',
   network: '',
@@ -77,7 +77,7 @@ const getDefaultComposerValues = (initialKernelDetails: INotebookKernalSchdulerD
   jobName: '',
   inputFile: '',
   projectId: '',
-  region: '',
+  composerRegion: '',
   executionMode: initialKernelDetails.kernalDetails.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number

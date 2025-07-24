@@ -29,11 +29,13 @@ import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import {
+  IComposerEnvAPIResponse,
   ICreateComposerSchedulerProps,
   ILoadingStateComposer
 } from '../../interfaces/ComposerInterface';
 import {
   EXECUTION_MODE_OPTIONS,
+  PACKAGES,
   SCHEDULE_MODE_OPTIONS
 } from '../../utils/Constants';
 import { FormGroup } from '@mui/material';
@@ -41,9 +43,12 @@ import { AddParameters } from './AddParameters';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
-> = ({ control, errors, setValue, watch }) => {
+> = ({ control, errors, setValue, watch, setError }) => {
   const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
+  const [composerEnvData, setComposerEnvData] = useState<
+    IComposerEnvAPIResponse[]
+  >([]);
   const [clusterOptions, setClusterOptions] = useState<DropdownOption[]>([]);
   const [serverlessOptions, setServerlessOptions] = useState<DropdownOption[]>(
     []
@@ -52,7 +57,9 @@ export const CreateComposerSchedule: React.FC<
   const [loadingState, setLoadingState] = useState<ILoadingStateComposer>({
     projectId: false,
     region: false,
-    environment: false
+    environment: false,
+    cluster: false,
+    serverless: false
     // ... initialize other mandatory properties
   });
 
@@ -64,7 +71,7 @@ export const CreateComposerSchedule: React.FC<
 
   // Watch for changes in form fields
   const selectedProjectId = watch('projectId');
-  const selectedRegion = watch('region');
+  const selectedRegion = watch('composerRegion');
   const scheduleMode = watch('scheduleMode');
   const emailOnFailure = watch('emailOnFailure');
   const emailOnRetry = watch('emailOnRetry');
@@ -109,49 +116,34 @@ export const CreateComposerSchedule: React.FC<
     setValue('environment', '');
   }, [selectedProjectId, setValue]);
 
-  // --- Logic to Pre-fill Region from Credentials (after regionOptions are updated) ---
-  // useEffect(() => {
-  //   if (selectedProjectId && regionOptions.length > 0) {
-  //     // Only run if project is selected and regions are fetched
-  //     authApi()
-  //       .then(credentials => {
-  //         if (credentials?.region_id) {
-  //           // Check if the credential's region exists in the *currently available* regionOptions
-  //           const regionExists = regionOptions.find(
-  //             opt => opt.value === credentials.region_id
-  //           );
-  //           if (regionExists) {
-  //             // Only set if the form field for region is currently empty or not matching the prefilled value
-  //             if (selectedRegion === '') {
-  //               setValue('region', credentials.region_id);
-  //             }
-  //           }
-  //         }
-  //       })
-  //       .catch(err => console.error('Error checking authApi for region:', err));
-  //   }
-  // }, [regionOptions, selectedRegion, setValue]);
-
   useEffect(() => {
     if (selectedProjectId && selectedRegion) {
       SchedulerService.listComposersAPIService(
         setEnvOptions,
+        setComposerEnvData,
         selectedProjectId,
         selectedRegion,
         setLoadingState
       );
     } else {
       setEnvOptions([]);
+      setComposerEnvData([]);
     }
   }, [selectedRegion, setValue]);
 
   useEffect(() => {
     if (executionMode === 'cluster') {
       setValue('serverless', '');
-      SchedulerService.listClustersAPIService(setClusterOptions);
+      SchedulerService.listClustersAPIService(
+        setClusterOptions,
+        setLoadingState
+      );
     } else if (executionMode === 'serverless') {
       setValue('cluster', '');
-      SchedulerService.listSessionTemplatesAPIService(setServerlessOptions);
+      SchedulerService.listSessionTemplatesAPIService(
+        setServerlessOptions,
+        setLoadingState
+      );
     } else {
       setClusterOptions([]);
       setServerlessOptions([]);
@@ -162,9 +154,9 @@ export const CreateComposerSchedule: React.FC<
   const handleProjectIdChange = useCallback(
     (value: string) => {
       setValue('projectId', value);
-      // setValue('region', '');
       setRegionOptions([]);
       setEnvOptions([]);
+      setComposerEnvData([]);
     },
     [setValue]
   );
@@ -172,26 +164,64 @@ export const CreateComposerSchedule: React.FC<
   // Handle Region change: Clear Environment
   const handleRegionChange = useCallback(
     (value: string) => {
-      setValue('region', value);
+      setValue('composerRegion', value);
       setEnvOptions([]);
+      setComposerEnvData([]);
     },
     [setValue]
   );
 
-  const handleEmailList = (data: string[]) => {
-    // const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    // let invalidEmail = false;
-    // data.forEach(email => {
-    //   if (!emailPattern.test(email)) {
-    //     invalidEmail = true;
-    //     setEmailError(true);
-    //   }
-    // });
-    // if (invalidEmail === false) {
-    //   setEmailError(false);
-    // }
-    setEmailList(data);
+  const findEnvironmentSelected = (
+    selectedEnvironment?: string,
+    composerEnvData?: IComposerEnvAPIResponse[]
+  ) => {
+    return composerEnvData?.find(
+      environment => environment.name === selectedEnvironment
+    );
   };
+
+  const checkRequiredPackages = (env: IComposerEnvAPIResponse) => {
+    const packages_from_env = env?.pypi_packages;
+    const missingPackages = packages_from_env
+      ? PACKAGES.filter(
+          pkg => !Object.prototype.hasOwnProperty.call(packages_from_env, pkg)
+        )
+      : PACKAGES.slice(); // If packages_from_env is falsy, all are missing
+
+    console.log(`Missing packages: ${missingPackages.join(', ')}`);
+    // Here you can handle the missing packages
+
+    if (missingPackages.length === 0) {
+      setError('environment', {
+        message: 'Required packages are already installed'
+      });
+    } else {
+      const message =
+        missingPackages.join(', ') +
+        ' will get installed on creation of schedule';
+      setError('environment', { message: message });
+      // setPackageInstalledList(missingPackages);
+    }
+  };
+
+  const handleEnvChange = useCallback(
+    (value: string) => {
+      setValue('environment', value);
+      if (value) {
+        const selectedEnvironment = findEnvironmentSelected(
+          value,
+          composerEnvData
+        );
+        console.log('exec', executionMode);
+        if (selectedEnvironment) {
+          if (executionMode === 'local') {
+            checkRequiredPackages(selectedEnvironment);
+          }
+        }
+      }
+    },
+    [setValue, composerEnvData]
+  );
 
   return (
     <div>
@@ -206,12 +236,11 @@ export const CreateComposerSchedule: React.FC<
           customClass="create-scheduler-style"
           onChangeCallback={handleProjectIdChange}
           disabled={true}
-          // error={errors}
         />
       </div>
       <div className="create-scheduler-form-element">
         <FormInputDropdown
-          name="region"
+          name="composerRegion"
           label="Region"
           control={control}
           setValue={setValue}
@@ -219,7 +248,7 @@ export const CreateComposerSchedule: React.FC<
           loading={loadingState.region}
           customClass="create-scheduler-style"
           onChangeCallback={handleRegionChange}
-          error={errors.region}
+          error={errors.composerRegion}
         />
       </div>
       <div className="create-scheduler-form-element">
@@ -231,7 +260,8 @@ export const CreateComposerSchedule: React.FC<
           options={envOptions}
           loading={loadingState.environment}
           customClass="create-scheduler-style"
-          // error={errors.environment}
+          onChangeCallback={handleEnvChange}
+          error={errors.environment}
         />
       </div>
       <div className="create-scheduler-label block-seperation">
@@ -247,9 +277,7 @@ export const CreateComposerSchedule: React.FC<
         />
       </div>
       <AddParameters control={control} errors={errors} />
-      
       {executionMode !== 'local' && (
-        // Start of a single wrapper div
         <div>
           <div className="create-scheduler-form-element sub-para">
             <FormInputRadio
@@ -257,18 +285,20 @@ export const CreateComposerSchedule: React.FC<
               control={control}
               className="schedule-radio-btn"
               options={EXECUTION_MODE_OPTIONS}
-              // error={errors.executionMode}
+              error={errors.executionMode}
             />
           </div>
           {executionMode === 'cluster' && (
             <div className="create-scheduler-form-element">
               <FormInputDropdown
                 name="cluster"
-                label="Cluster"
+                label="Cluster*"
                 control={control}
                 setValue={setValue}
                 options={clusterOptions}
+                loading={loadingState.cluster}
                 customClass="create-scheduler-style"
+                error={errors.cluster}
               />
             </div>
           )}
@@ -280,7 +310,9 @@ export const CreateComposerSchedule: React.FC<
                 control={control}
                 setValue={setValue}
                 options={serverlessOptions}
+                loading={loadingState.serverless}
                 customClass="create-scheduler-style"
+                error={errors.serverless}
               />
             </div>
           )}
@@ -294,9 +326,8 @@ export const CreateComposerSchedule: React.FC<
               />
             </div>
           )}
-        </div> // End of the single wrapper div
+        </div>
       )}
-
       <div className="create-scheduler-form-element block-seperation">
         <FormInputText
           label="Retry count"
@@ -304,7 +335,7 @@ export const CreateComposerSchedule: React.FC<
           name="retryCount"
           type="number"
           className="create-scheduler-style"
-          // error={errors.retryCount}
+          error={errors.retryCount}
         />
       </div>
       <div className="create-scheduler-form-element">
@@ -314,7 +345,7 @@ export const CreateComposerSchedule: React.FC<
           name="retryDelay"
           type="number"
           className="create-scheduler-style"
-          // error={errors.retryDelay}
+          error={errors.retryDelay}
         />
       </div>
       <div className="create-scheduler-form-element">
@@ -344,12 +375,12 @@ export const CreateComposerSchedule: React.FC<
           <MuiChipsInput
             name="emailRecipients"
             className="select-job-style"
-            onChange={e => handleEmailList(e)}
+            onChange={e => setEmailList(e)}
             addOnBlur={true}
             value={emailList}
             inputProps={{ placeholder: '' }}
             label="Email recipients"
-            // error={errors.emailRecipients}
+            // error={errors.email_recipients}
           />
         </div>
       )}
@@ -375,7 +406,7 @@ export const CreateComposerSchedule: React.FC<
               setValue={setValue}
               options={timeZoneOptions}
               customClass="create-scheduler-style"
-              // error={errors.timeZone}
+              error={errors.timeZone}
             />
           </div>
         </div>

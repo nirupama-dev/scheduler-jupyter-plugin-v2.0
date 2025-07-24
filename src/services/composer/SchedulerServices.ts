@@ -43,11 +43,13 @@ import { DropdownOption } from '../../interfaces/FormInterface';
 export class SchedulerService {
   static readonly listClustersAPIService = async (
     setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
   ) => {
     const pageToken = nextPageToken ?? '';
     try {
+      setLoadingState(prev => ({ ...prev, cluster: true }));
       const serviceURL = `clusterList?pageSize=500&pageToken=${pageToken}`;
 
       const formattedResponse: any = await requestAPI(serviceURL);
@@ -90,8 +92,10 @@ export class SchedulerService {
         handleErrorToast({
           error: formattedResponse?.error
         });
+        setLoadingState(prev => ({ ...prev, cluster: false }));
       }
     } catch (error) {
+      setLoadingState(prev => ({ ...prev, cluster: false }));
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
       const errorResponse = `Failed to fetch clusters : ${error}`;
       handleErrorToast({
@@ -101,6 +105,7 @@ export class SchedulerService {
   };
   static readonly listSessionTemplatesAPIService = async (
     setServerlessOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>,
     setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,
     previousSessionTemplatesList?: object
@@ -110,6 +115,7 @@ export class SchedulerService {
       setIsLoadingKernelDetail(true);
     }
     try {
+      setLoadingState(prev => ({ ...prev, serverless: true }));
       const serviceURL = `runtimeList?pageSize=500&pageToken=${pageToken}`;
 
       const formattedResponse: any = await requestAPI(serviceURL);
@@ -160,8 +166,10 @@ export class SchedulerService {
         handleErrorToast({
           error: formattedResponse?.error
         });
+        setLoadingState(prev => ({ ...prev, serverless: false }));
       }
     } catch (error) {
+      setLoadingState(prev => ({ ...prev, serverless: false }));
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
@@ -175,6 +183,7 @@ export class SchedulerService {
 
   static readonly listComposersAPIService = async (
     setEnvOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setComposerEnvData: Dispatch<SetStateAction<IComposerEnvAPIResponse[]>>,
     projectId: string,
     region: string,
     setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>,
@@ -202,9 +211,11 @@ export class SchedulerService {
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
         setEnvOptions([]);
+        setComposerEnvData([]);
       } else if (formattedResponse.length === undefined) {
         try {
           setEnvOptions([]);
+          setComposerEnvData([]);
         } catch (error) {
           console.error('Error parsing error message:', error);
           Notification.error(
@@ -215,6 +226,7 @@ export class SchedulerService {
           );
         }
       } else {
+        setComposerEnvData(formattedResponse);
         const environmentOptions: DropdownOption[] = formattedResponse.map(
           (env: IComposerEnvAPIResponse) => ({
             label: env.label,

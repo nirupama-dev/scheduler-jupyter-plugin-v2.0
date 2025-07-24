@@ -17,14 +17,21 @@
 
 import { ToastOptions } from 'react-toastify';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
-import { Control, FieldErrors, UseFormSetValue, UseFormWatch } from 'react-hook-form';
-import { ExecutionMode } from '../types/CommonSchedulerTypes';
+import {
+  Control,
+  FieldErrors,
+  UseFormSetError,
+  UseFormSetValue,
+  UseFormWatch
+} from 'react-hook-form';
+import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
 
 export interface ICreateComposerSchedulerProps {
   control: Control<CombinedCreateFormValues>;
-  errors: FieldErrors<CombinedCreateFormValues>;
+  errors: FieldErrors<ComposerSchedulerFormValues>;
   watch: UseFormWatch<CombinedCreateFormValues>;
   setValue: UseFormSetValue<CombinedCreateFormValues>;
+  setError: UseFormSetError<ComposerSchedulerFormValues>;
 }
 
 export interface IComposerSchedulePayload {
@@ -124,4 +131,6 @@ export interface ILoadingStateComposer {
   projectId: boolean;
   region: boolean;
   environment: boolean;
+  cluster: boolean;
+  serverless: boolean;
 }
