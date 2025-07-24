@@ -168,7 +168,7 @@ const NotebookSchedulerComponent = ({
           />
           Loading...
         </div>
-      ) : loginError && !isLoading ? (
+      ) : loginError && configError && !isLoading ? (
         <div className="login-error login-error-main">
           <LoginErrorComponent
             setLoginError={setLoginError}
