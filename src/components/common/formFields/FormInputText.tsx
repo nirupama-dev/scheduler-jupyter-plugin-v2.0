@@ -30,14 +30,15 @@ export const FormInputText = ({
   control,
   label,
   error,
-  type
+  type,
+  onBlurCallback
 }: FormInputProps) => {
   return (
     <Controller
       name={name}
       control={control}
       render={({
-        field: { onChange, value },
+        field: { onChange, value, onBlur },
         fieldState: { error: fieldError }, // eslint-disable-next-line @typescript-eslint/no-unused-vars
         formState
       }) => (
@@ -51,6 +52,13 @@ export const FormInputText = ({
           label={label}
           variant="outlined"
           type={type || 'text'}
+          onBlur={event => {
+            onBlur();
+
+            if(onBlurCallback) {
+              onBlurCallback(value);
+            }
+          }}
         />
       )}
     />

@@ -17,6 +17,7 @@
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema'; // Import types for clarity
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema'; // Import types for clarity
+import { DEFAULT_DISK_SIZE, DEFAULT_NETWORK_SELECTED, DEFAULT_SCHEDULER_SELECTED } from './Constants';
 import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 
 /**
@@ -36,7 +37,7 @@ import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
  * It provides a set of initial values that can be used when creating a new Vertex schedule.
  */
 const getDefaultVertexValues = (): VertexSchedulerFormValues => ({
-  schedulerSelection: 'vertex',
+  schedulerSelection: DEFAULT_SCHEDULER_SELECTED,
   jobName: '',
   inputFile: '',
   machineType: '',
@@ -47,18 +48,18 @@ const getDefaultVertexValues = (): VertexSchedulerFormValues => ({
   network: '',
   subnetwork: '',
   diskType: '',
-  diskSize: '50', // Example string default
+  diskSize: DEFAULT_DISK_SIZE, // Example string default
   acceleratorType: '',
   acceleratorCount: '',
   scheduleMode: 'runNow',
-  internalScheduleMode: undefined,
+  internalScheduleMode: 'cronFormat',
   scheduleField: '',
   scheduleValue: '',
   startTime: '',
   endTime: '',
   maxRunCount: '',
   timeZone: '',
-  networkOption: undefined,
+  networkOption: DEFAULT_NETWORK_SELECTED,
   primaryNetworkSelected: '',
   subNetworkSelected: '',
   sharedNetworkSelected: '',

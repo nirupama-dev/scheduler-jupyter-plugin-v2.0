@@ -19,7 +19,8 @@ import { requestAPI } from '../../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from './LoggingService';
 import path from 'path';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
-import { ILabelValue } from '../../interfaces/VertexInterface';
+import { ILoadingStateVertex } from '../../interfaces/VertexInterface';
+import { ILabelValue } from '../../interfaces/CommonInterface';
 
 export class StorageServices {
   static readonly cloudStorageAPIService = (
@@ -62,13 +63,14 @@ export class StorageServices {
   };
   static readonly newCloudStorageAPIService = (
     bucketName: string,
-    setIsCreatingNewBucket: (value: boolean) => void,
-    setBucketError: (value: string) => void
+    setLoadingState: React.Dispatch<React.SetStateAction<ILoadingStateVertex>>,
+    // setBucketError: (value: string) => void
   ) => {
     const payload = {
       bucket_name: bucketName
     };
-    setIsCreatingNewBucket(true);
+    // setIsCreatingNewBucket(true);
+    setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: true }));
     requestAPI('api/storage/createNewBucket', {
       body: JSON.stringify(payload),
       method: 'POST'
@@ -78,14 +80,16 @@ export class StorageServices {
           Notification.success('Bucket created successfully', {
             autoClose: false
           });
-          setBucketError('');
+          // setBucketError('');
         } else if (formattedResponse?.error) {
-          setBucketError(formattedResponse.error);
+          // setBucketError(formattedResponse.error);
         }
-        setIsCreatingNewBucket(false);
+        // setIsCreatingNewBucket(false);
+        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
       })
       .catch(error => {
-        setIsCreatingNewBucket(false);
+        // setIsCreatingNewBucket(false);
+        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
         SchedulerLoggingService.log(
           `Error creating the cloud storage bucket ${error}`,
           LOG_LEVEL.ERROR

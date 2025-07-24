@@ -55,7 +55,7 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   endTime: z.string().optional(),
   maxRunCount: z.string().optional(),
   timeZone: z.string().optional(),
-  networkOption: z.enum(['networkInThisProject', 'networkShared']).optional(),
+  networkOption: z.enum(['networkInThisProject', 'networkSharedFromHostProject']).optional(),
   primaryNetworkSelected: z.string().optional(),
   subNetworkSelected: z.string().optional(),
   sharedNetworkSelected: z.string().optional(),

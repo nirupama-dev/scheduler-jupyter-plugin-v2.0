@@ -65,7 +65,7 @@ export const combinedCreateFormSchema = z
           });
         }
       }
-      if (vertexData.networkOption === 'networkShared') {
+      if (vertexData.networkOption === 'networkSharedFromHostProject') {
         if (!vertexData.sharedNetworkSelected) {
           ctx.addIssue({
             path: ['sharedNetworkSelected'],

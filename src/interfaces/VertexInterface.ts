@@ -26,6 +26,7 @@ import {
   UseFormWatch
 } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
+import { ILabelValue } from './CommonInterface';
 
 export interface ICreateVertexSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -33,7 +34,7 @@ export interface ICreateVertexSchedulerProps {
   watch: UseFormWatch<CombinedCreateFormValues>;
   setValue: UseFormSetValue<CombinedCreateFormValues>;
   getValues: UseFormGetValues<CombinedCreateFormValues>;
-  trigger: UseFormTrigger<CombinedCreateFormValues>
+  trigger: UseFormTrigger<CombinedCreateFormValues>;
 }
 /*
  * Interface for the payload sent from the Create Vertex Scheduler form to the create API.
@@ -72,10 +73,6 @@ export interface IAllowedCounts {
 export interface IAcceleratorConfig {
   acceleratorType: { label: string; value: string };
   allowedCounts: IAllowedCounts[];
-}
-export interface ILabelValue<T> {
-  label: T;
-  value: T;
 }
 
 export interface ITransformedAcceleratorConfig {
@@ -189,4 +186,15 @@ export interface IFormattedResponse {
 export interface ILoadingStateVertex {
   region: boolean;
   machineType: boolean;
+  cloudStorageBucket: boolean;
+}
+
+export interface IServiceAccount {
+  displayName: string;
+  email: string;
+}
+
+export interface INetworkVertex {
+  name: string;
+  link: string;
 }
