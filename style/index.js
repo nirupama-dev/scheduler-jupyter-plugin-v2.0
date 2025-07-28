@@ -24,3 +24,4 @@
 import './createNotebookSchedule.css';
 import './createVertexScheduler.css';
 import './common.css';
+import './listVertexSchedule.css';

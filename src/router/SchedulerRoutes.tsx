@@ -20,24 +20,10 @@ import {
   Routes,
   Route,
   Navigate,
-  useNavigate,
   useParams
 } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
-
-// Dummy ListingScreen for demonstration
-function ListingScreen() {
-  const navigate = useNavigate();
-  return (
-    <div>
-      <h2>Listing Screen</h2>
-      <button onClick={() => navigate('/create')}>Go to Create</button>
-      <button onClick={() => navigate('/history/123')}>
-        Go to History for 123
-      </button>
-    </div>
-  );
-}
+import { ScheduleListingView } from '../components/vertex/ScheduleListingView';
 
 // Dummy ExecutionHistoryScreen for demonstration
 function ExecutionHistoryScreen() {
@@ -55,7 +41,7 @@ export function SchedulerRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/list" replace />} />
       <Route path="/create" element={<CreateNotebookSchedule />} />
-      <Route path="/list" element={<ListingScreen />} />
+      <Route path="/list" element={<ScheduleListingView />} />
       <Route path="/history/:id" element={<ExecutionHistoryScreen />} />
     </Routes>
   );

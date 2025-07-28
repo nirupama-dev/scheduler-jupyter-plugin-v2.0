@@ -23,7 +23,7 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  // MainAreaWidget,
+  MainAreaWidget,
   IThemeManager,
   Notification
 } from '@jupyterlab/apputils';
@@ -31,7 +31,9 @@ import { ILauncher } from '@jupyterlab/launcher';
 import { NotebookButtonExtension } from './components/notebookScheduler/NotebookButtonExtension';
 
 import { requestAPI } from './handler/Handler';
-import { PLUGIN_NAME, VERSION_DETAIL } from './utils/Constants';
+import { PLUGIN_NAME, TITLE_LAUNCHER_CATEGORY, VERSION_DETAIL } from './utils/Constants';
+import { NotebookScheduler } from './components/notebookScheduler/NotebookScheduler';
+import { iconScheduledNotebooks } from './utils/Icons';
 
 /**
  * Initialization data for the scheduler-jupyter-plugin extension.
@@ -49,9 +51,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ) => {
     console.log('JupyterLab extension scheduler-jupyter-plugin is activated!');
 
-    // const { commands } = app;
+    const { commands } = app;
 
-    // const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';
+    const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';
 
     async function jupyterVersionCheck() {
       try {
@@ -104,23 +106,24 @@ const plugin: JupyterFrontEndPlugin<void> = {
       }
     }
 
-    // commands.addCommand(createNotebookJobsComponentCommand, {
-    //   caption: 'Scheduled Jobs',
-    //   label: 'Scheduled Jobs',
-    //   icon: iconScheduledNotebooks,
-    //   execute: () => {
-    //     const content = new NotebookScheduler(
-    //       app as JupyterLab,
-    //       themeManager,
-    //       settingRegistry as ISettingRegistry,
-    //       ''
-    //     );
-    //     const widget = new MainAreaWidget<NotebookScheduler>({ content });
-    //     widget.title.label = 'Scheduled Jobs';
-    //     widget.title.icon = iconScheduledNotebooks;
-    //     app.shell.add(widget, 'main');
-    //   }
-    // });
+    commands.addCommand(createNotebookJobsComponentCommand, {
+      caption: 'Scheduled Jobs',
+      label: 'Scheduled Jobs',
+      icon: iconScheduledNotebooks,
+      execute: () => {
+        const content = new NotebookScheduler(
+          // app as JupyterLab,
+          themeManager,
+          // settingRegistry as ISettingRegistry,
+          // '',
+          '/list'
+        );
+        const widget = new MainAreaWidget<NotebookScheduler>({ content });
+        widget.title.label = 'Scheduled Jobs';
+        widget.title.icon = iconScheduledNotebooks;
+        app.shell.add(widget, 'main');
+      }
+    });
 
     app.docRegistry.addWidgetExtension(
       'Notebook',
@@ -132,13 +135,13 @@ const plugin: JupyterFrontEndPlugin<void> = {
       )
     );
 
-    // if (launcher) {
-    //   launcher.add({
-    //     command: createNotebookJobsComponentCommand,
-    //     category: TITLE_LAUNCHER_CATEGORY,
-    //     rank: 4
-    //   });
-    // }
+    if (launcher) {
+      launcher.add({
+        command: createNotebookJobsComponentCommand,
+        category: TITLE_LAUNCHER_CATEGORY,
+        rank: 4
+      });
+    }
 
     await jupyterVersionCheck();
   }

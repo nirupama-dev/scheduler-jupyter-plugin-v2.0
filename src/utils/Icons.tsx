@@ -18,6 +18,7 @@
 import { LabIcon } from '@jupyterlab/ui-components';
 import LeftArrowIcon from '../../style/icons/left_arrow_icon.svg';
 import notebookSchedulerIcon from '../../style/icons/scheduler_calendar_month.svg';
+import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -27,4 +28,9 @@ export const iconLeftArrow = new LabIcon({
 export const iconNotebookScheduler = new LabIcon({
   name: 'launcher:notebook-scheduler-icon',
   svgstr: notebookSchedulerIcon
+});
+
+export const iconScheduledNotebooks = new LabIcon({
+  name: 'launcher:scheduled-notebooks-icon',
+  svgstr: ScheduledNotebooksIcon
 });
