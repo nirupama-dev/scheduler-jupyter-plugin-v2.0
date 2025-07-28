@@ -18,6 +18,10 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { DropdownOption } from '../../interfaces/FormInterface';
+import { Dispatch, SetStateAction } from 'react';
+import { ILabelValue } from '../../interfaces/CommonInterface';
+import { ILoadingStateComposer } from '../../interfaces/ComposerInterface';
 
 export class ComputeServices {
   static readonly getParentProjectAPIService = async (
@@ -42,32 +46,33 @@ export class ComputeServices {
     }
   };
   static readonly primaryNetworkAPIService = (
-    setPrimaryNetworkList: (value: { name: string; link: string }[]) => void,
-    setPrimaryNetworkLoading: (value: boolean) => void,
-    setErrorMessagePrimaryNetwork: (value: string) => void
+    setPrimaryNetworkList: (value: ILabelValue<string>[]) => void,
+    // setPrimaryNetworkLoading: (value: boolean) => void,
+    // setErrorMessagePrimaryNetwork: (value: string) => void
   ) => {
-    setPrimaryNetworkLoading(true);
+    // setPrimaryNetworkLoading(true);
     requestAPI('api/compute/network')
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
+          console.log('formatted', formattedResponse)
           const primaryNetworkList = formattedResponse.map((network: any) => ({
-            name: network.name,
-            link: network.selfLink
+            label: network.name,
+            value: network.selfLink
           }));
           primaryNetworkList.sort();
           setPrimaryNetworkList(primaryNetworkList);
         } else if (formattedResponse.error) {
-          setErrorMessagePrimaryNetwork(formattedResponse.error);
+          // setErrorMessagePrimaryNetwork(formattedResponse.error);
           setPrimaryNetworkList([]);
         } else {
           setPrimaryNetworkList([]);
         }
 
-        setPrimaryNetworkLoading(false);
+        // setPrimaryNetworkLoading(false);
       })
       .catch(error => {
         setPrimaryNetworkList([]);
-        setPrimaryNetworkLoading(false);
+        // setPrimaryNetworkLoading(false);
         SchedulerLoggingService.log(
           `Error listing primary network ${error}`,
           LOG_LEVEL.ERROR
@@ -82,11 +87,11 @@ export class ComputeServices {
   static readonly subNetworkAPIService = async (
     region: string,
     primaryNetworkSelected: string | undefined,
-    setSubNetworkList: (value: { name: string; link: string }[]) => void,
-    setSubNetworkLoading: (value: boolean) => void,
-    setErrorMessageSubnetworkNetwork: (value: string) => void
+    setSubNetworkList: Dispatch<SetStateAction<ILabelValue<string>[]>>,
+    // setSubNetworkLoading: (value: boolean) => void,
+    // setErrorMessageSubnetworkNetwork: (value: string) => void
   ) => {
-    setSubNetworkLoading(true);
+    // setSubNetworkLoading(true);
     requestAPI(
       `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkSelected}`
     )
@@ -95,23 +100,23 @@ export class ComputeServices {
           const subNetworkList = formattedResponse
             .filter((network: any) => network.privateIpGoogleAccess === true)
             .map((network: any) => ({
-              name: network.name,
-              link: network.selfLink
+              label: network.name,
+              value: network.selfLink
             }));
           subNetworkList.sort();
           setSubNetworkList(subNetworkList);
-          setErrorMessageSubnetworkNetwork('');
+          // setErrorMessageSubnetworkNetwork('');
         } else if (formattedResponse.error) {
-          setErrorMessageSubnetworkNetwork(formattedResponse.error);
+          // setErrorMessageSubnetworkNetwork(formattedResponse.error);
           setSubNetworkList([]);
         } else {
           setSubNetworkList([]);
         }
-        setSubNetworkLoading(false);
+        // setSubNetworkLoading(false);
       })
       .catch(error => {
         setSubNetworkList([]);
-        setSubNetworkLoading(false);
+        // setSubNetworkLoading(false);
         SchedulerLoggingService.log(
           `Error listing sub networks ${error}`,
           LOG_LEVEL.ERROR
@@ -157,6 +162,35 @@ export class ComputeServices {
           LOG_LEVEL.ERROR
         );
         const errorResponse = `Failed to fetch shared networks list : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      });
+  };
+
+  static readonly regionAPIService = (
+    projectId: string,
+    setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>
+  ) => {
+    setLoadingState(prev => ({ ...prev, region: true }));
+    requestAPI(`api/compute/region?project_id=${projectId}`)
+      .then((formattedResponse: any) => {
+        console.log('Formatted response:', formattedResponse);
+        if (formattedResponse.length > 0) {
+          const regionOptions: DropdownOption[] = formattedResponse.map(
+            (region: string) => ({ value: region, label: region })
+          );
+          regionOptions.sort();
+          setRegionOptions(regionOptions);
+        } else {
+          setRegionOptions([]);
+        }
+        setLoadingState(prev => ({ ...prev, region: false }));
+      })
+      .catch(error => {
+        setLoadingState(prev => ({ ...prev, region: false }));
+        const errorResponse = `Failed to fetch region list : ${error}`;
         handleErrorToast({
           error: errorResponse
         });

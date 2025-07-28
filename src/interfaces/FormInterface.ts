@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+import { Control, FieldError, Path } from 'react-hook-form';
+import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
+import { ILabelValue } from './CommonInterface';
+
 export interface FormInputProps {
   name: string;
   control?: any;
@@ -22,13 +26,59 @@ export interface FormInputProps {
   setValue?: any;
   className?: string;
   options?: Array<{ label: string; value: string }>;
+  error?: FieldError;
+  [key: string]: any; // Allow additional props
+  type?: string;
+  hostProject?: any;
 }
 
-export interface FormInputDropdownProps {
-  name: string;
-  control: any;
-  options: Array<{ label: string; value: string }>;
+export interface IFormInput {
+  textValue: string;
+  radioValue: string;
+  checkboxValue: string[];
+  dateValue: Date;
+  dropdownValue: string;
+  type?: string;
+}
+
+// Define the specific option type
+export interface DropdownOption {
+  label: string;
+  value: string;
+}
+
+export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
+  name: Path<CombinedCreateFormValues>;
+  control: Control<CombinedCreateFormValues>;
+  options: Array<{ label: string; value: string }> | [];
   label?: string;
   setValue?: any;
+  className?: string;
   customClass?: string;
+  error?: FieldError;
+  onChangeCallback?: (value: any) => void;
+  loading?: boolean;
+  filterOptions?: any;
+  getOptionLabel?: any;
+  isOptionEqualToValue?: (option: OptionType, value: string | null | undefined) => boolean;
+  getOptionValue?: any;
+  disabled?:boolean
+}
+
+// Define the shape of a single option
+export interface Option {
+  label: string;
+  value: any;
+  disabled?: boolean; // Add a disabled property
+  defaultChecked?: boolean; // Add a defaultChecked property for initial state
+}
+
+// Define the props for the FormInputMultiCheckbox component
+export interface FormInputCheckboxProps {
+  name: string;
+  control: any; // Type from react-hook-form's useForm hook
+  label?: string;
+  isChecked?: boolean; // Optional prop to control the checked state
+  disabled?: boolean; // Optional prop to disable the checkbox
+  className?: string; // Optional prop for additional styling
 }

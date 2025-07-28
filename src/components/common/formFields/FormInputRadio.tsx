@@ -21,26 +21,42 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  Typography
+  Typography,
+  FormHelperText
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
 import { FormInputProps } from '../../../interfaces/FormInterface';
-import { NETWORK_OPTIONS, SHARED_NETWORK_DESCRIPTION, SHARED_NETWORK_DOC_URL } from '../../../utils/Constants';
+import {
+  DEFAULT_HOST_PROJECT_NETWORK,
+  NETWORK_OPTIONS,
+  SHARED_NETWORK_DESCRIPTION,
+  SHARED_NETWORK_DOC_URL
+} from '../../../utils/Constants';
 import LearnMore from '../links/LearnMore';
 
 export const FormInputRadio: React.FC<FormInputProps> = ({
   name,
   control,
   className = '',
-  options = []
+  options = [],
+  error,
+  hostProject
 }) => {
   const generateRadioOptions = () => {
     return options.map(singleOption => (
       <>
         <FormControlLabel
+          key={singleOption.value}
           value={singleOption.value}
           label={
-            <Typography sx={{ fontSize: 13 }}>{singleOption.label}</Typography>
+            <Typography sx={{ fontSize: 13 }}>
+              <>
+                {singleOption.label}
+                {singleOption.value === DEFAULT_HOST_PROJECT_NETWORK
+                  ? ` ${Object.keys(hostProject).length !== 0 ? `"${hostProject?.name}"` : ''}`
+                  : null}
+              </>
+            </Typography>
           }
           control={<Radio size="small" />}
           className="create-scheduler-label-style"
@@ -60,13 +76,13 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
   };
 
   return (
-    <FormControl component="fieldset">
+    <FormControl component="fieldset" error={!!error}>
       <Controller
         name={name}
         control={control}
         render={({
           field: { onChange, value },
-          fieldState: { error },
+          fieldState: { error: fieldError }, // eslint-disable-line @typescript-eslint/no-unused-vars
           formState
         }) => (
           <RadioGroup value={value} onChange={onChange} className={className}>
@@ -74,6 +90,8 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
           </RadioGroup>
         )}
       />
+      {error && <FormHelperText>{error.message}</FormHelperText>}{' '}
+      {/* Display error message */}
     </FormControl>
   );
 };

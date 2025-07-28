@@ -23,6 +23,7 @@ import {
   useParams
 } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
+import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/vertex/ScheduleListingView';
 
 // Dummy ExecutionHistoryScreen for demonstration
@@ -36,11 +37,20 @@ function ExecutionHistoryScreen() {
   );
 }
 
-export function SchedulerRoutes() {
+export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps) {
+  const { sessionContext, initialKernalSchedulerDetails } = sessionContextprops;
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/list" replace />} />
-      <Route path="/create" element={<CreateNotebookSchedule />} />
+      <Route
+        path="/create"
+        element={
+          <CreateNotebookSchedule
+            sessionContext={sessionContext}
+            initialKernalScheduleDetails={initialKernalSchedulerDetails}
+          />
+        }
+      />
       <Route path="/list" element={<ScheduleListingView />} />
       <Route path="/history/:id" element={<ExecutionHistoryScreen />} />
     </Routes>

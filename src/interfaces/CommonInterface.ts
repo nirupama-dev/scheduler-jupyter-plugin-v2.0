@@ -16,12 +16,21 @@
  *
  */
 
+import { ISessionContext } from '@jupyterlab/apputils';
+import { IKernelDetails } from './ComposerInterface';
+import { SchedulerType } from '../types/CommonSchedulerTypes';
+
 export interface IAuthCredentials {
   access_token?: string;
   project_id?: string;
   region_id?: string;
   config_error?: number;
   login_error?: number;
+}
+
+export interface ISchedulerRoutesProps {
+  sessionContext: ISessionContext; 
+  initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults| null |undefined
 }
 
 export interface IGcpUrlResponseData {
@@ -49,4 +58,43 @@ export interface IFormInput {
 
 export interface IPath {
   path?: string;
+}
+
+export interface Parameter {
+  key: string;
+  value: string;
+}
+
+export interface INotebookKernalSchdulerDefaults {
+  schedulerType: SchedulerType;
+  kernalDetails: IKernelDetails;
+}
+
+//Remove this if same as ISchedulerRoutesProps
+export interface ICreateNotebookScheduleProps {
+  sessionContext: ISessionContext;
+  initialKernalScheduleDetails?: INotebookKernalSchdulerDefaults|null|undefined;
+}
+
+
+export interface Parameter {
+  key: string;
+  value: string;
+}
+
+export interface INotebookKernalSchdulerDefaults {
+  schedulerType: SchedulerType;
+  kernalDetails: IKernelDetails;
+}
+
+//Remove this if same as ISchedulerRoutesProps
+export interface ICreateNotebookScheduleProps {
+  sessionContext: ISessionContext;
+  initialKernalScheduleDetails?: INotebookKernalSchdulerDefaults|null|undefined;
+}
+
+
+export interface ILabelValue<T> {
+  label: T;
+  value: T;
 }

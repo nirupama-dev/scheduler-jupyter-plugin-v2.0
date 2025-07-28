@@ -16,24 +16,44 @@
  */
 
 import { ToastOptions } from 'react-toastify';
+import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
+import {
+  Control,
+  FieldErrors,
+  UseFormSetError,
+  UseFormSetValue,
+  UseFormWatch
+} from 'react-hook-form';
+import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
+import { ExecutionMode } from '../types/CommonSchedulerTypes';
 
+export interface ICreateComposerSchedulerProps {
+  control: Control<CombinedCreateFormValues>;
+  errors: FieldErrors<ComposerSchedulerFormValues>;
+  watch: UseFormWatch<CombinedCreateFormValues>;
+  setValue: UseFormSetValue<CombinedCreateFormValues>;
+  setError: UseFormSetError<ComposerSchedulerFormValues>;
+}
 
-export interface IComposerCreatePayload {
+export interface IComposerSchedulePayload {
+  job_name: string;
+  dag_id?: string;
   input_filename: string;
+  project_id: string;
+  region: string;
   composer_environment_name: string;
   output_formats: string[];
-  parameters: string[];
+  parameters: string;
   serverless_name?: Record<string, never>;
   cluster_name?: string;
-  mode_selected: string;
-  schedule_value: string;
+  execution_mode: string;
+  schedule_value?: string;
   retry_count: number | undefined;
   retry_delay: number | undefined;
   email_failure: boolean;
-  email_delay: boolean;
-  email: string[];
-  name: string;
-  dag_id: string;
+  email_retry: boolean;
+  email_recipients?: string[];
+  run_option: 'runNow' | 'runOnSchedule';
   stop_cluster: boolean;
   time_zone?: string;
   local_kernel?: boolean;
@@ -44,6 +64,20 @@ export interface IComposerCreatePayload {
 export interface IUpdateSchedulerAPIResponse {
   status: number;
   error: string;
+}
+
+export interface IServerlessData {
+  serverlessName: string;
+  serverlessData: any; // Or a more specific type if you know the structure
+}
+
+export interface IKernelDetails {
+  executionMode: ExecutionMode; //local or remote kernels
+  isDataprocKernel: boolean; // Indicates if it's a Dataproc-related kernel (serverless or cluster)
+  kernelDisplayName: string;
+  kernelParentResource?: string; // Optional parent resource for remote kernels
+  selectedServerlessName?: string; // Name of the matched serverless instance
+  selectedClusterName?: string; // Name of the matched cluster
 }
 
 export interface ISchedulerDagData {
@@ -92,4 +126,12 @@ export interface IDagRunList {
 
 export interface IExpandableToastProps extends ToastOptions {
   message: string;
+}
+
+export interface ILoadingStateComposer {
+  projectId: boolean;
+  region: boolean;
+  environment: boolean;
+  cluster: boolean;
+  serverless: boolean;
 }
