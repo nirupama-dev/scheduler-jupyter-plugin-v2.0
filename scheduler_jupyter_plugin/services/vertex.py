@@ -303,11 +303,6 @@ class Client:
                                 "status": schedule.get("state"),
                                 "createTime": schedule.get("createTime"),
                                 "nextRunTime": schedule.get("nextRunTime"),
-                                "gcsNotebookSourceUri": schedule.get(
-                                    "createNotebookExecutionJobRequest"
-                                )
-                                .get("notebookExecutionJob")
-                                .get("gcsNotebookSource"),
                                 "lastScheduledRunResponse": schedule.get(
                                     "lastScheduledRunResponse"
                                 ),
@@ -434,9 +429,10 @@ class Client:
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs"
 
             headers = self.create_headers()
-            payload = data.get("createNotebookExecutionJobRequest").get(
-                "notebookExecutionJob"
-            )
+
+            payload = data.get("createNotebookExecutionJobRequest", {}) \
+                .get("notebookExecutionJob", {})
+            
             payload["scheduleResourceName"] = data.get("name")
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
