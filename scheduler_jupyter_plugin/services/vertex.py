@@ -296,10 +296,6 @@ class Client:
                             else:
                                 schedule_value = self.parse_schedule(cron)
 
-                            gcs_notebook_source_uri = schedule.get("createNotebookExecutionJobRequest", {}) \
-                                .get("notebookExecutionJob", {}) \
-                                .get("gcsNotebookSource")
-
                             formatted_schedule = {
                                 "name": schedule.get("name"),
                                 "displayName": schedule.get("displayName"),
@@ -307,7 +303,6 @@ class Client:
                                 "status": schedule.get("state"),
                                 "createTime": schedule.get("createTime"),
                                 "nextRunTime": schedule.get("nextRunTime"),
-                                "gcsNotebookSourceUri": gcs_notebook_source_uri,
                                 "lastScheduledRunResponse": schedule.get(
                                     "lastScheduledRunResponse"
                                 ),
