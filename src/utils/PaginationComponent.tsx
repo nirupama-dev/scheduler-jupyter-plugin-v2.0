@@ -33,10 +33,10 @@ export const PaginationComponent = ({
     <div>
       {isLoading ? null : (
         <div className="pagination-parent-view-main">
-          <div className="pagination-numbers" aria-disabled={isLoading}>
+          {/* <div className="pagination-numbers" aria-disabled={isLoading}>
             {currentStartIndex} - {currentLastIndex} of{' '}
             {totalCount !== 0 ? totalCount : 'many'}
-          </div>
+          </div> */}
 
           <div
             role={!canPreviousPage || isLoading ? undefined : 'button'}
