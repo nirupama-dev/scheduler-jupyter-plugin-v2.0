@@ -28,13 +28,12 @@ import {
   Notification,
   ToolbarButton
 } from '@jupyterlab/apputils';
-import { ILauncher } from '@jupyterlab/launcher';
 import { NotebookButtonExtension } from './components/notebookScheduler/NotebookButtonExtension';
-
 import { requestAPI } from './handler/Handler';
 import { PLUGIN_NAME, TITLE_LAUNCHER_CATEGORY, VERSION_DETAIL } from './utils/Constants';
 import { NotebookScheduler } from './components/notebookScheduler/NotebookScheduler';
 import { iconScheduledNotebooks } from './utils/Icons';
+import { ILauncher } from '@jupyterlab/launcher';
 
 /**
  * Initialization data for the scheduler-jupyter-plugin extension.
@@ -114,11 +113,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
       icon: iconScheduledNotebooks,
       execute: () => {
         const content = new NotebookScheduler(
-          // app as JupyterLab,
+          
           themeManager,
+          '/list',
           // settingRegistry as ISettingRegistry,
-          // '',
-          '/list'
+          
         );
         const widget = new MainAreaWidget<NotebookScheduler>({ content });
         widget.title.label = 'Scheduled Jobs';

@@ -35,7 +35,7 @@ import {
   ABORT_MESSAGE,
   DEFAULT_TIME_ZONE,
   HTTP_STATUS_FORBIDDEN,
-  pattern
+  // pattern
 } from '../../utils/Constants';
 import React, { Dispatch, SetStateAction } from 'react';
 import {
@@ -204,31 +204,31 @@ export class VertexServices {
         | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
     ) => void,
     region: string,
-    setIsLoading: (value: boolean) => void,
-    setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void,
-    setNextPageToken: (value: string | null) => void, // function for setting the next page token
-    newPageToken: string | null | undefined, // token of page to be fetched
-    setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
-    setApiEnableUrl: any,
+    // setIsLoading: (value: boolean) => void,
+    // setIsApiError: (value: boolean) => void,
+    // setApiError: (value: string) => void,
+    // setNextPageToken: (value: string | null) => void, // function for setting the next page token
+    // newPageToken: string | null | undefined, // token of page to be fetched
+    // setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
+    // setApiEnableUrl: any,
     pageLength: number = 25, // number of items to be fetched
-    abortControllers?: any
+    // abortControllers?: any
   ) => {
-    setIsLoading(true);
-    setIsApiError(false);
-    setApiError('');
+    // setIsLoading(true);
+    // setIsApiError(false);
+    // setApiError('');
 
     try {
       // setting controller to abort pending api call
       const controller = new AbortController();
-      abortControllers.current.push(controller);
+      // abortControllers.current.push(controller);
       const signal = controller.signal;
 
       const serviceURL = 'api/vertex/listSchedules';
       let urlparam = `?region_id=${region}&page_size=${pageLength}`;
-      if (newPageToken) {
-        urlparam += `&page_token=${newPageToken}`;
-      }
+      // if (newPageToken) {
+      //   urlparam += `&page_token=${newPageToken}`;
+      // }
 
       // API call
       const formattedResponse = await requestAPI(serviceURL + urlparam, {
@@ -237,36 +237,39 @@ export class VertexServices {
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
         setVertexScheduleList([]);
-        setNextPageToken(null);
-        setHasNextPageToken(false);
+        // setNextPageToken(null);
+        // setHasNextPageToken(false);
         return;
       }
 
-      const { schedules, nextPageToken, error } =
+      const { schedules, 
+        //nextPageToken, 
+        //error 
+        } =
         formattedResponse as IFormattedResponse;
 
       // Handle API error
-      if (error?.code === HTTP_STATUS_FORBIDDEN) {
-        const url = error.message.match(pattern);
-        if (url && url.length > 0) {
-          setIsApiError(true);
-          setApiError(error.message);
-          setApiEnableUrl(url);
-        } else {
-          setApiError(error.message);
-        }
+      // if (error?.code === HTTP_STATUS_FORBIDDEN) {
+      //   const url = error.message.match(pattern);
+      //   if (url && url.length > 0) {
+      //     setIsApiError(true);
+      //     setApiError(error.message);
+      //     setApiEnableUrl(url);
+      //   } else {
+      //     setApiError(error.message);
+      //   }
 
-        return;
-      }
+      //   return;
+      // }
 
       // Handle schedule data
       if (schedules && schedules.length > 0) {
         setVertexScheduleList(schedules);
 
         // Handle pagination
-        nextPageToken
-          ? setNextPageToken(nextPageToken)
-          : setNextPageToken(null);
+        // nextPageToken
+        //   ? setNextPageToken(nextPageToken)
+        //   : setNextPageToken(null);
         // Adding a slight delay for DOM refresh
         await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -277,15 +280,15 @@ export class VertexServices {
             schedule,
             region,
             setVertexScheduleList,
-            abortControllers
+            // abortControllers
           );
         });
-        setIsLoading(false); // Stop loading after everything is complete
+        // setIsLoading(false); // Stop loading after everything is complete
       } else {
         setVertexScheduleList([]);
-        setNextPageToken(null);
-        setHasNextPageToken(false);
-        setIsLoading(false);
+        // setNextPageToken(null);
+        // setHasNextPageToken(false);
+        // setIsLoading(false);
       }
     } catch (error: any) {
       if (typeof error === 'object' && error !== null) {
@@ -298,10 +301,10 @@ export class VertexServices {
       } else {
         // Handle errors during the API call
         setVertexScheduleList([]);
-        setNextPageToken(null);
-        setHasNextPageToken(false);
-        setIsApiError(true);
-        setApiError('An error occurred while fetching schedules.');
+        // setNextPageToken(null);
+        // setHasNextPageToken(false);
+        // setIsApiError(true);
+        // setApiError('An error occurred while fetching schedules.');
         SchedulerLoggingService.log(
           `Error listing vertex schedules ${error}`,
           LOG_LEVEL.ERROR
@@ -311,7 +314,7 @@ export class VertexServices {
         });
       }
     } finally {
-      setIsLoading(false); // Ensure loading is stopped
+      // setIsLoading(false); // Ensure loading is stopped
     }
   };
 
@@ -920,11 +923,11 @@ export class VertexServices {
         | IVertexScheduleList[]
         | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
     ) => void,
-    abortControllers: any
+    // abortControllers: any
   ) => {
     // Controller to abort pending API call
     const controller = new AbortController();
-    abortControllers?.current.push(controller);
+    // abortControllers?.current.push(controller);
     const signal = controller.signal;
 
     //Extract Schedule id from schedule name.

@@ -24,7 +24,7 @@ import {
 } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
-import { ScheduleListingView } from '../components/vertex/ScheduleListingView';
+import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
 
 // Dummy ExecutionHistoryScreen for demonstration
 function ExecutionHistoryScreen() {

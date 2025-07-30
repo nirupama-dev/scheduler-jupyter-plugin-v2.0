@@ -235,3 +235,34 @@ export const DEFAULT_DISK_SIZE = '100';
 export const DEFAULT_DISK_MIN_SIZE = 10;
 
 export const DEFAULT_DISK_MAX_SIZE = 65536;
+
+export const LISTING_SCREEN_HEADING = [
+        {
+          Header: 'Schedule Name',
+          accessor: 'displayName'
+        },
+        {
+          Header: 'Frequency',
+          accessor: 'schedule'
+        },
+        {
+          Header: 'Next Run Date',
+          accessor: 'nextRunTime'
+        },
+        {
+          Header: 'Created',
+          accessor: 'createTime'
+        },
+        {
+          Header: 'Latest Execution Jobs',
+          accessor: 'jobState'
+        },
+        {
+          Header: 'Status',
+          accessor: 'status'
+        },
+        {
+          Header: 'Actions',
+          accessor: 'actions'
+        }
+      ]

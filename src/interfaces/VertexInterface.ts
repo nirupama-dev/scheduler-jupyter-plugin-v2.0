@@ -198,3 +198,37 @@ export interface INetworkVertex {
   name: string;
   link: string;
 }
+
+export interface IVertexCellProps {
+  getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
+  value: string | any;
+  column: {
+    Header: string;
+  };
+  row: {
+    original: {
+      id: string;
+      status: string;
+      lastScheduledRunResponse: {
+        runResponse: string;
+      };
+      jobState: string[];
+      name: string;
+      createTime: string;
+      nextRunTime: string;
+    };
+  };
+  render: (value: string) => React.ReactNode;
+}
+
+export interface IVertexScheduleListing {
+  isLoading: boolean;
+}
+
+export interface IVertexScheduleList {
+  displayName: string;
+  schedule: string;
+  status: string;
+  jobState?: any[];
+  region: string;
+}

@@ -80,7 +80,7 @@ export const CreateNotebookSchedule = (
   /**
    * Function to Extract Kernal details and assign default Scheduler
    * Initially looks for the prefetched Ker
-   * 
+   *
    */
   const loadDefaultKernalScheduler = async () => {
     if (preFetchedInitialDetails) {
@@ -135,18 +135,20 @@ export const CreateNotebookSchedule = (
 
     // Set form values using react-hook-form's setValue
     setValue('schedulerSelection', kernalAndScheduleValue.schedulerType);
-    setValue(
-      'executionMode',
-      kernalAndScheduleValue.kernalDetails.executionMode
-    );
-    setValue(
-      'serverless',
-      kernalAndScheduleValue.kernalDetails.selectedServerlessName
-    );
-    setValue(
-      'cluster',
-      kernalAndScheduleValue.kernalDetails.selectedClusterName
-    );
+    if (kernalAndScheduleValue.kernalDetails) {
+      setValue(
+        'executionMode',
+        kernalAndScheduleValue.kernalDetails.executionMode
+      );
+      setValue(
+        'serverless',
+        kernalAndScheduleValue.kernalDetails.selectedServerlessName
+      );
+      setValue(
+        'cluster',
+        kernalAndScheduleValue.kernalDetails.selectedClusterName
+      );
+    }
   }, [preFetchedInitialDetails, sessionContext]); // Ensure all dependencies are listed
 
   // Destructure for easier access in JSX
@@ -233,7 +235,7 @@ export const CreateNotebookSchedule = (
         region: vertexData.vertexRegion,
         cloud_storage_bucket: vertexData.cloudStorageBucket,
         service_account: vertexData.serviceAccount,
-        network_option: vertexData.networkOption ||'networkInThisProject',
+        network_option: vertexData.networkOption || 'networkInThisProject',
         network: vertexData.network,
         subnetwork: vertexData.subnetwork,
         disk_type: vertexData.diskType,

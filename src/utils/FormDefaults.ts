@@ -79,7 +79,7 @@ const getDefaultComposerValues = (initialKernelDetails: INotebookKernalSchdulerD
   inputFile: '',
   projectId: '',
   composerRegion: '',
-  executionMode: initialKernelDetails.kernalDetails.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
+  executionMode: initialKernelDetails?.kernalDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
   retryDelay: 5, // Matches Zod's default
@@ -88,8 +88,8 @@ const getDefaultComposerValues = (initialKernelDetails: INotebookKernalSchdulerD
   emailOnSuccess: false,
   email_recipients: [], // Default for array of emails
   runOption: 'runNow',
-  cluster: initialKernelDetails.kernalDetails.selectedClusterName ?? '',
-  serverless: initialKernelDetails.kernalDetails.selectedServerlessName ?? '',
+  cluster: initialKernelDetails?.kernalDetails?.selectedClusterName ?? '',
+  serverless: initialKernelDetails.kernalDetails?.selectedServerlessName ?? '',
   timeZone: ''
 });
 

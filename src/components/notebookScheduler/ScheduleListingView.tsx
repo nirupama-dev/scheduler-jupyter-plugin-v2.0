@@ -11,6 +11,7 @@ import {
   RadioGroup,
   Typography
 } from '@mui/material';
+import { ListVertexSchedule } from '../vertex/scheduleListingView/ListVertexSchedule';
 
 export const ScheduleListingView = () => {
   const [schedulerSelected, setSchedulerSelected] = useState<string>(
@@ -74,6 +75,8 @@ export const ScheduleListingView = () => {
           </RadioGroup>
         </FormControl>
       </div>
+
+      <ListVertexSchedule/>
     </>
   );
 };
