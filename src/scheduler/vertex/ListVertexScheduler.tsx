@@ -231,7 +231,8 @@ function ListVertexScheduler({
       }
       setResetToCurrentPage(false); // to make sure ttoken list is not refreshed again.
       resetFlag = false;
-    } else if (fetchNextPage) { //only if incrementing to next page
+    } else if (fetchNextPage) {
+      //only if incrementing to next page
       currentPageNumber += 1;
       setFetchNextPage(false);
     }
@@ -256,7 +257,7 @@ function ListVertexScheduler({
       : updatedPageTokenList.length > 0; // hasPreviousPage is true if there are more than 1 tokens in the list, which means there is a previous page available.
     setCanPreviousPage(hasPreviousPage); // false only on first page
     setPageTokenList([...updatedPageTokenList]); // set the updated token list after pagination
-    
+
     setPageNumber(currentPageNumber);
     if (!hasNextPage) {
       setTotalCount(currentPageNumber); // Total count is found when we reach the final page
