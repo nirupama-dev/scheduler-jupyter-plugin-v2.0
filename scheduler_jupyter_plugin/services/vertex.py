@@ -61,7 +61,7 @@ class Client:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(token=self._access_token)
-            storage_client = storage.Client(credentials=credentials)
+            storage_client = storage.Client(credentials=credentials, project=self.project_id)
             storage_client.create_bucket(bucket_name)
         except Exception as error:
             self.log.exception(f"Error in creating Bucket: {error}")
@@ -69,7 +69,8 @@ class Client:
 
     async def upload_to_gcs(self, bucket_name, file_path, job_name):
         input_notebook = file_path.split("/")[-1]
-        storage_client = storage.Client()
+        credentials = oauth2.Credentials(self._access_token)
+        storage_client = storage.Client(credentials=credentials, project=self.project_id)
         bucket = storage_client.bucket(bucket_name)
         blob_name = None
 
@@ -143,11 +144,7 @@ class Client:
                                 "diskType": disk_type,
                                 "diskSizeGb": job.disk_size,
                             },
-                            "networkSpec": {
-                                "enableInternetAccess": "TRUE",
-                                "network": job.network,
-                                "subnetwork": job.subnetwork,
-                            },
+                            "networkSpec": {}
                         },
                         "gcsNotebookSource": {"uri": notebook_source},
                         "gcsOutputUri": job.cloud_storage_bucket,
@@ -163,6 +160,17 @@ class Client:
                 payload["startTime"] = job.start_time
             if job.end_time:
                 payload["endTime"] = job.end_time
+            if job.network:
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["networkSpec"]["network"] = job.network
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["networkSpec"]["enableInternetAccess"] = "TRUE"
+            if job.subnetwork and job.network:
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["networkSpec"]["subnetwork"] = job.subnetwork
 
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
@@ -259,10 +267,10 @@ class Client:
             result = {}
 
             if next_page_token:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}"
+                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
             else:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}"
+                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
             headers = self.create_headers()
             async with self.client_session.get(
@@ -276,6 +284,18 @@ class Client:
                         schedule_list = []
                         schedules = resp.get("schedules")
                         for schedule in schedules:
+                            # filter for a workbench schedule 
+                            # ie atleast any one of the following is not available.
+                            # workbenchRuntime or kernel or customEnvironmentSpec
+                            if schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob") is None:
+                                continue
+                            notebook_execution_job = schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob")
+                            if (
+                                notebook_execution_job.get("workbenchRuntime") is None
+                                and notebook_execution_job.get("kernelName") is None
+                                and notebook_execution_job.get("customEnvironmentSpec") is None
+                            ):
+                                continue
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
                             cron_value = (
@@ -295,11 +315,6 @@ class Client:
                                 "status": schedule.get("state"),
                                 "createTime": schedule.get("createTime"),
                                 "nextRunTime": schedule.get("nextRunTime"),
-                                "gcsNotebookSourceUri": schedule.get(
-                                    "createNotebookExecutionJobRequest"
-                                )
-                                .get("notebookExecutionJob")
-                                .get("gcsNotebookSource"),
                                 "lastScheduledRunResponse": schedule.get(
                                     "lastScheduledRunResponse"
                                 ),
@@ -426,9 +441,10 @@ class Client:
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs"
 
             headers = self.create_headers()
-            payload = data.get("createNotebookExecutionJobRequest").get(
-                "notebookExecutionJob"
-            )
+
+            payload = data.get("createNotebookExecutionJobRequest", {}) \
+                .get("notebookExecutionJob", {})
+            
             payload["scheduleResourceName"] = data.get("name")
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload

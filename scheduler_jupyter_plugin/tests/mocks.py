@@ -175,15 +175,26 @@ class MockListSchedulesClientSession:
 
     def get(self, api_endpoint, headers=None):
         return MockResponse(
-            {
-                "schedules": [
-                    {
+                {
+                 "schedules": [
+                     {
+                        "createTime": None,
+                        "displayName": None,
+                        "lastScheduledRunResponse": None,
+                        "name": None,
+                        "nextRunTime": None,
+                        "cron": "* * * * *",  # cron string, will be parsed by parse_schedule
+                        "state": None,        # maps to "status" in formatted output
                         "createNotebookExecutionJobRequest": {
-                            "notebookExecutionJob": {"gcsNotebookSource": ""}
-                        }
-                    },
-                ]
-            }
+                            "notebookExecutionJob": {
+                                "kernelName": "python3",  # at least one of these must be present
+                                # "workbenchRuntime": {},
+                                # "customEnvironmentSpec": {},
+                            }
+                         },
+                     },
+                 ]
+             }
         )
 
 
