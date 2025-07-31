@@ -102,8 +102,7 @@ export interface ILastScheduledRunResponse {
 export interface IPaginationViewProps {
   canPreviousPage: boolean;
   canNextPage: boolean;
-  currentStartIndex: number;
-  currentLastIndex: number;
+  pageNumber: number;
   handleNextPage: () => void;
   handlePreviousPage: () => void;
   isLoading: boolean;
@@ -112,6 +111,7 @@ export interface IPaginationViewProps {
 
 export interface IActivePaginationVariables {
   scheduleListPageLength: number;
+  pageNumber: number; // current page number
   totalCount: number; // size of each page with pagination
   pageTokenList: string[];
   nextPageToken: string | null;

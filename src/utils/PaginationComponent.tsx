@@ -22,8 +22,7 @@ import { IPaginationViewProps } from '../scheduler/vertex/VertexInterfaces';
 export const PaginationComponent = ({
   canPreviousPage,
   canNextPage,
-  currentStartIndex,
-  currentLastIndex,
+  pageNumber,
   handleNextPage,
   handlePreviousPage,
   isLoading,
@@ -33,10 +32,10 @@ export const PaginationComponent = ({
     <div>
       {isLoading ? null : (
         <div className="pagination-parent-view-main">
-          {/* <div className="pagination-numbers" aria-disabled={isLoading}>
-            {currentStartIndex} - {currentLastIndex} of{' '}
-            {totalCount !== 0 ? totalCount : 'many'}
-          </div> */}
+          <div className="pagination-numbers" aria-disabled={isLoading}>
+            Page {pageNumber} of {' '}
+            {totalCount !== 0 ? totalCount : 'Many'}
+          </div>
 
           <div
             role={!canPreviousPage || isLoading ? undefined : 'button'}

@@ -118,10 +118,6 @@ function ListVertexScheduler({
 
   const [scheduleListPageLength, setScheduleListPageLength] =
     useState<number>(25); // size of each page with pagination
-  const [currentStartIndex, setCurrentStartIndex] = useState<number>(1); // Track current page start index
-  const [currentLastIndex, setCurrentLastIndex] = useState<number>(
-    scheduleListPageLength
-  ); // Track current page last index
   const [totalCount, setTotalCount] = useState<number>(0); // size of each page with pagination
   const [pageTokenList, setPageTokenList] = useState<string[]>([]);
   const [canNextPage, setCanNextPage] = useState<boolean>(false);
@@ -133,6 +129,8 @@ function ListVertexScheduler({
   const previousNextPageToken = useRef(nextPageToken);
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [loaderRegion, setLoaderRegion] = useState<boolean>(false);
+  const [pageNumber, setPageNumber] = useState<number>(1); // Track current page number
+  const [fetchNextPage, setFetchNextPage] = useState<boolean>(false);
 
   const columns = useMemo(
     () => [
@@ -212,12 +210,12 @@ function ListVertexScheduler({
     }
     setActivePaginationVariables(null); // reset once api has loaded the active pagination variables on return back
   }, [nextPageToken, vertexScheduleList, scheduleListPageLength]);
-
   /**
    * Pagination variables
    */
   const setPaginationVariables = () => {
     let updatedPageTokenList = [...pageTokenList];
+    let currentPageNumber = pageNumber;
     let resetFlag = resetToCurrentPage;
     if (fetchPreviousPage) {
       // True only in case of clicking for previous page
@@ -225,6 +223,7 @@ function ListVertexScheduler({
         updatedPageTokenList = updatedPageTokenList.slice(0, -1); // Remove the token for accessing current page
       }
       setFetchPreviousPage(false);
+      currentPageNumber = Math.max(1, currentPageNumber - 1);
     } else if (resetToCurrentPage) {
       //Logic to refresh or reset current page. In case of Actions/ refresh
       if (updatedPageTokenList.length > 0 && nextPageToken) {
@@ -232,7 +231,11 @@ function ListVertexScheduler({
       }
       setResetToCurrentPage(false); // to make sure ttoken list is not refreshed again.
       resetFlag = false;
+    } else if (fetchNextPage) { //only if incrementing to next page
+      currentPageNumber += 1;
+      setFetchNextPage(false);
     }
+
     let hasNextPage = false;
 
     if (nextPageToken) {
@@ -253,28 +256,10 @@ function ListVertexScheduler({
       : updatedPageTokenList.length > 0; // hasPreviousPage is true if there are more than 1 tokens in the list, which means there is a previous page available.
     setCanPreviousPage(hasPreviousPage); // false only on first page
     setPageTokenList([...updatedPageTokenList]); // set the updated token list after pagination
-    let startIndex = 1;
-    if (hasPreviousPage) {
-      // change start index if navigating to next page and remains as 1 if on the 1st page.
-      startIndex = hasNextPage
-        ? (updatedPageTokenList.length - 1) * scheduleListPageLength + 1
-        : updatedPageTokenList.length * scheduleListPageLength + 1;
-    }
-    const endIndex =
-      vertexScheduleList.length > 0
-        ? startIndex + vertexScheduleList.length - 1
-        : startIndex;
-    setCurrentStartIndex(startIndex);
-    setCurrentLastIndex(endIndex);
-
-    if (
-      vertexScheduleList.length > 0 &&
-      vertexScheduleList.length < scheduleListPageLength
-    ) {
-      setTotalCount(
-        updatedPageTokenList.length * scheduleListPageLength +
-          vertexScheduleList.length
-      ); // Total count is found when we reach the final page
+    
+    setPageNumber(currentPageNumber);
+    if (!hasNextPage) {
+      setTotalCount(currentPageNumber); // Total count is found when we reach the final page
     }
   };
 
@@ -283,6 +268,7 @@ function ListVertexScheduler({
    */
   const handleNextPage = async () => {
     abortApiCall(); //Abort last run execution api call
+    setFetchNextPage(true);
     const nextTokenToFetch =
       pageTokenList.length > 0 ? pageTokenList[pageTokenList.length - 1] : null;
 
@@ -521,7 +507,8 @@ function ListVertexScheduler({
       scheduleListPageLength: scheduleListPageLength,
       totalCount: totalCount,
       pageTokenList: pageTokenList,
-      nextPageToken: nextPageToken
+      nextPageToken: nextPageToken,
+      pageNumber: pageNumber
     };
     return currentPaginationVariables;
   };
@@ -965,6 +952,7 @@ function ListVertexScheduler({
     setTotalCount(activePaginationVariables?.totalCount ?? totalCount);
     setPageTokenList(activePaginationVariables?.pageTokenList ?? pageTokenList);
     setNextPageToken(activePaginationVariables?.nextPageToken ?? nextPageToken);
+    setPageNumber(activePaginationVariables?.pageNumber ?? pageNumber);
     previousNextPageToken.current =
       activePaginationVariables?.nextPageToken ?? nextPageToken;
   };
@@ -981,8 +969,7 @@ function ListVertexScheduler({
     setResetToCurrentPage(reloadPagination);
     setCanPreviousPage(false);
     setCanNextPage(false);
-    setCurrentStartIndex(1);
-    setCurrentLastIndex(scheduleListPageLength);
+    setPageNumber(1);
     setTotalCount(0);
     setPageTokenList([]);
   };
@@ -1040,8 +1027,7 @@ function ListVertexScheduler({
               <PaginationComponent
                 canPreviousPage={canPreviousPage}
                 canNextPage={canNextPage}
-                currentStartIndex={currentStartIndex}
-                currentLastIndex={currentLastIndex}
+                pageNumber={pageNumber}
                 handleNextPage={handleNextPage}
                 handlePreviousPage={handlePreviousPage}
                 isLoading={isLoading}
