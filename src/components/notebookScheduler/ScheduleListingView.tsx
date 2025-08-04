@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LISTING_PAGE_HEADING,
   SCHEDULE_LABEL_COMPOSER,
@@ -11,20 +11,45 @@ import {
   RadioGroup,
   Typography
 } from '@mui/material';
-import { ListVertexSchedule } from '../vertex/scheduleListingView/ListVertexSchedule';
+// import { ListVertexSchedule } from '../vertex/scheduleListingView/ListVertexSchedule';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
 export const ScheduleListingView = () => {
-  const [schedulerSelected, setSchedulerSelected] = useState<string>(
-    SCHEDULE_LABEL_VERTEX
-  );
+  const [schedulerSelected, setSchedulerSelected] = useState<
+    string | undefined
+  >('');
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine current sub-route based on path
+  const currentSubPath = location.pathname.split('/').pop(); // Gets 'vertex' or 'composer'
+
+  // Effect to redirect to a default sub-route if /list is accessed directly
+  useEffect(() => {
+    if (location.pathname === '/list' || location.pathname === '/list/') {
+      navigate(SCHEDULE_LABEL_VERTEX, { replace: true }); // Default to /list/vertex
+    }
+console.log('inside effect naigateion')
+    setSchedulerSelected(currentSubPath);
+  }, [location.pathname, navigate]);
+
+  // useEffect(() => {
+  //   console.log('inside effect')
+  //   setSchedulerSelected(SCHEDULE_LABEL_VERTEX);
+  // }, []);
 
   /**
    * Handle he change  of the scheduler selection
    * @param(React.ChangeEvent<HTMLInputElement>) scheduler selected
    */
-  const handleSchedulerModeChange = (event: React.ChangeEvent<HTMLInputElement> ) => {
-    const selectedScheduler =(event.target as HTMLInputElement).value;
+  const handleSchedulerModeChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const selectedScheduler = (event.target as HTMLInputElement).value;
     setSchedulerSelected(selectedScheduler);
+    console.log('selectedScheduler', selectedScheduler);
+    navigate(`/list/${selectedScheduler}`);
   };
 
   return (
@@ -41,11 +66,11 @@ export const ScheduleListingView = () => {
             name="controlled-radio-buttons-group"
             value={schedulerSelected}
             onChange={handleSchedulerModeChange}
-            // data-testid={
-            //   notebookSelector === 'vertex'
-            //     ? 'vertex-selected'
-            //     : 'composer-selected'
-            // }
+            data-testid={
+              schedulerSelected === 'vertex'
+                ? 'vertex-selected'
+                : 'composer-selected'
+            }
           >
             <FormControlLabel
               value="vertex"
@@ -76,7 +101,9 @@ export const ScheduleListingView = () => {
         </FormControl>
       </div>
 
-      <ListVertexSchedule/>
+      <div>
+        <Outlet />
+      </div>
     </>
   );
 };

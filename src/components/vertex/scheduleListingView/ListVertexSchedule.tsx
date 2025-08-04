@@ -22,7 +22,11 @@ import {
   TextField
 } from '@mui/material';
 import React, { useEffect, useMemo, useState } from 'react';
-import { LISTING_SCREEN_HEADING, VERTEX_REGIONS } from '../../../utils/Constants';
+import {
+  LISTING_SCREEN_HEADING,
+  LOADER_CONTENT_VERTEX_LISTING_SCREEN,
+  VERTEX_REGIONS
+} from '../../../utils/Constants';
 import { ILabelValue } from '../../../interfaces/CommonInterface';
 import { authApi } from '../../common/login/Config';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
@@ -30,32 +34,35 @@ import TableData from '../../../utils/TableData';
 import { usePagination, useTable } from 'react-table';
 import { VertexServices } from '../../../services/vertex/Vertex';
 import { IVertexScheduleList } from '../../../interfaces/VertexInterface';
+import Loader from '../../common/loader/Loader';
 
-export const ListVertexSchedule = () => {
+const ListVertexSchedule = () => {
   const [region, setRegion] = useState<string>('');
   const [regionLoader, serRegionLoader] = useState<boolean>(false);
-  // const [loadingState, setLoadingState] = useState<IVertexScheduleListing>({
-    
-  // });
+  const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
     []
   );
+  // const [loaderState, setLoaderState] = useState<IVertexListingLoadingState>({
+  //   isLoading: false,
+  // });
   const data = vertexScheduleList;
 
   const columns = useMemo(() => LISTING_SCREEN_HEADING, []);
-  const [scheduleListPageLength, 
+  const [
+    scheduleListPageLength
     //setScheduleListPageLength
-    ] =
-      useState<number>(25); // size of each page with pagination
+  ] = useState<number>(25); // size of each page with pagination
 
   /**
    * Handles the selection of region
    */
-  const handleRegion = (region: ILabelValue<string> | null) => {
-    if (region) {
-      setRegion(region.value);
+  const handleRegion = (regionSelected: ILabelValue<string> | null) => {
+    if (regionSelected) {
+      setRegion(regionSelected.value);
+    } else {
+      setRegion('');
     }
-    setRegion('');
   };
 
   const {
@@ -77,30 +84,87 @@ export const ListVertexSchedule = () => {
     usePagination
   );
 
- /**
+  /**
    * Get list of schedules
    */
-  const listVertexScheduleInfoAPI = async (
-    nextToken: string | null | undefined
-  ) => {
-    // setIsLoading(true);
+  const listVertexScheduleInfoAPI = async () =>
+    // nextToken: string | null | undefined
+    {
+      // setIsLoading(true);
 
-    await VertexServices.listVertexSchedules(
-      setScheduleList,
-      region,
-      // setIsLoading,
-      // setIsApiError,
-      // setApiError,
-      // setNextPageToken,
-      // nextToken,
-      // setCanNextPage,
-      // setApiEnableUrl,
-      // scheduleListPageLength,
-      // abortControllers
-    );
-    // setRegionDisable(false);
-    // setIsLoading(false);
-  };
+      await VertexServices.listVertexSchedules(
+        setScheduleList,
+        region,
+        // setIsLoading,
+        // setIsApiError,
+        // setApiError,
+        // setNextPageToken,
+        // nextToken,
+        // setCanNextPage,
+        // setApiEnableUrl,
+        // scheduleListPageLength,
+        // abortControllers
+      );
+      setRegionDisable(false);
+      // setIsLoading(false);
+    };
+
+  /**
+   * Function that redirects to Job Execution History
+   * @param schedulerData schedule data to be retrieved
+   * @param scheduleName name of the schedule
+   * @param paginationVariables current page details (to be restored when user clicks back to Schedule Listing)
+   * @param region selected region for the job (to be reatianed when user clicks back to Schedule Listing)
+   */
+  // const handleScheduleIdSelectionFromList = (
+  //   schedulerData: any,
+  //   scheduleName: string
+  // ) => {
+
+  //   // abortApiCall();
+  //   // handleScheduleIdSelection(
+  //   //   schedulerData,
+  //   //   scheduleName,
+  //   //   // saveActivePaginationVariables(),
+  //   //   region
+  //   // );
+  // };
+
+  /**
+   *
+   * @param pageTokenListToLoad available only in case navigating  back from another screen
+   * @param nextPageTokenToLoad available only in case navigating back from another screen
+   */
+  const handleCurrentPageRefresh = async () =>
+    // pageTokenListToLoad: string[] | undefined | null,
+    // nextPageTokenToLoad: string | null | undefined
+    {
+      setRegionDisable(true);
+      // abortApiCall(); //Abort last run execution api call
+      // setResetToCurrentPage(true);
+      // //fetching the current page token from token list: on the last page its the last element, null if on first page, 2nd last element on other pages.
+      // let currentPageToken = null;
+      // if (pageTokenListToLoad) {
+      //   // if navigating back, load the same page.
+      //   currentPageToken = nextPageTokenToLoad
+      //     ? pageTokenListToLoad.length > 1
+      //       ? pageTokenListToLoad[pageTokenListToLoad.length - 2]
+      //       : null
+      //     : pageTokenListToLoad.length > 0
+      //       ? pageTokenListToLoad[pageTokenListToLoad.length - 1]
+      //       : null;
+      // } else {
+      //   // in case of a simple same page refresh.
+      //   currentPageToken = nextPageToken
+      //     ? pageTokenList.length > 1
+      //       ? pageTokenList[pageTokenList.length - 2]
+      //       : null
+      //     : pageTokenList.length > 0
+      //       ? pageTokenList[pageTokenList.length - 1]
+      //       : null;
+      // }
+      listVertexScheduleInfoAPI();
+    };
 
   useEffect(() => {
     serRegionLoader(true);
@@ -116,9 +180,13 @@ export const ListVertexSchedule = () => {
           error: error
         });
       });
-
-      listVertexScheduleInfoAPI(null);
   }, []);
+
+  useEffect(() => {
+    if (region) {
+      listVertexScheduleInfoAPI();
+    }
+  }, [region]);
 
   return (
     <>
@@ -156,40 +224,42 @@ export const ListVertexSchedule = () => {
               )}
               clearIcon={false}
               loading={regionLoader}
-              // disabled={!region}
+              disabled={regionDisable}
             />
           </div>
+        </div>
 
-          <div className="btn-refresh">
-            <Button
-              // disabled={isLoading}
-              className="btn-refresh-text"
-              variant="outlined"
-              aria-label="cancel Batch"
-              // onClick={() => {
-              //   handleCurrentPageRefresh(null, null);
-              // }}
-            >
-              <div>REFRESH</div>
-            </Button>
-          </div>
+        <div className="btn-refresh">
+          <Button
+            // disabled={isLoading}
+            className="btn-refresh-text"
+            variant="outlined"
+            aria-label="cancel Batch"
+            onClick={() => {
+              handleCurrentPageRefresh();
+            }}
+          >
+            <div>REFRESH</div>
+          </Button>
         </div>
       </div>
 
-      <>
-        <div className="notebook-templates-list-tabl e-parent vertex-list-table-parent table-space-around scroll-list">
-          <TableData
-            getTableProps={getTableProps}
-            headerGroups={headerGroups}
-            getTableBodyProps={getTableBodyProps}
-            // isLoading={isLoading}
-            rows={rows}
-            page={page}
-            prepareRow={prepareRow}
-            // tableDataCondition={tableDataCondition}
-            fromPage="Vertex schedulers"
-          />
-          {/* {vertexScheduleList.length > 0 && (
+      {vertexScheduleList.length > 0 ? (
+        <>
+          <div className="notebook-templates-list-tabl e-parent vertex-list-table-parent table-space-around scroll-list">
+            <TableData
+              getTableProps={getTableProps}
+              headerGroups={headerGroups}
+              getTableBodyProps={getTableBodyProps}
+              // isLoading={isLoading}
+              rows={rows}
+              page={page}
+              prepareRow={prepareRow}
+              // tableDataCondition={tableDataCondition}
+              fromPage="Vertex schedulers"
+              // handleScheduleIdSelectionFromList={handleScheduleIdSelectionFromList}
+            />
+            {/* {vertexScheduleList.length > 0 && (
             <PaginationComponent
               canPreviousPage={canPreviousPage}
               canNextPage={canNextPage}
@@ -210,8 +280,18 @@ export const ListVertexSchedule = () => {
               deletingSchedule={deletingSchedule}
             />
           )} */}
-        </div>
-      </>
+          </div>
+        </>
+      ) 
+      : 
+      // vertexScheduleList.length === 0 ? (
+      //   <div className="no-data-style">No schedules available</div>
+      // ) : 
+      (
+        <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
+      )}
     </>
   );
 };
+
+export default ListVertexSchedule;

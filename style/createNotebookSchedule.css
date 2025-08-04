@@ -72,13 +72,14 @@
 }
 
 .custom-spinner-path{
+  /* stylelint-disable-next-line */
   stroke: currentColor; /* Inherit color from parent, or set a specific color */
   stroke-linecap: round;
   animation: my-spinner-dash 1.5s ease-in-out infinite;
 }
 
 /* Target the jp-icon3 span that contains your SVG */
-.jp-icon3[data-icon-name="your-extension:custom-animated-spinner"] {
+.jp-icon3[data-icon-name='your-extension:custom-animated-spinner'] {
   animation: my-spinner-rotate 2s linear infinite;
   transform-origin: center center;
 }

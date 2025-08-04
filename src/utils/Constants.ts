@@ -117,9 +117,10 @@ export const TITLE_LAUNCHER_CATEGORY = 'Google Cloud Resources';
 
 export const LISTING_PAGE_HEADING = 'Scheduled Jobs';
 
-export const SCHEDULE_LABEL_VERTEX = 'Vertex';
+export const SCHEDULE_LABEL_VERTEX = 'vertex';
 
-export const SCHEDULE_LABEL_COMPOSER = 'Composer';
+export const SCHEDULE_LABEL_COMPOSER = 'composer';
+
 export const EXECUTION_MODE_OPTIONS = [
   {
     label: 'Serverless',
@@ -237,32 +238,38 @@ export const DEFAULT_DISK_MIN_SIZE = 10;
 export const DEFAULT_DISK_MAX_SIZE = 65536;
 
 export const LISTING_SCREEN_HEADING = [
-        {
-          Header: 'Schedule Name',
-          accessor: 'displayName'
-        },
-        {
-          Header: 'Frequency',
-          accessor: 'schedule'
-        },
-        {
-          Header: 'Next Run Date',
-          accessor: 'nextRunTime'
-        },
-        {
-          Header: 'Created',
-          accessor: 'createTime'
-        },
-        {
-          Header: 'Latest Execution Jobs',
-          accessor: 'jobState'
-        },
-        {
-          Header: 'Status',
-          accessor: 'status'
-        },
-        {
-          Header: 'Actions',
-          accessor: 'actions'
-        }
-      ]
+  {
+    Header: 'Schedule Name',
+    accessor: 'displayName'
+  },
+  {
+    Header: 'Frequency',
+    accessor: 'schedule'
+  },
+  {
+    Header: 'Next Run Date',
+    accessor: 'nextRunTime'
+  },
+  {
+    Header: 'Created',
+    accessor: 'createTime'
+  },
+  {
+    Header: 'Latest Execution Jobs',
+    accessor: 'jobState'
+  },
+  {
+    Header: 'Status',
+    accessor: 'status'
+  },
+  {
+    Header: 'Actions',
+    accessor: 'actions'
+  }
+];
+
+export const LOADER_CONTENT_VERTEX_LISTING_SCREEN =
+  'Loading Vertex Schedules...';
+
+export const LOADER_CONTENT_COMPOSER_LISTING_SCREEN =
+  'Loading Composer Schedules...';

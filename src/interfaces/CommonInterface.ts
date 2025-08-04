@@ -87,3 +87,7 @@ export interface ILabelValue<T> {
   label: T;
   value: T;
 }
+
+export interface LoaderProps {
+  message: string;
+}

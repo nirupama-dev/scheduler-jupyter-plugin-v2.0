@@ -10,6 +10,7 @@
   align-items: center;
   color: var(--jp-ui-font-color0);
 }
+
 .create-scheduler-style {
   width: 512px;
   height: 36px;
@@ -44,4 +45,148 @@
   padding: 32px 0 0;
   gap: 12px;
   height: 64px;
+}
+
+.schedule-radio-btn {
+  flex-direction: row !important;
+  gap: 20px;
+}
+
+.create-scheduler-label-style {
+  font-size: 14px;
+}
+
+.notebook-templates-list-table-parent {
+  height: 100%;
+  overflow: auto;
+}
+
+.table-space-around {
+  padding: 0 10px;
+}
+
+.scroll-list {
+  overflow: auto;
+  height: calc(100vh - 298px);
+}
+
+.clusters-list-table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color1);
+  z-index: 1;
+}
+
+body[data-jp-theme-light='true'].scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color0);
+}
+
+.cluster-list-table-header {
+  background: rgba(0 0 0 / 4%);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 13px;
+  height: 29px;
+  line-height: 18px;
+  color: var(--jp-ui-font-color0);
+}
+
+.clusters-table-header {
+  text-align: left;
+  padding-left: 15px;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.table-loading-ht {
+  height: calc(100vh - 368px);
+}
+
+.clusters-table-body {
+  overflow-y: auto;
+  max-height: 55vh;
+}
+
+.loader-table {
+  text-align: center;
+  padding: 50px;
+}
+
+.spin-loader {
+  display: flex;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.spin-loader-table {
+  width: 29%;
+  margin: 0 auto;
+}
+
+.spin-loader-custom-style {
+  margin-right: 5px;
+}
+
+.cluster-list-data-parent {
+  background: var(--jp-layout-color0);
+  height: 29px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--jp-ui-font-color2);
+}
+
+.clusters-table-data {
+  padding-left: 15px;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.clusters-table-data:nth-child(1) {
+  color: #3367d6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.clusters-table-data:nth-child(2) {
+  text-transform: capitalize;
+}
+
+.table-cell-overflow {
+  min-width: 25%;
+  max-width: 12%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+}
+
+.success_icon {
+  padding-right: 5px;
+}
+
+.icon-size {
+  width: 14px;
+}
+
+.icon-completed {
+  padding-top: 4px;
+}
+
+.icon-size-status {
+  width: 12px;
+}
+
+.cell-width-listing {
+  max-width: 300px;
+}
+
+.text-icon {
+  line-height: 2;
 }

@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
 
 .clusters-list-overlay {
   height: 37px;
@@ -18,4 +19,27 @@
   display: flex;
   align-items: center;
   color: var(--jp-ui-font-color0);
+}
+
+.select-text-overlay-scheduler {
+  width: 95%;
+  margin: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.enable-text-label {
+  width: 60%;
+}
+
+.btn-refresh {
+  line-height: 5;
+}
+
+.btn-refresh-text {
+  font-size: 12px !important;
+}
+
+.vertex-list-table-parent {
+  overflow: auto;
 }

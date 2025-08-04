@@ -25,12 +25,15 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   MainAreaWidget,
   IThemeManager,
-  Notification,
-  ToolbarButton
+  Notification
 } from '@jupyterlab/apputils';
 import { NotebookButtonExtension } from './components/notebookScheduler/NotebookButtonExtension';
 import { requestAPI } from './handler/Handler';
-import { PLUGIN_NAME, TITLE_LAUNCHER_CATEGORY, VERSION_DETAIL } from './utils/Constants';
+import {
+  PLUGIN_NAME,
+  TITLE_LAUNCHER_CATEGORY,
+  VERSION_DETAIL
+} from './utils/Constants';
 import { NotebookScheduler } from './components/notebookScheduler/NotebookScheduler';
 import { iconScheduledNotebooks } from './utils/Icons';
 import { ILauncher } from '@jupyterlab/launcher';
@@ -47,7 +50,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
     app: JupyterFrontEnd,
     settingRegistry: ISettingRegistry | null,
     themeManager: IThemeManager,
-    schedulerButton: ToolbarButton|null,
     launcher: ILauncher
   ) => {
     console.log('JupyterLab extension scheduler-jupyter-plugin is activated!');
@@ -113,11 +115,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
       icon: iconScheduledNotebooks,
       execute: () => {
         const content = new NotebookScheduler(
-          
           themeManager,
-          '/list',
+          '/list'
           // settingRegistry as ISettingRegistry,
-          
         );
         const widget = new MainAreaWidget<NotebookScheduler>({ content });
         widget.title.label = 'Scheduled Jobs';
@@ -133,7 +133,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         // settingRegistry as ISettingRegistry,
         // launcher,
         themeManager,
-        schedulerButton
+        null
       )
     );
 

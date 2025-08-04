@@ -16,9 +16,13 @@
  */
 
 import { CircularProgress } from '@mui/material';
-import React, { useEffect, useState } from 'react';
-import { Cell, Row } from 'react-table';
+import * as React from 'react';
+import { useEffect, useState } from 'react';
+import { 
+  //Cell,
+   Row } from 'react-table';
 import { handleDebounce } from './Config';
+import { tableDataCondition } from '../components/vertex/scheduleListingView/VertexListRow';
 
 function TableData({
   getTableProps,
@@ -28,8 +32,9 @@ function TableData({
   rows,
   page,
   prepareRow,
-  tableDataCondition,
-  fromPage
+  // tableDataCondition,
+  fromPage,
+  handleScheduleIdSelectionFromList
 }: any) {
   const [listDagRunHeight, setListDagRunHeight] = useState(
     window.innerHeight - 505
@@ -103,8 +108,8 @@ function TableData({
           displayData.map((row: Row, index: number) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()} className={'cluster-list-data-parent'}>
-                {row.cells.map((cell: Cell) => {
+              <tr>
+                {row.cells.map((cell: any) => {
                   return tableDataCondition(cell);
                 })}
               </tr>
