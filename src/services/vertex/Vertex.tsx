@@ -35,7 +35,7 @@ import {
   ABORT_MESSAGE,
   DEFAULT_TIME_ZONE,
   HTTP_STATUS_FORBIDDEN,
-  pattern
+  URL_LINK_PATTERN
 } from '../../utils/Constants';
 import React, { Dispatch, SetStateAction } from 'react';
 import {
@@ -247,7 +247,7 @@ export class VertexServices {
 
       // Handle API error
       if (error?.code === HTTP_STATUS_FORBIDDEN) {
-        const url = error.message.match(pattern);
+        const url = error.message.match(URL_LINK_PATTERN);
         if (url && url.length > 0) {
           setIsApiError(true);
           setApiError(error.message);

@@ -16,7 +16,7 @@
  */
 import { z } from 'zod';
 import { DISK_MIN_SIZE, DISK_MAX_SIZE } from '../utils/Constants';
-import { createNotebookCommonSchema } from './CreateNotebookCommonSchema';
+import { createNotebookCommonSchema, parameterSchema, sharedNetworkSchema } from './CreateNotebookCommonSchema';
 
 /**
  * Zod schema for Vertex Scheduler form validation.
@@ -28,8 +28,10 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   kernelName: z.string().min(1, 'Kernel is required.'),
   cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
   serviceAccount: z.string().min(1, 'Service account is required.'),
-  network: z.string().min(1, 'Network is required.'),
-  subnetwork: z.string().min(1, 'Subnetwork is required.'),
+  networkOption: z.enum(['networkInThisProject', 'networkSharedFromHostProject']).optional(),
+  primaryNetwork: z.string().optional(),
+  subNetwork: z.string().optional(),
+  sharedNetwork: sharedNetworkSchema.optional(),
   diskType: z.string().min(1, 'Disk type is required.'),
   diskSize: z.string().refine(
     val => {
@@ -55,11 +57,7 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   endTime: z.string().optional(),
   maxRunCount: z.string().optional(),
   timeZone: z.string().optional(),
-  networkOption: z.enum(['networkInThisProject', 'networkSharedFromHostProject']).optional(),
-  primaryNetworkSelected: z.string().optional(),
-  subNetworkSelected: z.string().optional(),
-  sharedNetworkSelected: z.string().optional(),
-  parameters: z.array(z.string()).optional()
+  parameters: z.array(parameterSchema).optional()
 });
 
 /**

@@ -19,7 +19,7 @@ import { Control, FieldError, Path } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { ILabelValue } from './CommonInterface';
 
-export interface FormInputProps {
+export interface IFormInputProps {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
   label?: string;
@@ -30,6 +30,7 @@ export interface FormInputProps {
   [key: string]: any; // Allow additional props
   type?: string;
   hostProject?: any;
+  disabled?:boolean
 }
 
 export interface IFormInput {
@@ -50,7 +51,7 @@ export interface DropdownOption {
 export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
-  options: Array<{ label: string; value: string }> | [];
+  options: Array<{ label: string; value: any }> | [];
   label?: string;
   setValue?: any;
   className?: string;
@@ -60,7 +61,7 @@ export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
   loading?: boolean;
   filterOptions?: any;
   getOptionLabel?: any;
-  isOptionEqualToValue?: (option: OptionType, value: string | null | undefined) => boolean;
+  isOptionEqualToValue?: (option: OptionType, value: string | any | null | undefined) => boolean;
   getOptionValue?: any;
   disabled?:boolean
 }
@@ -81,4 +82,11 @@ export interface FormInputCheckboxProps {
   isChecked?: boolean; // Optional prop to control the checked state
   disabled?: boolean; // Optional prop to disable the checkbox
   className?: string; // Optional prop for additional styling
+}
+
+export interface IErrorMessageProps {
+  message: string | FieldError | undefined;
+  showIcon?: boolean; // Optional prop to show/hide an icon
+  errorWidth?: boolean; // Optional prop to control width
+
 }

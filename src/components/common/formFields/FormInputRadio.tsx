@@ -25,7 +25,7 @@ import {
   FormHelperText
 } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { FormInputProps } from '../../../interfaces/FormInterface';
+import { IFormInputProps } from '../../../interfaces/FormInterface';
 import {
   DEFAULT_HOST_PROJECT_NETWORK,
   NETWORK_OPTIONS,
@@ -34,7 +34,7 @@ import {
 } from '../../../utils/Constants';
 import LearnMore from '../links/LearnMore';
 
-export const FormInputRadio: React.FC<FormInputProps> = ({
+export const FormInputRadio: React.FC<IFormInputProps> = ({
   name,
   control,
   className = '',
@@ -42,8 +42,11 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
   error,
   hostProject
 }) => {
+  const safeOptions = Array.isArray(options) ? options : [];
+  const hasHostProject = hostProject && typeof hostProject === 'object' && Object.keys(hostProject).length !== 0;
+
   const generateRadioOptions = () => {
-    return options.map(singleOption => (
+    return safeOptions.map(singleOption => (
       <>
         <FormControlLabel
           key={singleOption.value}
@@ -53,7 +56,7 @@ export const FormInputRadio: React.FC<FormInputProps> = ({
               <>
                 {singleOption.label}
                 {singleOption.value === DEFAULT_HOST_PROJECT_NETWORK
-                  ? ` ${Object.keys(hostProject).length !== 0 ? `"${hostProject?.name}"` : ''}`
+                  ? ` ${hasHostProject ? `"${hostProject?.name}"` : ''}`
                   : null}
               </>
             </Typography>

@@ -59,7 +59,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
               const selectedValue = newValue ? newValue.value : '';
               onChange(selectedValue); // react-hook-form update
               if (onChangeCallback) {
-                onChangeCallback(selectedValue); // Custom callback
+                onChangeCallback(selectedValue); // Custom callback with reason
               }
             }}
             // onInputChange={(_, newInputValue) => {
@@ -93,12 +93,12 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
                 if (option.value === 'Create and Select' && name === 'cloudStorageBucket') {
                   return (
                     <li {...props} className="custom-add-bucket">
-                      {option.value}
+                      {option.label}
                     </li>
                   );
                 }
 
-                return (<li {...props}>{option.value}</li>);
+                return (<li {...props}>{option.label}</li>);
               }}
               filterOptions={filterOptions}
           />

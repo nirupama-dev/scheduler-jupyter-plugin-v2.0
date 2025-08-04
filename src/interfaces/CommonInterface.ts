@@ -70,10 +70,16 @@ export interface INotebookKernalSchdulerDefaults {
   kernalDetails: IKernelDetails;
 }
 
+export interface IEdiModeData {
+  editMode: boolean;
+  existingData: any;
+}
+
 //Remove this if same as ISchedulerRoutesProps
 export interface ICreateNotebookScheduleProps {
   sessionContext: ISessionContext;
   initialKernalScheduleDetails?: INotebookKernalSchdulerDefaults|null|undefined;
+  editModeData?: IEdiModeData | null | undefined;
 }
 
 
@@ -82,19 +88,8 @@ export interface Parameter {
   value: string;
 }
 
-export interface INotebookKernalSchdulerDefaults {
-  schedulerType: SchedulerType;
-  kernalDetails: IKernelDetails;
-}
 
-//Remove this if same as ISchedulerRoutesProps
-export interface ICreateNotebookScheduleProps {
-  sessionContext: ISessionContext;
-  initialKernalScheduleDetails?: INotebookKernalSchdulerDefaults|null|undefined;
-}
-
-
-export interface ILabelValue<T> {
+export interface ILabelValue<T, U = T> {
   label: T;
-  value: T;
+  value: U;
 }

@@ -15,15 +15,10 @@
  * limitations under the License.
  */
 
-/**
- * Initialization data for the scheduler-jupyter-plugin extension.
- * Parent component for createVertexSchedule.tsx and CreateComposerSchedule.tsx
- */
-
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import TextField from '@mui/material/TextField';
-import { FormInputProps } from '../../../interfaces/FormInterface';
+import { IFormInputProps } from '../../../interfaces/FormInterface';
 
 export const FormInputText = ({
   name,
@@ -31,8 +26,9 @@ export const FormInputText = ({
   label,
   error,
   type,
-  onBlurCallback
-}: FormInputProps) => {
+  onBlurCallback,
+  disabled
+}: IFormInputProps) => {
   return (
     <Controller
       name={name}
@@ -59,6 +55,7 @@ export const FormInputText = ({
               onBlurCallback(value);
             }
           }}
+          disabled={disabled}
         />
       )}
     />

@@ -48,27 +48,19 @@ export const combinedCreateFormSchema = z
 
       // Network selection validation
       if (vertexData.networkOption === 'networkInThisProject') {
-        if (!vertexData.primaryNetworkSelected) {
+        if (!vertexData.primaryNetwork && vertexData.subNetwork) {
           ctx.addIssue({
-            path: ['primaryNetworkSelected'],
+            path: ['primaryNetwork'],
             code: z.ZodIssueCode.custom,
             message:
-              'Primary network is required when using network in this project.'
-          });
-        }
-        if (!vertexData.subNetworkSelected) {
-          ctx.addIssue({
-            path: ['subNetworkSelected'],
-            code: z.ZodIssueCode.custom,
-            message:
-              'Subnetwork is required when using network in this project.'
+              'Primary network is required when subnetwork is selected.'
           });
         }
       }
       if (vertexData.networkOption === 'networkSharedFromHostProject') {
-        if (!vertexData.sharedNetworkSelected) {
+        if (!vertexData.sharedNetwork) {
           ctx.addIssue({
-            path: ['sharedNetworkSelected'],
+            path: ['sharedNetwork'],
             code: z.ZodIssueCode.custom,
             message: 'Shared network is required when using shared network.'
           });

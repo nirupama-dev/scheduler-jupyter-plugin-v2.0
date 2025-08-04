@@ -17,6 +17,7 @@
 
 import dayjs from 'dayjs';
 import { scheduleMode } from '../utils/Constants';
+
 import {
   Control,
   FieldErrors,
@@ -26,7 +27,7 @@ import {
   UseFormWatch
 } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
-import { ILabelValue } from './CommonInterface';
+import { IEdiModeData, ILabelValue } from './CommonInterface';
 
 export interface ICreateVertexSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -35,6 +36,8 @@ export interface ICreateVertexSchedulerProps {
   setValue: UseFormSetValue<CombinedCreateFormValues>;
   getValues: UseFormGetValues<CombinedCreateFormValues>;
   trigger: UseFormTrigger<CombinedCreateFormValues>;
+  //sessionContext: ISessionContext;
+  editModeData: IEdiModeData | null | undefined;
 }
 /*
  * Interface for the payload sent from the Create Vertex Scheduler form to the create API.
@@ -48,7 +51,7 @@ export interface IVertexSchedulePayload {
   cloud_storage_bucket: string;
   service_account: string;
   network_option: 'networkInThisProject' | 'networkSharedFromHostProject';
-  network?: string;
+  primaryNetwork?: string;
   subnetwork?: string;
   disk_type: string;
   disk_size: string;
@@ -64,7 +67,7 @@ export interface IVertexSchedulePayload {
 
 export interface IMachineType {
   machineType: { label: string; value: string };
-  acceleratorConfigs: IAcceleratorConfig[];
+  acceleratorConfigs: IAcceleratorConfig[]|null;
 }
 export interface IAllowedCounts {
   label: number;
@@ -75,15 +78,10 @@ export interface IAcceleratorConfig {
   allowedCounts: IAllowedCounts[];
 }
 
-export interface ITransformedAcceleratorConfig {
-  acceleratorType: ILabelValue<string>;
-  allowedCounts: ILabelValue<number>[]; // Array of { label: number, value: number }
-}
-
 // This interface defines the structure of each item in the final transformed array
 export interface IMachineTypeFormatted {
   machineType: ILabelValue<string>;
-  acceleratorConfigs?: ITransformedAcceleratorConfig[] | null; // Optional, can be array or null
+  acceleratorConfigs?: IAcceleratorConfig[] | null; // Optional, can be array or null
 }
 
 export interface ICreatePayload {
@@ -187,6 +185,10 @@ export interface ILoadingStateVertex {
   region: boolean;
   machineType: boolean;
   cloudStorageBucket: boolean;
+  serviceAccount: boolean;
+  primaryNetwork: boolean;
+  subNetwork: boolean;
+  sharedNetwork: boolean;
 }
 
 export interface IServiceAccount {
@@ -197,4 +199,10 @@ export interface IServiceAccount {
 export interface INetworkVertex {
   name: string;
   link: string;
+}
+
+export interface ISharedNetwork {
+  name: string;
+  network: string;
+  subnetwork: string;
 }

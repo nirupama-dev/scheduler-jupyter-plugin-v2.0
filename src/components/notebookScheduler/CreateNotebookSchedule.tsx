@@ -63,7 +63,8 @@ export const CreateNotebookSchedule = (
 ) => {
   const {
     sessionContext,
-    initialKernalScheduleDetails: preFetchedInitialDetails
+    initialKernalScheduleDetails: preFetchedInitialDetails,
+    editModeData: editModeData,
   } = createScheduleProps; //sessionContext is used to fetch the initial kernel details
   const [kernalAndScheduleValue, setKernalAndScheduleValue] =
     useState<INotebookKernalSchdulerDefaults>(
@@ -76,78 +77,7 @@ export const CreateNotebookSchedule = (
         }
       }
     );
-
-  /**
-   * Function to Extract Kernal details and assign default Scheduler
-   * Initially looks for the prefetched Ker
-   * 
-   */
-  const loadDefaultKernalScheduler = async () => {
-    if (preFetchedInitialDetails) {
-      // Case 1: Details were successfully pre-fetched by the button extension
-      console.log(
-        'Using pre-fetched Initial Scheduler Details:',
-        preFetchedInitialDetails
-      );
-      setKernalAndScheduleValue(preFetchedInitialDetails);
-    } else {
-      // Case 2: Pre-fetched details were not provided (e.g., direct navigation, or button pre-fetch failed silently)
-      // In this scenario, we perform a fallback fetch.
-      console.log(
-        'Pre-fetched details not available. Falling back to internal fetch.'
-      );
-      try {
-        setKernalAndScheduleValue(
-          (await getDefaultSchedulerTypeOnLoad(sessionContext))
-            .kernalAndSchedulerDetails
-        );
-        console.log(
-          'Fallback fetched Initial Scheduler Details:',
-          kernalAndScheduleValue
-        );
-      } catch (error) {
-        console.error(
-          'Failed to fetch initial scheduler details in fallback:',
-          error
-        );
-        // Define a safe default if even the fallback fetch fails
-        setKernalAndScheduleValue({
-          schedulerType: 'vertex',
-          kernalDetails: {
-            executionMode: 'local',
-            isDataprocKernel: false,
-            kernelDisplayName: ''
-          }
-        });
-        // You might want to show a toast/notification here if this happens often
-      }
-    }
-  };
-  /**
-   * Effect to set the initial scheduler type based on the session context.
-   * This runs once when the component mounts.
-   */
-  useEffect(() => {
-    // This effect runs when preFetchedInitialDetails changes or when the component mounts
-    // and preFetchedInitialDetails is initially null/undefined.
-
-    loadDefaultKernalScheduler();
-
-    // Set form values using react-hook-form's setValue
-    setValue('schedulerSelection', kernalAndScheduleValue.schedulerType);
-    setValue(
-      'executionMode',
-      kernalAndScheduleValue.kernalDetails.executionMode
-    );
-    setValue(
-      'serverless',
-      kernalAndScheduleValue.kernalDetails.selectedServerlessName
-    );
-    setValue(
-      'cluster',
-      kernalAndScheduleValue.kernalDetails.selectedClusterName
-    );
-  }, [preFetchedInitialDetails, sessionContext]); // Ensure all dependencies are listed
+  
 
   // Destructure for easier access in JSX
   const { schedulerType } = kernalAndScheduleValue;
@@ -158,7 +88,7 @@ export const CreateNotebookSchedule = (
    */
   const schedulerFormValues = useMemo(() => {
     // This will now use the dynamically determined schedulerType
-    return getFormValuesForScheduler(kernalAndScheduleValue);
+    return getFormValuesForScheduler(kernalAndScheduleValue, sessionContext);
   }, [schedulerType]);
 
   const {
@@ -176,8 +106,55 @@ export const CreateNotebookSchedule = (
     defaultValues: schedulerFormValues,
     mode: 'onChange'
   });
+
+  useEffect(() => {
+  // This effect runs when preFetchedInitialDetails changes or when the component mounts
+  // and preFetchedInitialDetails is initially null/undefined.
+  let isMounted = true;
+  (async () => {
+    console.log(
+      'Component mounted or preFetchedInitialDetails changed. Current value:',
+      preFetchedInitialDetails
+    );
+    let loadedDetails: INotebookKernalSchdulerDefaults;
+    if (preFetchedInitialDetails) {
+      loadedDetails = preFetchedInitialDetails;
+      console.log('Using pre-fetched Initial Scheduler Details:', loadedDetails);
+    } else {
+      try {
+        loadedDetails = (
+          await getDefaultSchedulerTypeOnLoad(sessionContext)
+        ).kernalAndSchedulerDetails;
+        console.log('Fallback fetched Initial Scheduler Details:', loadedDetails);
+      } catch (error) {
+        console.error(
+          'Failed to fetch initial scheduler details in fallback:',
+          error
+        );
+        loadedDetails = {
+          schedulerType: 'vertex',
+          kernalDetails: {
+            executionMode: 'local',
+            isDataprocKernel: false,
+            kernelDisplayName: ''
+          }
+        };
+      }
+    }
+    if (isMounted) {
+      setKernalAndScheduleValue(loadedDetails);
+      setValue('schedulerSelection', loadedDetails.schedulerType);
+      setValue('executionMode', loadedDetails.kernalDetails.executionMode);
+      setValue('serverless', loadedDetails.kernalDetails.selectedServerlessName);
+      setValue('cluster', loadedDetails.kernalDetails.selectedClusterName);
+      console.log('Scheduler Selection set to:', loadedDetails.schedulerType);
+    }
+  })();
+  return () => {
+    isMounted = false;
+  };
+}, [preFetchedInitialDetails, sessionContext, setValue]);
   const schedulerSelection = watch('schedulerSelection'); // Get the current value of the radio button
-  console.log('Current Scheduler Selection:', schedulerSelection);
   /**
    * Helper function to get the schedule values from the Vertex scheduler form.
    * @param vertexData The data from the Vertex scheduler form.
@@ -234,8 +211,8 @@ export const CreateNotebookSchedule = (
         cloud_storage_bucket: vertexData.cloudStorageBucket,
         service_account: vertexData.serviceAccount,
         network_option: vertexData.networkOption ||'networkInThisProject',
-        network: vertexData.network,
-        subnetwork: vertexData.subnetwork,
+        primaryNetwork: vertexData.primaryNetwork,
+        subnetwork: vertexData.subNetwork,
         disk_type: vertexData.diskType,
         disk_size: vertexData.diskSize,
         accelerator_type: vertexData.acceleratorType,
@@ -245,7 +222,7 @@ export const CreateNotebookSchedule = (
         max_run_count: vertexData.maxRunCount,
         start_time: vertexData.startTime,
         end_time: vertexData.endTime,
-        parameters: vertexData.parameters
+        //parameters: vertexData.parameters
       };
       console.log('Vertex Payload:', vertexPayload);
       // TODO: Call your Vertex API here with vertexPayload
@@ -324,6 +301,7 @@ export const CreateNotebookSchedule = (
                 control={control}
                 name="inputFile"
                 error={errors.inputFile}
+                disabled={true}
               />
             </div>
           </div>
@@ -346,6 +324,8 @@ export const CreateNotebookSchedule = (
               watch={watch}
               getValues={getValues}
               trigger={trigger}
+            //sessionContext={sessionContext}
+              editModeData={editModeData}
             />
           )}
           {schedulerSelection === 'composer' && (
