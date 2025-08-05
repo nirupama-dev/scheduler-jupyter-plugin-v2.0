@@ -18,9 +18,7 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
-import { Dispatch, SetStateAction } from 'react';
 import { DropdownOption } from '../../interfaces/FormInterface';
-import { ILoadingStateComposerListing } from '../../interfaces/ComposerInterface';
 
 export class ComputeServices {
   static readonly getParentProjectAPIService = async (
@@ -166,31 +164,27 @@ export class ComputeServices {
       });
   };
 
-  static readonly regionAPIService = (
-    projectId: string,
-    setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>,
-    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposerListing>>
-  ) => {
-    setLoadingState(prev => ({ ...prev, region: true }));
-    requestAPI(`api/compute/region?project_id=${projectId}`)
-      .then((formattedResponse: any) => {
-        if (formattedResponse.length > 0) {
-          const regionOptions: DropdownOption[] = formattedResponse.map(
-            (region: string) => ({ value: region, label: region })
-          );
-          regionOptions.sort();
-          setRegionOptions(regionOptions);
-        } else {
-          setRegionOptions([]);
-        }
-        setLoadingState(prev => ({ ...prev, region: false }));
-      })
-      .catch(error => {
-        setLoadingState(prev => ({ ...prev, region: false }));
-        const errorResponse = `Failed to fetch region list : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      });
+  static readonly regionAPIService = async (
+    projectId: string
+  ): Promise<DropdownOption[]> => {
+    try {
+      const formattedResponse: string[] = await requestAPI(
+        `api/compute/region?project_id=${projectId}`
+      );
+
+      if (!Array.isArray(formattedResponse)) {
+        throw new Error('Invalid response format for regions');
+      }
+
+      const regionOptions: DropdownOption[] = formattedResponse.map(
+        (region: string) => ({ value: region, label: region })
+      );
+      regionOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+      return regionOptions;
+    } catch (error) {
+      // Re-throw the error so the calling component can handle it
+      throw error;
+    }
   };
 }

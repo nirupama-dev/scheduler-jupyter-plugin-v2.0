@@ -31,6 +31,8 @@ import TableData from '../../common/table/TableData';
 import { usePagination, useTable } from 'react-table';
 import { ICellProps } from '../../common/table/Utils';
 import { renderActions } from './RenderActions';
+import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
+import { toast } from 'react-toastify';
 // import { GCS_PLUGIN_ID } from '../../../utils/Constants';
 
 export const ListComposerSchedule = () => {
@@ -49,6 +51,9 @@ export const ListComposerSchedule = () => {
     });
   const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
     useState<boolean>(false);
+  const [defaultRegionFromAuth, setDefaultRegionFromAuth] = useState<
+    string | null
+  >(null);
 
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
@@ -106,6 +111,39 @@ export const ListComposerSchedule = () => {
     }
   };
 
+  const handleEnvChange = useCallback(
+    async (value: string) => {
+      console.log('value', value);
+      setValue('environment', value);
+      setDagList([]);
+      if (!value || !selectedProjectId || !selectedRegion) return;
+
+      try {
+        setLoadingState(prev => ({ ...prev, dags: true }));
+        const dags = await SchedulerService.listDagInfoAPIService(
+          value,
+          selectedRegion,
+          selectedProjectId
+        );
+        setDagList(dags);
+      } catch (error) {
+        if (!toast.isActive('dagListError')) {
+          const errorMessage =
+            typeof error === 'object' && error !== null && 'message' in error
+              ? error.message
+              : 'Unknown error';
+
+          toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
+            toastId: 'dagListError'
+          });
+        }
+      } finally {
+        setLoadingState(prev => ({ ...prev, dags: false }));
+      }
+    },
+    [selectedProjectId, selectedRegion, setValue]
+  );
+
   useEffect(() => {
     checkGCSPluginAvailability();
   }, []);
@@ -117,7 +155,9 @@ export const ListComposerSchedule = () => {
         const credentials = await authApi();
         if (credentials?.project_id) {
           setValue('projectId', credentials.project_id);
-          // Region will be handled by the subsequent useEffect and state updates.
+          if (credentials.region_id) {
+            setDefaultRegionFromAuth(credentials.region_id);
+          }
         }
         setLoadingState(prev => ({ ...prev, projectId: false }));
       } catch (error) {
@@ -129,52 +169,76 @@ export const ListComposerSchedule = () => {
 
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
-    if (selectedProjectId) {
-      ComputeServices.regionAPIService(
-        selectedProjectId,
-        setRegionOptions,
-        setLoadingState
-      );
-    } else {
-      setRegionOptions([]); // Clear regions if no project is selected
-    }
-    // Always clear environment when project_id changes
+    const fetchRegions = async () => {
+      if (!selectedProjectId) {
+        setRegionOptions([]);
+        setValue('composerRegion', '');
+        return;
+      }
+      try {
+        setLoadingState(prev => ({ ...prev, region: true }));
+        const options =
+          await ComputeServices.regionAPIService(selectedProjectId);
+        setRegionOptions(options);
+
+        // Set the default region after options are fetched
+        if (options.length > 0) {
+          const defaultRegion = defaultRegionFromAuth
+            ? options.find(opt => opt.value === defaultRegionFromAuth)
+            : options[0];
+          if (defaultRegion) {
+            setValue('composerRegion', defaultRegion.value);
+          }
+        }
+      } catch (error) {
+        // Handle error from the service call
+        const errorResponse = `Failed to fetch region list : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      } finally {
+        setLoadingState(prev => ({ ...prev, region: false }));
+      }
+    };
+
+    fetchRegions();
+    // Clear subsequent fields when project_id changes
     setValue('environment', '');
-  }, [selectedProjectId, setValue]);
+    setDagList([]);
+  }, [selectedProjectId, defaultRegionFromAuth, setValue]);
 
   useEffect(() => {
-    if (selectedProjectId && selectedRegion) {
-      SchedulerService.listComposersAPIService(
-        setEnvOptions,
-        selectedProjectId,
-        selectedRegion,
-        setLoadingState
-      );
-    } else {
-      setEnvOptions([]);
-    }
-    setDagList([]);
-  }, [selectedProjectId, selectedRegion, setValue]);
-
-  const handleEnvChange = useCallback(
-    async (value: string) => {
-      console.log('value', value);
-      setValue('environment', value);
-      setDagList([]);
-      if (value) {
-        if (selectedProjectId && selectedRegion) {
-          await SchedulerService.listDagInfoAPIService(
-            setDagList,
-            setLoadingState,
-            value,
-            selectedRegion,
-            selectedProjectId
-          );
-        }
+    const fetchEnvironments = async () => {
+      if (!selectedProjectId || !selectedRegion) {
+        setEnvOptions([]);
+        setValue('environment', '');
+        return;
       }
-    },
-    [selectedProjectId, selectedRegion, setValue]
-  );
+      try {
+        setLoadingState(prev => ({ ...prev, environment: true }));
+        const options = await SchedulerService.listComposersAPIService(
+          selectedProjectId,
+          selectedRegion
+        );
+        setEnvOptions(options);
+        if (options.length > 0) {
+          await handleEnvChange(options[0].value);
+        } else {
+          setValue('environment', '');
+          setDagList([]);
+        }
+      } catch (error) {
+        const errorResponse = `Failed to fetch composer environment list : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      } finally {
+        setLoadingState(prev => ({ ...prev, environment: false }));
+      }
+    };
+
+    fetchEnvironments();
+  }, [selectedProjectId, selectedRegion, setValue, handleEnvChange]);
 
   const tableDataCondition = useCallback(
     (cell: ICellProps) => {

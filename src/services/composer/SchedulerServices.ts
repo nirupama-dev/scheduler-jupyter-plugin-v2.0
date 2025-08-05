@@ -30,14 +30,12 @@ import {
   IDagList,
   IDagRunList,
   ISchedulerDagData,
-  IUpdateSchedulerAPIResponse,
-  ILoadingStateComposerListing
+  IUpdateSchedulerAPIResponse
 } from '../../interfaces/ComposerInterface';
 import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
-import { Dispatch, SetStateAction } from 'react';
 import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class SchedulerService {
@@ -172,80 +170,31 @@ export class SchedulerService {
   };
 
   static readonly listComposersAPIService = async (
-    setEnvOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     projectId: string,
-    region: string,
-    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposerListing>>,
-    setComposerEnvData?: Dispatch<SetStateAction<IComposerEnvAPIResponse[]>>,
-    enableAbort?: boolean | undefined | null,
-    abortControllers?: any
-  ) => {
+    region: string
+  ): Promise<DropdownOption[]> => {
     try {
-      setLoadingState(prev => ({ ...prev, environment: true }));
-      let formattedResponse: any;
-      if (enableAbort) {
-        // setting controller to abort pending api call
-        const controller = new AbortController();
-        abortControllers.current.push(controller);
-        const signal = controller.signal;
-        formattedResponse = await requestAPI(
-          `composerList?project_id=${projectId}&region_id=${region}`,
-          { signal }
-        );
-      } else {
-        formattedResponse = await requestAPI(
-          `composerList?project_id=${projectId}&region_id=${region}`
-        );
+      const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
+        `composerList?project_id=${projectId}&region_id=${region}`
+      );
+
+      if (!Array.isArray(formattedResponse)) {
+        // Handle unexpected response format
+        throw new Error('Invalid response format for composer environments');
       }
 
-      if (formattedResponse.length === 0) {
-        // Handle the case where the list is empty
-        setEnvOptions([]);
-        // setComposerEnvData([]);
-      } else if (formattedResponse.length === undefined) {
-        try {
-          setEnvOptions([]);
-          // setComposerEnvData([]);
-        } catch (error) {
-          console.error('Error parsing error message:', error);
-          Notification.error(
-            'Error fetching environments list. Please try again later.',
-            {
-              autoClose: false
-            }
-          );
-        }
-      } else {
-        // setComposerEnvData(formattedResponse);
-        const environmentOptions: DropdownOption[] = formattedResponse.map(
-          (env: IComposerEnvAPIResponse) => ({
-            label: env.label,
-            value: env.name
-          })
-        );
-        environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
-        setEnvOptions(environmentOptions);
-        setLoadingState(prev => ({ ...prev, environment: false }));
-      }
+      const environmentOptions: DropdownOption[] = formattedResponse.map(
+        (env: IComposerEnvAPIResponse) => ({
+          label: env.label,
+          value: env.name
+        })
+      );
+      environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+      return environmentOptions;
     } catch (error) {
-      setLoadingState(prev => ({ ...prev, environment: false }));
-      if (typeof error === 'object' && error !== null) {
-        if (
-          error instanceof TypeError &&
-          error.toString().includes(ABORT_MESSAGE)
-        ) {
-          return;
-        }
-      } else {
-        SchedulerLoggingService.log(
-          'Error listing composer environment list',
-          LOG_LEVEL.ERROR
-        );
-        const errorResponse = `Failed to fetch composer environment list : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      }
+      // Re-throw the error so the calling component can handle it
+      throw error;
     }
   };
   static readonly createJobSchedulerService = async (
@@ -635,110 +584,31 @@ export class SchedulerService {
     }
   };
   static readonly listDagInfoAPIService = async (
-    setDagList: (value: IDagList[]) => void,
-    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposerListing>>,
-    // setBucketName: (value: string) => void,
     composerSelected: string,
     region: string,
-    project: string,
-    abortControllers?: any,
-    dagInfoApiLoading?: { current: boolean }
-  ) => {
+    project: string
+  ): Promise<IDagList[]> => {
     try {
-      setLoadingState(prev => ({ ...prev, dags: true }));
-      console.log('in api call', composerSelected);
-      console.log('in api call', project);
-      console.log('in api call', region);
-      // setting controller to abort pending api call
-      const controller = new AbortController();
-      // abortControllers.current.push(controller);
-      const signal = controller.signal;
-
       const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
-      const formattedResponse: any = await requestAPI(serviceURL, { signal });
-      console.log('resp', formattedResponse);
-      let transformDagListData = [];
+      const formattedResponse: any = await requestAPI(serviceURL);
+
+      let transformDagListData: IDagList[] = [];
       if (formattedResponse?.length > 0) {
-        transformDagListData = formattedResponse[0]?.dags?.map(
-          (dag: ISchedulerDagData) => {
-            return {
-              jobid: dag.dag_id,
-              notebookname: dag.dag_id,
-              schedule: dag.timetable_description,
-              status: dag.is_paused ? 'Paused' : 'Active',
-              scheduleInterval: dag.schedule_interval?.value
-            };
-          }
-        );
-      } else {
-        const jsonstr = formattedResponse?.error?.slice(
-          formattedResponse?.error.indexOf('{'),
-          formattedResponse?.error.lastIndexOf('}') + 1
-        );
-
-        if (jsonstr) {
-          const errorObject = JSON.parse(jsonstr);
-          if (
-            errorObject &&
-            Object.hasOwn(errorObject, 'error') &&
-            Object.hasOwn(errorObject.error, 'message')
-          ) {
-            toast.error(
-              `Failed to fetch schedule list : ${errorObject.error.message}`,
-              {
-                ...toastifyCustomStyle,
-                toastId: 'dagListError'
-              }
-            );
-          } else {
-            toast.error(
-              `Failed to fetch schedule list : ${formattedResponse.error}`,
-              {
-                ...toastifyCustomStyle,
-                toastId: 'dagListError'
-              }
-            );
-          }
-        } else {
-          toast.error(
-            `Failed to fetch schedule list : ${formattedResponse.error}`,
-            {
-              ...toastifyCustomStyle,
-              toastId: 'dagListError'
-            }
-          );
-        }
+        transformDagListData = formattedResponse[0]?.dags?.map((dag: any) => ({
+          jobid: dag.dag_id,
+          notebookname: dag.dag_id,
+          schedule: dag.timetable_description,
+          status: dag.is_paused ? 'Paused' : 'Active',
+          scheduleInterval: dag.schedule_interval?.value
+        }));
       }
-
-      setDagList(transformDagListData);
-      setLoadingState(prev => ({ ...prev, dags: false }));
-      if (dagInfoApiLoading) {
-        dagInfoApiLoading.current = false;
-      }
-      // setBucketName(formattedResponse[1]);
+      return transformDagListData;
     } catch (error) {
-      console.error('API call to listDagInfoAPIService failed:', error);
-
-      if (
-        error instanceof TypeError &&
-        error.toString().includes(ABORT_MESSAGE)
-      ) {
-        return;
-      }
-      setLoadingState(prev => ({ ...prev, dags: false }));
-      if (!toast.isActive('dagListError')) {
-        const errorMessage =
-          typeof error === 'object' && error !== null && 'message' in error
-            ? error.message
-            : 'Unknown error';
-
-        toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
-          toastId: 'dagListError'
-        });
-      }
+      // Re-throw the error so the calling component can handle it
+      throw error;
     }
   };
-  static readonly listDagInfoAPIServiceForCreateNotebook = (
+  listDagInfoAPIServiceForCreateNotebook = (
     setDagList: (value: IDagList[]) => void,
     composerSelected: string,
     setJobNameUniquenessError: React.Dispatch<React.SetStateAction<boolean>>,
