@@ -15,6 +15,8 @@
  * limitations under the License.
  */
 
+import { FieldError } from 'react-hook-form';
+
 export interface FormInputProps {
   name: string;
   control: any;
@@ -24,11 +26,22 @@ export interface FormInputProps {
   options?: Array<{ label: string; value: string }>;
 }
 
+// Define the specific option type
+export interface DropdownOption {
+  label: string;
+  value: string;
+}
+
 export interface FormInputDropdownProps {
-  name: string;
+  name: any;
   control: any;
-  options: Array<{ label: string; value: string }>;
+  options: Array<{ label: string; value: string }> | [];
   label?: string;
   setValue?: any;
+  className?: string;
   customClass?: string;
+  error?: FieldError;
+  onChangeCallback?: (value: any) => void;
+  loading?: boolean;
+  disabled?: boolean;
 }

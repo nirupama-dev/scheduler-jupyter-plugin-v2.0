@@ -18,6 +18,13 @@
 import { LabIcon } from '@jupyterlab/ui-components';
 import LeftArrowIcon from '../../style/icons/left_arrow_icon.svg';
 import notebookSchedulerIcon from '../../style/icons/scheduler_calendar_month.svg';
+import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.svg';
+import playIcon from '../../style/icons/scheduler_play.svg';
+import pauseIcon from '../../style/icons/scheduler_pause.svg';
+import triggerIcon from '../../style/icons/scheduler_trigger.svg';
+import EditIconDisable from '../../style/icons/scheduler_edit_dag.svg';
+import deleteIcon from '../../style/icons/scheduler_delete.svg';
+import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -27,4 +34,39 @@ export const iconLeftArrow = new LabIcon({
 export const iconNotebookScheduler = new LabIcon({
   name: 'launcher:notebook-scheduler-icon',
   svgstr: notebookSchedulerIcon
+});
+
+export const iconScheduledNotebooks = new LabIcon({
+  name: 'launcher:scheduled-notebooks-icon',
+  svgstr: ScheduledNotebooksIcon
+});
+
+export const iconPlay = new LabIcon({
+  name: 'launcher:play-icon',
+  svgstr: playIcon
+});
+
+export const iconPause = new LabIcon({
+  name: 'launcher:pause-icon',
+  svgstr: pauseIcon
+});
+
+export const iconTrigger = new LabIcon({
+  name: 'launcher:trigger-icon',
+  svgstr: triggerIcon
+});
+
+export const iconEditDag = new LabIcon({
+  name: 'launcher:edit-disable-icon',
+  svgstr: EditIconDisable
+});
+
+export const iconDelete = new LabIcon({
+  name: 'launcher:delete-icon',
+  svgstr: deleteIcon
+});
+
+export const iconEditNotebook = new LabIcon({
+  name: 'launcher:edit-notebook-icon',
+  svgstr: EditNotebookIcon
 });

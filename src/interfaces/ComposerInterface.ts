@@ -17,7 +17,6 @@
 
 import { ToastOptions } from 'react-toastify';
 
-
 export interface IComposerCreatePayload {
   input_filename: string;
   composer_environment_name: string;
@@ -92,4 +91,18 @@ export interface IDagRunList {
 
 export interface IExpandableToastProps extends ToastOptions {
   message: string;
+}
+
+export interface ILoadingStateComposerListing {
+  projectId: boolean;
+  region: boolean;
+  environment: boolean;
+  dags: boolean;
+}
+
+export interface IDagList {
+  jobid: string;
+  notebookname: string;
+  schedule: string;
+  scheduleInterval: string;
 }

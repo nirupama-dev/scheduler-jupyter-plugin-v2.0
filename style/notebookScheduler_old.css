@@ -1,12 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 
-.select-text-overlay-scheduler {
-  width: 95%;
-  margin: 20px;
-  display: flex;
-  justify-content: space-between;
-}
-
 .execution-history-parent {
   margin: 20px;
 }
@@ -492,11 +485,6 @@
   outline: 1px solid var(--jp-layout-color3);
 }
 
-.select-panel-list {
-  width: 100%;
-  display: flex;
-}
-
 .disable-item {
   padding-right: 5px;
   color: rgb(245 245 245);
@@ -504,17 +492,9 @@
   pointer-events: none;
 }
 
-.select-panel-list-view-lay {
-  max-width: 294px;
-}
-
 .execution-state {
   margin: 5px 15px 5px 0;
   cursor: default;
-}
-
-.table-right-space {
-  padding-right: 15px;
 }
 
 .pagination-parent-view {

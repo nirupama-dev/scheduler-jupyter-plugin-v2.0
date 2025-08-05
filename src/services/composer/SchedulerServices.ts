@@ -21,8 +21,6 @@ import { JupyterLab } from '@jupyterlab/application';
 import {
   ABORT_MESSAGE,
   HTTP_STATUS_BAD_REQUEST,
-  HTTP_STATUS_FORBIDDEN,
-  pattern,
   scheduleMode
 } from '../../utils/Constants';
 import {
@@ -32,12 +30,15 @@ import {
   IDagList,
   IDagRunList,
   ISchedulerDagData,
-  IUpdateSchedulerAPIResponse
+  IUpdateSchedulerAPIResponse,
+  ILoadingStateComposerListing
 } from '../../interfaces/ComposerInterface';
 import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
+import { Dispatch, SetStateAction } from 'react';
+import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class SchedulerService {
   static readonly listClustersAPIService = async (
@@ -171,18 +172,16 @@ export class SchedulerService {
   };
 
   static readonly listComposersAPIService = async (
-    setComposerEnvData: (value: IComposerEnvAPIResponse[]) => void,
+    setEnvOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     projectId: string,
     region: string,
-    setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void,
-    setApiEnableUrl: any,
-    setEnvApiFlag: (value: boolean) => void,
-    setIsLoading?: (value: boolean) => void,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposerListing>>,
+    setComposerEnvData?: Dispatch<SetStateAction<IComposerEnvAPIResponse[]>>,
     enableAbort?: boolean | undefined | null,
     abortControllers?: any
   ) => {
     try {
+      setLoadingState(prev => ({ ...prev, environment: true }));
       let formattedResponse: any;
       if (enableAbort) {
         // setting controller to abort pending api call
@@ -201,31 +200,12 @@ export class SchedulerService {
 
       if (formattedResponse.length === 0) {
         // Handle the case where the list is empty
-        setComposerEnvData([]);
-        if (setIsLoading) {
-          setIsLoading(false);
-        }
-
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
+        setEnvOptions([]);
+        // setComposerEnvData([]);
       } else if (formattedResponse.length === undefined) {
         try {
-          setComposerEnvData([]);
-          if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
-            const url = formattedResponse.error.message.match(pattern);
-            if (url && url.length > 0) {
-              setIsApiError(true);
-              setApiError(formattedResponse.error.message);
-              setApiEnableUrl(url);
-            } else {
-              setApiError(formattedResponse.error.message);
-            }
-
-            if (setIsLoading) {
-              setIsLoading(false);
-            }
-          }
+          setEnvOptions([]);
+          // setComposerEnvData([]);
         } catch (error) {
           console.error('Error parsing error message:', error);
           Notification.error(
@@ -235,19 +215,20 @@ export class SchedulerService {
             }
           );
         }
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
       } else {
-        setIsApiError(false);
-        setApiError('');
-        setComposerEnvData(formattedResponse);
-
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
+        // setComposerEnvData(formattedResponse);
+        const environmentOptions: DropdownOption[] = formattedResponse.map(
+          (env: IComposerEnvAPIResponse) => ({
+            label: env.label,
+            value: env.name
+          })
+        );
+        environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
+        setEnvOptions(environmentOptions);
+        setLoadingState(prev => ({ ...prev, environment: false }));
       }
     } catch (error) {
+      setLoadingState(prev => ({ ...prev, environment: false }));
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -264,10 +245,6 @@ export class SchedulerService {
         handleErrorToast({
           error: errorResponse
         });
-
-        if (setEnvApiFlag) {
-          setEnvApiFlag(false);
-        }
       }
     }
   };
@@ -659,8 +636,8 @@ export class SchedulerService {
   };
   static readonly listDagInfoAPIService = async (
     setDagList: (value: IDagList[]) => void,
-    setIsLoading: (value: boolean) => void,
-    setBucketName: (value: string) => void,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposerListing>>,
+    // setBucketName: (value: string) => void,
     composerSelected: string,
     region: string,
     project: string,
@@ -668,13 +645,18 @@ export class SchedulerService {
     dagInfoApiLoading?: { current: boolean }
   ) => {
     try {
+      setLoadingState(prev => ({ ...prev, dags: true }));
+      console.log('in api call', composerSelected);
+      console.log('in api call', project);
+      console.log('in api call', region);
       // setting controller to abort pending api call
       const controller = new AbortController();
-      abortControllers.current.push(controller);
+      // abortControllers.current.push(controller);
       const signal = controller.signal;
 
       const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
       const formattedResponse: any = await requestAPI(serviceURL, { signal });
+      console.log('resp', formattedResponse);
       let transformDagListData = [];
       if (formattedResponse?.length > 0) {
         transformDagListData = formattedResponse[0]?.dags?.map(
@@ -729,34 +711,30 @@ export class SchedulerService {
       }
 
       setDagList(transformDagListData);
-      setIsLoading(false);
+      setLoadingState(prev => ({ ...prev, dags: false }));
       if (dagInfoApiLoading) {
         dagInfoApiLoading.current = false;
       }
-      setBucketName(formattedResponse[1]);
+      // setBucketName(formattedResponse[1]);
     } catch (error) {
-      if (dagInfoApiLoading) {
-        dagInfoApiLoading.current = false;
+      console.error('API call to listDagInfoAPIService failed:', error);
+
+      if (
+        error instanceof TypeError &&
+        error.toString().includes(ABORT_MESSAGE)
+      ) {
+        return;
       }
-      if (typeof error === 'object' && error !== null) {
-        if (
-          error instanceof TypeError &&
-          error.toString().includes(ABORT_MESSAGE)
-        ) {
-          return;
-        }
-      } else {
-        setIsLoading(false);
-        SchedulerLoggingService.log(
-          'Error listing dag Scheduler list',
-          LOG_LEVEL.ERROR
-        );
-        if (!toast.isActive('dagListError')) {
-          toast.error(`Failed to fetch schedule list : ${error}`, {
-            ...toastifyCustomStyle,
-            toastId: 'dagListError'
-          });
-        }
+      setLoadingState(prev => ({ ...prev, dags: false }));
+      if (!toast.isActive('dagListError')) {
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? error.message
+            : 'Unknown error';
+
+        toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
+          toastId: 'dagListError'
+        });
       }
     }
   };
@@ -849,14 +827,14 @@ export class SchedulerService {
         { method: 'DELETE' }
       );
       if (deleteResponse.status === 0) {
-        await SchedulerService.listDagInfoAPIService(
-          setDagList,
-          setIsLoading,
-          setBucketName,
-          composerSelected,
-          region,
-          project
-        );
+        // await SchedulerService.listDagInfoAPIService(
+        //   setDagList,
+        //   setIsLoading,
+        //   setBucketName,
+        //   composerSelected,
+        //   region,
+        //   project
+        // );
         Notification.success(
           `Deleted job ${dag_id}. It might take a few minutes to for it to be deleted from the list of jobs.`,
           {
@@ -897,14 +875,14 @@ export class SchedulerService {
         Notification.success(`scheduler ${dag_id} updated successfully`, {
           autoClose: false
         });
-        await SchedulerService.listDagInfoAPIService(
-          setDagList,
-          setIsLoading,
-          setBucketName,
-          composerSelected,
-          region,
-          project
-        );
+        // await SchedulerService.listDagInfoAPIService(
+        //   setDagList,
+        //   setIsLoading,
+        //   setBucketName,
+        //   composerSelected,
+        //   region,
+        //   project
+        // );
       } else {
         const errorResponse = `Error in pausing the schedule : ${formattedResponse?.error}`;
         handleErrorToast({

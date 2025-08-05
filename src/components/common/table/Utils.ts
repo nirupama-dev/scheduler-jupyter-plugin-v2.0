@@ -15,13 +15,27 @@
  * limitations under the License.
  */
 
-// import './base.css';
-// import './authLogin.css';
-// import './cluster.css';
-// import './notebookScheduler.css';
-// import './submitJob.css';
-// import './job.css';
-import './createNotebookSchedule.css';
-import './createVertexScheduler.css';
-import './common.css';
-import './listComposerSchedule.css';
+export const handleDebounce = (func: any, delay: number) => {
+  let timeoutId: any;
+  return function (...args: any) {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func(...args);
+    }, delay);
+  };
+};
+
+export interface ICellProps {
+  getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
+  value: string | any;
+  column: {
+    Header: string;
+  };
+  row: {
+    original: {
+      id: string;
+      status: string;
+    };
+  };
+  render: (value: string) => React.ReactNode;
+}

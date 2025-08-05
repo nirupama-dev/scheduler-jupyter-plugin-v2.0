@@ -114,3 +114,13 @@ export const SCHEDULE_FORMAT_DESCRIPTION = `Schedules are specified using unix-c
             "0 */3 * * *", every Monday at 9:00: "0 9 * * 1".`;
 
 export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
+
+export const LISTING_PAGE_HEADING = 'Scheduled Jobs';
+
+export const SCHEDULE_LABEL_VERTEX = 'Vertex';
+
+export const SCHEDULE_LABEL_COMPOSER = 'Composer';
+
+export const TITLE_LAUNCHER_CATEGORY = 'Google Cloud Resources';
+
+export const GCS_PLUGIN_ID = 'gcs-jupyter-plugin:plugin';
