@@ -189,6 +189,7 @@ export interface ILoadingStateVertex {
   primaryNetwork: boolean;
   subNetwork: boolean;
   sharedNetwork: boolean;
+  hostProject: boolean;
 }
 
 export interface IServiceAccount {

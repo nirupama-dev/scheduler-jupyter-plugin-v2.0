@@ -23,7 +23,7 @@ import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IDisposable } from '@lumino/disposable';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { NotebookScheduler } from './NotebookScheduler';
-import { customAnimatedSpinnerIcon, iconNotebookScheduler } from '../../utils/Icons';
+import { iconNotebookScheduler } from '../../utils/Icons';
 import {
   // ... other imports
   showDialog, // Import showDialog
@@ -63,14 +63,6 @@ export class NotebookButtonExtension
         await this.onNotebookSchedulerButtonClick(context.sessionContext)
     
       },
-      // onClick: async() => {
-      //   await this.onNotebookSchedulerButtonClick();
-      //   const content = new NotebookScheduler(this.themeManager, '/create', context.sessionContext);
-      //   const widget = new MainAreaWidget({ content });
-      //   widget.title.label = 'Create Scheduled Job';
-      //   widget.title.icon = iconNotebookScheduler;
-      //   this.app.shell.add(widget, 'main');
-      // },
       tooltip: 'Schedule this notebook as a job'
     });
     panel.toolbar.insertItem(1000, 'notebookScheduler', button);
@@ -85,18 +77,12 @@ export class NotebookButtonExtension
       console.error('Scheduler button not initialized.');
       return;
     }
-
-    // 1. Show loader on the button and disable it
-    this.schedulerButton.title.icon = customAnimatedSpinnerIcon;
-    this.schedulerButton.title.iconClass=''; // Clear any previous icon class'
-    this.schedulerButton.node.classList.add('jp-mod-inprogress'); // Add class for styling if needed
-    this.schedulerButton.enabled = false;
-
+    
     let initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults | null = null;
     let hasError = false;
 
     try {
-      // 2. Pre-fetch the initial kernel details
+      // Pre-fetch the initial kernel details
       initialKernalSchedulerDetails = (await getDefaultSchedulerTypeOnLoad(sessionContext)).kernalAndSchedulerDetails;
       console.log('Prefetched Initial Scheduler Details for button:', initialKernalSchedulerDetails);
 

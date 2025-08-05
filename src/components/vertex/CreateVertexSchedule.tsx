@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
@@ -31,6 +31,16 @@ import { StorageServices } from '../../services/common/Storage';
 import { IamServices } from '../../services/common/Iam';
 import { ComputeServices } from '../../services/common/Compute'; // Ensure this is imported
 import { authApi } from '../common/login/Config';
+import { ILabelValue } from '../../interfaces/CommonInterface';
+import { createVertexSchema } from '../../schemas/CreateVertexSchema';
+import { z } from 'zod';
+import { Controller, FieldErrors } from 'react-hook-form';
+import dayjs from 'dayjs';
+import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import Cron, { PeriodType } from 'react-js-cron';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import tzdata from 'tzdata';
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 
 // Constants
 import {
@@ -62,19 +72,6 @@ import {
   IMachineType,
   ISharedNetwork
 } from '../../interfaces/VertexInterface';
-import { ILabelValue } from '../../interfaces/CommonInterface';
-import { createVertexSchema } from '../../schemas/CreateVertexSchema';
-import { z } from 'zod';
-
-// Extend ILoadingStateVertex to include all necessary loading flags
-interface ILoadingStateVertexExtended extends ILoadingStateVertex {
-  serviceAccount: boolean;
-  primaryNetwork: boolean;
-  subNetwork: boolean;
-  sharedNetwork: boolean;
-  hostProject: boolean; // Added for hostProject loading
-  //createOperation: boolean;
-}
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -109,7 +106,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const [hostProject, setHostProject] = useState<any | null>(null);
 
   // Consolidated loading state for all API calls initiated by this component
-  const [loadingState, setLoadingState] = useState<ILoadingStateVertexExtended>(
+  const [loadingState, setLoadingState] = useState<ILoadingStateVertex>(
     {
       region: false,
       machineType: false,
@@ -662,390 +659,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     loadingState.hostProject
   ]);
 
-  // return (
-  //   <div>
-  //     {/* Region Dropdown */}
-  //     <div className="create-scheduler-form-element">
-  //       <FormInputDropdown
-  //         name="vertexRegion"
-  //         control={control}
-  //         label="Region*"
-  //         options={VERTEX_REGIONS}
-  //         customClass="create-scheduler-style"
-  //         loading={loadingState.region}
-  //         onChangeCallback={handleRegionChange}
-  //         error={vertexErrors.vertexRegion}
-  //       />
-  //     </div>
-
-  //     {/* Machine Type Dropdown */}
-  //     <div className="create-scheduler-form-element">
-  //       <FormInputDropdown
-  //         name="machineType"
-  //         control={control}
-  //         label="Machine Type*"
-  //         options={machineTypeList.map(item => item.machineType)}
-  //         customClass="create-scheduler-style"
-  //         loading={loadingState.machineType}
-  //         error={vertexErrors.machineType}
-  //       />
-  //     </div>
-
-  //     {/* Accelerator Type and Count (conditionally rendered) */}
-  //     {selectedMachineType &&
-  //       selectedMachineType.acceleratorConfigs &&
-  //       selectedMachineType.acceleratorConfigs.length > 0 && (
-  //         <div className="execution-history-main-wrapper">
-  //           <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-  //             <FormInputDropdown
-  //               name="acceleratorType"
-  //               control={control}
-  //               label="Accelerator Type"
-  //               options={getAcceleratedTypeOptions(
-  //                 selectedMachineType.acceleratorConfigs
-  //               )}
-  //               customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-  //               error={vertexErrors.acceleratorType}
-  //             />
-  //           </div>
-
-  //           {currentAcceleratorType &&
-  //             selectedMachineType.acceleratorConfigs.map(accelConfig =>
-  //               accelConfig.acceleratorType.value === currentAcceleratorType &&
-  //               accelConfig.allowedCounts.length > 0 ? (
-  //                 <div
-  //                   className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr"
-  //                   key={accelConfig.acceleratorType.value}
-  //                 >
-  //                   <FormInputDropdown
-  //                     name="acceleratorCount"
-  //                     control={control}
-  //                     label="Accelerator Count*"
-  //                     options={accelConfig.allowedCounts.map(count => ({
-  //                       label: count.value.toString(),
-  //                       value: count.value.toString()
-  //                     }))}
-  //                     customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-  //                     error={vertexErrors.acceleratorCount}
-  //                   />
-  //                 </div>
-  //               ) : null
-  //             )}
-  //         </div>
-  //       )}
-
-  //     {/* Kernel Dropdown */}
-  //     <div className="create-scheduler-form-element">
-  //       <FormInputDropdown
-  //         name="kernelName"
-  //         control={control}
-  //         label="Kernel*"
-  //         options={KERNEL_VALUE}
-  //         customClass="create-scheduler-style"
-  //         error={vertexErrors.kernelName}
-  //       />
-  //     </div>
-
-  //     {/* Cloud Storage Bucket Dropdown */}
-  //     <div className="create-scheduler-form-element">
-  //       <FormInputDropdown
-  //         name="cloudStorageBucket"
-  //         control={control}
-  //         label="Cloud Storage Bucket*"
-  //         options={cloudStorageList}
-  //         customClass="create-scheduler-style"
-  //         filterOptions={filterCloudStorageOptions}
-  //         loading={loadingState.cloudStorageBucket}
-  //         error={vertexErrors.cloudStorageBucket}
-  //         onChangeCallback={handleCloudStorageDropdownChange}
-  //       />
-  //     </div>
-
-  //     {/* Disk Type and Size */}
-  //     <div className="execution-history-main-wrapper">
-  //       <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-  //         <FormInputDropdown
-  //           name="diskType"
-  //           control={control}
-  //           label="Disk Type*"
-  //           options={DISK_TYPE_VALUE}
-  //           customClass="create-scheduler-style"
-  //           error={vertexErrors.diskType}
-  //         />
-  //       </div>
-  //       <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-  //         <FormInputText
-  //           label="Disk size*"
-  //           control={control}
-  //           name="diskSize"
-  //           onBlurCallback={handleDiskSizeBlur}
-  //           error={vertexErrors.diskSize}
-  //           type="number"
-  //         />
-  //       </div>
-  //     </div>
-
-  //     {/* Service Account Dropdown */}
-  //     <div className="create-scheduler-form-element panel-margin footer-text">
-  //       <FormInputDropdown
-  //         name="serviceAccount"
-  //         control={control}
-  //         label="Service account*"
-  //         options={serviceAccountList}
-  //         loading={loadingState.serviceAccount}
-  //         error={vertexErrors.serviceAccount}
-  //       />
-  //     </div>
-
-  //     {/* Network Configuration Section */}
-  //     <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
-  //       {NETWORK_CONFIGURATION_LABEL}
-  //     </div>
-  //     <p>{NETWORK_CONFIGURATION_LABEL_DESCRIPTION}</p>
-
-  //     <div className="create-scheduler-form-element panel-margin">
-  //       <FormInputRadio
-  //         name="networkOption"
-  //         control={control}
-  //         className="network-layout"
-  //         options={NETWORK_OPTIONS.map(option => ({
-  //           label:
-  //             option.value === 'networkSharedFromHostProject' &&
-  //             hostProject?.name
-  //               ? `${option.label} "${hostProject.name}"`
-  //               : option.label,
-  //           value: option.value
-  //         }))}
-  //         error={vertexErrors.networkOption }
-  //       />
-  //       <span className="sub-para tab-text-sub-cl">
-  //         Choose a shared VPC network from the project that is different from
-  //         the clusters project
-  //       </span>
-  //       <div className="learn-more-a-tag learn-more-url">
-  //         <LearnMore path={SHARED_NETWORK_DOC_URL} />
-  //       </div>
-  //     </div>
-
-  //     {/* Conditional Network Fields */}
-  //     {currentNetworkOption === DEFAULT_NETWORK_SELECTED ? (
-  //       <div className="execution-history-main-wrapper">
-  //         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-  //           <FormInputDropdown
-  //             name="primaryNetwork"
-  //             control={control}
-  //             label="Primary network*"
-  //             customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-  //             options={primaryNetworkList}
-  //             loading={loadingState.primaryNetwork}
-  //             error={vertexErrors.primaryNetwork}
-  //           />
-  //         </div>
-
-  //         <div className="create-scheduler-form-element create-scheduler-form-element-input-fl">
-  //           <FormInputDropdown
-  //             name="subNetwork"
-  //             control={control}
-  //             label="Sub network*"
-  //             customClass="create-scheduler-style create-scheduler-form-element-input-fl"
-  //             options={subNetworkList}
-  //             loading={loadingState.subNetwork}
-  //             error={vertexErrors.subNetwork}
-  //           />
-  //         </div>
-  //       </div>
-  //     ) : (
-  //       <>
-  //         <div className="create-scheduler-form-element">
-  //           <FormInputDropdown
-  //             name="sharedNetwork"
-  //             control={control}
-  //             label="Shared subNetwork*"
-  //             options={sharedNetworkList}
-  //             customClass="create-scheduler-style"
-  //             loading={loadingState.sharedNetwork}
-  //             error={
-  //               vertexErrors.sharedNetwork && 'message' in vertexErrors.sharedNetwork
-  //                 ? (vertexErrors.sharedNetwork as import('react-hook-form').FieldError)
-  //                 : undefined
-  //             }
-  //             disabled={!hostProject || Object.keys(hostProject).length === 0}
-  //           />
-  //         </div>
-  //         {/* {showSharedNetworkError() && (
-  //           <ErrorMessage
-  //             message={sharedNetworkSelectedError?.message || "No shared subNetworks are available in this region or no host project configured."}
-  //             showIcon={false}
-  //           />
-  //         )} */}
-  //       </>
-  //     )}
-
-  //     {/* Schedule Section */}
-  //     <div className="create-scheduler-label">Schedule</div>
-  //     <div className="create-scheduler-form-element">
-  //       <FormInputRadio
-  //         name="scheduleMode"
-  //         control={control}
-  //         className="network-layout"
-  //         options={SCHEDULE_MODE_OPTIONS}
-  //         error={vertexErrors.scheduleMode}
-  //       />
-  //     </div>
-
-  //     <div className="schedule-child-section">
-  //       {currentScheduleMode === 'runSchedule' && (
-  //         <>
-  //           <FormInputRadio
-  //             name="internalScheduleMode"
-  //             control={control}
-  //             className="schedule-radio-btn"
-  //             options={RUN_ON_SCHEDULE_OPTIONS}
-  //             error={vertexErrors.internalScheduleMode}
-  //           />
-
-  //           <div className="execution-history-main-wrapper">
-  //             <LocalizationProvider dateAdapter={AdapterDayjs}>
-  //               <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-  //                 <Controller
-  //                   name="startTime"
-  //                   control={control}
-  //                   render={({ field }) => (
-  //                     <DateTimePicker
-  //                       {...field}
-  //                       className="create-scheduler-style create-scheduler-form-element-input-fl"
-  //                       label="Start Date*"
-  //                       value={field.value ? dayjs(field.value) : null}
-  //                       onChange={newValue => {
-  //                         field.onChange(
-  //                           newValue ? newValue.toISOString() : null
-  //                         );
-  //                       }}
-  //                       slots={{ openPickerIcon: CalendarMonthIcon }}
-  //                       slotProps={{
-  //                         actionBar: { actions: ['clear'] },
-  //                         tabs: { hidden: true },
-  //                         textField: {
-  //                           error: !!vertexErrors.startTime,
-  //                           helperText: vertexErrors.startTime?.message
-  //                         }
-  //                       }}
-  //                       disablePast
-  //                       closeOnSelect={true}
-  //                     />
-  //                   )}
-  //                 />
-  //               </div>
-  //               <div className="create-scheduler-form-element create-scheduler-form-element-input-fl create-pr">
-  //                 <Controller
-  //                   name="endTime"
-  //                   control={control}
-  //                   render={({ field }) => (
-  //                     <DateTimePicker
-  //                       {...field}
-  //                       className="create-scheduler-style create-scheduler-form-element-input-fl"
-  //                       label="End Date*"
-  //                       value={field.value ? dayjs(field.value) : null}
-  //                       onChange={newValue => {
-  //                         field.onChange(
-  //                           newValue ? newValue.toISOString() : null
-  //                         );
-  //                       }}
-  //                       slots={{ openPickerIcon: CalendarMonthIcon }}
-  //                       slotProps={{
-  //                         actionBar: { actions: ['clear'] },
-  //                         field: { clearable: true },
-  //                         tabs: { hidden: true },
-  //                         textField: {
-  //                           error: !!vertexErrors.endTime,
-  //                           helperText: vertexErrors.endTime?.message
-  //                         }
-  //                       }}
-  //                       disablePast
-  //                       closeOnSelect={true}
-  //                     />
-  //                   )}
-  //                 />
-  //               </div>
-  //             </LocalizationProvider>
-  //           </div>
-  //         </>
-  //       )}
-
-  //       {currentScheduleMode === 'runSchedule' &&
-  //         currentInternalScheduleMode === 'cronFormat' && (
-  //           <>
-  //             <div className="create-scheduler-form-element schedule-input-field">
-  //               <FormInputText
-  //                 label="Schedule*"
-  //                 control={control}
-  //                 name="scheduleField"
-  //                 error={vertexErrors.scheduleField}
-  //               />
-  //             </div>
-  //             <div>
-  //               <span className="tab-description tab-text-sub-cl">
-  //                 {SCHEDULE_FORMAT_DESCRIPTION}
-  //               </span>
-  //               <div className="learn-more-url">
-  //                 <LearnMore path={CORN_EXP_DOC_URL} />
-  //               </div>
-  //             </div>
-  //           </>
-  //         )}
-
-  //       {currentScheduleMode === 'runSchedule' &&
-  //         currentInternalScheduleMode === 'userFriendly' && (
-  //           <div className="create-scheduler-form-element">
-  //             <Controller
-  //               name="scheduleValue"
-  //               control={control}
-  //               render={({ field }) => (
-  //                 <Cron
-  //                   value={field.value || ''}
-  //                   setValue={field.onChange}
-  //                   allowedPeriods={
-  //                     allowedPeriodsCron as PeriodType[] | undefined
-  //                   }
-  //                 />
-  //               )}
-  //             />
-  //             {/* {scheduleValueError && (
-  //             <ErrorMessage message={scheduleValueError.message || 'Schedule is required'} showIcon={false} />
-  //           )} */}
-  //           </div>
-  //         )}
-
-  //       {currentScheduleMode === 'runSchedule' && (
-  //         <>
-  //           <div className="create-scheduler-form-element">
-  //             <FormInputDropdown
-  //               name="timeZone"
-  //               control={control}
-  //               label="Time Zone*"
-  //               options={timezones}
-  //               customClass="create-scheduler-style"
-  //               error={vertexErrors.timeZone}
-  //             />
-  //           </div>
-
-  //           <div className="create-scheduler-form-element">
-  //             <FormInputText
-  //               label="Max runs"
-  //               control={control}
-  //               name="maxRunCount"
-  //               error={vertexErrors.maxRunCount}
-  //               type="number"
-  //             />
-  //           </div>
-  //         </>
-  //       )}
-  //     </div>
-  //     {/* Submit/Cancel Buttons */}
-
-  //   </div>
-  // );
-
+  // --- Render Component UI ---
   return (
     <div>
       {/* Region Dropdown */}
