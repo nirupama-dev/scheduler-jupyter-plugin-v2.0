@@ -25,7 +25,7 @@ import {
 } from '@mui/material';
 // For Material-UI v4, it might be directly from '@mui/material/Autocomplete' or '@material-ui/lab/Autocomplete'
 import { Controller } from 'react-hook-form';
-import { FormInputDropdownProps } from '../../../interfaces/FormInterface'; // Adjust path if needed
+import { FormInputDropdownProps, FormInputListingDropdownProps } from '../../../interfaces/FormInterface'; // Adjust path if needed
 
 export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   name,
@@ -35,9 +35,9 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   customClass = '',
   onChangeCallback,
   error,
-  loading = false, // Default to false,
-  filterOptions,
-  disabled
+  loading = false, // Default to false
+  disabled = false, // Default to false
+  filterOptions
   // onSearchInputChange,
   // freeSolo = false, // Default to false
   // placeholder = '',
@@ -62,18 +62,11 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
                 onChangeCallback(selectedValue); // Custom callback with reason
               }
             }}
-            // onInputChange={(_, newInputValue) => {
-            //   if (onSearchInputChange) {
-            //     onSearchInputChange(newInputValue); // Propagate search input changes
-            //   }
-            // }}
-            // freeSolo={freeSolo}
-            // loading={loading} // Pass loading prop to Autocomplete
+            
             renderInput={(params) => (
               <TextField
                 {...params}
                 label={label}
-                // placeholder={placeholder}
                 error={!!error}
                 InputProps={{
                   ...params.InputProps,
@@ -86,8 +79,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
                 }}
               />
             )}
-            // Optional: If you want to show a message when no options are found and not loading
-            // noOptionsText={loading ? 'Loading...' : 'No options found'}
+            
             renderOption={(props, option) => {
                 // Custom rendering for the "Create new bucket" option
                 if (option.value === 'Create and Select' && name === 'cloudStorageBucket') {
@@ -98,6 +90,68 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
                   );
                 }
 
+                return (<li {...props}>{option.label}</li>);
+              }}
+              filterOptions={filterOptions}
+          />
+        )}
+      />
+      <div>{error && <FormHelperText>{error.message}</FormHelperText>}</div>
+    </FormControl>
+  );
+};
+
+export const FormInputListingDropdown: React.FC<FormInputListingDropdownProps> = ({
+  name,
+  control,
+  label,
+  options = [],
+  customClass = '',
+  onChangeCallback,
+  error,
+  loading = false, // Default to false
+  disabled = false, // Default to false
+  filterOptions
+}) => {
+  return (
+    <FormControl fullWidth error={!!error} className={customClass}>
+      <Controller
+        name={name}
+        control={control}
+        render={({ field: { onChange, value, ...fieldProps } }) => (
+          <Autocomplete
+            {...fieldProps}
+            options={options}
+            disabled={disabled}
+            getOptionLabel={(option) => option.label} // How to get the label from an option object
+            value={options.find(option => option.value === value) || null} // Set value based on full option object
+            onChange={(_, newValue) => {
+              const selectedValue = newValue ? newValue.value : '';
+              onChange(selectedValue); // react-hook-form update
+              if (onChangeCallback) {
+                onChangeCallback(selectedValue); // Custom callback with reason
+              }
+            }}
+            
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={label}
+                error={!!error}
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <React.Fragment>
+                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {params.InputProps.endAdornment}
+                    </React.Fragment>
+                  ),
+                }}
+              />
+            )}
+            
+            renderOption={(props, option) => {
+              
                 return (<li {...props}>{option.label}</li>);
               }}
               filterOptions={filterOptions}

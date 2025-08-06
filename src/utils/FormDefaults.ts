@@ -129,14 +129,14 @@ const getDefaultComposerValues = (initialKernelDetails: INotebookKernalSchdulerD
  * @returns CombinedCreateFormValues that match one of the discriminated union branches.
  */
 export const getInitialFormValues = (
- initialKernelDetails: INotebookKernalSchdulerDefaults, sessionContext:ISessionContext
+ initialKernelDetails: INotebookKernalSchdulerDefaults, sessionContext: ISessionContext| null | undefined
 ): CombinedCreateFormValues => {
   console.log('Initial Kernel Details:', initialKernelDetails);
   if (initialKernelDetails.schedulerType === 'composer') {
-    return getDefaultComposerValues(initialKernelDetails, sessionContext.path);
+    return getDefaultComposerValues(initialKernelDetails, sessionContext?.path || '');
   }
   // Default to Vertex if no criteria or criteria is 'vertex'
-  return getDefaultVertexValues(initialKernelDetails, sessionContext.path);
+  return getDefaultVertexValues(initialKernelDetails, sessionContext?.path || '');
 };
 
 /**

@@ -103,32 +103,72 @@ export const CreateComposerSchedule: React.FC<
 
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
-    if (selectedProjectId) {
-      ComputeServices.regionAPIService(
-        selectedProjectId,
-        setRegionOptions,
-        setLoadingState
-      );
-    } else {
-      setRegionOptions([]); // Clear regions if no project is selected
-    }
-    // Always clear environment when project_id changes
+    // if (selectedProjectId) {
+    //   const regionList: DropdownOption[] = ComputeServices.regionAPIService(
+    //     selectedProjectId,
+    //   );
+
+    //   if (regionList) {
+    //     setRegionOptions(regionList);
+    //   }
+    // } else {
+    //   setRegionOptions([]); // Clear regions if no project is selected
+    // }
+    const fetchRegions = async () => {
+      if (selectedProjectId) {
+        setValue('composerRegion', '');
+
+        try {
+          setLoadingState(prev => ({ ...prev, region: true }));
+          const options =
+            await ComputeServices.regionAPIService(selectedProjectId);
+          setRegionOptions(options);
+        } catch (error) {
+          // Handle error from the service call
+          const errorResponse = `Failed to fetch region list : ${error}`;
+          handleErrorToast({
+            error: errorResponse
+          });
+        } finally {
+          setLoadingState(prev => ({ ...prev, region: false }));
+        }
+      } else {
+        setRegionOptions([]); // Clear regions if no project is selected
+      }
+    };
+    fetchRegions();
+    // Clear subsequent fields when project_id changes
     setValue('environment', '');
   }, [selectedProjectId, setValue]);
 
   useEffect(() => {
-    if (selectedProjectId && selectedRegion) {
-      SchedulerService.listComposersAPIService(
-        setEnvOptions,
-        setComposerEnvData,
-        selectedProjectId,
-        selectedRegion,
-        setLoadingState
-      );
-    } else {
-      setEnvOptions([]);
-      setComposerEnvData([]);
-    }
+    // Fetch environments based on selected project and region
+      const fetchEnvironments = async () => {
+            if (selectedProjectId || selectedRegion) {
+
+            try {
+              setLoadingState(prev => ({ ...prev, environment: true }));
+              const options = await SchedulerService.listComposersAPIService(
+                selectedProjectId,
+                selectedRegion
+              );
+              setEnvOptions(options);
+            } catch (error) {
+              const errorResponse = `Failed to fetch composer environment list : ${error}`;
+              handleErrorToast({
+                error: errorResponse
+              });
+            } finally {
+              setLoadingState(prev => ({ ...prev, environment: false }));
+            }
+          } else {
+            setEnvOptions([]);
+            setComposerEnvData([]);
+          }
+        };
+      // Fetch environments when project and region are selected
+   
+      fetchEnvironments();
   }, [selectedRegion, setValue]);
 
   useEffect(() => {

@@ -30,13 +30,13 @@ import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterfac
 
 export class NotebookScheduler extends SchedulerWidget {
   private initialRoute: string;
-  private sessionContext: ISessionContext;
+  private sessionContext: ISessionContext|null|undefined;
   private initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults|null|undefined;
 
   constructor(
     themeManager: IThemeManager,
     initialRoute: string = '/list',
-    sessionContext: ISessionContext,
+    sessionContext?: ISessionContext|null|undefined,
     initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults|null|undefined
   ) {
     super(themeManager);

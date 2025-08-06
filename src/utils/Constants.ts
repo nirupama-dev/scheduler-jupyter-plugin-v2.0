@@ -117,6 +117,16 @@ export const SCHEDULE_FORMAT_DESCRIPTION = `Schedules are specified using unix-c
 
 export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
 
+export const LISTING_PAGE_HEADING = 'Scheduled Jobs';
+
+export const SCHEDULE_LABEL_VERTEX = 'Vertex';
+
+export const SCHEDULE_LABEL_COMPOSER = 'Composer';
+
+export const TITLE_LAUNCHER_CATEGORY = 'Google Cloud Resources';
+
+export const GCS_PLUGIN_ID = 'gcs-jupyter-plugin:plugin';
+
 export const EXECUTION_MODE_OPTIONS = [
   {
     label: 'Serverless',
@@ -130,56 +140,56 @@ export const EXECUTION_MODE_OPTIONS = [
 
 export const VERTEX_REGIONS: ILabelValue<string>[] = [
   {
-    label: "asia-east2",
-    value: "asia-east2"
+    label: 'asia-east2',
+    value: 'asia-east2'
   },
   {
-    label: "asia-northeast1",
-    value: "asia-northeast1"
+    label: 'asia-northeast1',
+    value: 'asia-northeast1'
   },
   {
-    label: "asia-northeast3",
-    value: "asia-northeast3"
+    label: 'asia-northeast3',
+    value: 'asia-northeast3'
   },
   {
-    label: "asia-south1",
-    value: "asia-south1"
+    label: 'asia-south1',
+    value: 'asia-south1'
   },
   {
-    label: "asia-southeast1",
-    value: "asia-southeast1"
+    label: 'asia-southeast1',
+    value: 'asia-southeast1'
   },
   {
-    label: "australia-southeast1",
-    value: "australia-southeast1"
+    label: 'australia-southeast1',
+    value: 'australia-southeast1'
   },
   {
-    label: "europe-west1",
-    value: "europe-west1"
+    label: 'europe-west1',
+    value: 'europe-west1'
   },
   {
-    label: "northamerica-northeast1",
-    value: "northamerica-northeast1"
+    label: 'northamerica-northeast1',
+    value: 'northamerica-northeast1'
   },
   {
-    label: "southamerica-east1",
-    value: "southamerica-east1"
+    label: 'southamerica-east1',
+    value: 'southamerica-east1'
   },
   {
-    label: "us-central1",
-    value: "us-central1"
+    label: 'us-central1',
+    value: 'us-central1'
   },
   {
-    label: "us-west1",
-    value: "us-west1"
+    label: 'us-west1',
+    value: 'us-west1'
   },
   {
-    label: "us-west4",
-    value: "us-west4"
+    label: 'us-west4',
+    value: 'us-west4'
   }
 ];
 
-export const KERNEL_VALUE:ILabelValue<string>[]= [
+export const KERNEL_VALUE: ILabelValue<string>[] = [
   {
     label: 'python3',
     value: 'python3'
@@ -193,11 +203,12 @@ export const KERNEL_VALUE:ILabelValue<string>[]= [
     value: 'tensorflow'
   }
 ];
-export const DEFAULT_CLOUD_STORAGE_BUCKET  =
-  { label: 'default-vertex-schedules', value: 'default-vertex-schedules' }
-;
+export const DEFAULT_CLOUD_STORAGE_BUCKET = {
+  label: 'default-vertex-schedules',
+  value: 'default-vertex-schedules'
+};
 
-export const DISK_TYPE_VALUE : ILabelValue<string>[] = [
+export const DISK_TYPE_VALUE: ILabelValue<string>[] = [
   {
     label: 'pd-standard (Persistent Disk Standard',
     value: 'pd-standard (Persistent Disk Standard'
@@ -222,7 +233,10 @@ export const DISK_TYPE_VALUE : ILabelValue<string>[] = [
 
 export const DEFAULT_DISK_SIZE = '100'; // Needs to be a string as diskSize is string in schema
 
-export const DEFAULT_MACHINE_TYPE: ILabelValue<string> = { label: 'n1-standard-2 (2 CPUs, 8.05 GB RAM)', value: 'n1-standard-2' }; // Make it ILabelValue
+export const DEFAULT_MACHINE_TYPE: ILabelValue<string> = {
+  label: 'n1-standard-2 (2 CPUs, 8.05 GB RAM)',
+  value: 'n1-standard-2'
+}; // Make it ILabelValue
 
 export const DEFAULT_KERNEL = 'python3';
 
@@ -230,5 +244,8 @@ export const DEFAULT_SERVICE_ACCOUNT = 'compute@developer.gserviceaccount.com'; 
 
 export const CRON_FOR_SCHEDULE_EVERY_MIN = '* * * * *'; // Your 'everyMinuteCron'
 
+export const LOADER_CONTENT_VERTEX_LISTING_SCREEN =
+  'Loading Vertex Schedules...';
 
-
+export const LOADER_CONTENT_COMPOSER_LISTING_SCREEN =
+  'Loading Composer Schedules...';

@@ -44,12 +44,12 @@ async function getRunningKernelsCached(): Promise<Kernel.IModel[]> {
  * @returns A promise that resolves to an IKernelDetails object.
  */
 const getKernelDetails = async (
-  sessionContext: ISessionContext,
   availableKernelSpecs: any,
   serverlessNamesList: string[], // <-- Now expects string[] directly for matching
-  clusterList: string[]
+  clusterList: string[],
+  sessionContext?: ISessionContext | null | undefined
 ): Promise<IKernelDetails> => {
-  const kernelDisplayName = sessionContext.kernelDisplayName;
+  const kernelDisplayName = sessionContext?.kernelDisplayName;
   console.debug('Kernel Display Name:', kernelDisplayName);
 
   const kernelDetails: IKernelDetails = {
@@ -58,13 +58,13 @@ const getKernelDetails = async (
     selectedClusterName: undefined,
     kernelParentResource: undefined,
     isDataprocKernel: false,
-    kernelDisplayName: kernelDisplayName
+    kernelDisplayName: kernelDisplayName??''
   };
 
   // --- Attempt to get details from running kernel (preferred for active session) ---
   let parentResource: string | undefined;
   try {
-    const currentKernelId = sessionContext.session?.kernel?.id;
+    const currentKernelId = sessionContext?.session?.kernel?.id;
     console.log('Current Kernel ID:', currentKernelId);
     if (currentKernelId) {
       const runningKernels: Kernel.IModel[] = await getRunningKernelsCached();
@@ -96,7 +96,7 @@ const getKernelDetails = async (
   if (
     !parentResource &&
     availableKernelSpecs &&
-    sessionContext.kernelPreference.name
+    sessionContext?.kernelPreference.name
   ) {
     const kernels = availableKernelSpecs.kernelspecs;
     if (kernels && kernels[sessionContext.kernelPreference.name]) {
@@ -120,13 +120,13 @@ const getKernelDetails = async (
       kernelDetails.executionMode = 'serverless';
       kernelDetails.isDataprocKernel = true;
       kernelDetails.selectedServerlessName = serverlessNamesList.find(
-        serverlessName => kernelDisplayName.includes(serverlessName)
+        serverlessName => kernelDisplayName?.includes(serverlessName)
       );
     } else if (parentResource.includes('/clusters')) {
       kernelDetails.executionMode = 'cluster';
       kernelDetails.isDataprocKernel = true;
       kernelDetails.selectedClusterName = clusterList.find(cluster =>
-        kernelDisplayName.includes(cluster)
+        kernelDisplayName?.includes(cluster)
       );
     }
   }
@@ -145,20 +145,20 @@ const getKernelDetails = async (
  * and matched serverless/cluster names.
  */
 const extractSchedulerTypeAndKernelDetails = async (
-  sessionContext: ISessionContext,
   availableKernelSpecs: any,
   serverlessNamesList: string[], // <-- Now expects string[]
-  clusterList: string[]
+  clusterList: string[],
+  sessionContext?: ISessionContext | null | undefined
 ): Promise<{
   kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults;
 }> => {
 
   try {
     const kernelDetails = await getKernelDetails(
-      sessionContext,
       availableKernelSpecs,
       serverlessNamesList, // Pass the string array
-      clusterList
+      clusterList,
+      sessionContext
     );
     const schedulerType: SchedulerType =
       kernelDetails.executionMode === 'serverless' ||
@@ -170,7 +170,7 @@ const extractSchedulerTypeAndKernelDetails = async (
         schedulerType,
         kernalDetails: {
           executionMode: kernelDetails.executionMode,
-          kernelDisplayName: sessionContext.kernelDisplayName,
+          kernelDisplayName: sessionContext?.kernelDisplayName ?? '',
           selectedServerlessName: kernelDetails.selectedServerlessName,
           selectedClusterName: kernelDetails.selectedClusterName,
           kernelParentResource: kernelDetails.kernelParentResource,
@@ -189,7 +189,7 @@ const extractSchedulerTypeAndKernelDetails = async (
         schedulerType: 'vertex',
         kernalDetails: {
           executionMode: 'local',
-          kernelDisplayName: sessionContext.kernelDisplayName,
+          kernelDisplayName: sessionContext?.kernelDisplayName ?? '',
           selectedServerlessName: undefined,
           selectedClusterName: undefined,
           kernelParentResource: undefined,
@@ -262,7 +262,7 @@ const promisifiedListSessionTemplates = (): Promise<string[]> => {
  * execution mode, and any matched serverless or cluster names.
  */
 export const getDefaultSchedulerTypeOnLoad = async (
-  sessionContext: ISessionContext
+  sessionContext?: ISessionContext | null | undefined
 ): Promise<{
   kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults;
 }> => {
@@ -270,7 +270,7 @@ export const getDefaultSchedulerTypeOnLoad = async (
     schedulerType: 'vertex',
     kernalDetails: {
       executionMode: 'local',
-      kernelDisplayName: sessionContext.kernelDisplayName,
+      kernelDisplayName: sessionContext?.kernelDisplayName ?? '',
       selectedServerlessName: undefined,
       selectedClusterName: undefined,
       kernelParentResource: undefined,
@@ -279,8 +279,8 @@ export const getDefaultSchedulerTypeOnLoad = async (
   };
   // Early exit for local or no kernel
   if (
-    sessionContext.kernelDisplayName.includes('Local') ||
-    sessionContext.kernelDisplayName.includes('No Kernel')
+    sessionContext?.kernelDisplayName.includes('Local') ||
+    sessionContext?.kernelDisplayName.includes('No Kernel')
   ) {
     return { kernalAndSchedulerDetails };
   }
@@ -329,10 +329,10 @@ export const getDefaultSchedulerTypeOnLoad = async (
   });
 
   return extractSchedulerTypeAndKernelDetails(
-    sessionContext,
     availableKernelSpecs,
     fetchedServerlessNamesList, // Pass the string array directly
-    fetchedClusterList
+    fetchedClusterList,
+    sessionContext
   );
 
   

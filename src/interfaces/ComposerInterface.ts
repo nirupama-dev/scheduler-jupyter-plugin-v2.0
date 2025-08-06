@@ -128,6 +128,20 @@ export interface IExpandableToastProps extends ToastOptions {
   message: string;
 }
 
+export interface ILoadingStateComposerListing {
+  projectId: boolean;
+  region: boolean;
+  environment: boolean;
+  dags: boolean;
+}
+
+export interface IDagList {
+  jobid: string;
+  notebookname: string;
+  schedule: string;
+  scheduleInterval: string;
+}
+
 export interface ILoadingStateComposer {
   projectId: boolean;
   region: boolean;

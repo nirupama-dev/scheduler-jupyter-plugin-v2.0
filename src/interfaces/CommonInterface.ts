@@ -29,7 +29,7 @@ export interface IAuthCredentials {
 }
 
 export interface ISchedulerRoutesProps {
-  sessionContext: ISessionContext; 
+  sessionContext: ISessionContext| null | undefined; 
   initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults| null |undefined
 }
 
@@ -77,7 +77,7 @@ export interface IEdiModeData {
 
 //Remove this if same as ISchedulerRoutesProps
 export interface ICreateNotebookScheduleProps {
-  sessionContext: ISessionContext;
+  sessionContext: ISessionContext| null | undefined;
   initialKernalScheduleDetails?: INotebookKernalSchdulerDefaults|null|undefined;
   editModeData?: IEdiModeData | null | undefined;
 }
@@ -92,4 +92,8 @@ export interface Parameter {
 export interface ILabelValue<T, U = T> {
   label: T;
   value: U;
+}
+
+export interface LoaderProps {
+  message: string;
 }

@@ -19,185 +19,12 @@ import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 // import { DropdownOption } from '../../interfaces/FormInterface';
-import { Dispatch, SetStateAction } from 'react';
 import { ILabelValue } from '../../interfaces/CommonInterface';
-import { ILoadingStateComposer } from '../../interfaces/ComposerInterface';
 import { ISharedNetwork } from '../../interfaces/VertexInterface';
+import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class ComputeServices {
-  // static readonly getParentProjectAPIService = async (
-  //   setHostProject: (value: any) => void
-  // ) => {
-  //   try {
-  //     const formattedResponse: any = await requestAPI('api/compute/getXpnHost');
-  //     if (Object.keys(formattedResponse).length !== 0) {
-  //       setHostProject(formattedResponse);
-  //     } else {
-  //       setHostProject({});
-  //     }
-  //   } catch (error) {
-  //     SchedulerLoggingService.log(
-  //       'Error fetching host project',
-  //       LOG_LEVEL.ERROR
-  //     );
-  //     setHostProject('');
-  //     Notification.error('Failed to fetch host project', {
-  //       autoClose: false
-  //     });
-  //   }
-  // };
-  // static readonly primaryNetworkAPIService = (
-  //   setPrimaryNetworkList: (value: ILabelValue<string>[]) => void,
-  //   // setPrimaryNetworkLoading: (value: boolean) => void,
-  //   // setErrorMessagePrimaryNetwork: (value: string) => void
-  // ) => {
-  //   // setPrimaryNetworkLoading(true);
-  //   requestAPI('api/compute/network')
-  //     .then((formattedResponse: any) => {
-  //       if (formattedResponse.length > 0) {
-  //         console.log('formatted', formattedResponse)
-  //         const primaryNetworkList = formattedResponse.map((network: any) => ({
-  //           label: network.name,
-  //           value: network.selfLink
-  //         }));
-  //         primaryNetworkList.sort();
-  //         setPrimaryNetworkList(primaryNetworkList);
-  //       } else if (formattedResponse.error) {
-  //         // setErrorMessagePrimaryNetwork(formattedResponse.error);
-  //         setPrimaryNetworkList([]);
-  //       } else {
-  //         setPrimaryNetworkList([]);
-  //       }
-
-  //       // setPrimaryNetworkLoading(false);
-  //     })
-  //     .catch(error => {
-  //       setPrimaryNetworkList([]);
-  //       // setPrimaryNetworkLoading(false);
-  //       SchedulerLoggingService.log(
-  //         `Error listing primary network ${error}`,
-  //         LOG_LEVEL.ERROR
-  //       );
-  //       const errorResponse = `Failed to fetch primary network list : ${error}`;
-  //       handleErrorToast({
-  //         error: errorResponse
-  //       });
-  //     });
-  // };
-
-  // static readonly subNetworkAPIService = async (
-  //   region: string,
-  //   primaryNetworkSelected: string | undefined,
-  //   setSubNetworkList: Dispatch<SetStateAction<ILabelValue<string>[]>>,
-  //   // setSubNetworkLoading: (value: boolean) => void,
-  //   // setErrorMessageSubnetworkNetwork: (value: string) => void
-  // ) => {
-  //   // setSubNetworkLoading(true);
-  //   requestAPI(
-  //     `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkSelected}`
-  //   )
-  //     .then((formattedResponse: any) => {
-  //       if (formattedResponse.length > 0) {
-  //         const subNetworkList = formattedResponse
-  //           .filter((network: any) => network.privateIpGoogleAccess === true)
-  //           .map((network: any) => ({
-  //             label: network.name,
-  //             value: network.selfLink
-  //           }));
-  //         subNetworkList.sort();
-  //         setSubNetworkList(subNetworkList);
-  //         // setErrorMessageSubnetworkNetwork('');
-  //       } else if (formattedResponse.error) {
-  //         // setErrorMessageSubnetworkNetwork(formattedResponse.error);
-  //         setSubNetworkList([]);
-  //       } else {
-  //         setSubNetworkList([]);
-  //       }
-  //       // setSubNetworkLoading(false);
-  //     })
-  //     .catch(error => {
-  //       setSubNetworkList([]);
-  //       // setSubNetworkLoading(false);
-  //       SchedulerLoggingService.log(
-  //         `Error listing sub networks ${error}`,
-  //         LOG_LEVEL.ERROR
-  //       );
-  //       const errorResponse = `Failed to fetch sub networks list : ${error}`;
-  //       handleErrorToast({
-  //         error: errorResponse
-  //       });
-  //     });
-  // };
-
-  // static readonly sharedNetworkAPIService = async (
-  //   setSharedNetworkList: (
-  //     value: { name: string; network: string; subnetwork: string }[]
-  //   ) => void,
-  //   setSharedNetworkLoading: (value: boolean) => void,
-  //   hostProject: string,
-  //   region: string
-  // ) => {
-  //   setSharedNetworkLoading(true);
-  //   requestAPI(
-  //     `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
-  //   )
-  //     .then((formattedResponse: any) => {
-  //       if (formattedResponse.length > 0) {
-  //         const sharedNetworkList = formattedResponse.map((network: any) => ({
-  //           name: network.subnetwork.split('/').pop(),
-  //           network: network.network,
-  //           subnetwork: network.subnetwork
-  //         }));
-  //         sharedNetworkList.sort();
-  //         setSharedNetworkList(sharedNetworkList);
-  //       } else {
-  //         setSharedNetworkList([]);
-  //       }
-  //       setSharedNetworkLoading(false);
-  //     })
-  //     .catch(error => {
-  //       setSharedNetworkList([]);
-  //       setSharedNetworkLoading(false);
-  //       SchedulerLoggingService.log(
-  //         `Error listing shared networks ${error}`,
-  //         LOG_LEVEL.ERROR
-  //       );
-  //       const errorResponse = `Failed to fetch shared networks list : ${error}`;
-  //       handleErrorToast({
-  //         error: errorResponse
-  //       });
-  //     });
-  // };
-
-  // static readonly regionAPIService = (
-  //   projectId: string,
-  //   setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>,
-  //   setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>
-  // ) => {
-  //   setLoadingState(prev => ({ ...prev, region: true }));
-  //   requestAPI(`api/compute/region?project_id=${projectId}`)
-  //     .then((formattedResponse: any) => {
-  //       console.log('Formatted response:', formattedResponse);
-  //       if (formattedResponse.length > 0) {
-  //         const regionOptions: DropdownOption[] = formattedResponse.map(
-  //           (region: string) => ({ value: region, label: region })
-  //         );
-  //         regionOptions.sort();
-  //         setRegionOptions(regionOptions);
-  //       } else {
-  //         setRegionOptions([]);
-  //       }
-  //       setLoadingState(prev => ({ ...prev, region: false }));
-  //     })
-  //     .catch(error => {
-  //       setLoadingState(prev => ({ ...prev, region: false }));
-  //       const errorResponse = `Failed to fetch region list : ${error}`;
-  //       handleErrorToast({
-  //         error: errorResponse
-  //       });
-  //     });
-  // };
-
+ 
   /**
    * Fetches the parent host project for Shared VPC.
    * Handles error logging and notifications internally.
@@ -338,45 +165,35 @@ export class ComputeServices {
     // }
     }
   }
-
   /**
-   * Fetches a list of regions for a given project.
-   * Handles error logging, loading state, and notifications internally.
+   * Fetches a list of regions for a given project ID.
+   * Handles error logging and notifications internally.
    *
-   * @param projectId The project ID.
-   * @param setRegionOptions Callback to set the list of region options.
-   * @param setLoadingState Callback to update the loading state for Composer region.
-   * @returns A Promise that resolves with an array of `ILabelValue<string>` for regions (or empty array on error).
+   * @param projectId The project ID to fetch regions for.
+   * @returns A Promise that resolves with an array of `DropdownOption` for regions (or empty array on error).
    */
-  static async regionAPIService( // Added async and return type
-    projectId: string,
-    setRegionOptions: Dispatch<SetStateAction<ILabelValue<string>[]>>,
-    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>
-  ): Promise<ILabelValue<string>[]> { // Added return type
-    setLoadingState(prev => ({ ...prev, region: true }));
-    try {
-      const formattedResponse: any = await requestAPI(`api/compute/region?project_id=${projectId}`);
-      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const regionOptions: ILabelValue<string>[] = formattedResponse.map(
-          (region: string) => ({ value: region, label: region })
-        );
-        regionOptions.sort((a, b) => a.label.localeCompare(b.label));
-        setRegionOptions(regionOptions); // Still setting state directly
-        return regionOptions; // Return the data
-      } else if (formattedResponse?.error) {
-        throw new Error(formattedResponse.error);
-      }
-      setRegionOptions([]); // Clear list on no data/error
-      return []; // Return empty array if no data
-    } catch (error: any) {
-      setRegionOptions([]); // Clear list on error
-      setLoadingState(prev => ({ ...prev, region: false })); // Stop loading on error
-      const errorResponse = `Failed to fetch region list: ${error}`;
-      handleErrorToast({ error: errorResponse }); // Keep original notification
-      return []; // Return empty array on error
-    } finally {
-      setLoadingState(prev => ({ ...prev, region: false })); // Stop loading in finally
-    }
-  }
 
+  static readonly regionAPIService = async (
+    projectId: string
+  ): Promise<DropdownOption[]> => {
+    try {
+      const formattedResponse: string[] = await requestAPI(
+        `api/compute/region?project_id=${projectId}`
+      );
+
+      if (!Array.isArray(formattedResponse)) {
+        throw new Error('Invalid response format for regions');
+      }
+
+      const regionOptions: DropdownOption[] = formattedResponse.map(
+        (region: string) => ({ value: region, label: region })
+      );
+      regionOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+      return regionOptions;
+    } catch (error) {
+      // Re-throw the error so the calling component can handle it
+      throw error;
+    }
+  };
 }

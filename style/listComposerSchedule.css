@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+.select-text-overlay-scheduler {
+  width: 95%;
+  margin: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.select-panel-list {
+  width: 100%;
+  display: flex;
+}
+
+.select-panel-list-view-lay {
+  max-width: 294px;
+}
+
+.table-right-space {
+  padding-right: 15px;
+}
+
+.table-space-around {
+  padding: 0 10px;
+}
+
+.clusters-table-data {
+  padding-left: 15px;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.actions-icon-btn {
+  display: flex;
+}
+
+.edit-icon-buttons-display {
+  display: none;
+}

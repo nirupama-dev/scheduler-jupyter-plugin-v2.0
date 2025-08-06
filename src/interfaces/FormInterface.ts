@@ -19,6 +19,7 @@ import { Control, FieldError, Path } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { ILabelValue } from './CommonInterface';
 
+
 export interface IFormInputProps {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
@@ -62,6 +63,24 @@ export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
   filterOptions?: any;
   getOptionLabel?: any;
   isOptionEqualToValue?: (option: OptionType, value: string | any | null | undefined) => boolean;
+  getOptionValue?: any;
+  disabled?:boolean
+}
+
+export interface FormInputListingDropdownProps<OptionType = ILabelValue<string>> {
+  name: Path<any>;
+  control: Control<any>;
+  options: Array<{ label: string; value: any }> | [];
+  label?: string;
+  setValue?: any;
+  className?: string;
+  customClass?: string;
+  error?: FieldError;
+  onChangeCallback?: (value: any) => void;
+  loading?: boolean;
+  filterOptions?: any;
+  getOptionLabel?: any;
+  isOptionEqualToValue?: (option: OptionType, value: any) => boolean;
   getOptionValue?: any;
   disabled?:boolean
 }

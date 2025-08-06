@@ -256,11 +256,6 @@
   max-height: 55vh;
 }
 
-.clusters-table-data {
-  padding-left: 15px;
-  border-bottom: 1px solid var(--jp-layout-color3);
-}
-
 .clusters-table-data:nth-child(1) {
   color: #3367d6;
   text-decoration: underline;
@@ -348,14 +343,6 @@
   margin-left: 30px;
 }
 
-.actions-icon-btn {
-  display: flex;
-}
-
 .spin-loader-listing {
   margin: 10%;
-}
-
-.edit-icon-buttons-display {
-  display: none;
 }
