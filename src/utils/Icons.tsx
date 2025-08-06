@@ -18,6 +18,7 @@
 import { LabIcon } from '@jupyterlab/ui-components';
 import LeftArrowIcon from '../../style/icons/left_arrow_icon.svg';
 import notebookSchedulerIcon from '../../style/icons/scheduler_calendar_month.svg';
+import ErrorIcon from '../../style/icons/error_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -27,4 +28,20 @@ export const iconLeftArrow = new LabIcon({
 export const iconNotebookScheduler = new LabIcon({
   name: 'launcher:notebook-scheduler-icon',
   svgstr: notebookSchedulerIcon
+});
+
+const customSpinnerSvg = `
+<svg viewBox="0 0 50 50">
+  <circle class="custom-spinner-path" cx="25" cy="25" r="20" fill="none" stroke-width="5"></circle>
+</svg>
+`;
+
+export const customAnimatedSpinnerIcon = new LabIcon({
+  name: 'launcher:custom-animated-spinner',
+  svgstr: customSpinnerSvg
+});
+
+export const iconError = new LabIcon({
+  name: 'launcher:error-icon',
+  svgstr: ErrorIcon
 });

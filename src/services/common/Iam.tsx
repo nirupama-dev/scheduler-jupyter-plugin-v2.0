@@ -16,45 +16,33 @@
  */
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { requestAPI } from '../../handler/Handler';
+import { ILabelValue } from '../../interfaces/CommonInterface';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 
 export class IamServices {
-  static readonly serviceAccountAPIService = (
-    setServiceAccountList: (
-      value: { displayName: string; email: string }[]
-    ) => void,
-    setServiceAccountLoading: (value: boolean) => void,
-    setErrorMessage: (value: string) => void
-  ) => {
-    setServiceAccountLoading(true);
-    requestAPI('api/iam/listServiceAccount')
-      .then((formattedResponse: any) => {
-        if (formattedResponse.length > 0) {
-          const serviceAccountList = formattedResponse.map((account: any) => ({
-            displayName: account.displayName,
-            email: account.email
-          }));
-          serviceAccountList.sort();
-          setServiceAccountList(serviceAccountList);
-        } else if (formattedResponse.error) {
-          setErrorMessage(formattedResponse.error);
-          setServiceAccountList([]);
-        } else {
-          setServiceAccountList([]);
-        }
-        setServiceAccountLoading(false);
-      })
-      .catch(error => {
-        setServiceAccountList([]);
-        setServiceAccountLoading(false);
-        SchedulerLoggingService.log(
-          `Error listing service accounts : ${error}`,
-          LOG_LEVEL.ERROR
+  static async serviceAccountAPIService(): Promise<ILabelValue<string>[]> {
+    try {
+      const formattedResponse = await requestAPI('api/iam/listServiceAccount');
+      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
+        const serviceAccountList: ILabelValue<string>[] = formattedResponse.map(
+          (account: any) => ({
+            label: account.displayName,
+            value: account.email
+          })
         );
-        const errorResponse = `Failed to fetch service accounts list : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
+        serviceAccountList.sort((a, b) => a.label.localeCompare(b.label));
+        return serviceAccountList;
+      }
+      return [];
+    } catch (error) {
+      SchedulerLoggingService.log(
+        `Error listing service accounts : ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      handleErrorToast({
+        error: `Failed to fetch service accounts list : ${error}`
       });
-  };
+      return [];
+    }
+  }
 }

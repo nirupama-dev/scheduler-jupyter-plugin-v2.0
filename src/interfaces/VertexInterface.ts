@@ -18,6 +18,27 @@
 import dayjs from 'dayjs';
 import { scheduleMode } from '../utils/Constants';
 
+import {
+  Control,
+  FieldErrors,
+  UseFormGetValues,
+  UseFormSetValue,
+  UseFormTrigger,
+  UseFormWatch
+} from 'react-hook-form';
+import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
+import { IEdiModeData, ILabelValue } from './CommonInterface';
+
+export interface ICreateVertexSchedulerProps {
+  control: Control<CombinedCreateFormValues>;
+  errors: FieldErrors<CombinedCreateFormValues>;
+  watch: UseFormWatch<CombinedCreateFormValues>;
+  setValue: UseFormSetValue<CombinedCreateFormValues>;
+  getValues: UseFormGetValues<CombinedCreateFormValues>;
+  trigger: UseFormTrigger<CombinedCreateFormValues>;
+  //sessionContext: ISessionContext;
+  editModeData: IEdiModeData | null | undefined;
+}
 /*
  * Interface for the payload sent from the Create Vertex Scheduler form to the create API.
  */
@@ -29,29 +50,38 @@ export interface IVertexSchedulePayload {
   region: string;
   cloud_storage_bucket: string;
   service_account: string;
-  network_option?: 'networkInThisProject' | 'networkShared';
-  network: string;
-  subnetwork: string;
+  network_option: 'networkInThisProject' | 'networkSharedFromHostProject';
+  primaryNetwork?: string;
+  subnetwork?: string;
   disk_type: string;
   disk_size: string;
   accelerator_type?: string;
   accelerator_count?: string;
   schedule_value?: string; // Optional: only for scheduled jobs
-  time_zone?: string;      // Optional: only for scheduled jobs
-  max_run_count?: string;  // Optional: only for scheduled jobs
-  start_time?: string;      // Optional: only for scheduled jobs
-  end_time?: string;        // Optional: only for scheduled jobs
-  parameters?: string[];    //future enhancement: optional parameters for the job
+  time_zone?: string; // Optional: only for scheduled jobs
+  max_run_count?: string; // Optional: only for scheduled jobs
+  start_time?: string; // Optional: only for scheduled jobs
+  end_time?: string; // Optional: only for scheduled jobs
+  parameters?: string[]; //future enhancement: optional parameters for the job
 }
 
 export interface IMachineType {
-  machineType: string;
-  acceleratorConfigs: IAcceleratorConfig[];
+  machineType: { label: string; value: string };
+  acceleratorConfigs: IAcceleratorConfig[]|null;
+}
+export interface IAllowedCounts {
+  label: number;
+  value: number;
+}
+export interface IAcceleratorConfig {
+  acceleratorType: { label: string; value: string };
+  allowedCounts: IAllowedCounts[];
 }
 
-export interface IAcceleratorConfig {
-  acceleratorType: string;
-  allowedCounts: number[];
+// This interface defines the structure of each item in the final transformed array
+export interface IMachineTypeFormatted {
+  machineType: ILabelValue<string>;
+  acceleratorConfigs?: IAcceleratorConfig[] | null; // Optional, can be array or null
 }
 
 export interface ICreatePayload {
@@ -151,4 +181,29 @@ export interface IFormattedResponse {
   error?: { code: number; message: string };
 }
 
+export interface ILoadingStateVertex {
+  region: boolean;
+  machineType: boolean;
+  cloudStorageBucket: boolean;
+  serviceAccount: boolean;
+  primaryNetwork: boolean;
+  subNetwork: boolean;
+  sharedNetwork: boolean;
+  hostProject: boolean;
+}
 
+export interface IServiceAccount {
+  displayName: string;
+  email: string;
+}
+
+export interface INetworkVertex {
+  name: string;
+  link: string;
+}
+
+export interface ISharedNetwork {
+  name: string;
+  network: string;
+  subnetwork: string;
+}

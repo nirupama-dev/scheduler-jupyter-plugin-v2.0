@@ -27,14 +27,15 @@ import {
   ISchedulerData,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
-  IFormattedResponse
+  IFormattedResponse,
+  ILoadingStateVertex
 } from '../../interfaces/VertexInterface';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   ABORT_MESSAGE,
   DEFAULT_TIME_ZONE,
   HTTP_STATUS_FORBIDDEN,
-  pattern
+  URL_LINK_PATTERN
 } from '../../utils/Constants';
 import React, { Dispatch, SetStateAction } from 'react';
 import {
@@ -43,21 +44,26 @@ import {
 } from '../../components/common/notificationHandling/Config';
 import ExpandToastMessage from '../../components/common/notificationHandling/ExpandToastMessage';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { uiConfigAPIResponseTransform } from '../../components/common/vertex/Config';
 
 export class VertexServices {
   static readonly machineTypeAPIService = (
     region: string,
     setMachineTypeList: (value: IMachineType[]) => void,
-    setMachineTypeLoading: (value: boolean) => void,
-    setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void,
-    setApiEnableUrl: any
+    setLoadingState: React.Dispatch<React.SetStateAction<ILoadingStateVertex>>,
+    // setMachineTypeLoading: (value: boolean) => void,
+    // setIsApiError: (value: boolean) => void,
+    // setApiError: (value: string) => void,
+    // setApiEnableUrl: any
   ) => {
-    setMachineTypeLoading(true);
+    // setMachineTypeLoading(true);
+    setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: true }));
     requestAPI(`api/vertex/uiConfig?region_id=${region}`)
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
-          setMachineTypeList(formattedResponse);
+          //console.log('formattedResponse', formattedResponse);
+          const response:IMachineType[] = formattedResponse.map(uiConfigAPIResponseTransform);
+          setMachineTypeList(response);
         } else if (formattedResponse.length === undefined) {
           try {
             if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
@@ -67,11 +73,11 @@ export class VertexServices {
                 /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
               const url = formattedResponse.error.message.match(pattern);
               if (url && url.length > 0) {
-                setIsApiError(true);
-                setApiError(formattedResponse.error.message);
-                setApiEnableUrl(url);
+                // setIsApiError(true);
+                // setApiError(formattedResponse.error.message);
+                // setApiEnableUrl(url);
               } else {
-                setApiError(formattedResponse.error.message);
+                // setApiError(formattedResponse.error.message);
               }
             }
           } catch (error) {
@@ -86,11 +92,13 @@ export class VertexServices {
         } else {
           setMachineTypeList([]);
         }
-        setMachineTypeLoading(false);
+        // setMachineTypeLoading(false);
+        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
       })
       .catch(error => {
         setMachineTypeList([]);
-        setMachineTypeLoading(false);
+        // setMachineTypeLoading(false);
+        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
         SchedulerLoggingService.log(
           `Error listing machine type list: ${error}`,
           LOG_LEVEL.ERROR
@@ -239,7 +247,7 @@ export class VertexServices {
 
       // Handle API error
       if (error?.code === HTTP_STATUS_FORBIDDEN) {
-        const url = error.message.match(pattern);
+        const url = error.message.match(URL_LINK_PATTERN);
         if (url && url.length > 0) {
           setIsApiError(true);
           setApiError(error.message);

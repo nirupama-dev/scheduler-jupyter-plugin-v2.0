@@ -18,148 +18,365 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+// import { DropdownOption } from '../../interfaces/FormInterface';
+import { Dispatch, SetStateAction } from 'react';
+import { ILabelValue } from '../../interfaces/CommonInterface';
+import { ILoadingStateComposer } from '../../interfaces/ComposerInterface';
+import { ISharedNetwork } from '../../interfaces/VertexInterface';
 
 export class ComputeServices {
-  static readonly getParentProjectAPIService = async (
-    setHostProject: (value: any) => void
-  ) => {
+  // static readonly getParentProjectAPIService = async (
+  //   setHostProject: (value: any) => void
+  // ) => {
+  //   try {
+  //     const formattedResponse: any = await requestAPI('api/compute/getXpnHost');
+  //     if (Object.keys(formattedResponse).length !== 0) {
+  //       setHostProject(formattedResponse);
+  //     } else {
+  //       setHostProject({});
+  //     }
+  //   } catch (error) {
+  //     SchedulerLoggingService.log(
+  //       'Error fetching host project',
+  //       LOG_LEVEL.ERROR
+  //     );
+  //     setHostProject('');
+  //     Notification.error('Failed to fetch host project', {
+  //       autoClose: false
+  //     });
+  //   }
+  // };
+  // static readonly primaryNetworkAPIService = (
+  //   setPrimaryNetworkList: (value: ILabelValue<string>[]) => void,
+  //   // setPrimaryNetworkLoading: (value: boolean) => void,
+  //   // setErrorMessagePrimaryNetwork: (value: string) => void
+  // ) => {
+  //   // setPrimaryNetworkLoading(true);
+  //   requestAPI('api/compute/network')
+  //     .then((formattedResponse: any) => {
+  //       if (formattedResponse.length > 0) {
+  //         console.log('formatted', formattedResponse)
+  //         const primaryNetworkList = formattedResponse.map((network: any) => ({
+  //           label: network.name,
+  //           value: network.selfLink
+  //         }));
+  //         primaryNetworkList.sort();
+  //         setPrimaryNetworkList(primaryNetworkList);
+  //       } else if (formattedResponse.error) {
+  //         // setErrorMessagePrimaryNetwork(formattedResponse.error);
+  //         setPrimaryNetworkList([]);
+  //       } else {
+  //         setPrimaryNetworkList([]);
+  //       }
+
+  //       // setPrimaryNetworkLoading(false);
+  //     })
+  //     .catch(error => {
+  //       setPrimaryNetworkList([]);
+  //       // setPrimaryNetworkLoading(false);
+  //       SchedulerLoggingService.log(
+  //         `Error listing primary network ${error}`,
+  //         LOG_LEVEL.ERROR
+  //       );
+  //       const errorResponse = `Failed to fetch primary network list : ${error}`;
+  //       handleErrorToast({
+  //         error: errorResponse
+  //       });
+  //     });
+  // };
+
+  // static readonly subNetworkAPIService = async (
+  //   region: string,
+  //   primaryNetworkSelected: string | undefined,
+  //   setSubNetworkList: Dispatch<SetStateAction<ILabelValue<string>[]>>,
+  //   // setSubNetworkLoading: (value: boolean) => void,
+  //   // setErrorMessageSubnetworkNetwork: (value: string) => void
+  // ) => {
+  //   // setSubNetworkLoading(true);
+  //   requestAPI(
+  //     `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkSelected}`
+  //   )
+  //     .then((formattedResponse: any) => {
+  //       if (formattedResponse.length > 0) {
+  //         const subNetworkList = formattedResponse
+  //           .filter((network: any) => network.privateIpGoogleAccess === true)
+  //           .map((network: any) => ({
+  //             label: network.name,
+  //             value: network.selfLink
+  //           }));
+  //         subNetworkList.sort();
+  //         setSubNetworkList(subNetworkList);
+  //         // setErrorMessageSubnetworkNetwork('');
+  //       } else if (formattedResponse.error) {
+  //         // setErrorMessageSubnetworkNetwork(formattedResponse.error);
+  //         setSubNetworkList([]);
+  //       } else {
+  //         setSubNetworkList([]);
+  //       }
+  //       // setSubNetworkLoading(false);
+  //     })
+  //     .catch(error => {
+  //       setSubNetworkList([]);
+  //       // setSubNetworkLoading(false);
+  //       SchedulerLoggingService.log(
+  //         `Error listing sub networks ${error}`,
+  //         LOG_LEVEL.ERROR
+  //       );
+  //       const errorResponse = `Failed to fetch sub networks list : ${error}`;
+  //       handleErrorToast({
+  //         error: errorResponse
+  //       });
+  //     });
+  // };
+
+  // static readonly sharedNetworkAPIService = async (
+  //   setSharedNetworkList: (
+  //     value: { name: string; network: string; subnetwork: string }[]
+  //   ) => void,
+  //   setSharedNetworkLoading: (value: boolean) => void,
+  //   hostProject: string,
+  //   region: string
+  // ) => {
+  //   setSharedNetworkLoading(true);
+  //   requestAPI(
+  //     `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
+  //   )
+  //     .then((formattedResponse: any) => {
+  //       if (formattedResponse.length > 0) {
+  //         const sharedNetworkList = formattedResponse.map((network: any) => ({
+  //           name: network.subnetwork.split('/').pop(),
+  //           network: network.network,
+  //           subnetwork: network.subnetwork
+  //         }));
+  //         sharedNetworkList.sort();
+  //         setSharedNetworkList(sharedNetworkList);
+  //       } else {
+  //         setSharedNetworkList([]);
+  //       }
+  //       setSharedNetworkLoading(false);
+  //     })
+  //     .catch(error => {
+  //       setSharedNetworkList([]);
+  //       setSharedNetworkLoading(false);
+  //       SchedulerLoggingService.log(
+  //         `Error listing shared networks ${error}`,
+  //         LOG_LEVEL.ERROR
+  //       );
+  //       const errorResponse = `Failed to fetch shared networks list : ${error}`;
+  //       handleErrorToast({
+  //         error: errorResponse
+  //       });
+  //     });
+  // };
+
+  // static readonly regionAPIService = (
+  //   projectId: string,
+  //   setRegionOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+  //   setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>
+  // ) => {
+  //   setLoadingState(prev => ({ ...prev, region: true }));
+  //   requestAPI(`api/compute/region?project_id=${projectId}`)
+  //     .then((formattedResponse: any) => {
+  //       console.log('Formatted response:', formattedResponse);
+  //       if (formattedResponse.length > 0) {
+  //         const regionOptions: DropdownOption[] = formattedResponse.map(
+  //           (region: string) => ({ value: region, label: region })
+  //         );
+  //         regionOptions.sort();
+  //         setRegionOptions(regionOptions);
+  //       } else {
+  //         setRegionOptions([]);
+  //       }
+  //       setLoadingState(prev => ({ ...prev, region: false }));
+  //     })
+  //     .catch(error => {
+  //       setLoadingState(prev => ({ ...prev, region: false }));
+  //       const errorResponse = `Failed to fetch region list : ${error}`;
+  //       handleErrorToast({
+  //         error: errorResponse
+  //       });
+  //     });
+  // };
+
+  /**
+   * Fetches the parent host project for Shared VPC.
+   * Handles error logging and notifications internally.
+   *
+   * @returns A Promise that resolves with the host project data (or `null` if not found/error).
+   */
+  static async getParentProjectAPIService(): Promise<any | null> { // Adjusted return type
     try {
       const formattedResponse: any = await requestAPI('api/compute/getXpnHost');
-      if (Object.keys(formattedResponse).length !== 0) {
-        setHostProject(formattedResponse);
-      } else {
-        setHostProject({});
+      if (formattedResponse && Object.keys(formattedResponse).length !== 0) {
+        return formattedResponse; // Return the data
       }
-    } catch (error) {
+      return null; // Return null if no data
+    } catch (error: any) {
       SchedulerLoggingService.log(
         'Error fetching host project',
         LOG_LEVEL.ERROR
       );
-      setHostProject('');
-      Notification.error('Failed to fetch host project', {
-        autoClose: false
-      });
+      // Removed setHostProject call
+      Notification.error('Failed to fetch host project', { autoClose: false }); // Keep original notification
+      return null; // Return null on error
     }
-  };
-  static readonly primaryNetworkAPIService = (
-    setPrimaryNetworkList: (value: { name: string; link: string }[]) => void,
-    setPrimaryNetworkLoading: (value: boolean) => void,
-    setErrorMessagePrimaryNetwork: (value: string) => void
-  ) => {
-    setPrimaryNetworkLoading(true);
-    requestAPI('api/compute/network')
-      .then((formattedResponse: any) => {
-        if (formattedResponse.length > 0) {
-          const primaryNetworkList = formattedResponse.map((network: any) => ({
-            name: network.name,
-            link: network.selfLink
-          }));
-          primaryNetworkList.sort();
-          setPrimaryNetworkList(primaryNetworkList);
-        } else if (formattedResponse.error) {
-          setErrorMessagePrimaryNetwork(formattedResponse.error);
-          setPrimaryNetworkList([]);
-        } else {
-          setPrimaryNetworkList([]);
-        }
+  }
 
-        setPrimaryNetworkLoading(false);
-      })
-      .catch(error => {
-        setPrimaryNetworkList([]);
-        setPrimaryNetworkLoading(false);
-        SchedulerLoggingService.log(
-          `Error listing primary network ${error}`,
-          LOG_LEVEL.ERROR
-        );
-        const errorResponse = `Failed to fetch primary network list : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      });
-  };
+  /**
+   * Fetches a list of primary networks.
+   * Handles error logging and notifications internally.
+   *
+   * @returns A Promise that resolves with an array of `ILabelValue<string>` for networks (or empty array on error).
+   */
+  static async primaryNetworkAPIService(): Promise<ILabelValue<string>[]> { // Added async and return type
+    try {
+      const formattedResponse: any = await requestAPI('api/compute/network');
+      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
+        const primaryNetworkList = formattedResponse.map((network: any) => ({
+          label: network.name,
+          value: network.selfLink
+        }));
+        primaryNetworkList.sort((a, b) => a.label.localeCompare(b.label)); // Sort alphabetically
+        return primaryNetworkList; // Return the data
+      } else if (formattedResponse?.error) {
+        // Original error handling for specific API error structure
+        throw new Error(formattedResponse.error); // Throw to be caught in service's catch block
+      }
+      return []; // Return empty array if no data
+    } catch (error: any) {
+      SchedulerLoggingService.log(
+        `Error listing primary network ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to fetch primary network list: ${error}`;
+      handleErrorToast({ error: errorResponse }); // Keep original notification
+      return []; // Return empty array on error
+    }
+  }
 
-  static readonly subNetworkAPIService = async (
+  /**
+   * Fetches a list of subnetworks for a given region and primary network.
+   * Handles error logging and notifications internally.
+   *
+   * @param region The region ID.
+   * @param primaryNetworkLink The selfLink of the selected primary network.
+   * @returns A Promise that resolves with an array of `ILabelValue<string>` for subnetworks (or empty array on error).
+   */
+  static async subNetworkAPIService(
     region: string,
-    primaryNetworkSelected: string | undefined,
-    setSubNetworkList: (value: { name: string; link: string }[]) => void,
-    setSubNetworkLoading: (value: boolean) => void,
-    setErrorMessageSubnetworkNetwork: (value: string) => void
-  ) => {
-    setSubNetworkLoading(true);
-    requestAPI(
-      `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkSelected}`
-    )
-      .then((formattedResponse: any) => {
-        if (formattedResponse.length > 0) {
-          const subNetworkList = formattedResponse
-            .filter((network: any) => network.privateIpGoogleAccess === true)
-            .map((network: any) => ({
-              name: network.name,
-              link: network.selfLink
-            }));
-          subNetworkList.sort();
-          setSubNetworkList(subNetworkList);
-          setErrorMessageSubnetworkNetwork('');
-        } else if (formattedResponse.error) {
-          setErrorMessageSubnetworkNetwork(formattedResponse.error);
-          setSubNetworkList([]);
-        } else {
-          setSubNetworkList([]);
-        }
-        setSubNetworkLoading(false);
-      })
-      .catch(error => {
-        setSubNetworkList([]);
-        setSubNetworkLoading(false);
-        SchedulerLoggingService.log(
-          `Error listing sub networks ${error}`,
-          LOG_LEVEL.ERROR
-        );
-        const errorResponse = `Failed to fetch sub networks list : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      });
-  };
-
-  static readonly sharedNetworkAPIService = async (
-    setSharedNetworkList: (
-      value: { name: string; network: string; subnetwork: string }[]
-    ) => void,
-    setSharedNetworkLoading: (value: boolean) => void,
-    hostProject: string,
-    region: string
-  ) => {
-    setSharedNetworkLoading(true);
-    requestAPI(
-      `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
-    )
-      .then((formattedResponse: any) => {
-        if (formattedResponse.length > 0) {
-          const sharedNetworkList = formattedResponse.map((network: any) => ({
-            name: network.subnetwork.split('/').pop(),
-            network: network.network,
-            subnetwork: network.subnetwork
+    primaryNetworkLink: string | undefined
+  ): Promise<ILabelValue<string>[]> { // Added async and return type
+    try {
+      const formattedResponse: any = await requestAPI(
+        `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkLink}`
+      );
+      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
+        const subNetworkList = formattedResponse
+          .filter((network: any) => network.privateIpGoogleAccess === true)
+          .map((network: any) => ({
+            label: network.name,
+            value: network.selfLink
           }));
-          sharedNetworkList.sort();
-          setSharedNetworkList(sharedNetworkList);
-        } else {
-          setSharedNetworkList([]);
-        }
-        setSharedNetworkLoading(false);
-      })
-      .catch(error => {
-        setSharedNetworkList([]);
-        setSharedNetworkLoading(false);
-        SchedulerLoggingService.log(
-          `Error listing shared networks ${error}`,
-          LOG_LEVEL.ERROR
+        subNetworkList.sort((a, b) => a.label.localeCompare(b.label));
+        return subNetworkList; // Return the data
+      } else if (formattedResponse?.error) {
+        // Original error handling for specific API error structure
+        throw new Error(formattedResponse.error); // Throw to be caught in service's catch block
+      }
+      return []; // Return empty array if no data
+    } catch (error: any) {
+      SchedulerLoggingService.log(
+        `Error listing sub networks ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to fetch sub networks list: ${error}`;
+      handleErrorToast({ error: errorResponse }); // Keep original notification
+      return []; // Return empty array on error
+    }
+  }
+
+  /**
+   * Fetches a list of shared networks for a given host project and region.
+   * Handles error logging, loading state, and notifications internally.
+   *
+   * @param hostProject The host project ID/name.
+   * @param region The region ID.
+   * @param setSharedNetworkLoading Callback to update the loading state for shared networks.
+   * @returns A Promise that resolves with an array of `{ name: string; network: string; subnetwork: string; }`
+   * (or empty array on error).
+   */
+  static async sharedNetworkAPIService(
+    hostProject: string,
+    region: string,
+   // setSharedNetworkLoading: (value: boolean) => void // Loading state still managed by service for this one
+  ): Promise<ISharedNetwork[]> { // Added return type
+    // setSharedNetworkLoading(true); // Start loading here
+    try {
+      const formattedResponse: any = await requestAPI(
+        `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
+      );
+      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
+        const sharedNetworkList: ISharedNetwork[] = formattedResponse.map((network: any) => ({
+          name: network.subnetwork.split('/').pop(),
+          network: network.network,
+          subnetwork: network.subnetwork
+        }));
+        sharedNetworkList.sort((a, b) => a.name.localeCompare(b.name));
+        return sharedNetworkList; // Return the data
+      }
+      return []; // Return empty array if no data
+    } catch (error: any) {
+      SchedulerLoggingService.log(
+        `Error listing shared networks ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to fetch shared networks list: ${error}`;
+      handleErrorToast({ error: errorResponse }); // Keep original notification
+      return []; // Return empty array on error
+    // } finally {
+    //   setSharedNetworkLoading(false); // Stop loading in finally
+    // }
+    }
+  }
+
+  /**
+   * Fetches a list of regions for a given project.
+   * Handles error logging, loading state, and notifications internally.
+   *
+   * @param projectId The project ID.
+   * @param setRegionOptions Callback to set the list of region options.
+   * @param setLoadingState Callback to update the loading state for Composer region.
+   * @returns A Promise that resolves with an array of `ILabelValue<string>` for regions (or empty array on error).
+   */
+  static async regionAPIService( // Added async and return type
+    projectId: string,
+    setRegionOptions: Dispatch<SetStateAction<ILabelValue<string>[]>>,
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposer>>
+  ): Promise<ILabelValue<string>[]> { // Added return type
+    setLoadingState(prev => ({ ...prev, region: true }));
+    try {
+      const formattedResponse: any = await requestAPI(`api/compute/region?project_id=${projectId}`);
+      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
+        const regionOptions: ILabelValue<string>[] = formattedResponse.map(
+          (region: string) => ({ value: region, label: region })
         );
-        const errorResponse = `Failed to fetch shared networks list : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      });
-  };
+        regionOptions.sort((a, b) => a.label.localeCompare(b.label));
+        setRegionOptions(regionOptions); // Still setting state directly
+        return regionOptions; // Return the data
+      } else if (formattedResponse?.error) {
+        throw new Error(formattedResponse.error);
+      }
+      setRegionOptions([]); // Clear list on no data/error
+      return []; // Return empty array if no data
+    } catch (error: any) {
+      setRegionOptions([]); // Clear list on error
+      setLoadingState(prev => ({ ...prev, region: false })); // Stop loading on error
+      const errorResponse = `Failed to fetch region list: ${error}`;
+      handleErrorToast({ error: errorResponse }); // Keep original notification
+      return []; // Return empty array on error
+    } finally {
+      setLoadingState(prev => ({ ...prev, region: false })); // Stop loading in finally
+    }
+  }
+
 }

@@ -13,15 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-// import './base.css';
-// import './authLogin.css';
-// import './cluster.css';
-// import './notebookScheduler.css';
-// import './submitJob.css';
-// import './job.css';
-import './createNotebookSchedule.css';
-import './createVertexScheduler.css';
-import './createComposerScheduler.css';
-import './common.css';
+/**
+ * @fileoverview This file contains common types used across the scheduler module.
+ */
+
+ 
+export type SchedulerType = 'vertex' | 'composer'; // Define SchedulerType type
+export type ExecutionMode = 'local' | 'serverless' | 'cluster'; // Define ExecutionMode type

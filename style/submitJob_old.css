@@ -64,16 +64,6 @@
   border-style: none;
 }
 
-.select-job-style {
-  background: var(--jp-layout-color0);
-  border-radius: 4px;
-  width: 512px;
-  min-height: 36px;
-  outline: none;
-
-  /* min-height: unset !important; */
-}
-
 .select-text-overlay {
   position: relative;
   width: 512px;

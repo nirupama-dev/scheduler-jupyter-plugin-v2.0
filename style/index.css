@@ -3,7 +3,10 @@
 @import url('authLogin.css');
 @import url('notebookScheduler.css');
 @import url('job.css');
+@import url('submitJob.css');
+@import url('common.css');
 @import url('submitJob.css'); */
+@import url('createComposerScheduler.css');
 @import url('createNotebookSchedule.css');
 @import url('createVertexScheduler.css');
 @import url('common.css');

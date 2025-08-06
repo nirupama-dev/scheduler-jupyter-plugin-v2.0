@@ -436,11 +436,6 @@
   padding-top: 6px;
 }
 
-.block-seperation {
-  margin-top: 0;
-  padding-top: 25px;
-}
-
 .progress-message {
   text-align: justify;
 }
@@ -451,11 +446,6 @@
 
 .input-sub-action {
   margin: 0;
-}
-
-.block-level-seperation {
-  padding-top: 8px;
-  margin-top: 0;
 }
 
 .spinner-loader-modal {

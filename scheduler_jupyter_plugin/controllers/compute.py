@@ -27,10 +27,11 @@ class RegionController(APIHandler):
     async def get(self):
         """Returns available regions"""
         try:
+            project_id = self.get_argument("project_id")
             compute_client = compute.Client(
                 await credentials.get_cached(), self.log, None
             )
-            regions = await compute_client.list_region()
+            regions = await compute_client.list_region(project_id)
             self.finish(json.dumps(regions))
         except Exception as e:
             self.log.exception(f"Error fetching regions: {str(e)}")
