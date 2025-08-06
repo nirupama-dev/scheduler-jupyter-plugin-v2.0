@@ -90,7 +90,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
                       Notification.error(`Update failed.${updateError}`);
                     });
                 },
-                displayType: 'warn'
+                displayType: 'accent'
               },
               {
                 label: 'Ignore',
