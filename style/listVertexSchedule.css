@@ -43,3 +43,11 @@
 .vertex-list-table-parent {
   overflow: auto;
 }
+
+.actions-icon-btn {
+  display: flex;
+}
+
+.disable-complete-btn {
+  padding: 0 !important;
+}

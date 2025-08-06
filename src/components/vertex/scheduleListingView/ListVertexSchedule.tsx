@@ -33,19 +33,23 @@ import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import TableData from '../../../utils/TableData';
 import { usePagination, useTable } from 'react-table';
 import { VertexServices } from '../../../services/vertex/Vertex';
-import { IVertexScheduleList } from '../../../interfaces/VertexInterface';
+import {
+  IVertexListingLoadingState,
+  IVertexScheduleList
+} from '../../../interfaces/VertexInterface';
 import Loader from '../../common/loader/Loader';
 
 const ListVertexSchedule = () => {
   const [region, setRegion] = useState<string>('');
-  const [regionLoader, serRegionLoader] = useState<boolean>(false);
+  // const [regionLoader, serRegionLoader] = useState<boolean>(false);
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
     []
   );
-  // const [loaderState, setLoaderState] = useState<IVertexListingLoadingState>({
-  //   isLoading: false,
-  // });
+  const [loaderState, setLoaderState] = useState<IVertexListingLoadingState>({
+    isLoading: false,
+    regionLoader: false
+  });
   const data = vertexScheduleList;
 
   const columns = useMemo(() => LISTING_SCREEN_HEADING, []);
@@ -90,11 +94,12 @@ const ListVertexSchedule = () => {
   const listVertexScheduleInfoAPI = async () =>
     // nextToken: string | null | undefined
     {
+      setRegionDisable(true);
       // setIsLoading(true);
 
       await VertexServices.listVertexSchedules(
         setScheduleList,
-        region,
+        region
         // setIsLoading,
         // setIsApiError,
         // setApiError,
@@ -167,11 +172,11 @@ const ListVertexSchedule = () => {
     };
 
   useEffect(() => {
-    serRegionLoader(true);
+    setLoaderState(prevState => ({ ...prevState, regionLoader: true }));
     authApi()
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
-          serRegionLoader(false);
+          setLoaderState(prevState => ({ ...prevState, regionLoader: false }));
           setRegion(credentials.region_id);
         }
       })
@@ -209,7 +214,7 @@ const ListVertexSchedule = () => {
                     ...params.InputProps,
                     endAdornment: (
                       <>
-                        {regionLoader ? (
+                        {loaderState.regionLoader ? (
                           <CircularProgress
                             aria-label="Loading Spinner"
                             data-testid="loader"
@@ -223,7 +228,7 @@ const ListVertexSchedule = () => {
                 />
               )}
               clearIcon={false}
-              loading={regionLoader}
+              loading={loaderState.regionLoader}
               disabled={regionDisable}
             />
           </div>
@@ -282,12 +287,10 @@ const ListVertexSchedule = () => {
           )} */}
           </div>
         </>
-      ) 
-      : 
-      // vertexScheduleList.length === 0 ? (
-      //   <div className="no-data-style">No schedules available</div>
-      // ) : 
-      (
+      ) : (
+        // vertexScheduleList.length === 0 ? (
+        //   <div className="no-data-style">No schedules available</div>
+        // ) :
         <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
       )}
     </>

@@ -234,6 +234,7 @@ export interface IVertexScheduleList {
   region: string;
 }
 
-export interface  IVertexListingLoadingState {
+export interface IVertexListingLoadingState {
   isLoading: boolean;
+  regionLoader: boolean;
 }

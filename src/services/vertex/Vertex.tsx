@@ -34,7 +34,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import {
   ABORT_MESSAGE,
   DEFAULT_TIME_ZONE,
-  HTTP_STATUS_FORBIDDEN,
+  HTTP_STATUS_FORBIDDEN
   // pattern
 } from '../../utils/Constants';
 import React, { Dispatch, SetStateAction } from 'react';
@@ -50,19 +50,24 @@ export class VertexServices {
   static readonly machineTypeAPIService = (
     region: string,
     setMachineTypeList: (value: IMachineType[]) => void,
-    setLoadingState: React.Dispatch<React.SetStateAction<ILoadingStateVertex>>,
+    setLoadingState: React.Dispatch<React.SetStateAction<ILoadingStateVertex>>
     // setMachineTypeLoading: (value: boolean) => void,
     // setIsApiError: (value: boolean) => void,
     // setApiError: (value: string) => void,
     // setApiEnableUrl: any
   ) => {
     // setMachineTypeLoading(true);
-    setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: true }));
+    setLoadingState((prev: ILoadingStateVertex) => ({
+      ...prev,
+      machineType: true
+    }));
     requestAPI(`api/vertex/uiConfig?region_id=${region}`)
       .then((formattedResponse: any) => {
         if (formattedResponse.length > 0) {
           //console.log('formattedResponse', formattedResponse);
-          const response:IMachineType[] = formattedResponse.map(uiConfigAPIResponseTransform);
+          const response: IMachineType[] = formattedResponse.map(
+            uiConfigAPIResponseTransform
+          );
           setMachineTypeList(response);
         } else if (formattedResponse.length === undefined) {
           try {
@@ -93,12 +98,18 @@ export class VertexServices {
           setMachineTypeList([]);
         }
         // setMachineTypeLoading(false);
-        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
+        setLoadingState((prev: ILoadingStateVertex) => ({
+          ...prev,
+          machineType: false
+        }));
       })
       .catch(error => {
         setMachineTypeList([]);
         // setMachineTypeLoading(false);
-        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
+        setLoadingState((prev: ILoadingStateVertex) => ({
+          ...prev,
+          machineType: false
+        }));
         SchedulerLoggingService.log(
           `Error listing machine type list: ${error}`,
           LOG_LEVEL.ERROR
@@ -211,7 +222,7 @@ export class VertexServices {
     // newPageToken: string | null | undefined, // token of page to be fetched
     // setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
     // setApiEnableUrl: any,
-    pageLength: number = 25, // number of items to be fetched
+    pageLength: number = 25 // number of items to be fetched
     // abortControllers?: any
   ) => {
     // setIsLoading(true);
@@ -242,11 +253,11 @@ export class VertexServices {
         return;
       }
 
-      const { schedules, 
-        //nextPageToken, 
-        //error 
-        } =
-        formattedResponse as IFormattedResponse;
+      const {
+        schedules
+        //nextPageToken,
+        //error
+      } = formattedResponse as IFormattedResponse;
 
       // Handle API error
       // if (error?.code === HTTP_STATUS_FORBIDDEN) {
@@ -265,7 +276,6 @@ export class VertexServices {
       // Handle schedule data
       if (schedules && schedules.length > 0) {
         setVertexScheduleList(schedules);
-
         // Handle pagination
         // nextPageToken
         //   ? setNextPageToken(nextPageToken)
@@ -279,7 +289,7 @@ export class VertexServices {
           VertexServices.fetchLastFiveRunStatus(
             schedule,
             region,
-            setVertexScheduleList,
+            setVertexScheduleList
             // abortControllers
           );
         });
@@ -922,7 +932,7 @@ export class VertexServices {
       value:
         | IVertexScheduleList[]
         | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
-    ) => void,
+    ) => void
     // abortControllers: any
   ) => {
     // Controller to abort pending API call
