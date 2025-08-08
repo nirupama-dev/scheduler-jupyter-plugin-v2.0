@@ -29,7 +29,7 @@ import {
 } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
 import { NotebookScheduler } from './scheduler/NotebookScheduler';
-import { NotebookButtonExtension } from './controls/NotebookButtonExtension';
+import { SchedulerNotebookButtonExtension } from './controls/SchedulerNotebookButtonExtension';
 import {
   PLUGIN_NAME,
   TITLE_LAUNCHER_CATEGORY,
@@ -61,7 +61,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     async function jupyterVersionCheck() {
       try {
         const notificationMessage =
-          'There is a newer version of Scheduler Plugin available. Would you like to update it?';
+          'There is a new version of Scheduler Jupyter Plugin available. Would you like to update the extension?';
         const latestVersion = await requestAPI(
           `jupyterlabVersion?packageName=${PLUGIN_NAME}`,
           {
@@ -90,7 +90,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
                       Notification.error(`Update failed.${updateError}`);
                     });
                 },
-                displayType: 'warn'
+                displayType: 'accent'
               },
               {
                 label: 'Ignore',
@@ -129,10 +129,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     app.docRegistry.addWidgetExtension(
       'Notebook',
-      new NotebookButtonExtension(
+      new SchedulerNotebookButtonExtension(
         app as JupyterLab,
         settingRegistry as ISettingRegistry,
-        launcher,
         themeManager
       )
     );
