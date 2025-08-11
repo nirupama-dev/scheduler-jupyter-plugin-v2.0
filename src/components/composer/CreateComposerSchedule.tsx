@@ -361,7 +361,7 @@ export const CreateComposerSchedule: React.FC<
                 name="stopClusterAfterExecution"
                 control={control}
                 label="Stop cluster after execution"
-                className="create-scheduler-label-style"
+                className="scheduler-label-font"
               />
             </div>
           )}
@@ -393,19 +393,19 @@ export const CreateComposerSchedule: React.FC<
             name="emailOnFailure"
             label="Email on failure"
             control={control}
-            className="create-scheduler-label-style"
+            className="scheduler-label-font"
           />
           <FormInputCheckbox
             name="emailOnRetry"
             label="Email on retry"
             control={control}
-            className="create-scheduler-label-style"
+            className="scheduler-label-font"
           />
           <FormInputCheckbox
             name="emailOnSuccess"
             label="Email on success"
             control={control}
-            className="create-scheduler-label-style"
+            className="scheduler-label-font"
           />
         </FormGroup>
       </div>

@@ -225,7 +225,7 @@ const ListVertexSchedule = () => {
     <>
       <div className="select-text-overlay-scheduler">
         <div className="enable-text-label">
-          <div className="create-scheduler-form-element">
+          <div className="scheduler-form-element-container">
             <Autocomplete
               className="scheduler-tag-style"
               options={VERTEX_REGIONS}

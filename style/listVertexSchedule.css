@@ -42,3 +42,46 @@
 .disable-complete-btn {
   padding: 0 !important;
 }
+
+.scroll-list {
+  overflow: auto;
+  height: calc(100vh - 298px);
+}
+
+.scheduler-table-data {
+  padding-left: 15px;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.table-cell-overflow {
+  min-width: 25%;
+  max-width: 12%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+}
+
+.success_icon {
+  padding-right: 5px;
+}
+
+.icon-size {
+  width: 14px;
+}
+
+.icon-completed {
+  padding-top: 4px;
+}
+
+.icon-size-status {
+  width: 12px;
+}
+
+.cell-width-listing {
+  max-width: 300px;
+}
+
+.text-icon {
+  line-height: 2;
+}

@@ -57,7 +57,6 @@ export const parameterSchema = z.object({
     )
 });
 
-
 export const sharedNetworkSchema = z.object({
   network: z.string().min(1, 'Network is required.'),
   subnetwork: z.string().min(1, 'Subnetwork is required.'),

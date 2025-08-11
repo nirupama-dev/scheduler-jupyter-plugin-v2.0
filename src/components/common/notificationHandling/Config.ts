@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { toast, ToastOptions } from "react-toastify";
+import { toast, ToastOptions } from 'react-toastify';
 
 export const toastifyCustomStyle: ToastOptions<Record<string, never>> = {
   hideProgressBar: true,

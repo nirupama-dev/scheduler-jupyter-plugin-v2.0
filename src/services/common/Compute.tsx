@@ -24,14 +24,14 @@ import { ISharedNetwork } from '../../interfaces/VertexInterface';
 import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class ComputeServices {
- 
   /**
    * Fetches the parent host project for Shared VPC.
    * Handles error logging and notifications internally.
    *
    * @returns A Promise that resolves with the host project data (or `null` if not found/error).
    */
-  static async getParentProjectAPIService(): Promise<any | null> { // Adjusted return type
+  static async getParentProjectAPIService(): Promise<any | null> {
+    // Adjusted return type
     try {
       const formattedResponse: any = await requestAPI('api/compute/getXpnHost');
       if (formattedResponse && Object.keys(formattedResponse).length !== 0) {
@@ -55,7 +55,8 @@ export class ComputeServices {
    *
    * @returns A Promise that resolves with an array of `ILabelValue<string>` for networks (or empty array on error).
    */
-  static async primaryNetworkAPIService(): Promise<ILabelValue<string>[]> { // Added async and return type
+  static async primaryNetworkAPIService(): Promise<ILabelValue<string>[]> {
+    // Added async and return type
     try {
       const formattedResponse: any = await requestAPI('api/compute/network');
       if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
@@ -92,7 +93,8 @@ export class ComputeServices {
   static async subNetworkAPIService(
     region: string,
     primaryNetworkLink: string | undefined
-  ): Promise<ILabelValue<string>[]> { // Added async and return type
+  ): Promise<ILabelValue<string>[]> {
+    // Added async and return type
     try {
       const formattedResponse: any = await requestAPI(
         `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkLink}`
@@ -134,20 +136,23 @@ export class ComputeServices {
    */
   static async sharedNetworkAPIService(
     hostProject: string,
-    region: string,
-   // setSharedNetworkLoading: (value: boolean) => void // Loading state still managed by service for this one
-  ): Promise<ISharedNetwork[]> { // Added return type
+    region: string
+    // setSharedNetworkLoading: (value: boolean) => void // Loading state still managed by service for this one
+  ): Promise<ISharedNetwork[]> {
+    // Added return type
     // setSharedNetworkLoading(true); // Start loading here
     try {
       const formattedResponse: any = await requestAPI(
         `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
       );
       if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const sharedNetworkList: ISharedNetwork[] = formattedResponse.map((network: any) => ({
-          name: network.subnetwork.split('/').pop(),
-          network: network.network,
-          subnetwork: network.subnetwork
-        }));
+        const sharedNetworkList: ISharedNetwork[] = formattedResponse.map(
+          (network: any) => ({
+            name: network.subnetwork.split('/').pop(),
+            network: network.network,
+            subnetwork: network.subnetwork
+          })
+        );
         sharedNetworkList.sort((a, b) => a.name.localeCompare(b.name));
         return sharedNetworkList; // Return the data
       }
@@ -160,9 +165,9 @@ export class ComputeServices {
       const errorResponse = `Failed to fetch shared networks list: ${error}`;
       handleErrorToast({ error: errorResponse }); // Keep original notification
       return []; // Return empty array on error
-    // } finally {
-    //   setSharedNetworkLoading(false); // Stop loading in finally
-    // }
+      // } finally {
+      //   setSharedNetworkLoading(false); // Stop loading in finally
+      // }
     }
   }
   /**

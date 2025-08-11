@@ -21,7 +21,9 @@
 // import './notebookScheduler.css';
 // import './submitJob.css';
 // import './job.css';
-import './createNotebookSchedule.css';
+import './commonSchedulerStyles.css';
+import './listScheduleStylesCommon.css';
+import './createNotebookScheduler.css';
 import './createVertexScheduler.css';
 import './createComposerScheduler.css';
 import './common.css';

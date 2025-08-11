@@ -23,3 +23,54 @@
   margin-top: 15px;
   width: 512px;
 }
+
+.logo-alignment-style {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-arrow-icon {
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.schedule-radio-btn {
+  flex-direction: row !important;
+  gap: 20px;
+}
+
+.scheduler-label-font {
+  font-size: 14px;
+}
+
+body[data-jp-theme-light='true'].scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color0);
+}
+
+.spin-loader {
+  display: flex;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.spin-loader-custom-style {
+  margin-right: 5px;
+}
+
+.spin-loader-main {
+  display: flex;
+  max-height: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: 20%;
+}
+
+.spin-loader-listing {
+  margin: 10%;
+}

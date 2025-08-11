@@ -109,10 +109,11 @@ export class StorageServices {
       const formattedResponse: any = await requestAPI('api/storage/listBucket');
 
       if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const cloudStorageBucketList: ILabelValue<string>[] = formattedResponse.map((bucket: string) => ({
-          label: bucket,
-          value: bucket // Using bucket name as value as per previous structure
-        }));
+        const cloudStorageBucketList: ILabelValue<string>[] =
+          formattedResponse.map((bucket: string) => ({
+            label: bucket,
+            value: bucket // Using bucket name as value as per previous structure
+          }));
         return cloudStorageBucketList;
       } else if (formattedResponse?.error) {
         // Original error handling for specific API error structure
@@ -128,7 +129,7 @@ export class StorageServices {
       handleErrorToast({ error: errorResponse }); // Keep original toast behavior
       return []; // Return empty array on caught exception
     }
-  };
+  }
 
   /**
    * Creates a new cloud storage bucket.
@@ -141,13 +142,19 @@ export class StorageServices {
   static async newCloudStorageAPIService(bucketName: string): Promise<void> {
     const payload = { bucket_name: bucketName };
     try {
-      const formattedResponse: any = await requestAPI('api/storage/createNewBucket', {
-        body: JSON.stringify(payload),
-        method: 'POST'
-      });
+      const formattedResponse: any = await requestAPI(
+        'api/storage/createNewBucket',
+        {
+          body: JSON.stringify(payload),
+          method: 'POST'
+        }
+      );
       console.log('Create bucket response:', formattedResponse);
-      if (formattedResponse === null) { // Assuming null indicates success from backend
-        Notification.success('Bucket created successfully', { autoClose: false });
+      if (formattedResponse === null) {
+        // Assuming null indicates success from backend
+        Notification.success('Bucket created successfully', {
+          autoClose: false
+        });
       } else if (formattedResponse?.error) {
         throw new Error(formattedResponse.error); // Propagate API error message
       }
@@ -160,7 +167,7 @@ export class StorageServices {
       // If you want one, add it like: handleErrorToast({ error: `Failed to create bucket: ${error}` });
       throw error; // Re-throw so the calling component can still know if it failed (e.g., for loading states)
     }
-  };
+  }
 
   static readonly downloadJobAPIService = async (
     gcsUrl: string | undefined,

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { SchedulerLoggingService } from "../../../services/common/LoggingService";
+import { SchedulerLoggingService } from '../../../services/common/LoggingService';
 
 /**
  * Helper method that wraps fetch and logs the request uri and status codes to

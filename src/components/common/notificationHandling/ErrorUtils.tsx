@@ -6,23 +6,27 @@ import { toastifyCustomStyle, toastifyCustomWidth } from './Config';
 import { IErrorMessageProps } from '../../../interfaces/FormInterface';
 import { iconError } from '../../../utils/Icons';
 
-
 /**
- * 
+ *
  * @param param0 - Props containing the error message, optional icon display, and width styling.
  * @param message - The error message to display.
  * @param showIcon - Optional boolean to control icon visibility, defaults to true.
  * @param errorWidth - Optional boolean to control width styling, defaults to false.
  * @description
  * This component displays an error message with an optional icon.
- * @returns 
+ * @returns
  */
-export const ErrorMessage: React.FC<IErrorMessageProps> = ({ message, showIcon = true, errorWidth = false }) => {
+export const ErrorMessage: React.FC<IErrorMessageProps> = ({
+  message,
+  showIcon = true,
+  errorWidth = false
+}) => {
   if (!message) {
     return null;
   }
 
-  const errorMessageText = typeof message === 'string' ? message : message.message;
+  const errorMessageText =
+    typeof message === 'string' ? message : message.message;
 
   if (!errorMessageText) {
     return null;

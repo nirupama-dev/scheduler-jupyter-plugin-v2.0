@@ -68,7 +68,7 @@ export interface IVertexSchedulePayload {
 
 export interface IMachineType {
   machineType: { label: string; value: string };
-  acceleratorConfigs: IAcceleratorConfig[]|null;
+  acceleratorConfigs: IAcceleratorConfig[] | null;
 }
 export interface IAllowedCounts {
   label: number;

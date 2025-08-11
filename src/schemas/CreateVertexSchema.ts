@@ -20,19 +20,28 @@
  */
 import { z } from 'zod';
 import { DISK_MIN_SIZE, DISK_MAX_SIZE } from '../utils/Constants';
-import { createNotebookCommonSchema, parameterSchema, sharedNetworkSchema } from './CreateNotebookCommonSchema';
+import {
+  createNotebookCommonSchema,
+  parameterSchema,
+  sharedNetworkSchema
+} from './CreateNotebookCommonSchema';
 
 /**
  * Zod schema for Vertex Scheduler form validation.
  */
 export const createVertexSchema = createNotebookCommonSchema.extend({
   schedulerSelection: z.literal('vertex'), // Discriminator property
-  vertexRegion: z.string().nonempty('Region is required.').min(1, 'Region is required.'),
+  vertexRegion: z
+    .string()
+    .nonempty('Region is required.')
+    .min(1, 'Region is required.'),
   machineType: z.string().min(1, 'Machine type is required.'),
   kernelName: z.string().min(1, 'Kernel is required.'),
   cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
   serviceAccount: z.string().min(1, 'Service account is required.'),
-  networkOption: z.enum(['networkInThisProject', 'networkSharedFromHostProject']).optional(),
+  networkOption: z
+    .enum(['networkInThisProject', 'networkSharedFromHostProject'])
+    .optional(),
   primaryNetwork: z.string().optional(),
   subNetwork: z.string().optional(),
   sharedNetwork: sharedNetworkSchema.optional(),

@@ -1,0 +1,80 @@
+.scheduler-list-overlay {
+  height: 37px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 0;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.table-space-around {
+  padding: 0 10px;
+}
+
+.scheduler-list-table {
+  width: 100%;
+  border-spacing: 0;
+}
+
+.scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color1);
+  z-index: 1;
+}
+
+.scheduler-list-table-header {
+  background: rgba(133, 109, 109, 0.04);
+  font-style: normal;
+  font-weight: 500;
+  font-size: 13px;
+  height: 29px;
+  line-height: 18px;
+  color: var(--jp-ui-font-color0);
+}
+
+.scheduler-table-header {
+  text-align: left;
+  padding-left: 15px;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.table-loading-ht {
+  height: calc(100vh - 368px);
+}
+
+.table-body {
+  overflow-y: auto;
+  max-height: 55vh;
+}
+
+.loader-table {
+  text-align: center;
+  padding: 50px;
+}
+
+.spin-loader-table {
+  width: 29%;
+  margin: 0 auto;
+}
+
+.scheduler-table-list-data-parent {
+  background: var(--jp-layout-color0);
+  height: 29px;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--jp-ui-font-color2);
+}
+
+.icon-buttons-style {
+  cursor: pointer;
+  padding-right: 5px;
+}
+
+.icon-buttons-style-disable {
+  padding-right: 5px;
+  color: rgb(245 245 245);
+  opacity: 0.5;
+}
