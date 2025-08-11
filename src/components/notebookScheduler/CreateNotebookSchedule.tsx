@@ -343,7 +343,7 @@ export const CreateNotebookSchedule = (
 
   return (
     <div className="component-level">
-      <div className="cluster-details-header">
+      <div className="create-form-header">
         <div role="button" className="back-arrow-icon" onClick={handleCancel}>
           <iconLeftArrow.react
             tag="div"

@@ -55,7 +55,7 @@ console.log('inside effect naigateion')
   return (
     <>
       <div className="cluster-list-overlay" role="tab">
-        <div className="cluster-details-title">{LISTING_PAGE_HEADING}</div>
+        <div className="list-vertex-title">{LISTING_PAGE_HEADING}</div>
       </div>
 
       <div className="create-scheduler-form-element sub-para">

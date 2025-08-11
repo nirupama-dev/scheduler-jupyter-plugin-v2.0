@@ -445,7 +445,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     (cell: ICellProps) => {
       if (cell.column.Header === 'Actions') {
         return (
-          <td {...cell.getCellProps()} className="clusters-table-data">
+          <td {...cell.getCellProps()} className="table-data">
             {renderActions(
               cell.row.original,
               isGCSPluginInstalled,
@@ -459,7 +459,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
       } else if (cell.column.Header === 'Job Name') {
         return (
-          <td {...cell.getCellProps()} className="clusters-table-data">
+          <td {...cell.getCellProps()} className="table-data">
             <span
             // onClick={() => {
             //   if (composerEnvSelected) {
@@ -473,7 +473,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
       } else {
         return (
-          <td {...cell.getCellProps()} className="clusters-table-data">
+          <td {...cell.getCellProps()} className="table-data">
             {cell.render('Cell')}
           </td>
         );

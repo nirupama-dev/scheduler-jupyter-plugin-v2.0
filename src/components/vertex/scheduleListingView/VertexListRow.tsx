@@ -35,7 +35,7 @@ export const tableDataCondition = (cell: IVertexCellProps, region: string) => {
     return (
       <td
         {...cell.getCellProps()}
-        className="clusters-table-data table-cell-overflow"
+        className="scheduler-table-data table-cell-overflow"
       >
         {renderActions(cell.row.original, region)}
       </td>
@@ -44,7 +44,7 @@ export const tableDataCondition = (cell: IVertexCellProps, region: string) => {
     return (
       <td
         {...cell.getCellProps()}
-        className="clusters-table-data table-cell-overflow"
+        className="scheduler-table-data table-cell-overflow"
       >
         <span
         // onClick={() =>
@@ -59,7 +59,7 @@ export const tableDataCondition = (cell: IVertexCellProps, region: string) => {
     return (
       <td
         {...cell.getCellProps()}
-        className="clusters-table-data table-cell-overflow"
+        className="scheduler-table-data table-cell-overflow"
       >
         {dayjs(cell.row.original.createTime).format('MMM DD, YYYY h:mm A')}
       </td>
@@ -68,7 +68,7 @@ export const tableDataCondition = (cell: IVertexCellProps, region: string) => {
     return (
       <td
         {...cell.getCellProps()}
-        className="clusters-table-data table-cell-overflow"
+        className="scheduler-table-data table-cell-overflow"
       >
         {cell.row.original.status === 'COMPLETED' ||
         cell.row.original.status === 'PAUSED' ? (
@@ -82,7 +82,7 @@ export const tableDataCondition = (cell: IVertexCellProps, region: string) => {
     return (
       <td
         {...cell.getCellProps()}
-        className="clusters-table-data table-cell-overflow"
+        className="scheduler-table-data table-cell-overflow"
       >
         {cell.row.original.jobState ? (
           cell.row.original.jobState.length > 0 ? (
@@ -221,8 +221,8 @@ export const tableDataCondition = (cell: IVertexCellProps, region: string) => {
         {...cell.getCellProps()}
         className={
           cell.column.Header === 'Schedule'
-            ? 'clusters-table-data table-cell-overflow'
-            : 'clusters-table-data'
+            ? 'scheduler-table-data table-cell-overflow'
+            : 'scheduler-table-data'
         }
       >
         {cell.column.Header === 'Status' ? (

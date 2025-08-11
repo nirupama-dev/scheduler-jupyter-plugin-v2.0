@@ -44,7 +44,7 @@
   align-items: center;
 }
 
-.cluster-details-header {
+.create-form-header {
   height: 48px;
   display: flex;
   border-bottom: 1px solid var(--jp-layout-color3);

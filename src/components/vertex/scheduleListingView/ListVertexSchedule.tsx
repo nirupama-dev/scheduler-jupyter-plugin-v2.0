@@ -30,7 +30,6 @@ import {
 import { ILabelValue } from '../../../interfaces/CommonInterface';
 import { authApi } from '../../common/login/Config';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
-import TableData from '../../../utils/TableData';
 import { usePagination, useTable } from 'react-table';
 import { VertexServices } from '../../../services/vertex/VertexServices';
 import {
@@ -38,6 +37,7 @@ import {
   IVertexScheduleList
 } from '../../../interfaces/VertexInterface';
 import Loader from '../../common/loader/Loader';
+import TableData from '../../common/table/TableData';
 
 const ListVertexSchedule = () => {
   const [region, setRegion] = useState<string>('');

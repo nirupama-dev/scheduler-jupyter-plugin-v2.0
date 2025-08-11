@@ -56,17 +56,17 @@ function TableData({
   const displayData = page ? page : rows;
 
   return (
-    <table {...getTableProps()} className="clusters-list-table">
+    <table {...getTableProps()} className="scheduler-list-table">
       <thead className="scroll-fix-header">
         {headerGroups.map((headerGroup: any) => (
           <tr
             {...headerGroup.getHeaderGroupProps()}
-            className="cluster-list-table-header"
+            className="scheduler-list-table-header"
           >
             {headerGroup.headers.map((column: any) => (
               <th
                 {...column.getHeaderProps()}
-                className="clusters-table-header"
+                className="scheduler-table-header"
               >
                 {column.render('Header')}
               </th>
@@ -78,8 +78,8 @@ function TableData({
         {...getTableBodyProps()}
         className={
           isLoading
-            ? 'table-loading-ht clusters-table-body'
-            : 'clusters-table-body'
+            ? 'table-loading-ht table-body'
+            : 'table-body'
         }
         style={fromPage === 'Dag Runs' ? { maxHeight: listDagRunHeight } : null}
       >
@@ -103,7 +103,7 @@ function TableData({
           displayData.map((row: Row, index: number) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()} className={'cluster-list-data-parent'}>
+              <tr {...row.getRowProps()} className={'scheduler-list-data-parent'}>
                 {row.cells.map((cell: Cell) => {
                   return tableDataCondition(cell);
                 })}

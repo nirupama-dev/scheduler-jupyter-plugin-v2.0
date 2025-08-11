@@ -70,7 +70,7 @@
   height: calc(100vh - 298px);
 }
 
-.clusters-list-table {
+.scheduler-list-table {
   width: 100%;
   border-spacing: 0;
 }
@@ -88,7 +88,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   background-color: var(--jp-layout-color0);
 }
 
-.cluster-list-table-header {
+.scheduler-list-table-header {
   background: rgba(0 0 0 / 4%);
   font-style: normal;
   font-weight: 500;
@@ -98,7 +98,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   color: var(--jp-ui-font-color0);
 }
 
-.clusters-table-header {
+.scheduler-table-header {
   text-align: left;
   padding-left: 15px;
   border-bottom: 1px solid var(--jp-layout-color3);
@@ -108,7 +108,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   height: calc(100vh - 368px);
 }
 
-.clusters-table-body {
+.table-body {
   overflow-y: auto;
   max-height: 55vh;
 }
@@ -133,7 +133,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   margin-right: 5px;
 }
 
-.cluster-list-data-parent {
+.scheduler-list-data-parent {
   background: var(--jp-layout-color0);
   height: 29px;
   font-style: normal;
@@ -143,19 +143,9 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   color: var(--jp-ui-font-color2);
 }
 
-.clusters-table-data {
+.scheduler-table-data {
   padding-left: 15px;
   border-bottom: 1px solid var(--jp-layout-color3);
-}
-
-.clusters-table-data:nth-child(1) {
-  color: #3367d6;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.clusters-table-data:nth-child(2) {
-  text-transform: capitalize;
 }
 
 .table-cell-overflow {

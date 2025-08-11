@@ -1,15 +1,6 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 
-.clusters-list-overlay {
-  height: 37px;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  padding: 0;
-  border-bottom: 1px solid var(--jp-layout-color3);
-}
-
-.cluster-details-title {
+.list-vertex-title {
   padding: 0 15px;
   height: 48px;
   font-style: normal;
