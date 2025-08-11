@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import { toast } from 'react-toastify';
 import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { SchedulerLoggingService, LOG_LEVEL } from '../common/LoggingService';
@@ -23,28 +22,19 @@ import {
   IVertexScheduleList,
   IVertexScheduleRunList,
   IDeleteSchedulerAPIResponse,
-  IMachineType,
   ISchedulerData,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
   IFormattedResponse,
-  ILoadingStateVertex
 } from '../../interfaces/VertexInterface';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   ABORT_MESSAGE,
   DEFAULT_TIME_ZONE,
-  HTTP_STATUS_FORBIDDEN,
-  URL_LINK_PATTERN
-} from '../../utils/Constants';
-import React, { Dispatch, SetStateAction } from 'react';
-import {
-  toastifyCustomStyle,
-  toastifyCustomWidth
-} from '../../components/common/notificationHandling/Config';
-import ExpandToastMessage from '../../components/common/notificationHandling/ExpandToastMessage';
+  } from '../../utils/Constants';
+import { Dispatch, SetStateAction } from 'react';
+
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
-import { uiConfigAPIResponseTransform } from '../../components/common/vertex/Config';
 
 export class VertexServices {
   // static readonly machineTypeAPIService = (
@@ -249,15 +239,15 @@ export class VertexServices {
         formattedResponse as IFormattedResponse;
 
       // Handle API error
-      if (error?.code === HTTP_STATUS_FORBIDDEN) {
-        const url = error.message.match(URL_LINK_PATTERN);
-        if (url && url.length > 0) {
-          setIsApiError(true);
-          setApiError(error.message);
-          setApiEnableUrl(url);
-        } else {
-          setApiError(error.message);
-        }
+      // if (error?.code === HTTP_STATUS_FORBIDDEN) {
+      //   const url = error.message.match(URL_LINK_PATTERN);
+      //   if (url && url.length > 0) {
+      //     setIsApiError(true);
+      //     setApiError(error.message);
+      //     setApiEnableUrl(url);
+      //   } else {
+      //     setApiError(error.message);
+      //   }
 
       //   return;
       // }

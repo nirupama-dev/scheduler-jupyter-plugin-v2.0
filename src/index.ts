@@ -23,7 +23,6 @@ import {
 
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
-  MainAreaWidget,
   IThemeManager,
   MainAreaWidget,
   Notification,
@@ -55,7 +54,6 @@ const plugin: JupyterFrontEndPlugin<void> = {
   ) => {
     console.log('JupyterLab extension scheduler-jupyter-plugin is activated!');
 
-    const { commands } = app;
     const { commands } = app;
 
     const createNotebookJobsComponentCommand = 'create-notebook-jobs-component';

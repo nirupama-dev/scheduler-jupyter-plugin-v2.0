@@ -83,10 +83,6 @@ export const iconError = new LabIcon({
   name: 'launcher:error-icon',
   svgstr: ErrorIcon
 });
-export const iconScheduledNotebooks = new LabIcon({
-  name: 'launcher:scheduled-notebooks-icon',
-  svgstr: ScheduledNotebooksIcon
-});
 
 export const iconDash = new LabIcon({
   name: 'launcher:dash-icon',
