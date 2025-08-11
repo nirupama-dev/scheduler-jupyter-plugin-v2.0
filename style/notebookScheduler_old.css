@@ -27,7 +27,6 @@
   flex-direction: row;
 }
 
-
 .edit-notebook-style {
   cursor: pointer;
   margin-top: 10px;
@@ -45,7 +44,6 @@
   align-items: center;
   color: var(--jp-ui-font-color0);
 }
-
 
 .execution-history-left-wrapper {
   width: 400px;
@@ -303,15 +301,9 @@
   margin-right: 10px;
 }
 
-
-
 .sub-title-heading {
   padding: 0;
 }
-
-
-
-
 
 .tab-text-sub-cl .error-message {
   color: #b71c1c;
@@ -328,34 +320,6 @@
 
 .table-cell-width {
   width: 512px !important;
-}
-
-.btn-refresh {
-  line-height: 5;
-}
-
-.btn-refresh-text {
-  font-size: 12px !important;
-}
-
-.success_icon {
-  padding-right: 5px;
-}
-
-.icon-size {
-  width: 14px;
-}
-
-.icon-completed {
-  padding-top: 4px;
-}
-
-.icon-size-status {
-  width: 12px;
-}
-
-.text-icon {
-  line-height: 2;
 }
 
 .log-icon {
@@ -386,10 +350,6 @@
   color: blue;
   text-decoration: underline;
   padding-left: 3px;
-}
-
-.enable-text-label {
-  width: 60%;
 }
 
 .enable-error-text-label {
@@ -460,15 +420,6 @@
 
 .action-btn-execution {
   padding-left: 15px;
-}
-
-.table-cell-overflow {
-  min-width: 25%;
-  max-width: 12%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  position: relative;
 }
 
 .execution-task-log-outline {
@@ -558,19 +509,6 @@
   height: calc(100vh - 212px);
 }
 
-.scroll-fix-header {
-  position: sticky;
-  top: 0;
-  background-color: var(--jp-layout-color1);
-  z-index: 1;
-}
-
-body[data-jp-theme-light='true'].scroll-fix-header {
-  position: sticky;
-  top: 0;
-  background-color: var(--jp-layout-color0);
-}
-
 .table-main-execution {
   padding-right: 15px;
 }
@@ -586,20 +524,6 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   padding-top: 10px;
 }
 
-.loader-table {
-  text-align: center;
-  padding: 50px;
-}
-
-.table-loading-ht {
-  height: calc(100vh - 368px);
-}
-
-.spin-loader-table {
-  width: 29%;
-  margin: 0 auto;
-}
-
 .expanded-toast {
   width: 50%;
 }
@@ -607,14 +531,6 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .expand-btn {
   color: #3367d6;
   font-weight: bold;
-}
-
-.cell-width-listing {
-  max-width: 300px;
-}
-
-.table-space-around {
-  padding: 0 10px;
 }
 
 .pagination-parent-view-main {
@@ -626,11 +542,6 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 
   /* Add some padding around the component */
   padding: 0.5rem;
-}
-
-.scroll-list {
-  overflow: auto;
-  height: calc(100vh - 298px);
 }
 
 .list-level-component {

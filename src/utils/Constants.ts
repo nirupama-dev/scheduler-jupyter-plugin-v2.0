@@ -249,3 +249,36 @@ export const LOADER_CONTENT_VERTEX_LISTING_SCREEN =
 
 export const LOADER_CONTENT_COMPOSER_LISTING_SCREEN =
   'Loading Composer Schedules...';
+
+
+export const LISTING_SCREEN_HEADING = [
+  {
+    Header: 'Schedule Name',
+    accessor: 'displayName'
+  },
+  {
+    Header: 'Frequency',
+    accessor: 'schedule'
+  },
+  {
+    Header: 'Next Run Date',
+    accessor: 'nextRunTime'
+  },
+  {
+    Header: 'Created',
+    accessor: 'createTime'
+  },
+  {
+    Header: 'Latest Execution Jobs',
+    accessor: 'jobState'
+  },
+  {
+    Header: 'Status',
+    accessor: 'status'
+  },
+  {
+    Header: 'Actions',
+    accessor: 'actions'
+  }
+];
+

@@ -47,68 +47,68 @@ import { handleErrorToast } from '../../components/common/notificationHandling/E
 import { uiConfigAPIResponseTransform } from '../../components/common/vertex/Config';
 
 export class VertexServices {
-  static readonly machineTypeAPIService = (
-    region: string,
-    setMachineTypeList: (value: IMachineType[]) => void,
-    setLoadingState: React.Dispatch<React.SetStateAction<ILoadingStateVertex>>,
-    // setMachineTypeLoading: (value: boolean) => void,
-    // setIsApiError: (value: boolean) => void,
-    // setApiError: (value: string) => void,
-    // setApiEnableUrl: any
-  ) => {
-    // setMachineTypeLoading(true);
-    setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: true }));
-    requestAPI(`api/vertex/uiConfig?region_id=${region}`)
-      .then((formattedResponse: any) => {
-        if (formattedResponse.length > 0) {
-          //console.log('formattedResponse', formattedResponse);
-          const response:IMachineType[] = formattedResponse.map(uiConfigAPIResponseTransform);
-          setMachineTypeList(response);
-        } else if (formattedResponse.length === undefined) {
-          try {
-            if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
-              // Pattern to check whether string contains link
-              const pattern =
-                // eslint-disable-next-line
-                /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
-              const url = formattedResponse.error.message.match(pattern);
-              if (url && url.length > 0) {
-                // setIsApiError(true);
-                // setApiError(formattedResponse.error.message);
-                // setApiEnableUrl(url);
-              } else {
-                // setApiError(formattedResponse.error.message);
-              }
-            }
-          } catch (error) {
-            const errorResponse = `Error fetching machine type list: ${error}`;
-            toast.error(
-              <ExpandToastMessage message={errorResponse} />,
-              errorResponse.length > 500
-                ? toastifyCustomWidth
-                : toastifyCustomStyle
-            );
-          }
-        } else {
-          setMachineTypeList([]);
-        }
-        // setMachineTypeLoading(false);
-        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
-      })
-      .catch(error => {
-        setMachineTypeList([]);
-        // setMachineTypeLoading(false);
-        setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
-        SchedulerLoggingService.log(
-          `Error listing machine type list: ${error}`,
-          LOG_LEVEL.ERROR
-        );
-        const errorResponse = `Failed to fetch machine type list: ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      });
-  };
+  // static readonly machineTypeAPIService = (
+  //   region: string,
+  //   setMachineTypeList: (value: IMachineType[]) => void,
+  //   setLoadingState: React.Dispatch<React.SetStateAction<ILoadingStateVertex>>,
+  //   // setMachineTypeLoading: (value: boolean) => void,
+  //   // setIsApiError: (value: boolean) => void,
+  //   // setApiError: (value: string) => void,
+  //   // setApiEnableUrl: any
+  // ) => {
+  //   // setMachineTypeLoading(true);
+  //   setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: true }));
+  //   requestAPI(`api/vertex/uiConfig?region_id=${region}`)
+  //     .then((formattedResponse: any) => {
+  //       if (formattedResponse.length > 0) {
+  //         //console.log('formattedResponse', formattedResponse);
+  //         const response:IMachineType[] = formattedResponse.map(uiConfigAPIResponseTransform);
+  //         setMachineTypeList(response);
+  //       } else if (formattedResponse.length === undefined) {
+  //         try {
+  //           if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
+  //             // Pattern to check whether string contains link
+  //             const pattern =
+  //               // eslint-disable-next-line
+  //               /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
+  //             const url = formattedResponse.error.message.match(pattern);
+  //             if (url && url.length > 0) {
+  //               // setIsApiError(true);
+  //               // setApiError(formattedResponse.error.message);
+  //               // setApiEnableUrl(url);
+  //             } else {
+  //               // setApiError(formattedResponse.error.message);
+  //             }
+  //           }
+  //         } catch (error) {
+  //           const errorResponse = `Error fetching machine type list: ${error}`;
+  //           toast.error(
+  //             <ExpandToastMessage message={errorResponse} />,
+  //             errorResponse.length > 500
+  //               ? toastifyCustomWidth
+  //               : toastifyCustomStyle
+  //           );
+  //         }
+  //       } else {
+  //         setMachineTypeList([]);
+  //       }
+  //       // setMachineTypeLoading(false);
+  //       setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
+  //     })
+  //     .catch(error => {
+  //       setMachineTypeList([]);
+  //       // setMachineTypeLoading(false);
+  //       setLoadingState((prev: ILoadingStateVertex) => ({ ...prev, machineType: false }));
+  //       SchedulerLoggingService.log(
+  //         `Error listing machine type list: ${error}`,
+  //         LOG_LEVEL.ERROR
+  //       );
+  //       const errorResponse = `Failed to fetch machine type list: ${error}`;
+  //       handleErrorToast({
+  //         error: errorResponse
+  //       });
+  //     });
+  // };
 
   static readonly createVertexSchedulerService = async (
     payload: ICreatePayload,
@@ -204,31 +204,31 @@ export class VertexServices {
         | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
     ) => void,
     region: string,
-    setIsLoading: (value: boolean) => void,
-    setIsApiError: (value: boolean) => void,
-    setApiError: (value: string) => void,
-    setNextPageToken: (value: string | null) => void, // function for setting the next page token
-    newPageToken: string | null | undefined, // token of page to be fetched
-    setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
-    setApiEnableUrl: any,
+    // setIsLoading: (value: boolean) => void,
+    // setIsApiError: (value: boolean) => void,
+    // setApiError: (value: string) => void,
+    // setNextPageToken: (value: string | null) => void, // function for setting the next page token
+    // newPageToken: string | null | undefined, // token of page to be fetched
+    // setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
+    // setApiEnableUrl: any,
     pageLength: number = 25, // number of items to be fetched
-    abortControllers?: any
+    // abortControllers?: any
   ) => {
-    setIsLoading(true);
-    setIsApiError(false);
-    setApiError('');
+    // setIsLoading(true);
+    // setIsApiError(false);
+    // setApiError('');
 
     try {
       // setting controller to abort pending api call
       const controller = new AbortController();
-      abortControllers.current.push(controller);
+      // abortControllers.current.push(controller);
       const signal = controller.signal;
 
       const serviceURL = 'api/vertex/listSchedules';
       let urlparam = `?region_id=${region}&page_size=${pageLength}`;
-      if (newPageToken) {
-        urlparam += `&page_token=${newPageToken}`;
-      }
+      // if (newPageToken) {
+      //   urlparam += `&page_token=${newPageToken}`;
+      // }
 
       // API call
       const formattedResponse = await requestAPI(serviceURL + urlparam, {
@@ -237,12 +237,15 @@ export class VertexServices {
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
         setVertexScheduleList([]);
-        setNextPageToken(null);
-        setHasNextPageToken(false);
+        // setNextPageToken(null);
+        // setHasNextPageToken(false);
         return;
       }
 
-      const { schedules, nextPageToken, error } =
+      const { schedules, 
+        //nextPageToken, 
+        //error 
+        } =
         formattedResponse as IFormattedResponse;
 
       // Handle API error
@@ -256,17 +259,17 @@ export class VertexServices {
           setApiError(error.message);
         }
 
-        return;
-      }
+      //   return;
+      // }
 
       // Handle schedule data
       if (schedules && schedules.length > 0) {
         setVertexScheduleList(schedules);
 
         // Handle pagination
-        nextPageToken
-          ? setNextPageToken(nextPageToken)
-          : setNextPageToken(null);
+        // nextPageToken
+        //   ? setNextPageToken(nextPageToken)
+        //   : setNextPageToken(null);
         // Adding a slight delay for DOM refresh
         await new Promise(resolve => requestAnimationFrame(resolve));
 
@@ -277,15 +280,15 @@ export class VertexServices {
             schedule,
             region,
             setVertexScheduleList,
-            abortControllers
+            // abortControllers
           );
         });
-        setIsLoading(false); // Stop loading after everything is complete
+        // setIsLoading(false); // Stop loading after everything is complete
       } else {
         setVertexScheduleList([]);
-        setNextPageToken(null);
-        setHasNextPageToken(false);
-        setIsLoading(false);
+        // setNextPageToken(null);
+        // setHasNextPageToken(false);
+        // setIsLoading(false);
       }
     } catch (error: any) {
       if (typeof error === 'object' && error !== null) {
@@ -298,10 +301,10 @@ export class VertexServices {
       } else {
         // Handle errors during the API call
         setVertexScheduleList([]);
-        setNextPageToken(null);
-        setHasNextPageToken(false);
-        setIsApiError(true);
-        setApiError('An error occurred while fetching schedules.');
+        // setNextPageToken(null);
+        // setHasNextPageToken(false);
+        // setIsApiError(true);
+        // setApiError('An error occurred while fetching schedules.');
         SchedulerLoggingService.log(
           `Error listing vertex schedules ${error}`,
           LOG_LEVEL.ERROR
@@ -311,7 +314,7 @@ export class VertexServices {
         });
       }
     } finally {
-      setIsLoading(false); // Ensure loading is stopped
+      // setIsLoading(false); // Ensure loading is stopped
     }
   };
 
@@ -920,11 +923,11 @@ export class VertexServices {
         | IVertexScheduleList[]
         | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
     ) => void,
-    abortControllers: any
+    // abortControllers: any
   ) => {
     // Controller to abort pending API call
     const controller = new AbortController();
-    abortControllers?.current.push(controller);
+    // abortControllers?.current.push(controller);
     const signal = controller.signal;
 
     //Extract Schedule id from schedule name.

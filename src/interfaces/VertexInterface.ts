@@ -28,6 +28,7 @@ import {
 } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { IEdiModeData, ILabelValue } from './CommonInterface';
+import { HeaderProps, Renderer } from 'react-table';
 
 export interface ICreateVertexSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -206,4 +207,48 @@ export interface ISharedNetwork {
   name: string;
   network: string;
   subnetwork: string;
+}
+
+export interface ISharedNetwork {
+  name: string;
+  network: string;
+  subnetwork: string;
+}
+
+export interface IVertexCellProps {
+  getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
+  value: string | any;
+  column: {
+    Header?: string | undefined | Renderer<HeaderProps<{}>>;
+  };
+  row: {
+    original: {
+      id?: string;
+      status?: string;
+      lastScheduledRunResponse?: {
+        runResponse: string;
+      };
+      jobState?: string[];
+      name?: string;
+      createTime?: string;
+      nextRunTime?: string;
+    };
+  };
+  render: (value: string) => React.ReactNode;
+}
+
+export interface IVertexScheduleListing {
+  isLoading: boolean;
+}
+
+export interface IVertexScheduleList {
+  displayName: string;
+  schedule: string;
+  status: string;
+  jobState?: any[];
+  region: string;
+}
+
+export interface  IVertexListingLoadingState {
+  isLoading: boolean;
 }

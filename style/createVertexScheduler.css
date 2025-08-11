@@ -34,7 +34,7 @@
 
 .network-layout {
   flex-direction: column !important;
-  gap: 0px !important;
+  gap: 0 !important;
 }
 
 .sub-para {
@@ -56,7 +56,6 @@
   display: flex;
   justify-content: flex-start;
 }
-
 
 .create-scheduler-label {
   margin-top: 15px;

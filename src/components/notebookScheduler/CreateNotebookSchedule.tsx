@@ -77,7 +77,80 @@ export const CreateNotebookSchedule = (
         }
       }
     );
-  
+
+  /**
+   * Function to Extract Kernal details and assign default Scheduler
+   * Initially looks for the prefetched Ker
+   *
+   */
+  const loadDefaultKernalScheduler = async () => {
+    if (preFetchedInitialDetails) {
+      // Case 1: Details were successfully pre-fetched by the button extension
+      console.log(
+        'Using pre-fetched Initial Scheduler Details:',
+        preFetchedInitialDetails
+      );
+      setKernalAndScheduleValue(preFetchedInitialDetails);
+    } else {
+      // Case 2: Pre-fetched details were not provided (e.g., direct navigation, or button pre-fetch failed silently)
+      // In this scenario, we perform a fallback fetch.
+      console.log(
+        'Pre-fetched details not available. Falling back to internal fetch.'
+      );
+      try {
+        setKernalAndScheduleValue(
+          (await getDefaultSchedulerTypeOnLoad(sessionContext))
+            .kernalAndSchedulerDetails
+        );
+        console.log(
+          'Fallback fetched Initial Scheduler Details:',
+          kernalAndScheduleValue
+        );
+      } catch (error) {
+        console.error(
+          'Failed to fetch initial scheduler details in fallback:',
+          error
+        );
+        // Define a safe default if even the fallback fetch fails
+        setKernalAndScheduleValue({
+          schedulerType: 'vertex',
+          kernalDetails: {
+            executionMode: 'local',
+            isDataprocKernel: false,
+            kernelDisplayName: ''
+          }
+        });
+        // You might want to show a toast/notification here if this happens often
+      }
+    }
+  };
+  /**
+   * Effect to set the initial scheduler type based on the session context.
+   * This runs once when the component mounts.
+   */
+  useEffect(() => {
+    // This effect runs when preFetchedInitialDetails changes or when the component mounts
+    // and preFetchedInitialDetails is initially null/undefined.
+
+    loadDefaultKernalScheduler();
+
+    // Set form values using react-hook-form's setValue
+    setValue('schedulerSelection', kernalAndScheduleValue.schedulerType);
+    if (kernalAndScheduleValue.kernalDetails) {
+      setValue(
+        'executionMode',
+        kernalAndScheduleValue.kernalDetails.executionMode
+      );
+      setValue(
+        'serverless',
+        kernalAndScheduleValue.kernalDetails.selectedServerlessName
+      );
+      setValue(
+        'cluster',
+        kernalAndScheduleValue.kernalDetails.selectedClusterName
+      );
+    }
+  }, [preFetchedInitialDetails, sessionContext]); // Ensure all dependencies are listed
 
   // Destructure for easier access in JSX
   const { schedulerType } = kernalAndScheduleValue;
@@ -117,6 +190,7 @@ export const CreateNotebookSchedule = (
       preFetchedInitialDetails
     );
     let loadedDetails: INotebookKernalSchdulerDefaults;
+    // If preFetchedInitialDetails is available, use it; otherwise, fetch the default scheduler type
     if (preFetchedInitialDetails) {
       loadedDetails = preFetchedInitialDetails;
       console.log('Using pre-fetched Initial Scheduler Details:', loadedDetails);
@@ -144,9 +218,9 @@ export const CreateNotebookSchedule = (
     if (isMounted) {
       setKernalAndScheduleValue(loadedDetails);
       setValue('schedulerSelection', loadedDetails.schedulerType);
-      setValue('executionMode', loadedDetails.kernalDetails.executionMode);
-      setValue('serverless', loadedDetails.kernalDetails.selectedServerlessName);
-      setValue('cluster', loadedDetails.kernalDetails.selectedClusterName);
+      setValue('executionMode', loadedDetails.kernalDetails?.executionMode||'local');
+      setValue('serverless', loadedDetails.kernalDetails?.selectedServerlessName);
+      setValue('cluster', loadedDetails.kernalDetails?.selectedClusterName);
       console.log('Scheduler Selection set to:', loadedDetails.schedulerType);
     }
   })();
@@ -210,7 +284,7 @@ export const CreateNotebookSchedule = (
         region: vertexData.vertexRegion,
         cloud_storage_bucket: vertexData.cloudStorageBucket,
         service_account: vertexData.serviceAccount,
-        network_option: vertexData.networkOption ||'networkInThisProject',
+        network_option: vertexData.networkOption || 'networkInThisProject',
         primaryNetwork: vertexData.primaryNetwork,
         subnetwork: vertexData.subNetwork,
         disk_type: vertexData.diskType,

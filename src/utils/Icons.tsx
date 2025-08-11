@@ -26,6 +26,13 @@ import EditIconDisable from '../../style/icons/scheduler_edit_dag.svg';
 import deleteIcon from '../../style/icons/scheduler_delete.svg';
 import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
+import dashIcon from '../../style/icons/dash_icon_jupyter.svg';
+import CompletedIcon from '../../style/icons/dag_task_success_icon.svg';
+import FailedIcon from '../../style/icons/list_error_icon.svg';
+import pendingIcon from '../../style/icons/pending_icon.svg';
+import ActiveIcon from '../../style/icons/list_active_icon.svg';
+import ListPauseIcon from '../../style/icons/list_pause_icon.svg';
+import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_error.svg'
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -75,4 +82,43 @@ export const iconEditNotebook = new LabIcon({
 export const iconError = new LabIcon({
   name: 'launcher:error-icon',
   svgstr: ErrorIcon
+});
+export const iconScheduledNotebooks = new LabIcon({
+  name: 'launcher:scheduled-notebooks-icon',
+  svgstr: ScheduledNotebooksIcon
+});
+
+export const iconDash = new LabIcon({
+  name: 'launcher:dash-icon',
+  svgstr: dashIcon
+});
+
+export const iconSuccess = new LabIcon({
+  name: 'launcher:success-icon',
+  svgstr: CompletedIcon
+});
+
+export const iconFailed = new LabIcon({
+  name: 'launcher:failed-icon',
+  svgstr: FailedIcon
+});
+
+export const iconPending = new LabIcon({
+  name: 'launcher:pending-icon',
+  svgstr: pendingIcon
+});
+
+export const iconActive = new LabIcon({
+  name: 'launcher:active-icon',
+  svgstr: ActiveIcon
+});
+
+export const iconListPause = new LabIcon({
+  name: 'launcher:list-pause-icon',
+  svgstr: ListPauseIcon
+});
+
+export const iconListCompleteWithError = new LabIcon({
+  name: 'launcher:list-complete-icon',
+  svgstr: ListCompleteWithErrorIcon
 });
