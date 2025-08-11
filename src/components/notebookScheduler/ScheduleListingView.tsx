@@ -30,7 +30,7 @@ export const ScheduleListingView = () => {
     if (location.pathname === '/list' || location.pathname === '/list/') {
       navigate(SCHEDULE_LABEL_VERTEX, { replace: true }); // Default to /list/vertex
     }
-console.log('inside effect naigateion')
+    console.log('inside effect naigateion');
     setSchedulerSelected(currentSubPath);
   }, [location.pathname, navigate]);
 
@@ -76,10 +76,6 @@ console.log('inside effect naigateion')
               value="vertex"
               className="create-scheduler-label-style"
               control={<Radio size="small" />}
-              //   disabled={
-              //     schedulerBtnDisable ||
-              //     (editMode && notebookSelector === 'composer')
-              //   }
               label={
                 <Typography sx={{ fontSize: 13 }}>
                   {SCHEDULE_LABEL_VERTEX}
@@ -90,7 +86,6 @@ console.log('inside effect naigateion')
               value="composer"
               className="create-scheduler-label-style"
               control={<Radio size="small" />}
-              //   disabled={editMode && notebookSelector === 'vertex'}
               label={
                 <Typography sx={{ fontSize: 13 }}>
                   {SCHEDULE_LABEL_COMPOSER}
@@ -107,5 +102,3 @@ console.log('inside effect naigateion')
     </>
   );
 };
-
- 
