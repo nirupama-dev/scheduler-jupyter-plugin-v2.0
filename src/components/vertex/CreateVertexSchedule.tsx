@@ -242,7 +242,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
     try {
       const fetchedBuckets =
-        await StorageServices.cloudStorageAPIServiceForVertex();
+        await StorageServices.cloudStorageAPIService();
       setCloudStorageList(fetchedBuckets);
       const currentBucketValue = getValues('cloudStorageBucket');
       const isValidExisting = fetchedBuckets.some(
@@ -616,12 +616,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           console.log('Creating new bucket:', newBucketName);
           setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
           try {
-            await StorageServices.newCloudStorageAPIServiceForVertex(
+            await StorageServices.newCloudStorageAPIService(
               newBucketName
             );
             // Re-fetch buckets to include the newly created one and set it
             const updatedBucketList =
-              await StorageServices.cloudStorageAPIServiceForVertex();
+              await StorageServices.cloudStorageAPIService();
             setCloudStorageList(updatedBucketList);
             setValue('cloudStorageBucket', newBucketName);
           } catch (error) {

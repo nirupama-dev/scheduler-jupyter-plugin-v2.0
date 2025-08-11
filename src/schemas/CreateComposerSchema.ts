@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * This file defines the schema specific to creating a Composer scheduler.
+ */
 
 import { z } from 'zod';
 import {

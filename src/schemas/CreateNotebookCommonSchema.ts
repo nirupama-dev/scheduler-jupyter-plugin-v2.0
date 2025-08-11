@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * This file defines the schema common to all schedulers.
+ */
 import { z } from 'zod';
 
 // Regex for letters, numbers, hyphens, and underscores (including international characters)

@@ -14,6 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * This file defines the schema for creating a Vertex scheduler.
+ * It extends the common notebook schema and includes Vertex-specific fields.
+ */
 import { z } from 'zod';
 import { DISK_MIN_SIZE, DISK_MAX_SIZE } from '../utils/Constants';
 import { createNotebookCommonSchema, parameterSchema, sharedNetworkSchema } from './CreateNotebookCommonSchema';

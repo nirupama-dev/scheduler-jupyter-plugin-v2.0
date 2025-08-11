@@ -104,7 +104,7 @@ export class StorageServices {
    * @returns A Promise that resolves with an array of `ILabelValue<string>` for buckets
    * on success, or an empty array on error/no data.
    */
-  static async cloudStorageAPIServiceForVertex(): Promise<ILabelValue<string>[]> {
+  static async cloudStorageAPIService(): Promise<ILabelValue<string>[]> {
     try {
       const formattedResponse: any = await requestAPI('api/storage/listBucket');
 
@@ -138,7 +138,7 @@ export class StorageServices {
    * @returns A Promise that resolves with `void` on successful creation.
    * It does not return data, but manages notifications.
    */
-  static async newCloudStorageAPIServiceForVertex(bucketName: string): Promise<void> {
+  static async newCloudStorageAPIService(bucketName: string): Promise<void> {
     const payload = { bucket_name: bucketName };
     try {
       const formattedResponse: any = await requestAPI('api/storage/createNewBucket', {

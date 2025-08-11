@@ -27,7 +27,7 @@ import {
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
 
-// Dummy ExecutionHistoryScreen for demonstration
+// Dummy ExecutionHistoryScreen for testing purposes
 function ExecutionHistoryScreen() {
   const { id } = useParams();
   return (
@@ -37,7 +37,12 @@ function ExecutionHistoryScreen() {
     </div>
   );
 }
-
+/**
+ * 
+ * @param schedulerRouteProps 
+ * @returns 
+ * This component defines the routes for the scheduler application.
+ */
 export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   const { app, sessionContext, initialKernalSchedulerDetails } =
     schedulerRouteProps;
