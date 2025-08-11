@@ -38,8 +38,6 @@ export class NotebookButtonExtension
 {
   constructor(
     private app: JupyterLab,
-    // private settingRegistry: ISettingRegistry,
-    // private launcher: ILauncher,
     private themeManager: IThemeManager,
     private schedulerButton: ToolbarButton | null  // Store a reference to the button
   ) {
@@ -107,6 +105,7 @@ export class NotebookButtonExtension
     if (initialKernalSchedulerDetails && !hasError) {
       const content = new NotebookScheduler(
         this.themeManager,
+        this.app,
         '/create',
         sessionContext, // Pass sessionContext
         initialKernalSchedulerDetails // Pass the pre-fetched data

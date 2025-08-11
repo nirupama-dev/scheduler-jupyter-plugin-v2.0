@@ -26,6 +26,7 @@ import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
+import { JupyterLab } from '@jupyterlab/application';
 
 // Dummy ExecutionHistoryScreen for demonstration
 function ExecutionHistoryScreen() {
@@ -38,7 +39,7 @@ function ExecutionHistoryScreen() {
   );
 }
 
-export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps) {
+export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps{ app }: { app: JupyterLab }) {
   const { sessionContext, initialKernalSchedulerDetails } = sessionContextprops;
 
   // const ListVertexSchedule = lazy(
@@ -62,7 +63,7 @@ export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps) {
         }
       />
 
-      <Route path="/list" element={<ScheduleListingView />}>
+      <Route path="/list" element={<ScheduleListingView app={app} />}>
         <Route
           path="vertex"
           element={

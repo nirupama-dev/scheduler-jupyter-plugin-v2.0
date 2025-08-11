@@ -133,6 +133,11 @@ export interface ILoadingStateComposerListing {
   region: boolean;
   environment: boolean;
   dags: boolean;
+  update: string;
+  trigger: string;
+  editNotebook: string;
+  editDag: string;
+  delete: boolean;
 }
 
 export interface IDagList {
@@ -140,6 +145,11 @@ export interface IDagList {
   notebookname: string;
   schedule: string;
   scheduleInterval: string;
+}
+
+export interface IListDagInfoAPIServiceResponse {
+  dagList: IDagList[];
+  bucketName: string;
 }
 
 export interface ILoadingStateComposer {
