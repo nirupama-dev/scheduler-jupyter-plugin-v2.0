@@ -227,7 +227,7 @@ const ListVertexSchedule = () => {
         <div className="enable-text-label">
           <div className="create-scheduler-form-element">
             <Autocomplete
-              className="create-scheduler-style"
+              className="scheduler-tag-style"
               options={VERTEX_REGIONS}
               value={
                 VERTEX_REGIONS.find(option => option.value === region) || null

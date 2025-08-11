@@ -40,7 +40,7 @@ import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import Cron, { PeriodType } from 'react-js-cron';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import tzdata from 'tzdata';
-import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 // Constants
 import {
@@ -106,19 +106,17 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const [hostProject, setHostProject] = useState<any | null>(null);
 
   // Consolidated loading state for all API calls initiated by this component
-  const [loadingState, setLoadingState] = useState<ILoadingStateVertex>(
-    {
-      region: false,
-      machineType: false,
-      cloudStorageBucket: false,
-      serviceAccount: false,
-      primaryNetwork: false,
-      subNetwork: false,
-      sharedNetwork: false,
-      hostProject: false // Initialized
-      // createOperation: false
-    }
-  );
+  const [loadingState, setLoadingState] = useState<ILoadingStateVertex>({
+    region: false,
+    machineType: false,
+    cloudStorageBucket: false,
+    serviceAccount: false,
+    primaryNetwork: false,
+    subNetwork: false,
+    sharedNetwork: false,
+    hostProject: false // Initialized
+    // createOperation: false
+  });
 
   // Timezones for dropdown
   const timezones: ILabelValue<string>[] = useMemo(
@@ -241,8 +239,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const fetchCloudStorageBuckets = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
     try {
-      const fetchedBuckets =
-        await StorageServices.cloudStorageAPIService();
+      const fetchedBuckets = await StorageServices.cloudStorageAPIService();
       setCloudStorageList(fetchedBuckets);
       const currentBucketValue = getValues('cloudStorageBucket');
       const isValidExisting = fetchedBuckets.some(
@@ -616,9 +613,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           console.log('Creating new bucket:', newBucketName);
           setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
           try {
-            await StorageServices.newCloudStorageAPIService(
-              newBucketName
-            );
+            await StorageServices.newCloudStorageAPIService(newBucketName);
             // Re-fetch buckets to include the newly created one and set it
             const updatedBucketList =
               await StorageServices.cloudStorageAPIService();
@@ -669,7 +664,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           control={control}
           label="Region*"
           options={VERTEX_REGIONS}
-          customClass="create-scheduler-style"
+          customClass="scheduler-tag-style"
           loading={loadingState.region}
           onChangeCallback={handleRegionChange}
           error={vertexErrors.vertexRegion}
@@ -683,7 +678,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           control={control}
           label="Machine Type*"
           options={machineTypeList.map(item => item.machineType)}
-          customClass="create-scheduler-style"
+          customClass="scheduler-tag-style"
           loading={loadingState.machineType}
           error={vertexErrors.machineType}
           disabled={
@@ -713,7 +708,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 options={getAcceleratedTypeOptions(
                   selectedMachineType.acceleratorConfigs
                 )}
-                customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+                customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
                 error={vertexErrors.acceleratorType}
                 disabled={!currentMachineType || loadingState.machineType}
                 onChangeCallback={() => {
@@ -739,7 +734,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                         label: count.value.toString(),
                         value: count.value.toString()
                       }))}
-                      customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+                      customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
                       error={vertexErrors.acceleratorCount}
                       disabled={!currentAcceleratorType}
                     />
@@ -756,7 +751,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           control={control}
           label="Kernel*"
           options={KERNEL_VALUE}
-          customClass="create-scheduler-style"
+          customClass="scheduler-tag-style"
           error={vertexErrors.kernelName}
         />
       </div>
@@ -768,7 +763,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           control={control}
           label="Cloud Storage Bucket*"
           options={cloudStorageList}
-          customClass="create-scheduler-style"
+          customClass="scheduler-tag-style"
           filterOptions={filterCloudStorageOptions}
           loading={loadingState.cloudStorageBucket}
           error={vertexErrors.cloudStorageBucket}
@@ -790,7 +785,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             control={control}
             label="Disk Type*"
             options={DISK_TYPE_VALUE}
-            customClass="create-scheduler-style"
+            customClass="scheduler-tag-style"
             error={vertexErrors.diskType}
             onChangeCallback={() => {
               setValue('diskSize', ''); // Clear disk size when disk type changes
@@ -868,7 +863,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               name="primaryNetwork"
               control={control}
               label="Primary network"
-              customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+              customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
               options={primaryNetworkList}
               loading={loadingState.primaryNetwork}
               error={vertexErrors.primaryNetwork}
@@ -886,7 +881,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               name="subNetwork"
               control={control}
               label="Sub network"
-              customClass="create-scheduler-style create-scheduler-form-element-input-fl"
+              customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
               options={subNetworkList}
               loading={loadingState.subNetwork}
               error={vertexErrors.subNetwork}
@@ -910,7 +905,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               control={control}
               label="Shared subnetwork*"
               options={sharedNetworkList}
-              customClass="create-scheduler-style"
+              customClass="scheduler-tag-style"
               loading={loadingState.sharedNetwork}
               error={
                 vertexErrors.sharedNetwork &&
@@ -1026,7 +1021,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     render={({ field }) => (
                       <DateTimePicker
                         {...field}
-                        className="create-scheduler-style create-scheduler-form-element-input-fl"
+                        className="scheduler-tag-style create-scheduler-form-element-input-fl"
                         label="Start Date*"
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
@@ -1057,7 +1052,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     render={({ field }) => (
                       <DateTimePicker
                         {...field}
-                        className="create-scheduler-style create-scheduler-form-element-input-fl"
+                        className="scheduler-tag-style create-scheduler-form-element-input-fl"
                         label="End Date*"
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
@@ -1148,7 +1143,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 control={control}
                 label="Time Zone*"
                 options={timezones}
-                customClass="create-scheduler-style"
+                customClass="scheduler-tag-style"
                 error={vertexErrors.timeZone}
               />
             </div>

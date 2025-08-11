@@ -143,32 +143,31 @@ export const CreateComposerSchedule: React.FC<
 
   useEffect(() => {
     // Fetch environments based on selected project and region
-      const fetchEnvironments = async () => {
-            if (selectedProjectId || selectedRegion) {
+    const fetchEnvironments = async () => {
+      if (selectedProjectId || selectedRegion) {
+        try {
+          setLoadingState(prev => ({ ...prev, environment: true }));
+          const options = await ComposerServices.listComposersAPIService(
+            selectedProjectId,
+            selectedRegion
+          );
+          setEnvOptions(options);
+        } catch (error) {
+          const errorResponse = `Failed to fetch composer environment list : ${error}`;
+          handleErrorToast({
+            error: errorResponse
+          });
+        } finally {
+          setLoadingState(prev => ({ ...prev, environment: false }));
+        }
+      } else {
+        setEnvOptions([]);
+        setComposerEnvData([]);
+      }
+    };
+    // Fetch environments when project and region are selected
 
-            try {
-              setLoadingState(prev => ({ ...prev, environment: true }));
-              const options = await ComposerServices.listComposersAPIService(
-                selectedProjectId,
-                selectedRegion
-              );
-              setEnvOptions(options);
-            } catch (error) {
-              const errorResponse = `Failed to fetch composer environment list : ${error}`;
-              handleErrorToast({
-                error: errorResponse
-              });
-            } finally {
-              setLoadingState(prev => ({ ...prev, environment: false }));
-            }
-          } else {
-            setEnvOptions([]);
-            setComposerEnvData([]);
-          }
-        };
-      // Fetch environments when project and region are selected
-   
-      fetchEnvironments();
+    fetchEnvironments();
   }, [selectedRegion, setValue]);
 
   useEffect(() => {
@@ -265,7 +264,7 @@ export const CreateComposerSchedule: React.FC<
 
   return (
     <div>
-      <div className="create-scheduler-form-element">
+      <div className="scheduler-form-element-container">
         <FormInputDropdown
           name="projectId"
           label="Project ID"
@@ -273,12 +272,12 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={[{ label: selectedProjectId, value: selectedProjectId }]}
           loading={loadingState.projectId}
-          customClass="create-scheduler-style"
+          customClass="scheduler-tag-style "
           onChangeCallback={handleProjectIdChange}
           disabled={true}
         />
       </div>
-      <div className="create-scheduler-form-element">
+      <div className="scheduler-form-element-container">
         <FormInputDropdown
           name="composerRegion"
           label="Region"
@@ -286,12 +285,12 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={regionOptions}
           loading={loadingState.region}
-          customClass="create-scheduler-style"
+          customClass="scheduler-tag-style "
           onChangeCallback={handleRegionChange}
           error={errors.composerRegion}
         />
       </div>
-      <div className="create-scheduler-form-element">
+      <div className="scheduler-form-element-container">
         <FormInputDropdown
           name="environment"
           label="Environment"
@@ -299,7 +298,7 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           loading={loadingState.environment}
-          customClass="create-scheduler-style"
+          customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={errors.environment}
         />
@@ -307,7 +306,7 @@ export const CreateComposerSchedule: React.FC<
       <div className="create-scheduler-label block-seperation">
         Output formats
       </div>
-      <div className="create-scheduler-form-element">
+      <div className="scheduler-form-element-container">
         <FormInputCheckbox
           name="outputFormats"
           label="Notebook"
@@ -319,7 +318,7 @@ export const CreateComposerSchedule: React.FC<
       <AddParameters control={control} errors={errors} />
       {executionMode !== 'local' && (
         <div>
-          <div className="create-scheduler-form-element sub-para">
+          <div className="scheduler-form-element-container sub-para">
             <FormInputRadio
               name="executionMode"
               control={control}
@@ -329,7 +328,7 @@ export const CreateComposerSchedule: React.FC<
             />
           </div>
           {executionMode === 'cluster' && (
-            <div className="create-scheduler-form-element">
+            <div className="scheduler-form-element-container">
               <FormInputDropdown
                 name="cluster"
                 label="Cluster*"
@@ -337,13 +336,13 @@ export const CreateComposerSchedule: React.FC<
                 setValue={setValue}
                 options={clusterOptions}
                 loading={loadingState.cluster}
-                customClass="create-scheduler-style"
+                customClass="scheduler-tag-style "
                 error={errors.cluster}
               />
             </div>
           )}
           {executionMode === 'serverless' && (
-            <div className="create-scheduler-form-element">
+            <div className="scheduler-form-element-container">
               <FormInputDropdown
                 name="serverless"
                 label="Serverless"
@@ -351,13 +350,13 @@ export const CreateComposerSchedule: React.FC<
                 setValue={setValue}
                 options={serverlessOptions}
                 loading={loadingState.serverless}
-                customClass="create-scheduler-style"
+                customClass="scheduler-tag-style "
                 error={errors.serverless}
               />
             </div>
           )}
           {executionMode === 'cluster' && (
-            <div className="create-scheduler-form-element">
+            <div className="scheduler-form-element-container">
               <FormInputCheckbox
                 name="stopClusterAfterExecution"
                 control={control}
@@ -368,27 +367,27 @@ export const CreateComposerSchedule: React.FC<
           )}
         </div>
       )}
-      <div className="create-scheduler-form-element block-seperation">
+      <div className="scheduler-form-element-container block-seperation">
         <FormInputText
           label="Retry count"
           control={control}
           name="retryCount"
           type="number"
-          className="create-scheduler-style"
+          className="scheduler-tag-style "
           error={errors.retryCount}
         />
       </div>
-      <div className="create-scheduler-form-element">
+      <div className="scheduler-form-element-container">
         <FormInputText
           label="Retry delay (minutes)"
           control={control}
           name="retryDelay"
           type="number"
-          className="create-scheduler-style"
+          className="scheduler-tag-style "
           error={errors.retryDelay}
         />
       </div>
-      <div className="create-scheduler-form-element">
+      <div className="scheduler-form-element-container">
         <FormGroup row={true}>
           <FormInputCheckbox
             name="emailOnFailure"
@@ -411,7 +410,7 @@ export const CreateComposerSchedule: React.FC<
         </FormGroup>
       </div>
       {(emailOnFailure || emailOnRetry || emailOnSuccess) && (
-        <div className="create-scheduler-form-element">
+        <div className="scheduler-form-element-container">
           <MuiChipsInput
             name="emailRecipients"
             className="select-job-style"
@@ -425,7 +424,7 @@ export const CreateComposerSchedule: React.FC<
         </div>
       )}
       <div className="create-scheduler-label block-seperation">Schedule</div>
-      <div className="create-scheduler-form-element">
+      <div className="scheduler-form-element-container">
         <FormInputRadio
           name="scheduleMode"
           control={control}
@@ -435,17 +434,17 @@ export const CreateComposerSchedule: React.FC<
       </div>
       {scheduleMode === 'runSchedule' && (
         <div>
-          <div className="create-scheduler-form-element">
+          <div className="scheduler-form-element-container">
             <Cron value={''} setValue={() => {}} />
           </div>
-          <div className="create-scheduler-form-element">
+          <div className="scheduler-form-element-container">
             <FormInputDropdown
               name="timeZone"
               label="Time Zone"
               control={control}
               setValue={setValue}
               options={timeZoneOptions}
-              customClass="create-scheduler-style"
+              customClass="scheduler-tag-style "
               error={errors.timeZone}
             />
           </div>

@@ -1,29 +1,3 @@
-@import url('https://fonts.googleapis.com/css?family=Roboto');
-
-.create-scheduler-label {
-  margin-top: 15px;
-  font-style: normal;
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 28px;
-  display: flex;
-  align-items: center;
-  color: var(--jp-ui-font-color0);
-}
-
-.create-scheduler-style {
-  width: 512px;
-  height: 36px;
-  background: var(--jp-layout-color0);
-  margin-top: 10px;
-  outline: none;
-}
-
-.create-scheduler-form-element {
-  margin-top: 15px;
-  width: 512px;
-}
-
 .logo-alignment-style {
   display: flex;
   align-items: center;

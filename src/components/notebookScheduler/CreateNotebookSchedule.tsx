@@ -64,7 +64,7 @@ export const CreateNotebookSchedule = (
   const {
     sessionContext,
     initialKernalScheduleDetails: preFetchedInitialDetails,
-    editModeData: editModeData,
+    editModeData: editModeData
   } = createScheduleProps; //sessionContext is used to fetch the initial kernel details
   const [kernalAndScheduleValue, setKernalAndScheduleValue] =
     useState<INotebookKernalSchdulerDefaults>(
@@ -181,53 +181,64 @@ export const CreateNotebookSchedule = (
   });
 
   useEffect(() => {
-  // This effect runs when preFetchedInitialDetails changes or when the component mounts
-  // and preFetchedInitialDetails is initially null/undefined.
-  let isMounted = true;
-  (async () => {
-    console.log(
-      'Component mounted or preFetchedInitialDetails changed. Current value:',
-      preFetchedInitialDetails
-    );
-    let loadedDetails: INotebookKernalSchdulerDefaults;
-    // If preFetchedInitialDetails is available, use it; otherwise, fetch the default scheduler type
-    if (preFetchedInitialDetails) {
-      loadedDetails = preFetchedInitialDetails;
-      console.log('Using pre-fetched Initial Scheduler Details:', loadedDetails);
-    } else {
-      try {
-        loadedDetails = (
-          await getDefaultSchedulerTypeOnLoad(sessionContext)
-        ).kernalAndSchedulerDetails;
-        console.log('Fallback fetched Initial Scheduler Details:', loadedDetails);
-      } catch (error) {
-        console.error(
-          'Failed to fetch initial scheduler details in fallback:',
-          error
+    // This effect runs when preFetchedInitialDetails changes or when the component mounts
+    // and preFetchedInitialDetails is initially null/undefined.
+    let isMounted = true;
+    (async () => {
+      console.log(
+        'Component mounted or preFetchedInitialDetails changed. Current value:',
+        preFetchedInitialDetails
+      );
+      let loadedDetails: INotebookKernalSchdulerDefaults;
+      // If preFetchedInitialDetails is available, use it; otherwise, fetch the default scheduler type
+      if (preFetchedInitialDetails) {
+        loadedDetails = preFetchedInitialDetails;
+        console.log(
+          'Using pre-fetched Initial Scheduler Details:',
+          loadedDetails
         );
-        loadedDetails = {
-          schedulerType: 'vertex',
-          kernalDetails: {
-            executionMode: 'local',
-            isDataprocKernel: false,
-            kernelDisplayName: ''
-          }
-        };
+      } else {
+        try {
+          loadedDetails = (await getDefaultSchedulerTypeOnLoad(sessionContext))
+            .kernalAndSchedulerDetails;
+          console.log(
+            'Fallback fetched Initial Scheduler Details:',
+            loadedDetails
+          );
+        } catch (error) {
+          console.error(
+            'Failed to fetch initial scheduler details in fallback:',
+            error
+          );
+          loadedDetails = {
+            schedulerType: 'vertex',
+            kernalDetails: {
+              executionMode: 'local',
+              isDataprocKernel: false,
+              kernelDisplayName: ''
+            }
+          };
+        }
       }
-    }
-    if (isMounted) {
-      setKernalAndScheduleValue(loadedDetails);
-      setValue('schedulerSelection', loadedDetails.schedulerType);
-      setValue('executionMode', loadedDetails.kernalDetails?.executionMode||'local');
-      setValue('serverless', loadedDetails.kernalDetails?.selectedServerlessName);
-      setValue('cluster', loadedDetails.kernalDetails?.selectedClusterName);
-      console.log('Scheduler Selection set to:', loadedDetails.schedulerType);
-    }
-  })();
-  return () => {
-    isMounted = false;
-  };
-}, [preFetchedInitialDetails, sessionContext, setValue]);
+      if (isMounted) {
+        setKernalAndScheduleValue(loadedDetails);
+        setValue('schedulerSelection', loadedDetails.schedulerType);
+        setValue(
+          'executionMode',
+          loadedDetails.kernalDetails?.executionMode || 'local'
+        );
+        setValue(
+          'serverless',
+          loadedDetails.kernalDetails?.selectedServerlessName
+        );
+        setValue('cluster', loadedDetails.kernalDetails?.selectedClusterName);
+        console.log('Scheduler Selection set to:', loadedDetails.schedulerType);
+      }
+    })();
+    return () => {
+      isMounted = false;
+    };
+  }, [preFetchedInitialDetails, sessionContext, setValue]);
   const schedulerSelection = watch('schedulerSelection'); // Get the current value of the radio button
   /**
    * Helper function to get the schedule values from the Vertex scheduler form.
@@ -295,7 +306,7 @@ export const CreateNotebookSchedule = (
         time_zone: vertexData.timeZone,
         max_run_count: vertexData.maxRunCount,
         start_time: vertexData.startTime,
-        end_time: vertexData.endTime,
+        end_time: vertexData.endTime
         //parameters: vertexData.parameters
       };
       console.log('Vertex Payload:', vertexPayload);
@@ -359,7 +370,7 @@ export const CreateNotebookSchedule = (
       </div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="common-fields">
-          <div className="create-scheduler-style">
+          <div className="scheduler-tag-style">
             <FormInputText
               label="Job Name"
               control={control}
@@ -369,7 +380,7 @@ export const CreateNotebookSchedule = (
           </div>
 
           <div className="create-scheduler-form-element-input-file">
-            <div className="create-scheduler-style">
+            <div className="scheduler-tag-style">
               <FormInputText
                 label="Input File"
                 control={control}
@@ -380,7 +391,7 @@ export const CreateNotebookSchedule = (
             </div>
           </div>
 
-          <div className="create-scheduler-form-element">
+          <div className="scheduler-form-element-container">
             <FormInputRadio
               name="schedulerSelection"
               control={control}
@@ -398,7 +409,7 @@ export const CreateNotebookSchedule = (
               watch={watch}
               getValues={getValues}
               trigger={trigger}
-            //sessionContext={sessionContext}
+              //sessionContext={sessionContext}
               editModeData={editModeData}
             />
           )}
