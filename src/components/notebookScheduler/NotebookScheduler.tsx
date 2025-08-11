@@ -30,29 +30,36 @@ import { JupyterLab } from '@jupyterlab/application';
 import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface';
 
 export class NotebookScheduler extends SchedulerWidget {
-  app: JupyterLab;
+  private app: JupyterLab;
   private initialRoute: string;
   private sessionContext?: ISessionContext | undefined | null;
-  private initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults|null|undefined;
+  private initialKernalSchedulerDetails?:
+    | INotebookKernalSchdulerDefaults
+    | null
+    | undefined;
 
   constructor(
-    
     themeManager: IThemeManager,
     app: JupyterLab,
     initialRoute: string = '/list',
     sessionContext?: ISessionContext | undefined | null,
-    initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults|null|undefined
+    initialKernalSchedulerDetails?:
+      | INotebookKernalSchdulerDefaults
+      | null
+      | undefined
   ) {
     super(themeManager);
     this.initialRoute = initialRoute;
     this.app = app;
     this.sessionContext = sessionContext;
-    this.initialKernalSchedulerDetails = initialKernalSchedulerDetails||null||undefined;
+    this.initialKernalSchedulerDetails =
+      initialKernalSchedulerDetails || null || undefined;
   }
   protected renderInternal(): React.ReactElement {
     return (
       <MemoryRouter initialEntries={[this.initialRoute]}>
-        <SchedulerRoutes app={this.app}
+        <SchedulerRoutes
+          app={this.app}
           sessionContext={this.sessionContext}
           initialKernalSchedulerDetails={this.initialKernalSchedulerDetails}
         />

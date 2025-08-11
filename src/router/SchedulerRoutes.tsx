@@ -26,7 +26,6 @@ import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
-import { JupyterLab } from '@jupyterlab/application';
 
 // Dummy ExecutionHistoryScreen for demonstration
 function ExecutionHistoryScreen() {
@@ -39,12 +38,14 @@ function ExecutionHistoryScreen() {
   );
 }
 
-export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps{ app }: { app: JupyterLab }) {
-  const { sessionContext, initialKernalSchedulerDetails } = sessionContextprops;
+export function SchedulerRoutes(
+  schedulerRouteProps: ISchedulerRoutesProps,
+) {
+  const {  app, sessionContext, initialKernalSchedulerDetails } = schedulerRouteProps;
 
-  // const ListVertexSchedule = lazy(
-  //   () => import('../components/vertex/scheduleListingView/ListVertexSchedule')
-  // );
+  const ListVertexSchedule = lazy(
+    () => import('../components/vertex/scheduleListingView/ListVertexSchedule')
+  );
 
   const ListComposerSchedule = lazy(
     () => import('../components/composer/listingView/ListComposerSchedule')
@@ -63,7 +64,7 @@ export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps{ app 
         }
       />
 
-      <Route path="/list" element={<ScheduleListingView app={app} />}>
+      <Route path="/list" element={<ScheduleListingView/>}>
         <Route
           path="vertex"
           element={
@@ -72,7 +73,7 @@ export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps{ app 
                 <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
               }
             >
-              {/* <ListVertexSchedule /> */}
+              <ListVertexSchedule />
             </Suspense>
           }
         />
@@ -84,7 +85,7 @@ export function SchedulerRoutes(sessionContextprops: ISchedulerRoutesProps{ app 
                 <Loader message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN} />
               }
             >
-              <ListComposerSchedule />
+              <ListComposerSchedule app={app} />
             </Suspense>
           }
         />

@@ -25,7 +25,7 @@ import {
   IDagList,
   ILoadingStateComposerListing
 } from '../../../interfaces/ComposerInterface';
-import { SchedulerService } from '../../../services/composer/ComposerServices';
+import { ComposerServices } from '../../../services/composer/ComposerServices';
 import { Notification } from '@jupyterlab/apputils';
 import TableData from '../../common/table/TableData';
 import { usePagination, useTable } from 'react-table';
@@ -154,7 +154,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       try {
         setLoadingState(prev => ({ ...prev, dags: true }));
         const { dagList, bucketName } =
-          await SchedulerService.listDagInfoAPIService(
+          await ComposerServices.listDagInfoAPIService(
             value,
             selectedRegion,
             selectedProjectId
@@ -184,7 +184,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, update: dag_id }));
 
       try {
-        const response = await SchedulerService.handleUpdateSchedulerAPIService(
+        const response = await ComposerServices.handleUpdateSchedulerAPIService(
           selectedEnv,
           dag_id,
           is_status_paused,
@@ -228,7 +228,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, trigger: dag_id }));
 
       try {
-        const response = await SchedulerService.triggerDagService(
+        const response = await ComposerServices.triggerDagService(
           dag_id,
           selectedEnv ?? '',
           selectedProjectId,
@@ -273,7 +273,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, editNotebook: dag_id }));
 
       try {
-        const response = await SchedulerService.editNotebookSchedulerService(
+        const response = await ComposerServices.editNotebookSchedulerService(
           bucketName,
           dag_id
         );
@@ -307,7 +307,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
 
     try {
       const deleteResponse =
-        await SchedulerService.handleDeleteSchedulerAPIService(
+        await ComposerServices.handleDeleteSchedulerAPIService(
           selectedEnv ?? '',
           selectedDagId,
           selectedRegion,
@@ -411,7 +411,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       }
       try {
         setLoadingState(prev => ({ ...prev, environment: true }));
-        const options = await SchedulerService.listComposersAPIService(
+        const options = await ComposerServices.listComposersAPIService(
           selectedProjectId,
           selectedRegion
         );

@@ -19,24 +19,21 @@ import { LabIcon } from '@jupyterlab/ui-components';
 import LeftArrowIcon from '../../style/icons/left_arrow_icon.svg';
 import notebookSchedulerIcon from '../../style/icons/scheduler_calendar_month.svg';
 import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.svg';
-import playIcon from '../../style/icons/scheduler_play.svg';
-import pauseIcon from '../../style/icons/scheduler_pause.svg';
-import triggerIcon from '../../style/icons/scheduler_trigger.svg';
+import PlayIcon from '../../style/icons/scheduler_play.svg';
+import PauseIcon from '../../style/icons/scheduler_pause.svg';
+import TriggerIcon from '../../style/icons/scheduler_trigger.svg';
 import EditIconDisable from '../../style/icons/scheduler_edit_dag.svg';
-import deleteIcon from '../../style/icons/scheduler_delete.svg';
+import DeleteIconLarge from '../../style/icons/scheduler_delete.svg';
 import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
-import dashIcon from '../../style/icons/dash_icon_jupyter.svg';
+import DashIcon from '../../style/icons/dash_icon_jupyter.svg';
 import CompletedIcon from '../../style/icons/dag_task_success_icon.svg';
 import FailedIcon from '../../style/icons/list_error_icon.svg';
 import pendingIcon from '../../style/icons/pending_icon.svg';
 import ActiveIcon from '../../style/icons/list_active_icon.svg';
 import ListPauseIcon from '../../style/icons/list_pause_icon.svg';
 import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_error.svg';
-import pauseIcon from '../../style/icons/scheduler_pause.svg';
-import triggerIcon from '../../style/icons/scheduler_trigger.svg';
-import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
-import DeleteIcon from '../../style/icons/delete_icon.svg';
+import DeleteIconSmall from '../../style/icons/delete_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -55,17 +52,17 @@ export const iconScheduledNotebooks = new LabIcon({
 
 export const iconPlay = new LabIcon({
   name: 'launcher:play-icon',
-  svgstr: playIcon
+  svgstr: PlayIcon
 });
 
 export const iconPause = new LabIcon({
   name: 'launcher:pause-icon',
-  svgstr: pauseIcon
+  svgstr: PauseIcon
 });
 
 export const iconTrigger = new LabIcon({
   name: 'launcher:trigger-icon',
-  svgstr: triggerIcon
+  svgstr: TriggerIcon
 });
 
 export const iconEditDag = new LabIcon({
@@ -73,9 +70,9 @@ export const iconEditDag = new LabIcon({
   svgstr: EditIconDisable
 });
 
-export const iconDelete = new LabIcon({
+export const iconDeleteAction = new LabIcon({
   name: 'launcher:delete-icon',
-  svgstr: deleteIcon
+  svgstr: DeleteIconLarge
 });
 
 export const iconEditNotebook = new LabIcon({
@@ -90,7 +87,7 @@ export const iconError = new LabIcon({
 
 export const iconDash = new LabIcon({
   name: 'launcher:dash-icon',
-  svgstr: dashIcon
+  svgstr: DashIcon
 });
 
 export const iconSuccess = new LabIcon({
@@ -123,22 +120,7 @@ export const iconListCompleteWithError = new LabIcon({
   svgstr: ListCompleteWithErrorIcon
 });
 
-export const iconPause = new LabIcon({
-  name: 'launcher:pause-icon',
-  svgstr: pauseIcon
-});
-
-export const iconTrigger = new LabIcon({
-  name: 'launcher:trigger-icon',
-  svgstr: triggerIcon
-});
-
-export const iconEditNotebook = new LabIcon({
-  name: 'launcher:edit-notebook-icon',
-  svgstr: EditNotebookIcon
-});
-
-export const iconDelete = new LabIcon({
+export const iconDeleteProperty = new LabIcon({
   name: 'launcher:delete-icon',
-  svgstr: DeleteIcon
+  svgstr: DeleteIconSmall
 });

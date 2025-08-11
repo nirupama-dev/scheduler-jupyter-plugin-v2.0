@@ -1,27 +1,4 @@
-/**
- * @license
- * Copyright 2025 Google LLC
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-/**
- * React component that defines the Notebook Scheduler widget.
- * It uses MemoryRouter to handle routing within the JupyterLab environment.
- * I wraps the SchedulerRoutes component to provide the necessary routing context.
- */
-
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   LISTING_PAGE_HEADING,
   SCHEDULE_LABEL_COMPOSER,
@@ -34,14 +11,33 @@ import {
   RadioGroup,
   Typography
 } from '@mui/material';
-import ListComposerSchedule from '../composer/listingView/ListComposerSchedule';
-import { JupyterLab } from '@jupyterlab/application';
+// import { ListVertexSchedule } from '../vertex/scheduleListingView/ListVertexSchedule';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 
+export const ScheduleListingView = () => {
+  const [schedulerSelected, setSchedulerSelected] = useState<
+    string | undefined
+  >('');
 
-export const ScheduleListingView = ({ app }: { app: JupyterLab }) => {
-  const [schedulerSelected, setSchedulerSelected] = useState<string>(
-    SCHEDULE_LABEL_VERTEX
-  );
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine current sub-route based on path
+  const currentSubPath = location.pathname.split('/').pop(); // Gets 'vertex' or 'composer'
+
+  // Effect to redirect to a default sub-route if /list is accessed directly
+  useEffect(() => {
+    if (location.pathname === '/list' || location.pathname === '/list/') {
+      navigate(SCHEDULE_LABEL_VERTEX, { replace: true }); // Default to /list/vertex
+    }
+console.log('inside effect naigateion')
+    setSchedulerSelected(currentSubPath);
+  }, [location.pathname, navigate]);
+
+  // useEffect(() => {
+  //   console.log('inside effect')
+  //   setSchedulerSelected(SCHEDULE_LABEL_VERTEX);
+  // }, []);
 
   /**
    * Handle he change  of the scheduler selection
@@ -52,6 +48,8 @@ export const ScheduleListingView = ({ app }: { app: JupyterLab }) => {
   ) => {
     const selectedScheduler = (event.target as HTMLInputElement).value;
     setSchedulerSelected(selectedScheduler);
+    console.log('selectedScheduler', selectedScheduler);
+    navigate(`/list/${selectedScheduler}`);
   };
 
   return (
@@ -68,11 +66,11 @@ export const ScheduleListingView = ({ app }: { app: JupyterLab }) => {
             name="controlled-radio-buttons-group"
             value={schedulerSelected}
             onChange={handleSchedulerModeChange}
-            // data-testid={
-            //   notebookSelector === 'vertex'
-            //     ? 'vertex-selected'
-            //     : 'composer-selected'
-            // }
+            data-testid={
+              schedulerSelected === 'vertex'
+                ? 'vertex-selected'
+                : 'composer-selected'
+            }
           >
             <FormControlLabel
               value="vertex"
@@ -103,7 +101,11 @@ export const ScheduleListingView = ({ app }: { app: JupyterLab }) => {
         </FormControl>
       </div>
 
-      <ListComposerSchedule app={app} />
+      <div>
+        <Outlet />
+      </div>
     </>
   );
 };
+
+ 

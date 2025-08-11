@@ -30,9 +30,9 @@ export interface IAuthCredentials {
 }
 
 export interface ISchedulerRoutesProps {
+  app: JupyterLab;
   sessionContext?: ISessionContext | null | undefined;
-  initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults| null |undefined;
-  app?:JupyterLab;
+  initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults | null | undefined;
 }
 
 export interface IGcpUrlResponseData {

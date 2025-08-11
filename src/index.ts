@@ -116,10 +116,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       execute: () => {
         const content = new NotebookScheduler(
           themeManager,
-          app as JupyterLab
-          // settingRegistry as ISettingRegistry,
-          // ''
-          themeManager,
+          app as JupyterLab,
           '/list'
         );
         const widget = new MainAreaWidget<NotebookScheduler>({ content });

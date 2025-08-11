@@ -7,7 +7,7 @@ import { ISessionContext } from '@jupyterlab/apputils';
 import { IKernelDetails } from '../interfaces/ComposerInterface';
 import { SchedulerType } from '../types/CommonSchedulerTypes';
 import { Kernel, KernelAPI, KernelSpecAPI } from '@jupyterlab/services';
-import { SchedulerService } from '../services/composer/SchedulerServices';
+import { ComposerServices } from '../services/composer/ComposerServices';
 import { DropdownOption } from '../interfaces/FormInterface';
 import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 
@@ -221,7 +221,7 @@ const promisifiedListClusters = (): Promise<string[]> => {
     };
     console.log('Calling listClustersAPIService');
 
-    SchedulerService.listClustersAPIService(setClusterOptionsCallback).catch(
+    ComposerServices.listClustersAPIService(setClusterOptionsCallback).catch(
       reject
     ); // Propagate rejections from the service itself
   });
@@ -246,7 +246,7 @@ const promisifiedListSessionTemplates = (): Promise<string[]> => {
       }
     };
     console.log('Calling listSessionTemplatesAPIService');
-    SchedulerService.listSessionTemplatesAPIService(
+    ComposerServices.listSessionTemplatesAPIService(
       setServerlessOptionsCallback,
     ).catch(reject); // Propagate rejections from the service itself
   });

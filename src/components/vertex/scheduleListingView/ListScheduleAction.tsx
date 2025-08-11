@@ -22,7 +22,7 @@ import {
   iconPause,
   iconTrigger,
   iconEditNotebook,
-  iconDelete
+  iconDeleteAction
 } from '../../../utils/Icons';
 import { VertexServices } from '../../../services/vertex/VertexServices';
 
@@ -191,7 +191,7 @@ export const renderActions = (data: any, region: string) => {
           title="Delete"
           // onClick={() => handleDeletePopUp(data.name, data.displayName)}
         >
-          <iconDelete.react
+          <iconDeleteAction.react
             tag="div"
             className="icon-white logo-alignment-style"
           />

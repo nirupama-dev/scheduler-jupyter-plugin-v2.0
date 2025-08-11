@@ -24,7 +24,7 @@ import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import Cron from 'react-js-cron';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
-import { SchedulerService } from '../../services/composer/SchedulerServices';
+import { ComposerServices } from '../../services/composer/ComposerServices';
 import { authApi } from '../common/login/Config';
 import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
@@ -148,7 +148,7 @@ export const CreateComposerSchedule: React.FC<
 
             try {
               setLoadingState(prev => ({ ...prev, environment: true }));
-              const options = await SchedulerService.listComposersAPIService(
+              const options = await ComposerServices.listComposersAPIService(
                 selectedProjectId,
                 selectedRegion
               );
@@ -174,13 +174,13 @@ export const CreateComposerSchedule: React.FC<
   useEffect(() => {
     if (executionMode === 'cluster') {
       setValue('serverless', '');
-      SchedulerService.listClustersAPIService(
+      ComposerServices.listClustersAPIService(
         setClusterOptions,
         setLoadingState
       );
     } else if (executionMode === 'serverless') {
       setValue('cluster', '');
-      SchedulerService.listSessionTemplatesAPIService(
+      ComposerServices.listSessionTemplatesAPIService(
         setServerlessOptions,
         setLoadingState
       );

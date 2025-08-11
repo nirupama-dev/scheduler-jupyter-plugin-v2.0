@@ -2,7 +2,7 @@
 import React, { FC } from 'react';
 import { CircularProgress } from '@mui/material';
 import {
-  iconDelete,
+  iconDeleteAction,
   iconEditDag,
   iconEditNotebook,
   iconPause,
@@ -133,7 +133,7 @@ export const renderActions = (
       <ActionButton
         title="Delete"
         onClick={() => handleDeletePopUp(data.jobid)}
-        icon={iconDelete}
+        icon={iconDeleteAction}
       />
     </div>
   );
