@@ -25,9 +25,8 @@ import { ToolbarButton } from '@jupyterlab/apputils';
 import { NotebookScheduler } from './NotebookScheduler';
 import { iconNotebookScheduler } from '../../utils/Icons';
 import {
-  // ... other imports
-  showDialog, // Import showDialog
-  Dialog // Import Dialog
+  showDialog, 
+  Dialog 
 } from '@jupyterlab/apputils';
 import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
 import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface'; 
