@@ -201,7 +201,7 @@ export class VertexServices {
     // newPageToken: string | null | undefined, // token of page to be fetched
     // setHasNextPageToken: (value: boolean) => void, // true if there are more items that were not fetched
     // setApiEnableUrl: any,
-    pageLength: number = 25, // number of items to be fetched
+    pageLength: number = 25 // number of items to be fetched
     // abortControllers?: any
   ) => {
     // setIsLoading(true);
@@ -232,11 +232,11 @@ export class VertexServices {
         return;
       }
 
-      const { schedules, 
-        //nextPageToken, 
-        //error 
-        } =
-        formattedResponse as IFormattedResponse;
+      const {
+        schedules
+        //nextPageToken,
+        //error
+      } = formattedResponse as IFormattedResponse;
 
       // Handle API error
       // if (error?.code === HTTP_STATUS_FORBIDDEN) {
@@ -255,7 +255,6 @@ export class VertexServices {
       // Handle schedule data
       if (schedules && schedules.length > 0) {
         setVertexScheduleList(schedules);
-
         // Handle pagination
         // nextPageToken
         //   ? setNextPageToken(nextPageToken)
@@ -269,7 +268,7 @@ export class VertexServices {
           VertexServices.fetchLastFiveRunStatus(
             schedule,
             region,
-            setVertexScheduleList,
+            setVertexScheduleList
             // abortControllers
           );
         });
@@ -912,7 +911,7 @@ export class VertexServices {
       value:
         | IVertexScheduleList[]
         | ((prevItems: IVertexScheduleList[]) => IVertexScheduleList[])
-    ) => void,
+    ) => void
     // abortControllers: any
   ) => {
     // Controller to abort pending API call

@@ -32,20 +32,24 @@ import { authApi } from '../../common/login/Config';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import TableData from '../../../utils/TableData';
 import { usePagination, useTable } from 'react-table';
-import { VertexServices } from '../../../services/vertex/Vertex';
-import { IVertexScheduleList } from '../../../interfaces/VertexInterface';
+import { VertexServices } from '../../../services/vertex/VertexServices';
+import {
+  IVertexListingLoadingState,
+  IVertexScheduleList
+} from '../../../interfaces/VertexInterface';
 import Loader from '../../common/loader/Loader';
 
 const ListVertexSchedule = () => {
   const [region, setRegion] = useState<string>('');
-  const [regionLoader, serRegionLoader] = useState<boolean>(false);
+  // const [regionLoader, serRegionLoader] = useState<boolean>(false);
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
-  const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
-    []
-  );
-  // const [loaderState, setLoaderState] = useState<IVertexListingLoadingState>({
-  //   isLoading: false,
-  // });
+  const [vertexScheduleList, setVertexScheduleList] = useState<
+    IVertexScheduleList[]
+  >([]);
+  const [loaderState, setLoaderState] = useState<IVertexListingLoadingState>({
+    isLoading: false,
+    regionLoader: false
+  });
   const data = vertexScheduleList;
 
   const columns = useMemo(() => LISTING_SCREEN_HEADING, []);
@@ -90,11 +94,11 @@ const ListVertexSchedule = () => {
   const listVertexScheduleInfoAPI = async () =>
     // nextToken: string | null | undefined
     {
+      setRegionDisable(true);
       // setIsLoading(true);
 
-      await VertexServices.listVertexSchedules(
-        setScheduleList,
-        region,
+      const scheduleApiData = await VertexServices.listVertexSchedules(
+        region
         // setIsLoading,
         // setIsApiError,
         // setApiError,
@@ -105,9 +109,38 @@ const ListVertexSchedule = () => {
         // scheduleListPageLength,
         // abortControllers
       );
+      if (scheduleApiData) {
+        setVertexScheduleList(scheduleApiData?.schedulesList);
+        setLoaderState(prevState => ({ ...prevState, isLoading: false }));
+      }
+
       setRegionDisable(false);
+
       // setIsLoading(false);
     };
+
+  // useEffect(() => {
+  //   if (vertexScheduleList.length > 0) {
+  //     vertexScheduleList.forEach((schedule: IVertexScheduleList) => {
+  //       // Triggering fetch asynchronously
+  //       const lastFiveRun = VertexServices.fetchLastFiveRunStatus(
+  //         schedule,
+  //         region
+  //         // abortControllers
+  //       );
+  //       console.log('lastFiveRun', lastFiveRun);
+  //       if (Array.isArray(lastFiveRun)) {
+  //         setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+  //           prevItems.map(prevItem =>
+  //             prevItem.displayName === schedule.displayName
+  //               ? { ...prevItem, jobState: lastFiveRun }
+  //               : prevItem
+  //           )
+  //         );
+  //       }
+  //     });
+  //   }
+  // }, [vertexScheduleList]);
 
   /**
    * Function that redirects to Job Execution History
@@ -167,11 +200,11 @@ const ListVertexSchedule = () => {
     };
 
   useEffect(() => {
-    serRegionLoader(true);
+    setLoaderState(prevState => ({ ...prevState, regionLoader: true }));
     authApi()
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
-          serRegionLoader(false);
+          setLoaderState(prevState => ({ ...prevState, regionLoader: false }));
           setRegion(credentials.region_id);
         }
       })
@@ -209,7 +242,7 @@ const ListVertexSchedule = () => {
                     ...params.InputProps,
                     endAdornment: (
                       <>
-                        {regionLoader ? (
+                        {loaderState.regionLoader ? (
                           <CircularProgress
                             aria-label="Loading Spinner"
                             data-testid="loader"
@@ -223,7 +256,7 @@ const ListVertexSchedule = () => {
                 />
               )}
               clearIcon={false}
-              loading={regionLoader}
+              loading={loaderState.regionLoader}
               disabled={regionDisable}
             />
           </div>
@@ -257,6 +290,7 @@ const ListVertexSchedule = () => {
               prepareRow={prepareRow}
               // tableDataCondition={tableDataCondition}
               fromPage="Vertex schedulers"
+              region={region}
               // handleScheduleIdSelectionFromList={handleScheduleIdSelectionFromList}
             />
             {/* {vertexScheduleList.length > 0 && (
@@ -282,12 +316,10 @@ const ListVertexSchedule = () => {
           )} */}
           </div>
         </>
-      ) 
-      : 
-      // vertexScheduleList.length === 0 ? (
-      //   <div className="no-data-style">No schedules available</div>
-      // ) : 
-      (
+      ) : (
+        // vertexScheduleList.length === 0 ? (
+        //   <div className="no-data-style">No schedules available</div>
+        // ) :
         <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
       )}
     </>

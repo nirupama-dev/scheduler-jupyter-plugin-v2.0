@@ -249,6 +249,15 @@ export interface IVertexScheduleList {
   region: string;
 }
 
-export interface  IVertexListingLoadingState {
+export interface IVertexListingLoadingState {
   isLoading: boolean;
+  regionLoader: boolean;
+}
+
+export interface IUpdateSchedulerArgs {
+  scheduleId: string;
+  region: string;
+  displayName: string;
+  // setResumeLoading: (value: string) => void;
+  // abortControllers: any;
 }

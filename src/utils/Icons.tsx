@@ -32,7 +32,11 @@ import FailedIcon from '../../style/icons/list_error_icon.svg';
 import pendingIcon from '../../style/icons/pending_icon.svg';
 import ActiveIcon from '../../style/icons/list_active_icon.svg';
 import ListPauseIcon from '../../style/icons/list_pause_icon.svg';
-import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_error.svg'
+import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_error.svg';
+import pauseIcon from '../../style/icons/scheduler_pause.svg';
+import triggerIcon from '../../style/icons/scheduler_trigger.svg';
+import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
+import DeleteIcon from '../../style/icons/delete_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -117,4 +121,24 @@ export const iconListPause = new LabIcon({
 export const iconListCompleteWithError = new LabIcon({
   name: 'launcher:list-complete-icon',
   svgstr: ListCompleteWithErrorIcon
+});
+
+export const iconPause = new LabIcon({
+  name: 'launcher:pause-icon',
+  svgstr: pauseIcon
+});
+
+export const iconTrigger = new LabIcon({
+  name: 'launcher:trigger-icon',
+  svgstr: triggerIcon
+});
+
+export const iconEditNotebook = new LabIcon({
+  name: 'launcher:edit-notebook-icon',
+  svgstr: EditNotebookIcon
+});
+
+export const iconDelete = new LabIcon({
+  name: 'launcher:delete-icon',
+  svgstr: DeleteIcon
 });
