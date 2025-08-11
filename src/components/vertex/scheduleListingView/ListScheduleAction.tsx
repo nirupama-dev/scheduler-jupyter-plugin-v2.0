@@ -24,12 +24,49 @@ import {
   iconEditNotebook,
   iconDelete
 } from '../../../utils/Icons';
+import { VertexServices } from '../../../services/vertex/VertexServices';
 
-export const renderActions = (data: any) => {
+export const renderActions = (data: any, region: string) => {
   const is_status_paused = data.status;
+
+  /**
+   * Handle resume and pause
+   * @param {string} scheduleId unique ID for schedule
+   * @param {string} is_status_paused modfied status of schedule
+   * @param {string} displayName name of schedule
+   */
+  const handleUpdateScheduler = async (
+    scheduleId: string,
+    is_status_paused: string,
+    displayName: string,
+    newPageToken: string | null | undefined
+  ) => {
+    const args = {
+      scheduleId,
+      region,
+      displayName
+    };
+    if (is_status_paused === 'ACTIVE') {
+      await VertexServices.handleUpdateSchedulerPauseAPIService(
+        args
+        // setResumeLoading,
+        // abortControllers
+      );
+    } else {
+      await VertexServices.handleUpdateSchedulerResumeAPIService(
+        args
+        // setResumeLoading,
+        // abortControllers
+      );
+    }
+    // handleCurrentPageRefresh(null, null);
+  };
+
   return (
-    <div className="actions-icon-btn">
-      {/* {data.name === resumeLoading ? (
+    console.log('data', data),
+    (
+      <div className="actions-icon-btn">
+        {/* {data.name === resumeLoading ? (
         <div className="icon-buttons-style">
           <CircularProgress
             size={18}
@@ -38,45 +75,45 @@ export const renderActions = (data: any) => {
           />
         </div>
       ) : ( */}
-      <div
-        role="button"
-        className="icon-buttons-style"
-        title={
-          is_status_paused === 'COMPLETED'
-            ? 'Completed'
-            : is_status_paused === 'PAUSED'
-              ? 'Resume'
-              : 'Pause'
-        }
-        // onClick={e => {
-        //   is_status_paused !== 'COMPLETED' &&
-        //     handleUpdateScheduler(
-        //       data.name,
-        //       is_status_paused,
-        //       data.displayName,
-        //       null
-        //     );
-        // }}
-      >
-        {is_status_paused === 'COMPLETED' ? (
-          <iconPlay.react
-            tag="div"
-            className="icon-buttons-style-disable disable-complete-btn"
-          />
-        ) : is_status_paused === 'PAUSED' ? (
-          <iconPlay.react
-            tag="div"
-            className="icon-white logo-alignment-style"
-          />
-        ) : (
-          <iconPause.react
-            tag="div"
-            className="icon-white logo-alignment-style"
-          />
-        )}
-      </div>
-      {/* )} */}
-      {/* {data.name === triggerLoading ? (
+        <div
+          role="button"
+          className="icon-buttons-style"
+          title={
+            is_status_paused === 'COMPLETED'
+              ? 'Completed'
+              : is_status_paused === 'PAUSED'
+                ? 'Resume'
+                : 'Pause'
+          }
+          onClick={e => {
+            is_status_paused !== 'COMPLETED' &&
+              handleUpdateScheduler(
+                data.name,
+                is_status_paused,
+                data.displayName,
+                null
+              );
+          }}
+        >
+          {is_status_paused === 'COMPLETED' ? (
+            <iconPlay.react
+              tag="div"
+              className="icon-buttons-style-disable disable-complete-btn"
+            />
+          ) : is_status_paused === 'PAUSED' ? (
+            <iconPlay.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          ) : (
+            <iconPause.react
+              tag="div"
+              className="icon-white logo-alignment-style"
+            />
+          )}
+        </div>
+        {/* )} */}
+        {/* {data.name === triggerLoading ? (
         <div className="icon-buttons-style">
           <CircularProgress
             size={18}
@@ -85,20 +122,20 @@ export const renderActions = (data: any) => {
           />
         </div>
       ) : ( */}
-      <div
-        role="button"
-        className="icon-buttons-style"
-        title="Trigger the job"
-        data-scheduleId={data.name}
-        // onClick={e => handleTriggerSchedule(e, data.displayName)}
-      >
-        <iconTrigger.react
-          tag="div"
-          className="icon-white logo-alignment-style"
-        />
-      </div>
-      {/* )} */}
-      {/* {is_status_paused === 'COMPLETED' ? (
+        <div
+          role="button"
+          className="icon-buttons-style"
+          title="Trigger the job"
+          data-scheduleId={data.name}
+          // onClick={e => handleTriggerSchedule(e, data.displayName)}
+        >
+          <iconTrigger.react
+            tag="div"
+            className="icon-white logo-alignment-style"
+          />
+        </div>
+        {/* )} */}
+        {/* {is_status_paused === 'COMPLETED' ? (
         <iconEditNotebook.react
           tag="div"
           className="icon-buttons-style-disable"
@@ -112,20 +149,20 @@ export const renderActions = (data: any) => {
           />
         </div>
       ) : ( */}
-      <div
-        role="button"
-        className="icon-buttons-style"
-        title="Edit Schedule"
-        data-jobid={data.name}
-        // onClick={e => handleEditJob(e, data.displayName)}
-      >
-        <iconEditNotebook.react
-          tag="div"
-          className="icon-white logo-alignment-style"
-        />
-      </div>
-      {/* )} */}
-      {/* {isPreview &&
+        <div
+          role="button"
+          className="icon-buttons-style"
+          title="Edit Schedule"
+          data-jobid={data.name}
+          // onClick={e => handleEditJob(e, data.displayName)}
+        >
+          <iconEditNotebook.react
+            tag="div"
+            className="icon-white logo-alignment-style"
+          />
+        </div>
+        {/* )} */}
+        {/* {isPreview &&
         (data.name === editNotebookLoading ? (
           <div className="icon-buttons-style">
             <CircularProgress
@@ -148,17 +185,18 @@ export const renderActions = (data: any) => {
             />
           </div>
         ))} */}
-      <div
-        role="button"
-        className="icon-buttons-style"
-        title="Delete"
-        // onClick={() => handleDeletePopUp(data.name, data.displayName)}
-      >
-        <iconDelete.react
-          tag="div"
-          className="icon-white logo-alignment-style"
-        />
+        <div
+          role="button"
+          className="icon-buttons-style"
+          title="Delete"
+          // onClick={() => handleDeletePopUp(data.name, data.displayName)}
+        >
+          <iconDelete.react
+            tag="div"
+            className="icon-white logo-alignment-style"
+          />
+        </div>
       </div>
-    </div>
+    )
   );
 };

@@ -18,9 +18,10 @@
 import { CircularProgress } from '@mui/material';
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { 
+import {
   //Cell,
-   Row } from 'react-table';
+  Row
+} from 'react-table';
 import { handleDebounce } from './Config';
 import { tableDataCondition } from '../components/vertex/scheduleListingView/VertexListRow';
 
@@ -34,7 +35,8 @@ function TableData({
   prepareRow,
   // tableDataCondition,
   fromPage,
-  handleScheduleIdSelectionFromList
+  handleScheduleIdSelectionFromList,
+  region
 }: any) {
   const [listDagRunHeight, setListDagRunHeight] = useState(
     window.innerHeight - 505
@@ -47,7 +49,7 @@ function TableData({
 
   // Debounce the handleUpdateHeight function
   const debouncedHandleUpdateHeight = handleDebounce(handleUpdateHeight, 500);
-  
+
   // Add event listener for window resize using useEffect
   useEffect(() => {
     window.addEventListener('resize', debouncedHandleUpdateHeight);
@@ -110,7 +112,7 @@ function TableData({
             return (
               <tr>
                 {row.cells.map((cell: any) => {
-                  return tableDataCondition(cell);
+                  return tableDataCondition(cell, region);
                 })}
               </tr>
             );

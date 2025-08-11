@@ -32,7 +32,7 @@ import { authApi } from '../../common/login/Config';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import TableData from '../../../utils/TableData';
 import { usePagination, useTable } from 'react-table';
-import { VertexServices } from '../../../services/vertex/Vertex';
+import { VertexServices } from '../../../services/vertex/VertexServices';
 import {
   IVertexListingLoadingState,
   IVertexScheduleList
@@ -43,9 +43,9 @@ const ListVertexSchedule = () => {
   const [region, setRegion] = useState<string>('');
   // const [regionLoader, serRegionLoader] = useState<boolean>(false);
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
-  const [vertexScheduleList, setScheduleList] = useState<IVertexScheduleList[]>(
-    []
-  );
+  const [vertexScheduleList, setVertexScheduleList] = useState<
+    IVertexScheduleList[]
+  >([]);
   const [loaderState, setLoaderState] = useState<IVertexListingLoadingState>({
     isLoading: false,
     regionLoader: false
@@ -97,8 +97,7 @@ const ListVertexSchedule = () => {
       setRegionDisable(true);
       // setIsLoading(true);
 
-      await VertexServices.listVertexSchedules(
-        setScheduleList,
+      const scheduleApiData = await VertexServices.listVertexSchedules(
         region
         // setIsLoading,
         // setIsApiError,
@@ -110,9 +109,38 @@ const ListVertexSchedule = () => {
         // scheduleListPageLength,
         // abortControllers
       );
+      if (scheduleApiData) {
+        setVertexScheduleList(scheduleApiData?.schedulesList);
+        setLoaderState(prevState => ({ ...prevState, isLoading: false }));
+      }
+
       setRegionDisable(false);
+
       // setIsLoading(false);
     };
+
+  // useEffect(() => {
+  //   if (vertexScheduleList.length > 0) {
+  //     vertexScheduleList.forEach((schedule: IVertexScheduleList) => {
+  //       // Triggering fetch asynchronously
+  //       const lastFiveRun = VertexServices.fetchLastFiveRunStatus(
+  //         schedule,
+  //         region
+  //         // abortControllers
+  //       );
+  //       console.log('lastFiveRun', lastFiveRun);
+  //       if (Array.isArray(lastFiveRun)) {
+  //         setVertexScheduleList((prevItems: IVertexScheduleList[]) =>
+  //           prevItems.map(prevItem =>
+  //             prevItem.displayName === schedule.displayName
+  //               ? { ...prevItem, jobState: lastFiveRun }
+  //               : prevItem
+  //           )
+  //         );
+  //       }
+  //     });
+  //   }
+  // }, [vertexScheduleList]);
 
   /**
    * Function that redirects to Job Execution History
@@ -262,6 +290,7 @@ const ListVertexSchedule = () => {
               prepareRow={prepareRow}
               // tableDataCondition={tableDataCondition}
               fromPage="Vertex schedulers"
+              region={region}
               // handleScheduleIdSelectionFromList={handleScheduleIdSelectionFromList}
             />
             {/* {vertexScheduleList.length > 0 && (
