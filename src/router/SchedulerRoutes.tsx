@@ -48,7 +48,7 @@ export function SchedulerRoutes(
   );
 
   const ListComposerSchedule = lazy(
-    () => import('../components/composer/listingView/ListComposerSchedule')
+    () => import('../components/composer/composerListingView/ListComposerSchedule')
   );
 
   return (
