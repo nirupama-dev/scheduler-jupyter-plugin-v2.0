@@ -38,13 +38,12 @@ function ExecutionHistoryScreen() {
   );
 }
 
-export function SchedulerRoutes(
-  schedulerRouteProps: ISchedulerRoutesProps,
-) {
-  const {  app, sessionContext, initialKernalSchedulerDetails } = schedulerRouteProps;
+export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
+  const { app, sessionContext, initialKernalSchedulerDetails } =
+    schedulerRouteProps;
 
   const ListVertexSchedule = lazy(
-    () => import('../components/vertex/scheduleListingView/ListVertexSchedule')
+    () => import('../components/vertex/vertexListingView/ListVertexSchedule')
   );
 
   const ListComposerSchedule = lazy(
@@ -64,7 +63,7 @@ export function SchedulerRoutes(
         }
       />
 
-      <Route path="/list" element={<ScheduleListingView/>}>
+      <Route path="/list" element={<ScheduleListingView />}>
         <Route
           path="vertex"
           element={
@@ -90,7 +89,10 @@ export function SchedulerRoutes(
           }
         />
       </Route>
-      <Route path="/execution-vertex-history/:id" element={<ExecutionHistoryScreen />} />
+      <Route
+        path="/execution-vertex-history/:id"
+        element={<ExecutionHistoryScreen />}
+      />
     </Routes>
   );
 }
