@@ -35,8 +35,9 @@ import {
   Typography
 } from '@mui/material';
 import { ListComposerSchedule } from '../composer/listingView/ListComposerSchedule';
+import { JupyterLab } from '@jupyterlab/application';
 
-export const ScheduleListingView = () => {
+export const ScheduleListingView = ({ app }: { app: JupyterLab }) => {
   const [schedulerSelected, setSchedulerSelected] = useState<string>(
     SCHEDULE_LABEL_VERTEX
   );
@@ -101,7 +102,7 @@ export const ScheduleListingView = () => {
         </FormControl>
       </div>
 
-      <ListComposerSchedule />
+      <ListComposerSchedule app={app} />
     </>
   );
 };

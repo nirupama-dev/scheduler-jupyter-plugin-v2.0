@@ -117,8 +117,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
       icon: iconScheduledNotebooks,
       execute: () => {
         const content = new NotebookScheduler(
-          // app as JupyterLab,
-          themeManager
+          themeManager,
+          app as JupyterLab
           // settingRegistry as ISettingRegistry,
           // ''
         );

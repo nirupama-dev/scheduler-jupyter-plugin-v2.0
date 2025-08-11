@@ -26,19 +26,26 @@ import { MemoryRouter } from 'react-router-dom';
 import { IThemeManager } from '@jupyterlab/apputils';
 import { SchedulerRoutes } from '../../router/SchedulerRoutes';
 import { SchedulerWidget } from '../common/widget/SchedulerWidget';
+import { JupyterLab } from '@jupyterlab/application';
 
 export class NotebookScheduler extends SchedulerWidget {
+  app: JupyterLab;
   private initialRoute: string;
 
-  constructor(themeManager: IThemeManager, initialRoute: string = '/list') {
+  constructor(
+    themeManager: IThemeManager,
+    app: JupyterLab,
+    initialRoute: string = '/list'
+  ) {
     super(themeManager);
     this.initialRoute = initialRoute;
+    this.app = app;
   }
 
   protected renderInternal(): React.ReactElement {
     return (
       <MemoryRouter initialEntries={[this.initialRoute]}>
-        <SchedulerRoutes />
+        <SchedulerRoutes app={this.app} />
       </MemoryRouter>
     );
   }

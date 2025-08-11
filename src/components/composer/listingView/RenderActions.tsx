@@ -9,6 +9,9 @@ import {
   iconPlay,
   iconTrigger
 } from '../../../utils/Icons';
+import { LabIcon } from '@jupyterlab/ui-components';
+import { LabIconComponent } from '../../common/table/LabIcon';
+import { ILoadingStateComposerListing } from '../../../interfaces/ComposerInterface';
 
 const LoadingSpinner: FC = () => (
   <div className="icon-buttons-style">
@@ -22,7 +25,7 @@ const LoadingSpinner: FC = () => (
 
 interface ActionButtonProps {
   title: string;
-  icon: any;
+  icon: LabIcon;
   onClick?: (e: React.MouseEvent) => void;
   disabled?: boolean;
   className?: string;
@@ -31,64 +34,62 @@ interface ActionButtonProps {
 const ActionButton: FC<ActionButtonProps> = ({
   title,
   onClick,
-  icon: IconComponent,
+  icon,
   disabled = false,
   className = 'icon-buttons-style'
-}) => (
-  <div
-    role="button"
-    className={disabled ? 'icon-buttons-style-disable' : className}
-    title={title}
-    onClick={e => {
-      if (!disabled) {
-        onClick?.(e);
-      }
-    }}
-  >
-    <IconComponent tag="div" className="icon-white logo-alignment-style" />
-  </div>
-);
+}) => {
+  return (
+    <div
+      role="button"
+      className={disabled ? 'icon-buttons-style-disable' : className}
+      title={title}
+      onClick={e => {
+        if (!disabled) {
+          onClick?.(e);
+        }
+      }}
+    >
+      <LabIconComponent
+        icon={icon}
+        className="icon-white logo-alignment-style"
+        tag="div"
+      />
+    </div>
+  );
+};
 
-// Pass all dependencies as parameters to make the function pure and testable.
 export const renderActions = (
   data: any,
-  isGCSPluginInstalled?: boolean
-  // updateLoading?: string | null,
-  // triggerLoading?: string | null,
-  // editDagLoading?: string | null,
-  // editNotebookLoading?: string | null,
-  // handleUpdateScheduler?: (jobid: string, isPaused: boolean) => void,
-  // handleTriggerDag?: (e: React.MouseEvent) => void,
+  isGCSPluginInstalled: boolean,
+  loadingState: ILoadingStateComposerListing,
+  handleUpdateScheduler: (jobid: string, isPaused: boolean) => void,
+  handleTriggerDag: (jobid: string) => void,
+  handleEditNotebook: (jobid: string) => void,
+  handleDeletePopUp: (jobid: string) => void
   // handleEditDags?: (e: React.MouseEvent) => void,
-  // handleEditNotebook?: (e: React.MouseEvent) => void,
-  // handleDeletePopUp?: (jobid: string) => void
 ) => {
   const isPaused = data.status === 'Paused';
-  const isUpdateLoading = data.jobid === false;
-  const isTriggerLoading = data.jobid === false;
-  const isEditDagLoading = data.jobid === false;
-  const isEditNotebookLoading = data.jobid === false;
 
   return (
     <div className="actions-icon-btn">
       {/* Pause/Unpause Button */}
-      {isUpdateLoading ? (
+      {loadingState.update ? (
         <LoadingSpinner />
       ) : (
         <ActionButton
           title={isPaused ? 'Unpause' : 'Pause'}
-          // onClick={() => handleUpdateScheduler(data.jobid, isPaused)}
+          onClick={() => handleUpdateScheduler(data.jobid, isPaused)}
           icon={isPaused ? iconPlay : iconPause}
         />
       )}
 
       {/* Trigger Button */}
-      {isTriggerLoading ? (
+      {loadingState.trigger ? (
         <LoadingSpinner />
       ) : (
         <ActionButton
           title={isPaused ? "Can't Trigger Paused job" : 'Trigger the job'}
-          // onClick={handleTriggerDag}
+          onClick={() => handleTriggerDag(data.jobid)}
           icon={iconTrigger}
           disabled={isPaused}
           className={
@@ -98,7 +99,7 @@ export const renderActions = (
       )}
 
       {/* Edit Schedule Button */}
-      {isEditDagLoading ? (
+      {loadingState.editDag ? (
         <LoadingSpinner />
       ) : (
         <ActionButton
@@ -110,12 +111,12 @@ export const renderActions = (
 
       {/* Edit Notebook Button (Conditional on GCS Plugin) */}
       {isGCSPluginInstalled ? (
-        isEditNotebookLoading ? (
+        loadingState.editNotebook ? (
           <LoadingSpinner />
         ) : (
           <ActionButton
             title="Edit Notebook"
-            // onClick={handleEditNotebook}
+            onClick={event => handleEditNotebook(data.jobid)}
             icon={iconEditNotebook}
           />
         )
@@ -131,7 +132,7 @@ export const renderActions = (
       {/* Delete Button */}
       <ActionButton
         title="Delete"
-        // onClick={() => handleDeletePopUp(data.jobid)}
+        onClick={() => handleDeletePopUp(data.jobid)}
         icon={iconDelete}
       />
     </div>

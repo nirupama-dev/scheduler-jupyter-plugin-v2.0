@@ -223,20 +223,6 @@
   width: 50%;
 }
 
-.submit-button-disable-style {
-  margin-right: 10px;
-  background: var(--jp-layout-color0);
-  color: var(--jp-ui-font-color2);
-  height: 30px;
-  font-size: 13px;
-  width: 70px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
 .submit-button-style {
   margin-right: 10px;
   background: var(--jp-brand-color1);

@@ -19,6 +19,7 @@ import React from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
+import { JupyterLab } from '@jupyterlab/application';
 
 // Dummy ExecutionHistoryScreen for demonstration
 function ExecutionHistoryScreen() {
@@ -31,12 +32,12 @@ function ExecutionHistoryScreen() {
   );
 }
 
-export function SchedulerRoutes() {
+export function SchedulerRoutes({ app }: { app: JupyterLab }) {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/list" replace />} />
       <Route path="/create" element={<CreateNotebookSchedule />} />
-      <Route path="/list" element={<ScheduleListingView />} />
+      <Route path="/list" element={<ScheduleListingView app={app} />} />
       <Route path="/history/:id" element={<ExecutionHistoryScreen />} />
     </Routes>
   );

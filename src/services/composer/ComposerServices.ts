@@ -30,7 +30,8 @@ import {
   IDagList,
   IDagRunList,
   ISchedulerDagData,
-  IUpdateSchedulerAPIResponse
+  IUpdateSchedulerAPIResponse,
+  IListDagInfoAPIServiceResponse
 } from '../../interfaces/ComposerInterface';
 import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
@@ -263,24 +264,13 @@ export class SchedulerService {
 
   static readonly editNotebookSchedulerService = async (
     bucketName: string,
-    dagId: string,
-    setInputNotebookFilePath: (value: string) => void,
-    setEditNotebookLoading: (value: string) => void
-  ) => {
-    setEditNotebookLoading(dagId);
-    try {
-      const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
-      const formattedResponse: any = await requestAPI(serviceURL, {
-        method: 'POST'
-      });
-      setInputNotebookFilePath(formattedResponse.input_filename);
-    } catch (reason) {
-      setEditNotebookLoading('');
-      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
-      handleErrorToast({
-        error: errorResponse
-      });
-    }
+    dagId: string
+  ): Promise<any> => {
+    const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
+    const formattedResponse: any = await requestAPI(serviceURL, {
+      method: 'POST'
+    });
+    return formattedResponse;
   };
 
   static readonly editJobSchedulerService = async (
@@ -587,7 +577,7 @@ export class SchedulerService {
     composerSelected: string,
     region: string,
     project: string
-  ): Promise<IDagList[]> => {
+  ): Promise<IListDagInfoAPIServiceResponse> => {
     try {
       const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
       const formattedResponse: any = await requestAPI(serviceURL);
@@ -602,7 +592,10 @@ export class SchedulerService {
           scheduleInterval: dag.schedule_interval?.value
         }));
       }
-      return transformDagListData;
+      return {
+        dagList: transformDagListData,
+        bucketName: formattedResponse[1]
+      };
     } catch (error) {
       // Re-throw the error so the calling component can handle it
       throw error;
@@ -683,91 +676,32 @@ export class SchedulerService {
   static readonly handleDeleteSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
-    setDagList: (value: IDagList[]) => void,
-    setIsLoading: (value: boolean) => void,
-    setBucketName: (value: string) => void,
     region: string,
     project: string,
     fromPage?: string | undefined
-  ) => {
-    try {
-      const serviceURL = `dagDelete?composer=${composerSelected}&dag_id=${dag_id}&from_page=${fromPage}&project_id=${project}&region_id=${region}`;
-      const deleteResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL,
-        { method: 'DELETE' }
-      );
-      if (deleteResponse.status === 0) {
-        // await SchedulerService.listDagInfoAPIService(
-        //   setDagList,
-        //   setIsLoading,
-        //   setBucketName,
-        //   composerSelected,
-        //   region,
-        //   project
-        // );
-        Notification.success(
-          `Deleted job ${dag_id}. It might take a few minutes to for it to be deleted from the list of jobs.`,
-          {
-            autoClose: false
-          }
-        );
-      } else {
-        Notification.error(`Failed to delete the ${dag_id}`, {
-          autoClose: false
-        });
-      }
-    } catch (error) {
-      SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
-      Notification.error(`Failed to delete the ${dag_id} : ${error}`, {
-        autoClose: false
-      });
-    }
+  ): Promise<IUpdateSchedulerAPIResponse> => {
+    const serviceURL = `dagDelete?composer=${composerSelected}&dag_id=${dag_id}&from_page=${fromPage}&project_id=${project}&region_id=${region}`;
+    const deleteResponse: IUpdateSchedulerAPIResponse = await requestAPI(
+      serviceURL,
+      { method: 'DELETE' }
+    );
+    return deleteResponse;
   };
   static readonly handleUpdateSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
     is_status_paused: boolean,
-    setDagList: (value: IDagList[]) => void,
-    setIsLoading: (value: boolean) => void,
-    setBucketName: (value: string) => void,
-    setUpdateLoading: (value: string) => void,
     region: string,
     project: string
-  ) => {
-    setUpdateLoading(dag_id);
-    try {
-      const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}&project_id=${project}&region_id=${region}`;
-      const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL,
-        { method: 'POST' }
-      );
-      if (formattedResponse?.status === 0) {
-        Notification.success(`scheduler ${dag_id} updated successfully`, {
-          autoClose: false
-        });
-        // await SchedulerService.listDagInfoAPIService(
-        //   setDagList,
-        //   setIsLoading,
-        //   setBucketName,
-        //   composerSelected,
-        //   region,
-        //   project
-        // );
-      } else {
-        const errorResponse = `Error in pausing the schedule : ${formattedResponse?.error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
-      }
-      setUpdateLoading('');
-    } catch (error) {
-      setUpdateLoading('');
-      SchedulerLoggingService.log('Error in Update api', LOG_LEVEL.ERROR);
-      const errorResponse = `Error in pausing the schedule : ${error}`;
-      handleErrorToast({
-        error: errorResponse
-      });
-    }
+  ): Promise<IUpdateSchedulerAPIResponse> => {
+    const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}&project_id=${project}&region_id=${region}`;
+
+    const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
+      serviceURL,
+      { method: 'POST' }
+    );
+
+    return formattedResponse;
   };
   static readonly listDagTaskInstancesListService = async (
     composerName: string,
@@ -884,59 +818,33 @@ export class SchedulerService {
   static readonly triggerDagService = async (
     dagId: string,
     composerSelectedList: string,
-    setTriggerLoading: (value: string) => void,
     project: string,
     region: string
-  ) => {
-    setTriggerLoading(dagId);
-    try {
-      const data: any = await requestAPI(
-        `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
-        { method: 'POST' }
-      );
-      if (data?.error) {
-        let errorObject: any = {};
-        if (data?.error.includes('Bad Request')) {
-          const jsonstr = data?.error.slice(
-            data?.error.indexOf('{'),
-            data?.error.lastIndexOf('}') + 1
-          );
-          errorObject = JSON.parse(jsonstr);
-        }
+  ): Promise<any> => {
+    const data: any = await requestAPI(
+      `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
+      { method: 'POST' }
+    );
 
-        if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
-          const installedPackageList: any = await requestAPI(
-            `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
-          );
-          if (installedPackageList.length > 0) {
-            Notification.error(
-              `Failed to trigger ${dagId} : required packages are not installed`,
-              {
-                autoClose: false
-              }
-            );
-          } else {
-            Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
-              autoClose: false
-            });
-          }
-        } else {
-          Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
-            autoClose: false
-          });
-        }
-      } else {
-        Notification.success(`${dagId} triggered successfully `, {
-          autoClose: false
-        });
+    // If a 'Bad Request' error is returned, perform the secondary API call
+    if (data?.error && data?.error.includes('Bad Request')) {
+      const jsonstr = data?.error.slice(
+        data?.error.indexOf('{'),
+        data?.error.lastIndexOf('}') + 1
+      );
+      const errorObject = JSON.parse(jsonstr);
+
+      if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
+        const installedPackageList: any = await requestAPI(
+          `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
+        );
+        // Return the response from the secondary API call to the handler
+        return installedPackageList;
       }
-      setTriggerLoading('');
-    } catch (reason) {
-      setTriggerLoading('');
-      Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
-        autoClose: false
-      });
     }
+
+    // Otherwise, return the initial data
+    return data;
   };
 
   static readonly listComposersAPICheckService = async () => {
