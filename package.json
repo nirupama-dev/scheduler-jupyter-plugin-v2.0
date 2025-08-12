@@ -45,6 +45,7 @@
         "eslint:check": "eslint . --cache --ext .ts,.tsx",
         "generate:licenses": "generate-license-file --input package.json --output third-party-licenses.txt",
         "install:extension": "jlpm build",
+        "licenses": "jlpm generate-license-file --input package.json --output third-party-licenses.txt --overwrite",
         "lint": "jlpm stylelint && jlpm prettier && jlpm eslint",
         "lint:check": "jlpm stylelint:check && jlpm prettier:check && jlpm eslint:check",
         "prettier": "jlpm prettier:base --write --list-different",
