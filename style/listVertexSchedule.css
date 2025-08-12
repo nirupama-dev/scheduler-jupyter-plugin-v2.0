@@ -48,11 +48,6 @@
   height: calc(100vh - 298px);
 }
 
-.scheduler-table-data {
-  padding-left: 15px;
-  border-bottom: 1px solid var(--jp-layout-color3);
-}
-
 .table-cell-overflow {
   min-width: 25%;
   max-width: 12%;

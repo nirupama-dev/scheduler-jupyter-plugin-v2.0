@@ -21,7 +21,7 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
-import Loader from '../components/common/loader/Loader';
+import Loader from '../components/common/loader/LoaderSpinner';
 import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
@@ -75,7 +75,11 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
           element={
             <Suspense
               fallback={
-                <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
+                <Loader
+                  message={LOADER_CONTENT_VERTEX_LISTING_SCREEN}
+                  iconClassName="spin-loader-custom-style"
+                  parentTagClassName="spin-loader-main spin-loader-listing"
+                />
               }
             >
               <ListVertexSchedule />
@@ -87,7 +91,11 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
           element={
             <Suspense
               fallback={
-                <Loader message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN} />
+                <Loader
+                  message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN}
+                  iconClassName="spin-loader-custom-style"
+                  parentTagClassName='"spin-loader-main spin-loader-listing'
+                />
               }
             >
               <ListComposerSchedule app={app} />

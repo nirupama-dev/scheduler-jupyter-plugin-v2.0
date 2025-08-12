@@ -33,11 +33,14 @@ import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import { usePagination, useTable } from 'react-table';
 import { VertexServices } from '../../../services/vertex/VertexServices';
 import {
+  IVertexCellProps,
   IVertexListingLoadingState,
   IVertexScheduleList
 } from '../../../interfaces/VertexInterface';
-import Loader from '../../common/loader/Loader';
+import Loader from '../../common/loader/LoaderSpinner';
 import TableData from '../../common/table/TableData';
+import { renderActions } from './ListScheduleAction';
+import { rowDataList } from './VertexListRow';
 
 const ListVertexSchedule = () => {
   const [region, setRegion] = useState<string>('');
@@ -199,6 +202,21 @@ const ListVertexSchedule = () => {
       listVertexScheduleInfoAPI();
     };
 
+  const tableDataCondition = (cell: IVertexCellProps) => {
+    if (cell.column.Header === 'Actions') {
+      return (
+        <td
+          {...cell.getCellProps()}
+          className="scheduler-table-data table-cell-overflow"
+        >
+          {renderActions(cell.row.original, region)}
+        </td>
+      );
+    } else {
+      return <>{rowDataList(cell)}</>;
+    }
+  };
+
   useEffect(() => {
     setLoaderState(prevState => ({ ...prevState, regionLoader: true }));
     authApi()
@@ -288,8 +306,8 @@ const ListVertexSchedule = () => {
               rows={rows}
               page={page}
               prepareRow={prepareRow}
-              // tableDataCondition={tableDataCondition}
-              fromPage="Vertex schedulers"
+              tableDataCondition={tableDataCondition}
+              fromPage="vertex"
               region={region}
               // handleScheduleIdSelectionFromList={handleScheduleIdSelectionFromList}
             />
@@ -320,7 +338,11 @@ const ListVertexSchedule = () => {
         // vertexScheduleList.length === 0 ? (
         //   <div className="no-data-style">No schedules available</div>
         // ) :
-        <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
+        <Loader
+          message={LOADER_CONTENT_VERTEX_LISTING_SCREEN}
+          iconClassName="spin-loader-custom-style"
+          parentTagClassName="spin-loader-main spin-loader-listing"
+        />
       )}
     </>
   );

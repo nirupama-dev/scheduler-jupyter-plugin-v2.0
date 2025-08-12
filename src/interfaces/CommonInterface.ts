@@ -102,4 +102,6 @@ export interface ILabelValue<T, U = T> {
 
 export interface LoaderProps {
   message: string;
+  iconClassName: string;
+  parentTagClassName: string;
 }

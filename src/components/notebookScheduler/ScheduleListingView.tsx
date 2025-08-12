@@ -28,9 +28,8 @@ export const ScheduleListingView = () => {
   // Effect to redirect to a default sub-route if /list is accessed directly
   useEffect(() => {
     if (location.pathname === '/list' || location.pathname === '/list/') {
-      navigate(SCHEDULE_LABEL_VERTEX, { replace: true }); // Default to /list/vertex
+      navigate(SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(), { replace: true }); // Default to /list/vertex
     }
-    console.log('inside effect naigateion');
     setSchedulerSelected(currentSubPath);
   }, [location.pathname, navigate]);
 
