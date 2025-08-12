@@ -21,7 +21,7 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
-import Loader from '../components/common/loader/Loader';
+import Loader from '../components/common/loader/LoadingSpinner';
 import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
@@ -47,9 +47,9 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   const { app, sessionContext, initialKernalSchedulerDetails } =
     schedulerRouteProps;
 
-  const ListVertexSchedule = lazy(
-    () => import('../components/vertex/vertexListingView/ListVertexSchedule')
-  );
+  // const ListVertexSchedule = lazy(
+  //   () => import('../components/vertex/vertexListingView/ListVertexSchedule')
+  // );
 
   const ListComposerSchedule = lazy(
     () => import('../components/composer/composerListingView/ListComposerSchedule')
@@ -77,7 +77,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                 <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
               }
             >
-              <ListVertexSchedule />
+              {/* <ListVertexSchedule /> */}
             </Suspense>
           }
         />

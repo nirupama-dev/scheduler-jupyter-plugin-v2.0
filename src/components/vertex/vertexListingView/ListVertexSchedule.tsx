@@ -36,7 +36,7 @@ import {
   IVertexListingLoadingState,
   IVertexScheduleList
 } from '../../../interfaces/VertexInterface';
-import Loader from '../../common/loader/Loader';
+import Loader from '../../common/loader/LoadingSpinner';
 import TableData from '../../common/table/TableData';
 
 const ListVertexSchedule = () => {

@@ -2,18 +2,24 @@ import { CircularProgress } from '@mui/material';
 import React from 'react';
 import { LoaderProps } from '../../../interfaces/CommonInterface';
 
-const Loader: React.FC<LoaderProps> = ({ message }) => {
+const Loader: React.FC<LoaderProps> = ({
+  message,
+  iconClassName,
+  parentTagClassName
+}) => {
   return (
-    <div className="spin-loader-main spin-loader-listing">
+    <div className={parentTagClassName}>
       <CircularProgress
-        className="spin-loader-custom-style"
+        className={iconClassName}
         size={18}
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-      {message}
+      {message || ''}
     </div>
   );
 };
 
 export default Loader;
+
+ 

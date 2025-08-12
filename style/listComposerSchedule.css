@@ -50,3 +50,15 @@
   border-radius: 4px;
   font-weight: 600;
 }
+
+.pagination-parent-view {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+
+  /* Adjust spacing between elements */
+  gap: 1rem;
+
+  /* Add some padding around the component */
+  padding: 0.5rem;
+}

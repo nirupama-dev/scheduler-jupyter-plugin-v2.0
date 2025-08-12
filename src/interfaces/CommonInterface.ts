@@ -98,5 +98,7 @@ export interface ILabelValue<T, U = T> {
 }
 
 export interface LoaderProps {
-  message: string;
+  message?: string;
+  iconClassName?: string;
+  parentTagClassName?: string;
 }

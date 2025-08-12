@@ -32,7 +32,8 @@ import {
   ILoadingStateComposer,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse,
-  IListDagInfoAPIServiceResponse
+  IListDagInfoAPIServiceResponse,
+  ILoadingStateComposerListing
 } from '../../interfaces/ComposerInterface';
 import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
@@ -42,7 +43,6 @@ import { Dispatch, SetStateAction } from 'react';
 import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class ComposerServices {
-  
   static readonly listClustersAPIService = async (
     setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
@@ -224,6 +224,7 @@ export class ComposerServices {
       throw error;
     }
   };
+
   static readonly createJobSchedulerService = async (
     payload: IComposerSchedulePayload,
     app: JupyterLab,
@@ -599,6 +600,7 @@ export class ComposerServices {
       });
     }
   };
+
   static readonly listDagInfoAPIService = async (
     composerSelected: string,
     region: string,
@@ -627,6 +629,7 @@ export class ComposerServices {
       throw error;
     }
   };
+
   listDagInfoAPIServiceForCreateNotebook = (
     setDagList: (value: IDagList[]) => void,
     composerSelected: string,
@@ -699,6 +702,7 @@ export class ComposerServices {
       setDownloadOutputDagRunId('');
     }
   };
+
   static readonly handleDeleteSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
@@ -713,6 +717,7 @@ export class ComposerServices {
     );
     return deleteResponse;
   };
+
   static readonly handleUpdateSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
@@ -729,6 +734,7 @@ export class ComposerServices {
 
     return formattedResponse;
   };
+
   static readonly listDagTaskInstancesListService = async (
     composerName: string,
     dagId: string,
@@ -770,6 +776,7 @@ export class ComposerServices {
       });
     }
   };
+
   static readonly listDagTaskLogsListService = async (
     composerName: string,
     dagId: string,
@@ -796,16 +803,14 @@ export class ComposerServices {
       });
     }
   };
+  
   static readonly handleImportErrordataService = async (
     composerSelectedList: string,
-    setImportErrorData: (value: string[]) => void,
-    setImportErrorEntries: (value: number) => void,
     project: string,
     region: string,
-    abortControllers: any,
-    isImportErrorLoading: { current: boolean }
+    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposerListing>>,
+    abortControllers?: any
   ) => {
-    // setting controller to abort pending api call
     const controller = new AbortController();
     abortControllers.current.push(controller);
     const signal = controller.signal;
@@ -815,29 +820,34 @@ export class ComposerServices {
         `importErrorsList?composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
         { signal }
       );
-      setImportErrorData(data?.import_errors);
-      setImportErrorEntries(data?.total_entries);
+      // The loading flag is updated here
       if (data) {
-        isImportErrorLoading.current = false; // for future development add return statements only after this flag is turned false.
+        setLoadingState(prev => ({ ...prev, importErrors: false }));
       }
+      return data;
     } catch (reason) {
-      isImportErrorLoading.current = false; // for future development add return statements only after this flag is turned false.
+      setLoadingState(prev => ({ ...prev, importErrors: false }));
+
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&
           reason.toString().includes(ABORT_MESSAGE)
         ) {
+          // Return nothing if the request was aborted
           return;
         }
-      } else {
-        const errorResponse = `Error in fetching import errors list : ${reason}`;
-        if (!toast.isActive('importListError')) {
-          toast.error(errorResponse, {
-            ...toastifyCustomStyle,
-            toastId: 'importListError'
-          });
-        }
       }
+
+      // Handle and display the error notification
+      const errorResponse = `Error in fetching import errors list: ${reason}`;
+      if (!toast.isActive('importListError')) {
+        toast.error(errorResponse, {
+          ...toastifyCustomStyle,
+          toastId: 'importListError'
+        });
+      }
+      // Return nothing on error
+      return;
     }
   };
 
