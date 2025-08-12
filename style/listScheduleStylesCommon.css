@@ -78,3 +78,18 @@
   color: rgb(245 245 245);
   opacity: 0.5;
 }
+
+.scheduler-table-data {
+  padding-left: 15px;
+  border-bottom: 1px solid var(--jp-layout-color3);
+}
+
+.scheduler-table-data:nth-child(1) {
+  color: #3367d6;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.scheduler-table-data:nth-child(2) {
+  text-transform: capitalize;
+}

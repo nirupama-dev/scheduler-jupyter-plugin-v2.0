@@ -28,19 +28,9 @@ import {
   iconListCompleteWithError
 } from '../../../utils/Icons';
 import { CircularProgress } from '@mui/material';
-import { renderActions } from './ListScheduleAction';
 
-export const tableDataCondition = (cell: IVertexCellProps, region: string) => {
-  if (cell.column.Header === 'Actions') {
-    return (
-      <td
-        {...cell.getCellProps()}
-        className="scheduler-table-data table-cell-overflow"
-      >
-        {renderActions(cell.row.original, region)}
-      </td>
-    );
-  } else if (cell.column.Header === 'Schedule Name') {
+export const rowDataList = (cell: IVertexCellProps) => {
+  if (cell.column.Header === 'Schedule Name') {
     return (
       <td
         {...cell.getCellProps()}
