@@ -42,7 +42,6 @@ import { Dispatch, SetStateAction } from 'react';
 import { DropdownOption } from '../../interfaces/FormInterface';
 
 export class ComposerServices {
-  
   static readonly listClustersAPIService = async (
     setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
     setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,

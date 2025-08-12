@@ -6,8 +6,10 @@
 @import url('submitJob.css');
 @import url('common.css');
 @import url('submitJob.css'); */
+@import url('commonSchedulerStyles.css');
+@import url('listScheduleStylesCommon.css');
 @import url('createComposerScheduler.css');
-@import url('createNotebookSchedule.css');
+@import url('createNotebookScheduler.css');
 @import url('createVertexScheduler.css');
 @import url('common.css');
 @import url('listVertexSchedule.css');

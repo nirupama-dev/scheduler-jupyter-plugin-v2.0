@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto');
+
+.create-scheduler-label {
+  margin-top: 15px;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 20px;
+  line-height: 28px;
+  display: flex;
+  align-items: center;
+  color: var(--jp-ui-font-color0);
+}
+
+.scheduler-tag-style {
+  width: 512px;
+  height: 36px;
+  background: var(--jp-layout-color0);
+  margin-top: 10px;
+  outline: none;
+}
+
+.scheduler-form-element-container {
+  margin-top: 15px;
+  width: 512px;
+}
+
+.logo-alignment-style {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-arrow-icon {
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.schedule-radio-btn {
+  flex-direction: row !important;
+  gap: 20px;
+}
+
+.scheduler-label-font {
+  font-size: 14px;
+}
+
+body[data-jp-theme-light='true'].scroll-fix-header {
+  position: sticky;
+  top: 0;
+  background-color: var(--jp-layout-color0);
+}
+
+.spin-loader {
+  display: flex;
+  margin-top: 10px;
+  margin-left: 10px;
+}
+
+.spin-loader-custom-style {
+  margin-right: 5px;
+}
+
+.spin-loader-main {
+  display: flex;
+  max-height: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: 20%;
+}
+
+.spin-loader-listing {
+  margin: 10%;
+}

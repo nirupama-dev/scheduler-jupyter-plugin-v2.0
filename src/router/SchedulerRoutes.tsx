@@ -38,9 +38,9 @@ function ExecutionHistoryScreen() {
   );
 }
 /**
- * 
- * @param schedulerRouteProps 
- * @returns 
+ *
+ * @param schedulerRouteProps
+ * @returns
  * This component defines the routes for the scheduler application.
  */
 export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
@@ -52,7 +52,8 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   );
 
   const ListComposerSchedule = lazy(
-    () => import('../components/composer/composerListingView/ListComposerSchedule')
+    () =>
+      import('../components/composer/composerListingView/ListComposerSchedule')
   );
 
   return (

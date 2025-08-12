@@ -25,7 +25,10 @@ import {
 } from '@mui/material';
 // For Material-UI v4, it might be directly from '@mui/material/Autocomplete' or '@material-ui/lab/Autocomplete'
 import { Controller } from 'react-hook-form';
-import { FormInputDropdownProps, FormInputListingDropdownProps } from '../../../interfaces/FormInterface'; // Adjust path if needed
+import {
+  FormInputDropdownProps,
+  FormInputListingDropdownProps
+} from '../../../interfaces/FormInterface'; // Adjust path if needed
 
 export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   name,
@@ -52,7 +55,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
             {...fieldProps}
             options={options}
             disabled={disabled}
-            getOptionLabel={(option) => option.label} // How to get the label from an option object
+            getOptionLabel={option => option.label} // How to get the label from an option object
             // isOptionEqualToValue={(option, val) => option.value === val} // Essential for matching selected value
             value={options.find(option => option.value === value) || null} // Set value based on full option object
             onChange={(_, newValue) => {
@@ -62,8 +65,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
                 onChangeCallback(selectedValue); // Custom callback with reason
               }
             }}
-            
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
                 label={label}
@@ -72,27 +74,31 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
                   ...params.InputProps,
                   endAdornment: (
                     <React.Fragment>
-                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {loading ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null}
                       {params.InputProps.endAdornment}
                     </React.Fragment>
-                  ),
+                  )
                 }}
               />
             )}
-            
             renderOption={(props, option) => {
-                // Custom rendering for the "Create new bucket" option
-                if (option.value === 'Create and Select' && name === 'cloudStorageBucket') {
-                  return (
-                    <li {...props} className="custom-add-bucket">
-                      {option.label}
-                    </li>
-                  );
-                }
+              // Custom rendering for the "Create new bucket" option
+              if (
+                option.value === 'Create and Select' &&
+                name === 'cloudStorageBucket'
+              ) {
+                return (
+                  <li {...props} className="custom-add-bucket">
+                    {option.label}
+                  </li>
+                );
+              }
 
-                return (<li {...props}>{option.label}</li>);
-              }}
-              filterOptions={filterOptions}
+              return <li {...props}>{option.label}</li>;
+            }}
+            filterOptions={filterOptions}
           />
         )}
       />
@@ -101,7 +107,9 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
   );
 };
 
-export const FormInputListingDropdown: React.FC<FormInputListingDropdownProps> = ({
+export const FormInputListingDropdown: React.FC<
+  FormInputListingDropdownProps
+> = ({
   name,
   control,
   label,
@@ -123,7 +131,7 @@ export const FormInputListingDropdown: React.FC<FormInputListingDropdownProps> =
             {...fieldProps}
             options={options}
             disabled={disabled}
-            getOptionLabel={(option) => option.label} // How to get the label from an option object
+            getOptionLabel={option => option.label} // How to get the label from an option object
             value={options.find(option => option.value === value) || null} // Set value based on full option object
             onChange={(_, newValue) => {
               const selectedValue = newValue ? newValue.value : '';
@@ -132,8 +140,7 @@ export const FormInputListingDropdown: React.FC<FormInputListingDropdownProps> =
                 onChangeCallback(selectedValue); // Custom callback with reason
               }
             }}
-            
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
                 label={label}
@@ -142,19 +149,19 @@ export const FormInputListingDropdown: React.FC<FormInputListingDropdownProps> =
                   ...params.InputProps,
                   endAdornment: (
                     <React.Fragment>
-                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                      {loading ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null}
                       {params.InputProps.endAdornment}
                     </React.Fragment>
-                  ),
+                  )
                 }}
               />
             )}
-            
             renderOption={(props, option) => {
-              
-                return (<li {...props}>{option.label}</li>);
-              }}
-              filterOptions={filterOptions}
+              return <li {...props}>{option.label}</li>;
+            }}
+            filterOptions={filterOptions}
           />
         )}
       />

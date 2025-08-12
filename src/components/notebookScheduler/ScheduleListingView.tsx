@@ -54,11 +54,11 @@ export const ScheduleListingView = () => {
 
   return (
     <>
-      <div className="cluster-list-overlay" role="tab">
+      <div className="scheduler-list-overlay" role="tab">
         <div className="list-vertex-title">{LISTING_PAGE_HEADING}</div>
       </div>
 
-      <div className="create-scheduler-form-element sub-para">
+      <div className="scheduler-form-element-container sub-para">
         <FormControl>
           <RadioGroup
             className="schedule-radio-btn"
@@ -74,7 +74,7 @@ export const ScheduleListingView = () => {
           >
             <FormControlLabel
               value="vertex"
-              className="create-scheduler-label-style"
+              className="scheduler-label-font"
               control={<Radio size="small" />}
               label={
                 <Typography sx={{ fontSize: 13 }}>
@@ -84,7 +84,7 @@ export const ScheduleListingView = () => {
             />
             <FormControlLabel
               value="composer"
-              className="create-scheduler-label-style"
+              className="scheduler-label-font"
               control={<Radio size="small" />}
               label={
                 <Typography sx={{ fontSize: 13 }}>

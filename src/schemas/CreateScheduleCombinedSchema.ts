@@ -52,8 +52,7 @@ export const combinedCreateFormSchema = z
           ctx.addIssue({
             path: ['primaryNetwork'],
             code: z.ZodIssueCode.custom,
-            message:
-              'Primary network is required when subnetwork is selected.'
+            message: 'Primary network is required when subnetwork is selected.'
           });
         }
       }
@@ -158,7 +157,10 @@ export const combinedCreateFormSchema = z
         composerData.emailOnRetry ||
         composerData.emailOnSuccess
       ) {
-        if (!composerData.email_recipients || composerData.email_recipients.length === 0) {
+        if (
+          !composerData.email_recipients ||
+          composerData.email_recipients.length === 0
+        ) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Email recipients is required field',

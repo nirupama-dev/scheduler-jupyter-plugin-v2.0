@@ -11,7 +11,6 @@ import { ComposerServices } from '../services/composer/ComposerServices';
 import { DropdownOption } from '../interfaces/FormInterface';
 import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 
-
 /**
  * caching KernelAPI.listRunning() to improve preformance.
  */
@@ -21,7 +20,7 @@ const CACHE_LIFETIME = 10 * 1000; // 5 seconds, adjust as needed
 
 async function getRunningKernelsCached(): Promise<Kernel.IModel[]> {
   const now = Date.now();
-  if (cachedRunningKernels && (now - lastFetchTime < CACHE_LIFETIME)) {
+  if (cachedRunningKernels && now - lastFetchTime < CACHE_LIFETIME) {
     console.debug('Using cached running kernels');
     return cachedRunningKernels;
   }
@@ -58,7 +57,7 @@ const getKernelDetails = async (
     selectedClusterName: undefined,
     kernelParentResource: undefined,
     isDataprocKernel: false,
-    kernelDisplayName: kernelDisplayName??''
+    kernelDisplayName: kernelDisplayName ?? ''
   };
 
   // --- Attempt to get details from running kernel (preferred for active session) ---
@@ -68,7 +67,7 @@ const getKernelDetails = async (
     console.log('Current Kernel ID:', currentKernelId);
     if (currentKernelId) {
       const runningKernels: Kernel.IModel[] = await getRunningKernelsCached();
-      console.log("runningKernal", runningKernels);
+      console.log('runningKernal', runningKernels);
       const runningKernel = runningKernels.find(
         kernel => kernel.id === currentKernelId
       );
@@ -152,7 +151,6 @@ const extractSchedulerTypeAndKernelDetails = async (
 ): Promise<{
   kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults;
 }> => {
-
   try {
     const kernelDetails = await getKernelDetails(
       availableKernelSpecs,
@@ -166,7 +164,8 @@ const extractSchedulerTypeAndKernelDetails = async (
         ? 'composer'
         : 'vertex';
 
-    return {kernalAndSchedulerDetails: {
+    return {
+      kernalAndSchedulerDetails: {
         schedulerType,
         kernalDetails: {
           executionMode: kernelDetails.executionMode,
@@ -174,9 +173,9 @@ const extractSchedulerTypeAndKernelDetails = async (
           selectedServerlessName: kernelDetails.selectedServerlessName,
           selectedClusterName: kernelDetails.selectedClusterName,
           kernelParentResource: kernelDetails.kernelParentResource,
-          isDataprocKernel: kernelDetails.isDataprocKernel,
-        },
-      },
+          isDataprocKernel: kernelDetails.isDataprocKernel
+        }
+      }
     };
   } catch (error) {
     console.error('Error extracting scheduler type and kernel details:', error);
@@ -247,7 +246,7 @@ const promisifiedListSessionTemplates = (): Promise<string[]> => {
     };
     console.log('Calling listSessionTemplatesAPIService');
     ComposerServices.listSessionTemplatesAPIService(
-      setServerlessOptionsCallback,
+      setServerlessOptionsCallback
     ).catch(reject); // Propagate rejections from the service itself
   });
 };
@@ -334,6 +333,4 @@ export const getDefaultSchedulerTypeOnLoad = async (
     fetchedClusterList,
     sessionContext
   );
-
-  
 };
