@@ -206,12 +206,6 @@
   max-height: 55vh;
 }
 
-.clusters-table-data:nth-child(1) {
-  color: #3367d6;
-  text-decoration: underline;
-  cursor: pointer;
-}
-
 .cluster-name {
   color: #3367d6;
   text-decoration: underline;

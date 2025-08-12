@@ -21,7 +21,7 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
-import Loader from '../components/common/loader/LoadingSpinner';
+import Loader from '../components/common/loader/LoaderSpinner';
 import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
@@ -38,9 +38,9 @@ function ExecutionHistoryScreen() {
   );
 }
 /**
- * 
- * @param schedulerRouteProps 
- * @returns 
+ *
+ * @param schedulerRouteProps
+ * @returns
  * This component defines the routes for the scheduler application.
  */
 export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
@@ -52,7 +52,8 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   // );
 
   const ListComposerSchedule = lazy(
-    () => import('../components/composer/composerListingView/ListComposerSchedule')
+    () =>
+      import('../components/composer/composerListingView/ListComposerSchedule')
   );
 
   return (
@@ -74,7 +75,11 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
           element={
             <Suspense
               fallback={
-                <Loader message={LOADER_CONTENT_VERTEX_LISTING_SCREEN} />
+                <Loader
+                  message={LOADER_CONTENT_VERTEX_LISTING_SCREEN}
+                  iconClassName="spin-loader-custom-style"
+                  parentTagClassName="spin-loader-main spin-loader-listing"
+                />
               }
             >
               {/* <ListVertexSchedule /> */}
@@ -86,7 +91,11 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
           element={
             <Suspense
               fallback={
-                <Loader message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN} />
+                <Loader
+                  message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN}
+                  iconClassName="spin-loader-custom-style"
+                  parentTagClassName='"spin-loader-main spin-loader-listing'
+                />
               }
             >
               <ListComposerSchedule app={app} />

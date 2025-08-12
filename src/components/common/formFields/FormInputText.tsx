@@ -51,7 +51,7 @@ export const FormInputText = ({
           onBlur={event => {
             onBlur();
 
-            if(onBlurCallback) {
+            if (onBlurCallback) {
               onBlurCallback(value);
             }
           }}

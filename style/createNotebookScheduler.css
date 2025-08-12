@@ -71,7 +71,7 @@
   }
 }
 
-.custom-spinner-path{
+.custom-spinner-path {
   /* stylelint-disable-next-line */
   stroke: currentColor; /* Inherit color from parent, or set a specific color */
   stroke-linecap: round;

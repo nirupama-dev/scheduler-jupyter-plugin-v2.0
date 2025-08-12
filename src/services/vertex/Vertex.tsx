@@ -25,13 +25,10 @@ import {
   ISchedulerData,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
-  IFormattedResponse,
+  IFormattedResponse
 } from '../../interfaces/VertexInterface';
 import dayjs, { Dayjs } from 'dayjs';
-import {
-  ABORT_MESSAGE,
-  DEFAULT_TIME_ZONE,
-  } from '../../utils/Constants';
+import { ABORT_MESSAGE, DEFAULT_TIME_ZONE } from '../../utils/Constants';
 import { Dispatch, SetStateAction } from 'react';
 
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';

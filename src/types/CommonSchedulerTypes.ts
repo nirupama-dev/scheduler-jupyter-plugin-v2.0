@@ -20,6 +20,5 @@
  * @fileoverview This file contains common types used across the scheduler module.
  */
 
- 
 export type SchedulerType = 'vertex' | 'composer'; // Define SchedulerType type
 export type ExecutionMode = 'local' | 'serverless' | 'cluster'; // Define ExecutionMode type

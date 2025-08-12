@@ -495,7 +495,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     (cell: ICellProps) => {
       if (cell.column.Header === 'Actions') {
         return (
-          <td {...cell.getCellProps()} className="table-data">
+          <td {...cell.getCellProps()} className="scheduler-table-data">
             {renderActions(
               cell.row.original,
               isGCSPluginInstalled,
@@ -509,7 +509,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
       } else if (cell.column.Header === 'Job Name') {
         return (
-          <td {...cell.getCellProps()} className="table-data">
+          <td {...cell.getCellProps()} className="scheduler-table-data">
             <span
             // onClick={() => {
             //   if (composerEnvSelected) {
@@ -523,7 +523,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
       } else {
         return (
-          <td {...cell.getCellProps()} className="table-data">
+          <td {...cell.getCellProps()} className="scheduler-table-data">
             {cell.render('Cell')}
           </td>
         );
@@ -548,7 +548,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     <div>
       <div className="select-text-overlay-scheduler">
         <div className="select-panel-list">
-          <div className="create-scheduler-form-element select-panel-list-view-lay table-right-space">
+          <div className="scheduler-form-element-container select-panel-list-view-lay table-right-space">
             <FormInputListingDropdown
               name="projectId"
               label="Project ID"
@@ -560,7 +560,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               disabled={true}
             />
           </div>
-          <div className="create-scheduler-form-element select-panel-list-view-lay table-right-space">
+          <div className="scheduler-form-element-container select-panel-list-view-lay table-right-space">
             <FormInputListingDropdown
               name="composerRegion"
               label="Region"
@@ -572,7 +572,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               //   error={errors.composerRegion}
             />
           </div>
-          <div className="create-scheduler-form-element select-panel-list-view-lay">
+          <div className="scheduler-form-element-container select-panel-list-view-lay">
             <FormInputListingDropdown
               name="environment"
               label="Environment"

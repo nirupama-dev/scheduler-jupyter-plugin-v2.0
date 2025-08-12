@@ -43,7 +43,10 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
   hostProject
 }) => {
   const safeOptions = Array.isArray(options) ? options : [];
-  const hasHostProject = hostProject && typeof hostProject === 'object' && Object.keys(hostProject).length !== 0;
+  const hasHostProject =
+    hostProject &&
+    typeof hostProject === 'object' &&
+    Object.keys(hostProject).length !== 0;
 
   const generateRadioOptions = () => {
     return safeOptions.map(singleOption => (
@@ -62,7 +65,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
             </Typography>
           }
           control={<Radio size="small" />}
-          className="create-scheduler-label-style"
+          className="scheduler-label-font"
         />
         {singleOption.label === NETWORK_OPTIONS[1].label && (
           <>

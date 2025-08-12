@@ -76,11 +76,7 @@ function TableData({
       </thead>
       <tbody
         {...getTableBodyProps()}
-        className={
-          isLoading
-            ? 'table-loading-ht table-body'
-            : 'table-body'
-        }
+        className={isLoading ? 'table-loading-ht table-body' : 'table-body'}
         style={fromPage === 'Dag Runs' ? { maxHeight: listDagRunHeight } : null}
       >
         {isLoading ? (
@@ -103,7 +99,10 @@ function TableData({
           displayData.map((row: Row, index: number) => {
             prepareRow(row);
             return (
-              <tr {...row.getRowProps()} className={'scheduler-list-data-parent'}>
+              <tr
+                {...row.getRowProps()}
+                className={'scheduler-table-list-data-parent'}
+              >
                 {row.cells.map((cell: Cell) => {
                   return tableDataCondition(cell);
                 })}

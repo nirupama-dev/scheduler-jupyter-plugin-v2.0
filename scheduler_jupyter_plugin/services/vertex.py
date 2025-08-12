@@ -272,10 +272,10 @@ class Client:
             result = {}
 
             if next_page_token:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}"
+                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
             else:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}"
+                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
             headers = self.create_headers()
             async with self.client_session.get(
@@ -289,6 +289,18 @@ class Client:
                         schedule_list = []
                         schedules = resp.get("schedules")
                         for schedule in schedules:
+                            # filter for a workbench schedule 
+                            # ie atleast any one of the following is not available.
+                            # workbenchRuntime or kernel or customEnvironmentSpec
+                            if schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob") is None:
+                                continue
+                            notebook_execution_job = schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob")
+                            if (
+                                notebook_execution_job.get("workbenchRuntime") is None
+                                and notebook_execution_job.get("kernelName") is None
+                                and notebook_execution_job.get("customEnvironmentSpec") is None
+                            ):
+                                continue
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
                             cron_value = (

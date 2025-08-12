@@ -19,7 +19,6 @@ import { Control, FieldError, Path } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { ILabelValue } from './CommonInterface';
 
-
 export interface IFormInputProps {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
@@ -31,7 +30,7 @@ export interface IFormInputProps {
   [key: string]: any; // Allow additional props
   type?: string;
   hostProject?: any;
-  disabled?:boolean
+  disabled?: boolean;
 }
 
 export interface IFormInput {
@@ -62,12 +61,17 @@ export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
   loading?: boolean;
   filterOptions?: any;
   getOptionLabel?: any;
-  isOptionEqualToValue?: (option: OptionType, value: string | any | null | undefined) => boolean;
+  isOptionEqualToValue?: (
+    option: OptionType,
+    value: string | any | null | undefined
+  ) => boolean;
   getOptionValue?: any;
-  disabled?:boolean
+  disabled?: boolean;
 }
 
-export interface FormInputListingDropdownProps<OptionType = ILabelValue<string>> {
+export interface FormInputListingDropdownProps<
+  OptionType = ILabelValue<string>
+> {
   name: Path<any>;
   control: Control<any>;
   options: Array<{ label: string; value: any }> | [];
@@ -82,7 +86,7 @@ export interface FormInputListingDropdownProps<OptionType = ILabelValue<string>>
   getOptionLabel?: any;
   isOptionEqualToValue?: (option: OptionType, value: any) => boolean;
   getOptionValue?: any;
-  disabled?:boolean
+  disabled?: boolean;
 }
 
 // Define the shape of a single option
@@ -107,5 +111,4 @@ export interface IErrorMessageProps {
   message: string | FieldError | undefined;
   showIcon?: boolean; // Optional prop to show/hide an icon
   errorWidth?: boolean; // Optional prop to control width
-
 }

@@ -32,7 +32,10 @@ export interface IAuthCredentials {
 export interface ISchedulerRoutesProps {
   app: JupyterLab;
   sessionContext?: ISessionContext | null | undefined;
-  initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults | null | undefined;
+  initialKernalSchedulerDetails?:
+    | INotebookKernalSchdulerDefaults
+    | null
+    | undefined;
 }
 
 export interface IGcpUrlResponseData {
@@ -77,20 +80,20 @@ export interface IEdiModeData {
   existingData: any;
 }
 
-
 //Remove this if same as ISchedulerRoutesProps
 export interface ICreateNotebookScheduleProps {
-  sessionContext?: ISessionContext| null | undefined | null | undefined;
-  initialKernalScheduleDetails?: INotebookKernalSchdulerDefaults|null|undefined;
+  sessionContext?: ISessionContext | null | undefined | null | undefined;
+  initialKernalScheduleDetails?:
+    | INotebookKernalSchdulerDefaults
+    | null
+    | undefined;
   editModeData?: IEdiModeData | null | undefined;
 }
-
 
 export interface Parameter {
   key: string;
   value: string;
 }
-
 
 export interface ILabelValue<T, U = T> {
   label: T;

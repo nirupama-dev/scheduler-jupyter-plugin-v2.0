@@ -17,20 +17,20 @@
 
 import { JupyterLab } from '@jupyterlab/application';
 
-import { ISessionContext, IThemeManager, MainAreaWidget } from '@jupyterlab/apputils';
+import {
+  ISessionContext,
+  IThemeManager,
+  MainAreaWidget
+} from '@jupyterlab/apputils';
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IDisposable } from '@lumino/disposable';
 import { ToolbarButton } from '@jupyterlab/apputils';
 import { NotebookScheduler } from './NotebookScheduler';
 import { iconNotebookScheduler } from '../../utils/Icons';
-import {
-  showDialog, 
-  Dialog 
-} from '@jupyterlab/apputils';
+import { showDialog, Dialog } from '@jupyterlab/apputils';
 import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
-import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface'; 
-
+import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface';
 
 export class NotebookButtonExtension
   implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
@@ -38,11 +38,11 @@ export class NotebookButtonExtension
   constructor(
     private app: JupyterLab,
     private themeManager: IThemeManager,
-    private schedulerButton: ToolbarButton | null  // Store a reference to the button
+    private schedulerButton: ToolbarButton | null // Store a reference to the button
   ) {
     this.app = app;
     this.themeManager = themeManager;
-    this.schedulerButton= schedulerButton
+    this.schedulerButton = schedulerButton;
   }
 
   createNew(
@@ -51,14 +51,16 @@ export class NotebookButtonExtension
   ): IDisposable {
     const button = new ToolbarButton({
       icon: iconNotebookScheduler,
-      onClick: async () => { // Make onClick async to await onNotebookSchedulerButtonClick
+      onClick: async () => {
+        // Make onClick async to await onNotebookSchedulerButtonClick
         // Ensure the button reference is available before proceeding
         if (!this.schedulerButton) {
-            console.error('Scheduler button reference not found in onClick. This should not happen after assignment.');
-            return;
+          console.error(
+            'Scheduler button reference not found in onClick. This should not happen after assignment.'
+          );
+          return;
         }
-        await this.onNotebookSchedulerButtonClick(context.sessionContext)
-    
+        await this.onNotebookSchedulerButtonClick(context.sessionContext);
       },
       tooltip: 'Schedule this notebook as a job'
     });
@@ -67,22 +69,29 @@ export class NotebookButtonExtension
     return button;
   }
 
- // Pass sessionContext as an argument because `this.context` is not available in this class directly
- private onNotebookSchedulerButtonClick = async (sessionContext: ISessionContext): Promise<void> => {
+  // Pass sessionContext as an argument because `this.context` is not available in this class directly
+  private onNotebookSchedulerButtonClick = async (
+    sessionContext: ISessionContext
+  ): Promise<void> => {
     // Ensure the button is present before attempting to modify it
     if (!this.schedulerButton) {
       console.error('Scheduler button not initialized.');
       return;
     }
-    
-    let initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults | null = null;
+
+    let initialKernalSchedulerDetails: INotebookKernalSchdulerDefaults | null =
+      null;
     let hasError = false;
 
     try {
       // Pre-fetch the initial kernel details
-      initialKernalSchedulerDetails = (await getDefaultSchedulerTypeOnLoad(sessionContext)).kernalAndSchedulerDetails;
-      console.log('Prefetched Initial Scheduler Details for button:', initialKernalSchedulerDetails);
-
+      initialKernalSchedulerDetails = (
+        await getDefaultSchedulerTypeOnLoad(sessionContext)
+      ).kernalAndSchedulerDetails;
+      console.log(
+        'Prefetched Initial Scheduler Details for button:',
+        initialKernalSchedulerDetails
+      );
     } catch (error) {
       console.error('Failed to pre-fetch initial scheduler details:', error);
       hasError = true;
@@ -114,5 +123,5 @@ export class NotebookButtonExtension
       widget.title.icon = iconNotebookScheduler;
       this.app.shell.add(widget, 'main');
     }
-  }
+  };
 }

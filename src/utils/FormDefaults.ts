@@ -22,18 +22,17 @@ import {
   DEFAULT_DISK_SIZE,
   DEFAULT_NETWORK_SELECTED,
   DEFAULT_SCHEDULER_SELECTED,
-  DEFAULT_CLOUD_STORAGE_BUCKET, 
-  DEFAULT_MACHINE_TYPE, 
-  DEFAULT_KERNEL, 
-  DEFAULT_SERVICE_ACCOUNT, 
-  DEFAULT_TIME_ZONE, 
-  DISK_TYPE_VALUE, 
-  CRON_FOR_SCHEDULE_EVERY_MIN 
+  DEFAULT_CLOUD_STORAGE_BUCKET,
+  DEFAULT_MACHINE_TYPE,
+  DEFAULT_KERNEL,
+  DEFAULT_SERVICE_ACCOUNT,
+  DEFAULT_TIME_ZONE,
+  DISK_TYPE_VALUE,
+  CRON_FOR_SCHEDULE_EVERY_MIN
 } from './Constants';
 import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
 import dayjs from 'dayjs';
-
 
 /**
  * Formats a timestamp into a specific string format.
@@ -69,7 +68,10 @@ const generateDefaultJobName = () => {
  * This function returns default values for the form fields used in the Vertex scheduler.
  * It provides a set of initial values that can be used when creating a new Vertex schedule.
  */
-const getDefaultVertexValues = (initialKernelDetails:INotebookKernalSchdulerDefaults, inputFilePath:string): VertexSchedulerFormValues => ({
+const getDefaultVertexValues = (
+  initialKernelDetails: INotebookKernalSchdulerDefaults,
+  inputFilePath: string
+): VertexSchedulerFormValues => ({
   schedulerSelection: DEFAULT_SCHEDULER_SELECTED,
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
@@ -103,7 +105,10 @@ const getDefaultVertexValues = (initialKernelDetails:INotebookKernalSchdulerDefa
  * This function returns default values for the form fields used in the Composer scheduler.
  * It provides a set of initial values that can be used when creating a new Composer schedule.
  */
-const getDefaultComposerValues = (initialKernelDetails: INotebookKernalSchdulerDefaults, inputFilePath:string): ComposerSchedulerFormValues => ({
+const getDefaultComposerValues = (
+  initialKernelDetails: INotebookKernalSchdulerDefaults,
+  inputFilePath: string
+): ComposerSchedulerFormValues => ({
   schedulerSelection: 'composer',
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
@@ -129,14 +134,21 @@ const getDefaultComposerValues = (initialKernelDetails: INotebookKernalSchdulerD
  * @returns CombinedCreateFormValues that match one of the discriminated union branches.
  */
 export const getInitialFormValues = (
- initialKernelDetails: INotebookKernalSchdulerDefaults, sessionContext: ISessionContext| null | undefined
+  initialKernelDetails: INotebookKernalSchdulerDefaults,
+  sessionContext: ISessionContext | null | undefined
 ): CombinedCreateFormValues => {
   console.log('Initial Kernel Details:', initialKernelDetails);
   if (initialKernelDetails.schedulerType === 'composer') {
-    return getDefaultComposerValues(initialKernelDetails, sessionContext?.path || '');
+    return getDefaultComposerValues(
+      initialKernelDetails,
+      sessionContext?.path || ''
+    );
   }
   // Default to Vertex if no criteria or criteria is 'vertex'
-  return getDefaultVertexValues(initialKernelDetails, sessionContext?.path || '');
+  return getDefaultVertexValues(
+    initialKernelDetails,
+    sessionContext?.path || ''
+  );
 };
 
 /**
@@ -158,12 +170,15 @@ export const getEditFormValues = (
       executionMode: existingData.executionMode || 'local',
       selectedClusterName: existingData.cluster || '',
       selectedServerlessName: existingData.serverless || '',
-      isDataprocKernel:false
+      isDataprocKernel: false
     }
   };
 
   if (existingData.schedulerSelection === 'vertex') {
-    const vertexDefaults = getDefaultVertexValues(dummyInitialKernelDetails, sessionContext.path);
+    const vertexDefaults = getDefaultVertexValues(
+      dummyInitialKernelDetails,
+      sessionContext.path
+    );
     return {
       ...vertexDefaults, // Start with defaults
       ...existingData, // Overlay existing data (prioritizes existingData for most fields)
@@ -186,14 +201,19 @@ export const getEditFormValues = (
       sharedNetwork: existingData.sharedNetwork
     };
   } else if (existingData.schedulerSelection === 'composer') {
-    const composerDefaults = getDefaultComposerValues(dummyInitialKernelDetails, sessionContext.path);
+    const composerDefaults = getDefaultComposerValues(
+      dummyInitialKernelDetails,
+      sessionContext.path
+    );
     return {
       ...composerDefaults,
       ...existingData,
       inputFile: sessionContext.path,
       // Composer-specific merging for optional fields
-      email_recipients: existingData.email_recipients ?? composerDefaults.email_recipients,
-      scheduleValue: existingData.scheduleValue ?? composerDefaults.scheduleValue,
+      email_recipients:
+        existingData.email_recipients ?? composerDefaults.email_recipients,
+      scheduleValue:
+        existingData.scheduleValue ?? composerDefaults.scheduleValue,
       timeZone: existingData.timeZone ?? composerDefaults.timeZone
     };
   }

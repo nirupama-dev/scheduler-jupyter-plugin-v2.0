@@ -151,7 +151,7 @@ async def test_list_uiconfig(monkeypatch, returncode, expected_result, jp_fetch)
         )
     ],
 )
-async def list_notebook_execution_jobs(
+async def test_list_notebook_execution_jobs(
     monkeypatch, returncode, expected_result, jp_fetch
 ):
     monkeypatch.setattr(
@@ -186,7 +186,6 @@ async def list_notebook_execution_jobs(
                     {
                         "createTime": None,
                         "displayName": None,
-                        "gcsNotebookSourceUri": "",
                         "lastScheduledRunResponse": None,
                         "name": None,
                         "nextRunTime": None,

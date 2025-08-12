@@ -25,7 +25,7 @@ import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import {
   IThemeManager,
   MainAreaWidget,
-  Notification,
+  Notification
 } from '@jupyterlab/apputils';
 import { NotebookButtonExtension } from './components/notebookScheduler/NotebookButtonExtension';
 import { requestAPI } from './handler/Handler';
@@ -109,7 +109,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
       }
     }
 
-  commands.addCommand(createNotebookJobsComponentCommand, {
+    commands.addCommand(createNotebookJobsComponentCommand, {
       caption: 'Scheduled Jobs',
       label: 'Scheduled Jobs',
       icon: iconScheduledNotebooks,
