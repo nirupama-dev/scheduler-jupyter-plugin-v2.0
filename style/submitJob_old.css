@@ -227,23 +227,6 @@
   border-radius: 4px;
 }
 
-.error-key-parent {
-  padding-top: 5px;
-  display: flex;
-  align-items: center;
-  width: 90%;
-}
-
-.error-key-wrapper {
-  width: 100%;
-}
-
-.error-key-missing {
-  color: var(--jp-error-color0);
-  padding-left: 5px;
-  font-size: 10px;
-}
-
 /* Highlight tags input field when focus */
 .react-tagsinput-focused {
   border: 3px solid var(--jp-brand-color0) !important;

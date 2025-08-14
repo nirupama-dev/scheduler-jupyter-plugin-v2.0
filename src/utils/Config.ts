@@ -24,3 +24,23 @@ export const handleDebounce = (func: any, delay: number) => {
     }, delay);
   };
 };
+
+/***
+ * Setting API list to abort
+ * @param {any} abortControllers abortController to hold API list
+ */
+export const settingController = (abortControllers: any) => {
+  const controller = new AbortController();
+  abortControllers.current.push(controller);
+  const signal = controller.signal;
+  return signal;
+};
+
+/**
+ * Abort Api calls while moving away from page.
+ * @param {any} abortControllers API list to abort
+ */
+export const abortApiCall = (abortControllers: any) => {
+  abortControllers.current.forEach((controller: any) => controller.abort());
+  abortControllers.current = [];
+};

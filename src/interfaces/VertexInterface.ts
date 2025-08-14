@@ -250,14 +250,42 @@ export interface IVertexScheduleList {
 }
 
 export interface IVertexListingLoadingState {
+  initialLoading: boolean;
   isLoading: boolean;
   regionLoader: boolean;
+  editScheduleLoader: boolean;
+  isLoadingTableContent: boolean;
+}
+
+export interface IVertexSelectedActionProps {
+  resumePauseLoading?: string;
+  triggerLoading?: string;
+  editScheduleLoading?: string;
+  deleteLoading?: string;
 }
 
 export interface IUpdateSchedulerArgs {
   scheduleId: string;
   region: string;
   displayName: string;
-  // setResumeLoading: (value: string) => void;
-  // abortControllers: any;
+  abortControllers: any;
+}
+
+export interface ISheduleToDelete {
+  scheduleId: string;
+  displayName: string;
+  deletePopUpShow: boolean;
+  deletingStatus?: boolean;
+}
+
+export interface IVertexDeleteAPIArgs {
+  region: string;
+  uniqueScheduleId: string;
+  scheduleDisplayName: string;
+  listVertexScheduleInfoAPI: () => void;
+}
+
+export interface IVertexListPayload {
+  region: string;
+  abortControllers: any;
 }
