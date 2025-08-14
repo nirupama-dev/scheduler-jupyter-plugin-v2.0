@@ -24,7 +24,8 @@
 }
 
 .scheduler-list-table-header {
-  background: rgba(133, 109, 109, 0.04);
+  /* stylelint-disable-next-line */
+  background: rgb(133, 109, 109, 0.04);
   font-style: normal;
   font-weight: 500;
   font-size: 13px;
