@@ -39,6 +39,10 @@
   border-bottom: 1px solid var(--jp-layout-color3);
 }
 
+.scheduler-table-header:nth-child(4) {
+  padding-left: 25px;
+}
+
 .table-loading-ht {
   height: calc(100vh - 368px);
 }
@@ -92,4 +96,9 @@
 
 .scheduler-table-data:nth-child(2) {
   text-transform: capitalize;
+  color: black;
+}
+
+.scheduler-table-data:nth-child(3) {
+  color: black;
 }

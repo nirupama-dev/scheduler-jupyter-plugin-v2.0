@@ -19,8 +19,8 @@ export const renderActions = (
   handleUpdateScheduler: (jobid: string, isPaused: boolean) => void,
   handleTriggerDag: (jobid: string) => void,
   handleEditNotebook: (jobid: string) => void,
-  handleDeletePopUp: (jobid: string) => void
-  // handleEditDags?: (e: React.MouseEvent) => void,
+  handleDeletePopUp: (jobid: string) => void,
+  handleEditSchedule: (jobid: string) => void
 ) => {
   const isPaused = data.status === 'Paused';
 
@@ -53,12 +53,12 @@ export const renderActions = (
       )}
 
       {/* Edit Schedule Button */}
-      {data.jobid === loadingState.editDag ? (
+      {data.jobid === loadingState.editSchedule ? (
         <Loader parentTagClassName="icon-buttons-style" />
       ) : (
         <ActionButton
           title="Edit Schedule"
-          // onClick={handleEditDags}
+          onClick={() => handleEditSchedule(data.jobid)}
           icon={iconEditDag}
         />
       )}
@@ -70,7 +70,7 @@ export const renderActions = (
         ) : (
           <ActionButton
             title="Edit Notebook"
-            onClick={event => handleEditNotebook(data.jobid)}
+            onClick={() => handleEditNotebook(data.jobid)}
             icon={iconEditNotebook}
           />
         )

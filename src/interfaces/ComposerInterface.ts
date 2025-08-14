@@ -137,8 +137,8 @@ export interface ILoadingStateComposerListing {
   update: string;
   trigger: string;
   editNotebook: string;
-  editDag: string;
   delete: boolean;
+  editSchedule: string;
 }
 
 export interface IDagList {

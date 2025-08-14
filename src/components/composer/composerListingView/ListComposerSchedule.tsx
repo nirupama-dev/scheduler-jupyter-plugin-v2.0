@@ -43,6 +43,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { GCS_PLUGIN_ID } from '../../../utils/Constants';
 import { PaginationView } from '../../common/table/PaginationView';
 import ImportErrorPopup from './ImportErrorPopup';
+import { useNavigate } from 'react-router-dom';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const { control, setValue, watch } = useForm();
@@ -60,8 +61,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       update: '',
       trigger: '',
       editNotebook: '',
-      editDag: '',
-      delete: false
+      delete: false,
+      editSchedule: ''
       // ... initialize other mandatory properties
     });
   const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
@@ -77,6 +78,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
   const [importErrorPopupOpen, setImportErrorPopupOpen] =
     useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
@@ -146,14 +149,14 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     setImportErrorPopupOpen(false);
   };
 
-  const handleImportErrordata = async () => {
+  const handleImportErrordata = async (env: string) => {
     if (loadingState.importErrors) {
       return;
     }
     setLoadingState(prev => ({ ...prev, importErrors: true }));
 
     const result = await ComposerServices.handleImportErrordataService(
-      selectedEnv ?? '',
+      env ?? '',
       selectedProjectId,
       selectedRegion,
       setLoadingState
@@ -210,7 +213,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           );
         setDagList(dagList);
         setBucketName(bucketName);
-        handleImportErrordata();
+        handleImportErrordata(value);
       } catch (error) {
         if (!toast.isActive('dagListError')) {
           const errorMessage =
@@ -389,6 +392,17 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
   };
 
+  const handleEditSchedule = (id: string) => {
+    console.log('Edit schedule clicked for id:', id);
+    setLoadingState(prevState => ({
+      ...prevState,
+      editSchedule: id
+    }));
+    navigate(
+      `/edit/composer/${selectedProjectId}/${selectedRegion}/${selectedEnv}/${id}`
+    );
+  };
+
   useEffect(() => {
     checkGCSPluginAvailability();
   }, []);
@@ -503,7 +517,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               handleUpdateScheduler,
               handleTriggerDag,
               handleEditNotebook,
-              handleDeletePopUp
+              handleDeletePopUp,
+              handleEditSchedule
             )}
           </td>
         );

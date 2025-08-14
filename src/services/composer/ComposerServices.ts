@@ -803,7 +803,7 @@ export class ComposerServices {
       });
     }
   };
-  
+
   static readonly handleImportErrordataService = async (
     composerSelectedList: string,
     project: string,
@@ -812,7 +812,7 @@ export class ComposerServices {
     abortControllers?: any
   ) => {
     const controller = new AbortController();
-    abortControllers.current.push(controller);
+    // abortControllers.current.push(controller);
     const signal = controller.signal;
 
     try {

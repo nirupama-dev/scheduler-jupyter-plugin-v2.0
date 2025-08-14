@@ -62,3 +62,7 @@
   /* Add some padding around the component */
   padding: 0.5rem;
 }
+
+.no-data-style {
+  margin: 10px 15px;
+}
