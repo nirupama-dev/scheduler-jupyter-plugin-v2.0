@@ -37,7 +37,7 @@ import {
   IVertexListingLoadingState,
   IVertexScheduleList
 } from '../../../interfaces/VertexInterface';
-import Loader from '../../common/loader/LoaderSpinner';
+import Loader from '../../common/loader/LoadingSpinner';
 import TableData from '../../common/table/TableData';
 import { renderActions } from './ListScheduleAction';
 import { rowDataList } from './VertexListRow';

@@ -21,11 +21,11 @@ import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
-import Loader from '../components/common/loader/LoaderSpinner';
 import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
+import Loader from '../components/common/loader/LoadingSpinner';
 
 // Dummy ExecutionHistoryScreen for testing purposes
 function ExecutionHistoryScreen() {
@@ -47,9 +47,9 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   const { app, sessionContext, initialKernalSchedulerDetails } =
     schedulerRouteProps;
 
-  const ListVertexSchedule = lazy(
-    () => import('../components/vertex/vertexListingView/ListVertexSchedule')
-  );
+  // const ListVertexSchedule = lazy(
+  //   () => import('../components/vertex/vertexListingView/ListVertexSchedule')
+  // );
 
   const ListComposerSchedule = lazy(
     () =>
@@ -82,7 +82,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                 />
               }
             >
-              <ListVertexSchedule />
+              {/* <ListVertexSchedule /> */}
             </Suspense>
           }
         />

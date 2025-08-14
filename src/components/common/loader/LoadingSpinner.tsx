@@ -15,9 +15,11 @@ const Loader: React.FC<LoaderProps> = ({
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-      {message ? message : ''}
+      {message || ''}
     </div>
   );
 };
 
 export default Loader;
+
+ 
