@@ -80,3 +80,7 @@
 .text-icon {
   line-height: 2;
 }
+
+.no-data-style {
+  margin: 10px 15px;
+}

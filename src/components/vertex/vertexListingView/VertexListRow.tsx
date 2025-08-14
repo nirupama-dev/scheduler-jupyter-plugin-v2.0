@@ -29,7 +29,10 @@ import {
 } from '../../../utils/Icons';
 import { CircularProgress } from '@mui/material';
 
-export const rowDataList = (cell: IVertexCellProps) => {
+export const rowDataList = (
+  cell: IVertexCellProps,
+  handleScheduleIdSelection: (schedulerData: any, scheduleName: string) => void
+) => {
   if (cell.column.Header === 'Schedule Name') {
     return (
       <td
@@ -37,9 +40,9 @@ export const rowDataList = (cell: IVertexCellProps) => {
         className="scheduler-table-data table-cell-overflow"
       >
         <span
-        // onClick={() =>
-        //   handleScheduleIdSelectionFromList(cell.row.original, cell.value)
-        // }
+          onClick={() =>
+            handleScheduleIdSelection(cell.row.original, cell.value)
+          }
         >
           {cell.value}
         </span>

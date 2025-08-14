@@ -2,7 +2,7 @@ import { CircularProgress } from '@mui/material';
 import React from 'react';
 import { LoaderProps } from '../../../interfaces/CommonInterface';
 
-const Loader: React.FC<LoaderProps> = ({
+const LoadingSpinner: React.FC<LoaderProps> = ({
   message,
   iconClassName,
   parentTagClassName
@@ -20,4 +20,4 @@ const Loader: React.FC<LoaderProps> = ({
   );
 };
 
-export default Loader;
+export default LoadingSpinner;
