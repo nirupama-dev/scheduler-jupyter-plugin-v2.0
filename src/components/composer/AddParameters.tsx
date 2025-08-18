@@ -41,7 +41,7 @@ const getNestedProperty = (
     if (
       current === null ||
       typeof current !== 'object' ||
-      !current.hasOwnProperty(pathArray[i])
+      !Object.hasOwn(current, pathArray[i])
     ) {
       return defaultValue;
     }

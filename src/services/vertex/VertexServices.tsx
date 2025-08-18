@@ -106,7 +106,7 @@ export class VertexServices {
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/listSchedules';
-      let urlparam = `?region_id=${region}&page_size=${pageLength}`;
+      const urlparam = `?region_id=${region}&page_size=${pageLength}`;
 
       // API call
       const formattedResponse = await requestAPI(serviceURL + urlparam, {

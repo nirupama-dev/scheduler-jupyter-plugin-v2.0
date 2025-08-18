@@ -265,7 +265,7 @@ export const getDefaultSchedulerTypeOnLoad = async (
 ): Promise<{
   kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults;
 }> => {
-  let kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults = {
+  const kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults = {
     schedulerType: 'vertex',
     kernalDetails: {
       executionMode: 'local',
