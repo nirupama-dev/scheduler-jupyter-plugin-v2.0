@@ -1,13 +1,13 @@
 import React, { FC } from 'react';
 import { LabIcon } from '@jupyterlab/ui-components';
 
-interface LabIconComponentProps {
+interface ILabIconComponentProps {
   icon: LabIcon;
   className?: string;
   tag?: 'div' | 'span';
 }
 
-export const LabIconComponent: FC<LabIconComponentProps> = ({
+export const LabIconComponent: FC<ILabIconComponentProps> = ({
   icon,
   className,
   tag = 'div'

@@ -43,12 +43,12 @@ export interface IFormInput {
 }
 
 // Define the specific option type
-export interface DropdownOption {
+export interface IDropdownOption {
   label: string;
   value: string;
 }
 
-export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
+export interface IFormInputDropdownProps<OptionType = ILabelValue<string>> {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
   options: Array<{ label: string; value: any }> | [];
@@ -69,7 +69,7 @@ export interface FormInputDropdownProps<OptionType = ILabelValue<string>> {
   disabled?: boolean;
 }
 
-export interface FormInputListingDropdownProps<
+export interface IFormInputListingDropdownProps<
   OptionType = ILabelValue<string>
 > {
   name: Path<any>;
@@ -90,7 +90,7 @@ export interface FormInputListingDropdownProps<
 }
 
 // Define the shape of a single option
-export interface Option {
+export interface IOption {
   label: string;
   value: any;
   disabled?: boolean; // Add a disabled property
@@ -98,7 +98,7 @@ export interface Option {
 }
 
 // Define the props for the FormInputMultiCheckbox component
-export interface FormInputCheckboxProps {
+export interface IFormInputCheckboxProps {
   name: string;
   control: any; // Type from react-hook-form's useForm hook
   label?: string;

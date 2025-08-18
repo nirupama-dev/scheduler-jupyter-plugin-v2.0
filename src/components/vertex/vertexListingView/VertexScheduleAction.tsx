@@ -16,7 +16,6 @@
  */
 
 import React, { FC } from 'react';
-// import { CircularProgress } from '@mui/material';
 import {
   iconDeleteAction,
   iconEditNotebook,
@@ -32,7 +31,7 @@ import {
   IVertexSelectedActionProps
 } from '../../../interfaces/VertexInterface';
 
-interface ActionButtonProps {
+interface IActionButtonProps {
   title: string;
   icon: LabIcon;
   onClick?: (e: React.MouseEvent) => void;
@@ -40,7 +39,7 @@ interface ActionButtonProps {
   className?: string;
 }
 
-const ActionButton: FC<ActionButtonProps> = ({
+const ActionButton: FC<IActionButtonProps> = ({
   title,
   onClick,
   icon,

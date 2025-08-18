@@ -40,7 +40,7 @@ import {
 } from '../../schemas/CreateScheduleCombinedSchema';
 import {
   ICreateNotebookScheduleProps,
-  Parameter,
+  IParameter,
   INotebookKernalSchdulerDefaults
 } from '../../interfaces/CommonInterface';
 import { IVertexSchedulePayload } from '../../interfaces/VertexInterface';
@@ -271,7 +271,7 @@ export const CreateNotebookSchedule = (
    * @param params An array of parameters to convert to a string.
    * @returns A string representation of the parameters, formatted as "key:value" pairs.
    */
-  const convertParametersToString = (params: Parameter[]): string => {
+  const convertParametersToString = (params: IParameter[]): string => {
     if (!params || params.length === 0) {
       return '';
     }

@@ -39,11 +39,11 @@ import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 import { Dispatch, SetStateAction } from 'react';
-import { DropdownOption } from '../../interfaces/FormInterface';
+import { IDropdownOption } from '../../interfaces/FormInterface';
 
 export class ComposerServices {
   static readonly listClustersAPIService = async (
-    setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setClusterOptions: Dispatch<SetStateAction<IDropdownOption[]>>,
     setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
@@ -112,7 +112,7 @@ export class ComposerServices {
   };
 
   static readonly listSessionTemplatesAPIService = async (
-    setServerlessOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setServerlessOptions: Dispatch<SetStateAction<IDropdownOption[]>>,
     setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
     setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,
@@ -198,7 +198,7 @@ export class ComposerServices {
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
-  ): Promise<DropdownOption[]> => {
+  ): Promise<IDropdownOption[]> => {
     try {
       const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
         `composerList?project_id=${projectId}&region_id=${region}`
@@ -209,7 +209,7 @@ export class ComposerServices {
         throw new Error('Invalid response format for composer environments');
       }
 
-      const environmentOptions: DropdownOption[] = formattedResponse.map(
+      const environmentOptions: IDropdownOption[] = formattedResponse.map(
         (env: IComposerEnvAPIResponse) => ({
           label: env.label,
           value: env.name
