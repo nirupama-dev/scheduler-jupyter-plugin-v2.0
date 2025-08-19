@@ -34,6 +34,8 @@ import ActiveIcon from '../../style/icons/list_active_icon.svg';
 import ListPauseIcon from '../../style/icons/list_pause_icon.svg';
 import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_error.svg';
 import DeleteIconSmall from '../../style/icons/delete_icon.svg';
+import PreviousIcon from '../../style/icons/previous_page.svg';
+import NextIcon from '../../style/icons/next_page.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -123,4 +125,14 @@ export const iconListCompleteWithError = new LabIcon({
 export const iconDeleteProperty = new LabIcon({
   name: 'launcher:delete-icon',
   svgstr: DeleteIconSmall
+});
+
+export const iconPrevious = new LabIcon({
+  name: 'launcher:previous-icon',
+  svgstr: PreviousIcon
+});
+
+export const iconNext = new LabIcon({
+  name: 'launcher:next-icon',
+  svgstr: NextIcon
 });

@@ -116,3 +116,7 @@
   display: flex;
   justify-content: center;
 }
+
+.cursor-icon {
+  cursor: pointer;
+}

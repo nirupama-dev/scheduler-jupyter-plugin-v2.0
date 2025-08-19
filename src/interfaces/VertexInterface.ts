@@ -160,8 +160,7 @@ export interface ILastScheduledRunResponse {
 export interface IPaginationViewProps {
   canPreviousPage: boolean;
   canNextPage: boolean;
-  currentStartIndex: number;
-  currentLastIndex: number;
+  pageNumber: number;
   handleNextPage: () => void;
   handlePreviousPage: () => void;
   isLoading: boolean;
@@ -173,6 +172,7 @@ export interface IActivePaginationVariables {
   totalCount: number; // size of each page with pagination
   pageTokenList: string[];
   nextPageToken: string | null;
+  pageNumber: number;
 }
 
 // Define the expected type for formattedResponse
@@ -219,7 +219,7 @@ export interface IVertexCellProps {
   getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
   value: string | any;
   column: {
-    Header?: string | undefined | Renderer<HeaderProps<{}>>;
+    Header?: string | undefined | Renderer<HeaderProps<object>>;
   };
   row: {
     original: {
@@ -282,10 +282,14 @@ export interface IVertexDeleteAPIArgs {
   region: string;
   uniqueScheduleId: string;
   scheduleDisplayName: string;
-  listVertexScheduleInfoAPI: () => void;
+  listVertexScheduleInfoAPI: (
+    nextPageTokenToLoad: string | null | undefined
+  ) => void;
 }
 
 export interface IVertexListPayload {
   region: string;
+  nextToken: string | null | undefined;
+  scheduleListPageLength: number;
   abortControllers: any;
 }

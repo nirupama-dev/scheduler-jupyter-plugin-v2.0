@@ -98,15 +98,20 @@ export class VertexServices {
    * an error message, and a loading state.
    */
   static readonly listVertexSchedules = async (
-    listVertexPayload: IVertexListPayload,
-    pageLength: number = 25
+    listVertexPayload: IVertexListPayload
     //TODO: other api error
   ) => {
-    const { region, abortControllers } = listVertexPayload;
+    const { region, nextToken, scheduleListPageLength, abortControllers } =
+      listVertexPayload;
+
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/listSchedules';
-      const urlparam = `?region_id=${region}&page_size=${pageLength}`;
+      let urlparam = `?region_id=${region}&page_size=${scheduleListPageLength}`;
+
+      if (nextToken) {
+        urlparam += `&page_token=${nextToken}`;
+      }
 
       // API call
       const formattedResponse = await requestAPI(serviceURL + urlparam, {
@@ -114,32 +119,43 @@ export class VertexServices {
       });
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
-        // setNextPageToken(null);
-        // setHasNextPageToken(false);
         return {
           schedulesList: [],
+          nextPageToken: null,
+          hasNextPageToken: false,
           error: '',
           isLoading: false
         };
+        // setNextPageToken(null);
+        // setHasNextPageToken(false);
+        // return {
+        //   schedulesList: [],
+        //   error: '',
+        //   isLoading: false
+        // };
       }
 
       const {
-        schedules
-        //nextPageToken,
+        schedules,
+        nextPageToken
         //error
       } = formattedResponse as IFormattedResponse;
+
+      //TODO error handling for API enablement error
 
       if (schedules && schedules.length > 0) {
         return {
           schedulesList: schedules,
+          nextPageToken: nextPageToken ? nextPageToken : null,
           error: '',
           isLoading: false
         };
       } else {
         return {
           schedulesList: [],
-          error: 'No schedules found',
-          isLoading: false
+          nextPageToken: null,
+          hasNextPageToken: false,
+          error: 'No schedules found'
         };
       }
     } catch (error: any) {
@@ -167,12 +183,11 @@ export class VertexServices {
 
         return {
           schedulesList: [],
-          error: 'An error occurrd while fetching schedules.',
-          isLoading: false
+          nextPageToken: null,
+          hasNextPageToken: false,
+          error: 'An error occurred while fetching schedules: ' + error
         };
       }
-    } finally {
-      // setIsLoading(false); // Ensure loading is stopped
     }
   };
 
@@ -364,7 +379,7 @@ export class VertexServices {
       );
 
       if (deleteResponse && deleteResponse.done) {
-        listVertexScheduleInfoAPI(); // Refresh the list after deletion
+        listVertexScheduleInfoAPI(null); // Refresh the list after deletion
         Notification.success(
           `Deleted job ${deletePayload.scheduleDisplayName}. It might take a few minutes for the job to be deleted from the list of jobs.`,
           {
