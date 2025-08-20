@@ -32,8 +32,7 @@ import {
   ILoadingStateComposer,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse,
-  IListDagInfoAPIServiceResponse,
-  ILoadingStateComposerListing
+  IListDagInfoAPIServiceResponse
 } from '../../interfaces/ComposerInterface';
 import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
@@ -808,7 +807,6 @@ export class ComposerServices {
     composerSelectedList: string,
     project: string,
     region: string,
-    setLoadingState: Dispatch<SetStateAction<ILoadingStateComposerListing>>,
     abortControllers?: any
   ) => {
     const controller = new AbortController();
@@ -820,14 +818,8 @@ export class ComposerServices {
         `importErrorsList?composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
         { signal }
       );
-      // The loading flag is updated here
-      if (data) {
-        setLoadingState(prev => ({ ...prev, importErrors: false }));
-      }
       return data;
     } catch (reason) {
-      setLoadingState(prev => ({ ...prev, importErrors: false }));
-
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&

@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputListingDropdown } from '../../common/formFields/FormInputDropdown';
 import { authApi } from '../../common/login/Config';
 import { useForm } from 'react-hook-form';
@@ -40,10 +40,15 @@ import {
 } from '../../../services/common/LoggingService';
 import DeletePopup from '../../common/table/DeletePopup';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { GCS_PLUGIN_ID } from '../../../utils/Constants';
+import {
+  GCS_PLUGIN_ID,
+  POLLING_DAG_LIST_INTERVAL,
+  POLLING_IMPORT_ERROR_INTERVAL
+} from '../../../utils/Constants';
 import { PaginationView } from '../../common/table/PaginationView';
 import ImportErrorPopup from './ImportErrorPopup';
 import { useNavigate } from 'react-router-dom';
+import PollingTimer from '../../../utils/PollingTimer';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const { control, setValue, watch } = useForm();
@@ -126,6 +131,37 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     usePagination
   );
 
+  const listDagInfoAPI = async (env: string) => {
+    if (loadingState.dags) {
+      return;
+    }
+    setLoadingState(prev => ({ ...prev, dags: true }));
+
+    try {
+      const { dagList, bucketName } =
+        await ComposerServices.listDagInfoAPIService(
+          env ?? '',
+          selectedRegion,
+          selectedProjectId
+        );
+      setDagList(dagList);
+      setBucketName(bucketName);
+    } catch (error) {
+      if (!toast.isActive('dagListError')) {
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? error.message
+            : 'Unknown error';
+
+        toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
+          toastId: 'dagListError'
+        });
+      }
+    } finally {
+      setLoadingState(prev => ({ ...prev, dags: false }));
+    }
+  };
+
   /**
    * Check if GCS plugin is installed
    * If installed, set isGCSPluginInstalled to true
@@ -155,16 +191,19 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
     setLoadingState(prev => ({ ...prev, importErrors: true }));
 
-    const result = await ComposerServices.handleImportErrordataService(
-      env ?? '',
-      selectedProjectId,
-      selectedRegion,
-      setLoadingState
-    );
+    try {
+      const result = await ComposerServices.handleImportErrordataService(
+        env ?? '',
+        selectedProjectId,
+        selectedRegion
+      );
 
-    if (result) {
-      setImportErrorData(result.import_errors);
-      setImportErrorEntries(result.total_entries);
+      if (result) {
+        setImportErrorData(result.import_errors);
+        setImportErrorEntries(result.total_entries);
+      }
+    } finally {
+      setLoadingState(prev => ({ ...prev, importErrors: false }));
     }
   };
 
@@ -203,31 +242,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setDagList([]);
       if (!value || !selectedProjectId || !selectedRegion) return;
 
-      try {
-        setLoadingState(prev => ({ ...prev, dags: true }));
-        const { dagList, bucketName } =
-          await ComposerServices.listDagInfoAPIService(
-            value,
-            selectedRegion,
-            selectedProjectId
-          );
-        setDagList(dagList);
-        setBucketName(bucketName);
-        handleImportErrordata(value);
-      } catch (error) {
-        if (!toast.isActive('dagListError')) {
-          const errorMessage =
-            typeof error === 'object' && error !== null && 'message' in error
-              ? error.message
-              : 'Unknown error';
-
-          toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
-            toastId: 'dagListError'
-          });
-        }
-      } finally {
-        setLoadingState(prev => ({ ...prev, dags: false }));
-      }
+      listDagInfoAPI(value);
+      handleImportErrordata(value);
     },
     [selectedProjectId, selectedRegion, setValue]
   );
@@ -402,6 +418,43 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       `/edit/composer/${selectedProjectId}/${selectedRegion}/${selectedEnv}/${id}`
     );
   };
+
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const pollingDagList = async (
+    pollingFunction: () => void,
+    pollingDisable: boolean
+  ) => {
+    PollingTimer(
+      pollingFunction,
+      pollingDisable,
+      POLLING_DAG_LIST_INTERVAL,
+      timer
+    );
+  };
+
+  const timerImportError = useRef<NodeJS.Timeout | undefined>(undefined);
+  const pollingImportError = async (
+    pollingFunction: () => void,
+    pollingDisable: boolean
+  ) => {
+    PollingTimer(
+      pollingFunction,
+      pollingDisable,
+      POLLING_IMPORT_ERROR_INTERVAL,
+      timerImportError
+    );
+  };
+
+  useEffect(() => {
+    if (selectedEnv) {
+      pollingDagList(() => listDagInfoAPI(selectedEnv), false);
+      pollingImportError(() => handleImportErrordata(selectedEnv), false);
+    }
+    return () => {
+      pollingDagList(() => listDagInfoAPI(selectedEnv), true);
+      pollingImportError(() => handleImportErrordata(selectedEnv), true);
+    };
+  }, [selectedEnv, listDagInfoAPI, handleImportErrordata]);
 
   useEffect(() => {
     checkGCSPluginAvailability();
