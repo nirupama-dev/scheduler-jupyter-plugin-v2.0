@@ -441,18 +441,24 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   // Initial API calls for static/independent dropdowns and default region
   useEffect(() => {
     // Set non-API dependent defaults if not in edit mode or values are empty
-    if (!editModeData?.editMode || !getValues('startTime'))
+    if (!editModeData?.editMode || !getValues('startTime')) {
       setValue('startTime', dayjs().toISOString());
-    if (!editModeData?.editMode || !getValues('endTime'))
+    }
+    if (!editModeData?.editMode || !getValues('endTime')) {
       setValue('endTime', dayjs().add(1, 'day').toISOString());
-    if (!editModeData?.editMode || !getValues('scheduleField'))
+    }
+    if (!editModeData?.editMode || !getValues('scheduleField')) {
       setValue('scheduleField', '');
-    if (!editModeData?.editMode || !getValues('scheduleValue'))
+    }
+    if (!editModeData?.editMode || !getValues('scheduleValue')) {
       setValue('scheduleValue', EVERY_MINUTE_CRON);
-    if (!editModeData?.editMode || !getValues('timeZone'))
+    }
+    if (!editModeData?.editMode || !getValues('timeZone')) {
       setValue('timeZone', Intl.DateTimeFormat().resolvedOptions().timeZone);
-    if (!editModeData?.editMode || !getValues('networkOption'))
+    }
+    if (!editModeData?.editMode || !getValues('networkOption')) {
       setValue('networkOption', DEFAULT_NETWORK_SELECTED);
+    }
 
     // Initial data fetches
     fetchRegion();
@@ -637,7 +643,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   // Error message for shared network if host project is missing or no networks
   const showSharedNetworkError = useMemo(() => {
     if (currentNetworkOption === 'networkSharedFromHostProject') {
-      if (loadingState.hostProject) return null; // Don't show error while loading host project
+      if (loadingState.hostProject) {
+        return null;
+      } // Don't show error while loading host project
       if (!hostProject || Object.keys(hostProject).length === 0) {
         return 'No host project configured or accessible. Please ensure a host project is set up for shared VPC networks.';
       }
@@ -964,19 +972,24 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               setValue('maxRunCount', '');
               setValue('timeZone', '');
             } else {
-              if (!getValues('internalScheduleMode'))
+              if (!getValues('internalScheduleMode')) {
                 setValue('internalScheduleMode', 'userFriendly');
-              if (!getValues('scheduleValue'))
+              }
+              if (!getValues('scheduleValue')) {
                 setValue('scheduleValue', EVERY_MINUTE_CRON);
-              if (!getValues('startTime'))
+              }
+              if (!getValues('startTime')) {
                 setValue('startTime', dayjs().toISOString());
-              if (!getValues('endTime'))
+              }
+              if (!getValues('endTime')) {
                 setValue('endTime', dayjs().add(1, 'day').toISOString());
-              if (!getValues('timeZone'))
+              }
+              if (!getValues('timeZone')) {
                 setValue(
                   'timeZone',
                   Intl.DateTimeFormat().resolvedOptions().timeZone
                 );
+              }
             }
             trigger([
               'internalScheduleMode',

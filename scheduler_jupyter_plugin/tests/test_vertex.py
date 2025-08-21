@@ -186,6 +186,7 @@ async def test_list_notebook_execution_jobs(
                     {
                         "createTime": None,
                         "displayName": None,
+                        'gcsNotebookSourceUri': None,
                         "lastScheduledRunResponse": None,
                         "name": None,
                         "nextRunTime": None,

@@ -26,7 +26,7 @@ import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
 import { authApi } from '../common/login/Config';
-import { DropdownOption } from '../../interfaces/FormInterface';
+import { IDropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import {
   IComposerEnvAPIResponse,
@@ -44,13 +44,13 @@ import { AddParameters } from './AddParameters';
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
 > = ({ control, errors, setValue, watch, setError }) => {
-  const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
-  const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
+  const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
+  const [envOptions, setEnvOptions] = useState<IDropdownOption[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
     IComposerEnvAPIResponse[]
   >([]);
-  const [clusterOptions, setClusterOptions] = useState<DropdownOption[]>([]);
-  const [serverlessOptions, setServerlessOptions] = useState<DropdownOption[]>(
+  const [clusterOptions, setClusterOptions] = useState<IDropdownOption[]>([]);
+  const [serverlessOptions, setServerlessOptions] = useState<IDropdownOption[]>(
     []
   );
   const [emailList, setEmailList] = useState<string[]>([]);
@@ -64,7 +64,7 @@ export const CreateComposerSchedule: React.FC<
   });
 
   const timezones = Object.keys(tzdata.zones).sort();
-  const timeZoneOptions: DropdownOption[] = timezones.map(zone => ({
+  const timeZoneOptions: IDropdownOption[] = timezones.map(zone => ({
     label: zone,
     value: zone
   }));

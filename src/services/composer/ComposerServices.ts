@@ -39,11 +39,11 @@ import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 import { Dispatch, SetStateAction } from 'react';
-import { DropdownOption } from '../../interfaces/FormInterface';
+import { IDropdownOption } from '../../interfaces/FormInterface';
 
 export class ComposerServices {
   static readonly listClustersAPIService = async (
-    setClusterOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setClusterOptions: Dispatch<SetStateAction<IDropdownOption[]>>,
     setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
@@ -112,7 +112,7 @@ export class ComposerServices {
   };
 
   static readonly listSessionTemplatesAPIService = async (
-    setServerlessOptions: Dispatch<SetStateAction<DropdownOption[]>>,
+    setServerlessOptions: Dispatch<SetStateAction<IDropdownOption[]>>,
     setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
     setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,
@@ -198,30 +198,25 @@ export class ComposerServices {
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
-  ): Promise<DropdownOption[]> => {
-    try {
-      const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
-        `composerList?project_id=${projectId}&region_id=${region}`
-      );
+  ): Promise<IDropdownOption[]> => {
+    const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
+      `composerList?project_id=${projectId}&region_id=${region}`
+    );
 
-      if (!Array.isArray(formattedResponse)) {
-        // Handle unexpected response format
-        throw new Error('Invalid response format for composer environments');
-      }
-
-      const environmentOptions: DropdownOption[] = formattedResponse.map(
-        (env: IComposerEnvAPIResponse) => ({
-          label: env.label,
-          value: env.name
-        })
-      );
-      environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
-
-      return environmentOptions;
-    } catch (error) {
-      // Re-throw the error so the calling component can handle it
-      throw error;
+    if (!Array.isArray(formattedResponse)) {
+      // This custom error will now be thrown and caught by the caller.
+      throw new Error('Invalid response format for composer environments');
     }
+
+    const environmentOptions: IDropdownOption[] = formattedResponse.map(
+      (env: IComposerEnvAPIResponse) => ({
+        label: env.label,
+        value: env.name
+      })
+    );
+    environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+    return environmentOptions;
   };
 
   static readonly createJobSchedulerService = async (
@@ -624,7 +619,16 @@ export class ComposerServices {
         bucketName: formattedResponse[1]
       };
     } catch (error) {
-      // Re-throw the error so the calling component can handle it
+      if (!toast.isActive('dagListError')) {
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? error.message
+            : 'Unknown error';
+
+        toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
+          toastId: 'dagListError'
+        });
+      }
       throw error;
     }
   };

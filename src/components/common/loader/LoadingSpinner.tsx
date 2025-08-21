@@ -1,8 +1,8 @@
 import { CircularProgress } from '@mui/material';
 import React from 'react';
-import { LoaderProps } from '../../../interfaces/CommonInterface';
+import { ILoaderProps } from '../../../interfaces/CommonInterface';
 
-const Loader: React.FC<LoaderProps> = ({
+const Loader: React.FC<ILoaderProps> = ({
   message,
   iconClassName,
   parentTagClassName

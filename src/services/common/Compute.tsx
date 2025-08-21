@@ -21,7 +21,7 @@ import { handleErrorToast } from '../../components/common/notificationHandling/E
 // import { DropdownOption } from '../../interfaces/FormInterface';
 import { ILabelValue } from '../../interfaces/CommonInterface';
 import { ISharedNetwork } from '../../interfaces/VertexInterface';
-import { DropdownOption } from '../../interfaces/FormInterface';
+import { IDropdownOption } from '../../interfaces/FormInterface';
 
 export class ComputeServices {
   /**
@@ -180,7 +180,7 @@ export class ComputeServices {
 
   static readonly regionAPIService = async (
     projectId: string
-  ): Promise<DropdownOption[]> => {
+  ): Promise<IDropdownOption[]> => {
     try {
       const formattedResponse: string[] = await requestAPI(
         `api/compute/region?project_id=${projectId}`
@@ -190,14 +190,17 @@ export class ComputeServices {
         throw new Error('Invalid response format for regions');
       }
 
-      const regionOptions: DropdownOption[] = formattedResponse.map(
+      const regionOptions: IDropdownOption[] = formattedResponse.map(
         (region: string) => ({ value: region, label: region })
       );
       regionOptions.sort((a, b) => a.label.localeCompare(b.label));
 
       return regionOptions;
     } catch (error) {
-      // Re-throw the error so the calling component can handle it
+      const errorResponse = `Failed to fetch region list : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
       throw error;
     }
   };

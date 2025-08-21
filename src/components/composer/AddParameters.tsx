@@ -21,10 +21,10 @@ import { Button, TextField, IconButton, Typography, Box } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import { ComposerSchedulerFormValues } from '../../schemas/CreateComposerSchema';
-import { Parameter } from '../../interfaces/CommonInterface';
+import { IParameter } from '../../interfaces/CommonInterface';
 import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
 
-interface AddParametersProps {
+interface IAddParametersProps {
   control: Control<CombinedCreateFormValues>;
   errors: FieldErrors<ComposerSchedulerFormValues>; // Pass the errors object from useForm
 }
@@ -41,7 +41,7 @@ const getNestedProperty = (
     if (
       current === null ||
       typeof current !== 'object' ||
-      !current.hasOwnProperty(pathArray[i])
+      !Object.hasOwn(current, pathArray[i])
     ) {
       return defaultValue;
     }
@@ -50,7 +50,7 @@ const getNestedProperty = (
   return current === undefined ? defaultValue : current;
 };
 
-export const AddParameters: FC<AddParametersProps> = ({ control, errors }) => {
+export const AddParameters: FC<IAddParametersProps> = ({ control, errors }) => {
   const { fields, append, remove } = useFieldArray({
     control,
     name: 'parameters' // This must match the field name in your Zod schema
@@ -155,7 +155,7 @@ export const AddParameters: FC<AddParametersProps> = ({ control, errors }) => {
       <Button
         variant="outlined"
         startIcon={<AddCircleOutlineIcon />}
-        onClick={() => append({ key: '', value: '' } as Parameter)}
+        onClick={() => append({ key: '', value: '' } as IParameter)}
         disabled={isAddButtonDisabled}
         sx={{ mt: 1 }}
       >

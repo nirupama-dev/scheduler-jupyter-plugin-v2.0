@@ -80,3 +80,25 @@
 .text-icon {
   line-height: 2;
 }
+
+.no-data-style {
+  margin: 10px 15px;
+}
+
+.pagination-parent-view-main {
+  display: flex;
+  justify-content: flex-end;
+
+  /* Adjust spacing between elements */
+  gap: 1rem;
+
+  /* Add some padding around the component */
+  padding: 0.5rem;
+}
+
+.pagination-numbers {
+  font-size: 0.9rem;
+
+  /* Adjust text color */
+  color: #555;
+}

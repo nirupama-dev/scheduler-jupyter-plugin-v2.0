@@ -26,11 +26,11 @@ import {
 // For Material-UI v4, it might be directly from '@mui/material/Autocomplete' or '@material-ui/lab/Autocomplete'
 import { Controller } from 'react-hook-form';
 import {
-  FormInputDropdownProps,
-  FormInputListingDropdownProps
+  IFormInputDropdownProps,
+  IFormInputListingDropdownProps
 } from '../../../interfaces/FormInterface'; // Adjust path if needed
 
-export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
+export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
   name,
   control,
   label,
@@ -108,7 +108,7 @@ export const FormInputDropdown: React.FC<FormInputDropdownProps> = ({
 };
 
 export const FormInputListingDropdown: React.FC<
-  FormInputListingDropdownProps
+  IFormInputListingDropdownProps
 > = ({
   name,
   control,

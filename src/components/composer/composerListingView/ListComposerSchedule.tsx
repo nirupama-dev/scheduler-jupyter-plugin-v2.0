@@ -19,7 +19,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputListingDropdown } from '../../common/formFields/FormInputDropdown';
 import { authApi } from '../../common/login/Config';
 import { useForm } from 'react-hook-form';
-import { DropdownOption } from '../../../interfaces/FormInterface';
+import { IDropdownOption } from '../../../interfaces/FormInterface';
 import { ComputeServices } from '../../../services/common/Compute';
 import {
   IDagList,
@@ -32,7 +32,6 @@ import { usePagination, useTable } from 'react-table';
 import { ICellProps } from '../../common/table/Utils';
 import { renderActions } from './RenderActions';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
-import { toast } from 'react-toastify';
 import { CircularProgress } from '@mui/material';
 import {
   LOG_LEVEL,
@@ -52,8 +51,8 @@ import PollingTimer from '../../../utils/PollingTimer';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const { control, setValue, watch } = useForm();
-  const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
-  const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
+  const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
+  const [envOptions, setEnvOptions] = useState<IDropdownOption[]>([]);
   const [dagList, setDagList] = useState<IDagList[]>([]);
   const data = dagList;
   const [loadingState, setLoadingState] =
@@ -146,17 +145,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
       setDagList(dagList);
       setBucketName(bucketName);
-    } catch (error) {
-      if (!toast.isActive('dagListError')) {
-        const errorMessage =
-          typeof error === 'object' && error !== null && 'message' in error
-            ? error.message
-            : 'Unknown error';
-
-        toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
-          toastId: 'dagListError'
-        });
-      }
     } finally {
       setLoadingState(prev => ({ ...prev, dags: false }));
     }
@@ -240,7 +228,9 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     async (value: string) => {
       setValue('environment', value);
       setDagList([]);
-      if (!value || !selectedProjectId || !selectedRegion) return;
+      if (!value || !selectedProjectId || !selectedRegion) {
+        return;
+      }
 
       listDagInfoAPI(value);
       handleImportErrordata(value);

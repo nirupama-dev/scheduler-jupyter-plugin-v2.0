@@ -16,16 +16,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useRef } from 'react';
 import { Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
+import Loader from '../components/common/loader/LoadingSpinner';
 import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
-import Loader from '../components/common/loader/LoadingSpinner';
 
 // Dummy ExecutionHistoryScreen for testing purposes
 function ExecutionHistoryScreen() {
@@ -47,9 +47,11 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   const { app, sessionContext, initialKernalSchedulerDetails } =
     schedulerRouteProps;
 
-  // const ListVertexSchedule = lazy(
-  //   () => import('../components/vertex/vertexListingView/ListVertexSchedule')
-  // );
+  const abortControllers = useRef<any>([]);
+
+  const ListVertexSchedule = lazy(
+    () => import('../components/vertex/vertexListingView/ListVertexSchedule')
+  );
 
   const ListComposerSchedule = lazy(
     () =>
@@ -69,6 +71,11 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
         }
       />
 
+      <Route
+        path="/edit/:schedulerTypeOne/:id"
+        element={<CreateNotebookSchedule />}
+      />
+
       <Route path="/list" element={<ScheduleListingView />}>
         <Route
           path="vertex"
@@ -82,7 +89,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                 />
               }
             >
-              {/* <ListVertexSchedule /> */}
+              <ListVertexSchedule abortControllers={abortControllers} />
             </Suspense>
           }
         />

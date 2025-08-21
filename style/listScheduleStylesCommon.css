@@ -102,3 +102,29 @@
 .scheduler-table-data:nth-child(3) {
   color: black;
 }
+
+.error-key-parent {
+  padding-top: 5px;
+  display: flex;
+  align-items: center;
+  width: 90%;
+}
+
+.error-key-wrapper {
+  width: 100%;
+}
+
+.error-key-missing {
+  color: var(--jp-error-color0);
+  padding-left: 5px;
+  font-size: 10px;
+}
+
+.align-center-text {
+  display: flex;
+  justify-content: center;
+}
+
+.cursor-icon {
+  cursor: pointer;
+}

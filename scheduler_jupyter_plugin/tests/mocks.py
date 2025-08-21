@@ -180,6 +180,7 @@ class MockListSchedulesClientSession:
                      {
                         "createTime": None,
                         "displayName": None,
+                        'gcsNotebookSourceUri': None,
                         "lastScheduledRunResponse": None,
                         "name": None,
                         "nextRunTime": None,
