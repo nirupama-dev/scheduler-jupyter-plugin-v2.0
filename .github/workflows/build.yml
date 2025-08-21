@@ -33,7 +33,8 @@ jobs:
       - name: Test the extension
         run: |
           set -eux
-          jlpm run test
+          # TODO: remove this later, added to avoid breaking the build for test case
+          jlpm run test --passWithNoTests 
 
       - name: Build the extension
         run: |

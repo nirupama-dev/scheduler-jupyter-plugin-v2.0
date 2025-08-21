@@ -4,4 +4,3 @@
 **/lib/
 **/ui-tests/
 **/src/react-table-config.d.ts
-**/src/.*/.*.spec.ts[x]?$
