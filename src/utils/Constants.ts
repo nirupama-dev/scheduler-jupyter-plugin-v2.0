@@ -250,6 +250,9 @@ export const LOADER_CONTENT_VERTEX_LISTING_SCREEN =
 export const LOADER_CONTENT_COMPOSER_LISTING_SCREEN =
   'Loading Composer Schedules...';
 
+export const LOADER_CONTENT_VERTEX_EXECUTION_SCREEN =
+  'Loading Vertex Schedule Execution...';
+
 export const LISTING_SCREEN_HEADING = [
   {
     Header: 'Schedule Name',
@@ -280,3 +283,5 @@ export const LISTING_SCREEN_HEADING = [
     accessor: 'actions'
   }
 ];
+
+export const VIEW_CLOUD_LOGS = 'VIEW CLOUD LOGS';

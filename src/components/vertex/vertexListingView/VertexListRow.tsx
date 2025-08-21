@@ -79,7 +79,7 @@ export const rowDataList = (
       >
         {cell.row.original.jobState ? (
           cell.row.original.jobState.length > 0 ? (
-            <div className="execution-history-main-wrapper">
+            <div className="horizontal-element-wrapper">
               {cell.row.original.jobState.map(job => {
                 return (
                   <>
@@ -220,7 +220,7 @@ export const rowDataList = (
       >
         {cell.column.Header === 'Status' ? (
           <>
-            <div className="execution-history-main-wrapper">
+            <div className="horizontal-element-wrapper">
               {getStatusIcon()}
               <div className={alignIcon ? 'text-icon' : ''}>
                 {cell.render('Cell')}

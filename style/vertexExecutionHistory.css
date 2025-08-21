@@ -1,0 +1,48 @@
+.execution-history-header {
+  height: 48px;
+  display: flex;
+}
+
+.scheduler-back-arrow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  padding-left: 10px;
+  border: none;
+  background: none;
+}
+
+.log-btn {
+  padding: 10px;
+  margin-left: auto;
+  width: 11%;
+}
+
+.create-icon {
+  display: flex;
+  height: 18px;
+  width: 18px;
+  color: #3367d6;
+  margin-top: -1px;
+}
+
+.log-icon {
+  padding-top: 8px;
+}
+
+.create-text {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 32px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  text-transform: uppercase;
+  color: #3367d6;
+}
+
+.execution-header-wrap-arrow {
+  padding: 0 15px 0 5px;
+}

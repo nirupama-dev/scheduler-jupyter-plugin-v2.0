@@ -17,26 +17,17 @@
  * limitations under the License.
  */
 import React, { lazy, Suspense, useRef } from 'react';
-import { Routes, Route, Navigate, useParams } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
 import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
 import Loader from '../components/common/loader/LoadingSpinner';
 import {
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
+  LOADER_CONTENT_VERTEX_EXECUTION_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
 
-// Dummy ExecutionHistoryScreen for testing purposes
-function ExecutionHistoryScreen() {
-  const { id } = useParams();
-  return (
-    <div>
-      <h2>Execution History</h2>
-      <div>History for job: {id}</div>
-    </div>
-  );
-}
 /**
  *
  * @param schedulerRouteProps
@@ -56,6 +47,13 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   const ListComposerSchedule = lazy(
     () =>
       import('../components/composer/composerListingView/ListComposerSchedule')
+  );
+
+  const VertexExecutionHistory = lazy(
+    () =>
+      import(
+        '../components/vertex/vertexExecutionHistoryView/VertexExecutionHistoryHeader'
+      )
   );
 
   return (
@@ -111,8 +109,20 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
         />
       </Route>
       <Route
-        path="/execution-vertex-history/:id"
-        element={<ExecutionHistoryScreen />}
+        path="/execution-vertex-history:id"
+        element={
+          <Suspense
+            fallback={
+              <Loader
+                message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
+                iconClassName="spin-loader-custom-style"
+                parentTagClassName='"spin-loader-main spin-loader-listing'
+              />
+            }
+          >
+            <VertexExecutionHistory />
+          </Suspense>
+        }
       />
     </Routes>
   );

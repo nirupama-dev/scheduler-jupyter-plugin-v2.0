@@ -75,14 +75,6 @@
   overflow: auto;
 }
 
-.scheduler-back-arrow-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding-left: 10px;
-}
-
 .dag-runs-table-body {
   overflow-y: auto;
   max-height: 55vh;
@@ -254,11 +246,6 @@
   height: 24px;
 }
 
-.execution-history-header {
-  height: 48px;
-  display: flex;
-}
-
 .accordion-section {
   background: #f2dede;
   margin: 10px 0;
@@ -316,10 +303,6 @@
 
 .table-cell-width {
   width: 512px !important;
-}
-
-.log-icon {
-  padding-top: 8px;
 }
 
 /* Optional: Adjustments for other elements */
@@ -496,12 +479,6 @@
 
 .table-main-execution {
   padding-right: 15px;
-}
-
-.log-btn {
-  padding: 10px;
-  margin-left: auto;
-  width: 11%;
 }
 
 .error-message-warn {
