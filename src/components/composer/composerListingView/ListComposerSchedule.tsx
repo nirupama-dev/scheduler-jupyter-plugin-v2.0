@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputListingDropdown } from '../../common/formFields/FormInputDropdown';
 import { authApi } from '../../common/login/Config';
 import { useForm } from 'react-hook-form';
@@ -39,7 +39,15 @@ import {
 } from '../../../services/common/LoggingService';
 import DeletePopup from '../../common/table/DeletePopup';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { GCS_PLUGIN_ID } from '../../../utils/Constants';
+import {
+  GCS_PLUGIN_ID,
+  POLLING_DAG_LIST_INTERVAL,
+  POLLING_IMPORT_ERROR_INTERVAL
+} from '../../../utils/Constants';
+import { PaginationView } from '../../common/table/PaginationView';
+import ImportErrorPopup from './ImportErrorPopup';
+import { useNavigate } from 'react-router-dom';
+import PollingTimer from '../../../utils/PollingTimer';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const { control, setValue, watch } = useForm();
@@ -52,12 +60,13 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       projectId: false,
       region: false,
       environment: false,
+      importErrors: false,
       dags: false,
       update: '',
       trigger: '',
       editNotebook: '',
-      editDag: '',
-      delete: false
+      delete: false,
+      editSchedule: ''
       // ... initialize other mandatory properties
     });
   const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
@@ -69,6 +78,12 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const [selectedDagId, setSelectedDagId] = useState('');
   const [bucketName, setBucketName] = useState('');
   const [inputNotebookFilePath, setInputNotebookFilePath] = useState('');
+  const [importErrorData, setImportErrorData] = useState<string[]>([]);
+  const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
+  const [importErrorPopupOpen, setImportErrorPopupOpen] =
+    useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
@@ -102,13 +117,38 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     headerGroups,
     rows,
     prepareRow,
-    page
-    // state: { pageIndex, pageSize }
+    page,
+    setPageSize,
+    previousPage,
+    canPreviousPage,
+    canNextPage,
+    nextPage,
+    state: { pageIndex, pageSize }
   } = useTable(
     //@ts-expect-error react-table 'columns' which is declared here on type 'TableOptions<ICluster>'
     { columns, data, autoResetPage: false, initialState: { pageSize: 50 } },
     usePagination
   );
+
+  const listDagInfoAPI = async (env: string) => {
+    if (loadingState.dags) {
+      return;
+    }
+    setLoadingState(prev => ({ ...prev, dags: true }));
+
+    try {
+      const { dagList, bucketName } =
+        await ComposerServices.listDagInfoAPIService(
+          env ?? '',
+          selectedRegion,
+          selectedProjectId
+        );
+      setDagList(dagList);
+      setBucketName(bucketName);
+    } finally {
+      setLoadingState(prev => ({ ...prev, dags: false }));
+    }
+  };
 
   /**
    * Check if GCS plugin is installed
@@ -124,6 +164,46 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         autoClose: false
       });
     }
+  };
+
+  const handleImportErrorPopup = async () => {
+    setImportErrorPopupOpen(true);
+  };
+  const handleImportErrorClosed = async () => {
+    setImportErrorPopupOpen(false);
+  };
+
+  const handleImportErrordata = async (env: string) => {
+    if (loadingState.importErrors) {
+      return;
+    }
+    setLoadingState(prev => ({ ...prev, importErrors: true }));
+
+    try {
+      const result = await ComposerServices.handleImportErrordataService(
+        env ?? '',
+        selectedProjectId,
+        selectedRegion
+      );
+
+      if (result) {
+        setImportErrorData(result.import_errors);
+        setImportErrorEntries(result.total_entries);
+      }
+    } finally {
+      setLoadingState(prev => ({ ...prev, importErrors: false }));
+    }
+  };
+
+  const handleDeleteImportError = async (dagId: string) => {
+    const fromPage = 'importErrorPage';
+    await ComposerServices.handleDeleteSchedulerAPIService(
+      selectedEnv ?? '',
+      selectedDagId,
+      selectedRegion,
+      selectedProjectId,
+      fromPage
+    );
   };
 
   const handleCancelDelete = () => {
@@ -152,19 +232,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         return;
       }
 
-      try {
-        setLoadingState(prev => ({ ...prev, dags: true }));
-        const { dagList, bucketName } =
-          await ComposerServices.listDagInfoAPIService(
-            value,
-            selectedRegion,
-            selectedProjectId
-          );
-        setDagList(dagList);
-        setBucketName(bucketName);
-      } finally {
-        setLoadingState(prev => ({ ...prev, dags: false }));
-      }
+      listDagInfoAPI(value);
+      handleImportErrordata(value);
     },
     [selectedProjectId, selectedRegion, setValue]
   );
@@ -329,6 +398,54 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
   };
 
+  const handleEditSchedule = (id: string) => {
+    console.log('Edit schedule clicked for id:', id);
+    setLoadingState(prevState => ({
+      ...prevState,
+      editSchedule: id
+    }));
+    navigate(
+      `/edit/composer/${selectedProjectId}/${selectedRegion}/${selectedEnv}/${id}`
+    );
+  };
+
+  const timer = useRef<NodeJS.Timeout | undefined>(undefined);
+  const pollingDagList = async (
+    pollingFunction: () => void,
+    pollingDisable: boolean
+  ) => {
+    PollingTimer(
+      pollingFunction,
+      pollingDisable,
+      POLLING_DAG_LIST_INTERVAL,
+      timer
+    );
+  };
+
+  const timerImportError = useRef<NodeJS.Timeout | undefined>(undefined);
+  const pollingImportError = async (
+    pollingFunction: () => void,
+    pollingDisable: boolean
+  ) => {
+    PollingTimer(
+      pollingFunction,
+      pollingDisable,
+      POLLING_IMPORT_ERROR_INTERVAL,
+      timerImportError
+    );
+  };
+
+  useEffect(() => {
+    if (selectedEnv) {
+      pollingDagList(() => listDagInfoAPI(selectedEnv), false);
+      pollingImportError(() => handleImportErrordata(selectedEnv), false);
+    }
+    return () => {
+      pollingDagList(() => listDagInfoAPI(selectedEnv), true);
+      pollingImportError(() => handleImportErrordata(selectedEnv), true);
+    };
+  }, [selectedEnv, listDagInfoAPI, handleImportErrordata]);
+
   useEffect(() => {
     checkGCSPluginAvailability();
   }, []);
@@ -443,7 +560,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               handleUpdateScheduler,
               handleTriggerDag,
               handleEditNotebook,
-              handleDeletePopUp
+              handleDeletePopUp,
+              handleEditSchedule
             )}
           </td>
         );
@@ -525,6 +643,28 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
             />
           </div>
         </div>
+        {importErrorEntries > 0 && selectedProjectId && selectedRegion && (
+          <div className="import-error-parent">
+            <div
+              className="accordion-button"
+              role="button"
+              aria-label="Show Import Errors"
+              title="Show Import Errors"
+              onClick={handleImportErrorPopup}
+            >
+              Show Schedule Errors ({importErrorEntries})
+            </div>
+            {importErrorPopupOpen && (
+              <ImportErrorPopup
+                importErrorData={importErrorData}
+                importErrorEntries={importErrorEntries}
+                importErrorPopupOpen={importErrorPopupOpen}
+                onClose={handleImportErrorClosed}
+                onDelete={(dagId: string) => handleDeleteImportError(dagId)}
+              />
+            )}
+          </div>
+        )}
       </div>
       {dagList.length > 0 ? (
         <div className="table-space-around">
@@ -539,6 +679,18 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
             tableDataCondition={tableDataCondition}
             fromPage="Notebook Schedulers"
           />
+          {dagList.length > 50 && (
+            <PaginationView
+              pageSize={pageSize}
+              setPageSize={setPageSize}
+              pageIndex={pageIndex}
+              allData={dagList}
+              previousPage={previousPage}
+              nextPage={nextPage}
+              canPreviousPage={canPreviousPage}
+              canNextPage={canNextPage}
+            />
+          )}
           {deletePopupOpen && (
             <DeletePopup
               onCancel={() => handleCancelDelete()}
