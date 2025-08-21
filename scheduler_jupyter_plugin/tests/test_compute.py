@@ -58,11 +58,13 @@ async def test_list_region(monkeypatch, returncode, expected_result, jp_fetch):
         "RegionsClient",
         lambda credentials=None, project=None: mock_compute_client,
     )
+    mock_project_id = "mock-project-id"
 
     response = await jp_fetch(
         "scheduler-plugin",
         "api/compute/region",
         method="GET",
+        params={"project_id": mock_project_id},
         allow_nonstandard_methods=True,
     )
     assert response.code == 200
