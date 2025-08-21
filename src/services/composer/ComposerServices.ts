@@ -199,29 +199,24 @@ export class ComposerServices {
     projectId: string,
     region: string
   ): Promise<IDropdownOption[]> => {
-    try {
-      const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
-        `composerList?project_id=${projectId}&region_id=${region}`
-      );
+    const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
+      `composerList?project_id=${projectId}&region_id=${region}`
+    );
 
-      if (!Array.isArray(formattedResponse)) {
-        // Handle unexpected response format
-        throw new Error('Invalid response format for composer environments');
-      }
-
-      const environmentOptions: IDropdownOption[] = formattedResponse.map(
-        (env: IComposerEnvAPIResponse) => ({
-          label: env.label,
-          value: env.name
-        })
-      );
-      environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
-
-      return environmentOptions;
-    } catch (error) {
-      // Re-throw the error so the calling component can handle it
-      throw error;
+    if (!Array.isArray(formattedResponse)) {
+      // This custom error will now be thrown and caught by the caller.
+      throw new Error('Invalid response format for composer environments');
     }
+
+    const environmentOptions: IDropdownOption[] = formattedResponse.map(
+      (env: IComposerEnvAPIResponse) => ({
+        label: env.label,
+        value: env.name
+      })
+    );
+    environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+    return environmentOptions;
   };
   static readonly createJobSchedulerService = async (
     payload: IComposerSchedulePayload,
@@ -622,7 +617,16 @@ export class ComposerServices {
         bucketName: formattedResponse[1]
       };
     } catch (error) {
-      // Re-throw the error so the calling component can handle it
+      if (!toast.isActive('dagListError')) {
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? error.message
+            : 'Unknown error';
+
+        toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
+          toastId: 'dagListError'
+        });
+      }
       throw error;
     }
   };

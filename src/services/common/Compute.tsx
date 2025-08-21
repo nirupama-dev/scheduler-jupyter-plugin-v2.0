@@ -197,7 +197,10 @@ export class ComputeServices {
 
       return regionOptions;
     } catch (error) {
-      // Re-throw the error so the calling component can handle it
+      const errorResponse = `Failed to fetch region list : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
       throw error;
     }
   };

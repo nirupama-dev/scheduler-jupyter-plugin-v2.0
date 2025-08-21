@@ -32,7 +32,6 @@ import { usePagination, useTable } from 'react-table';
 import { ICellProps } from '../../common/table/Utils';
 import { renderActions } from './RenderActions';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
-import { toast } from 'react-toastify';
 import { CircularProgress } from '@mui/material';
 import {
   LOG_LEVEL,
@@ -163,17 +162,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           );
         setDagList(dagList);
         setBucketName(bucketName);
-      } catch (error) {
-        if (!toast.isActive('dagListError')) {
-          const errorMessage =
-            typeof error === 'object' && error !== null && 'message' in error
-              ? error.message
-              : 'Unknown error';
-
-          toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
-            toastId: 'dagListError'
-          });
-        }
       } finally {
         setLoadingState(prev => ({ ...prev, dags: false }));
       }
