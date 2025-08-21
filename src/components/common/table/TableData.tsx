@@ -83,14 +83,14 @@ function TableData({
           <tr>
             <td colSpan={7} className="loader-table">
               <div>
-                <div className="spin-loader spin-loader-table">
+                <div className="spin-loader spin-loader-table align-center-text">
                   <CircularProgress
                     className="spin-loader-custom-style"
                     size={18}
                     aria-label="Loading Spinner"
                     data-testid="loader"
                   />
-                  Loading {fromPage}
+                  Loading {fromPage} Schedules
                 </div>
               </div>
             </td>

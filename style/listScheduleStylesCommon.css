@@ -24,7 +24,8 @@
 }
 
 .scheduler-list-table-header {
-  background: rgba(133, 109, 109, 0.04);
+  /* stylelint-disable-next-line */
+  background: rgb(133, 109, 109, 0.04);
   font-style: normal;
   font-weight: 500;
   font-size: 13px;
@@ -92,4 +93,30 @@
 
 .scheduler-table-data:nth-child(2) {
   text-transform: capitalize;
+}
+
+.error-key-parent {
+  padding-top: 5px;
+  display: flex;
+  align-items: center;
+  width: 90%;
+}
+
+.error-key-wrapper {
+  width: 100%;
+}
+
+.error-key-missing {
+  color: var(--jp-error-color0);
+  padding-left: 5px;
+  font-size: 10px;
+}
+
+.align-center-text {
+  display: flex;
+  justify-content: center;
+}
+
+.cursor-icon {
+  cursor: pointer;
 }

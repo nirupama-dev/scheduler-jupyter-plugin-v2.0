@@ -212,7 +212,7 @@ export class VertexServices {
       const signal = controller.signal;
 
       const serviceURL = 'api/vertex/listSchedules';
-      let urlparam = `?region_id=${region}&page_size=${pageLength}`;
+      const urlparam = `?region_id=${region}&page_size=${pageLength}`;
       // if (newPageToken) {
       //   urlparam += `&page_token=${newPageToken}`;
       // }

@@ -23,7 +23,7 @@ const LoadingSpinner: FC = () => (
   </div>
 );
 
-interface ActionButtonProps {
+interface IActionButtonProps {
   title: string;
   icon: LabIcon;
   onClick?: (e: React.MouseEvent) => void;
@@ -31,7 +31,7 @@ interface ActionButtonProps {
   className?: string;
 }
 
-const ActionButton: FC<ActionButtonProps> = ({
+const ActionButton: FC<IActionButtonProps> = ({
   title,
   onClick,
   icon,

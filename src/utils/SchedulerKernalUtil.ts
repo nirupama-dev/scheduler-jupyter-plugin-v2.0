@@ -8,7 +8,7 @@ import { IKernelDetails } from '../interfaces/ComposerInterface';
 import { SchedulerType } from '../types/CommonSchedulerTypes';
 import { Kernel, KernelAPI, KernelSpecAPI } from '@jupyterlab/services';
 import { ComposerServices } from '../services/composer/ComposerServices';
-import { DropdownOption } from '../interfaces/FormInterface';
+import { IDropdownOption } from '../interfaces/FormInterface';
 import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 
 /**
@@ -209,7 +209,7 @@ const promisifiedListClusters = (): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     // This callback will receive the final accumulated list from SchedulerService's internal recursion
     const setClusterOptionsCallback = (
-      action: React.SetStateAction<DropdownOption[]>
+      action: React.SetStateAction<IDropdownOption[]>
     ) => {
       if (typeof action === 'function') {
         const finalOptions = action([]); // Call the function to get the actual array
@@ -235,7 +235,7 @@ const promisifiedListClusters = (): Promise<string[]> => {
 const promisifiedListSessionTemplates = (): Promise<string[]> => {
   return new Promise((resolve, reject) => {
     const setServerlessOptionsCallback = (
-      action: React.SetStateAction<DropdownOption[]>
+      action: React.SetStateAction<IDropdownOption[]>
     ) => {
       if (typeof action === 'function') {
         const finalOptions = action([]);
@@ -265,7 +265,7 @@ export const getDefaultSchedulerTypeOnLoad = async (
 ): Promise<{
   kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults;
 }> => {
-  let kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults = {
+  const kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults = {
     schedulerType: 'vertex',
     kernalDetails: {
       executionMode: 'local',
