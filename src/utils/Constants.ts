@@ -287,3 +287,12 @@ export const LISTING_SCREEN_HEADING = [
 ];
 
 export const VIEW_CLOUD_LOGS = 'VIEW CLOUD LOGS';
+
+export const VERTEX_EXECUTION_HISTORY_TABLE_HEADER = [
+  { Header: 'State', accessor: 'state' },
+  { Header: 'Date', accessor: 'date' },
+  { Header: 'Time', accessor: 'time' },
+  { Header: 'Code', accessor: 'code' },
+  { Header: 'Status Message', accessor: 'statusMessage' },
+  { Header: 'Actions', accessor: 'actions' }
+];

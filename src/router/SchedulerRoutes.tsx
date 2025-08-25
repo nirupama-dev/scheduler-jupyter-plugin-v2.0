@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import React, { lazy, Suspense, useRef } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { CreateNotebookSchedule } from '../components/notebookScheduler/CreateNotebookSchedule';
@@ -52,7 +53,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   const VertexExecutionHistory = lazy(
     () =>
       import(
-        '../components/vertex/vertexExecutionHistoryView/VertexExecutionHistoryHeader'
+        '../components/vertex/vertexExecutionHistoryView/VertexExecutionHistory'
       )
   );
 
@@ -109,7 +110,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
         />
       </Route>
       <Route
-        path="/execution-vertex-history:id"
+        path="/execution-vertex-history/:scheduleId/:region/:scheduleName"
         element={
           <Suspense
             fallback={
@@ -120,7 +121,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
               />
             }
           >
-            <VertexExecutionHistory />
+            <VertexExecutionHistory abortControllers={abortControllers} />
           </Suspense>
         }
       />

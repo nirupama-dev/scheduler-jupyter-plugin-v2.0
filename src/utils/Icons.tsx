@@ -39,6 +39,11 @@ import NextIcon from '../../style/icons/next_page.svg';
 import expandLessIcon from '../../style/icons/expand_less.svg';
 import expandMoreIcon from '../../style/icons/expand_more.svg';
 import createClusterIcon from '../../style/icons/create_cluster_icon.svg';
+import SuccessCircleIcon from '../../style/icons/success-circle-icon.svg';
+import FailedCircleIcon from '../../style/icons/failed-circle-icon.svg';
+import OrangeCircle from '../../style/icons/orange_icon.svg';
+import GreyCircle from '../../style/icons/grey_icon.svg';
+import downloadIcon from '../../style/icons/scheduler_download.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -153,4 +158,29 @@ export const iconExpandMore = new LabIcon({
 export const iconCreateCluster = new LabIcon({
   name: 'launcher:create-cluster-icon',
   svgstr: createClusterIcon
+});
+
+export const IconSuccessCircle = new LabIcon({
+  name: 'launcher:success-circle-icon',
+  svgstr: SuccessCircleIcon
+});
+
+export const IconFailedCircle = new LabIcon({
+  name: 'launcher:failed-circle-icon',
+  svgstr: FailedCircleIcon
+});
+
+export const IconOrangeCircle = new LabIcon({
+  name: 'launcher:orange-circle-icon',
+  svgstr: OrangeCircle
+});
+
+export const IconGreyCircle = new LabIcon({
+  name: 'launcher:grey-circle-icon',
+  svgstr: GreyCircle
+});
+
+export const iconDownload = new LabIcon({
+  name: 'launcher:download-icon',
+  svgstr: downloadIcon
 });

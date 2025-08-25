@@ -18,39 +18,42 @@
 import React from 'react';
 import { iconLeftArrow, iconCreateCluster } from '../../../utils/Icons';
 import { VIEW_CLOUD_LOGS } from '../../../utils/Constants';
+import LoadingSpinner from '../../common/loader/LoadingSpinner';
 
-const ExecutionHistoryHeader = () => (
-  //   {
-  //     //   scheduleName,
-  //     //   handleBackButton,
-  //     //   handleLogs
-  //   }
+const ExecutionHistoryHeader = ({
+  scheduleName,
+  handleBackButton,
+  handleLogs
+}: {
+  scheduleName: string;
+  handleBackButton: () => void;
+  handleLogs: () => void;
+}) => (
   <div className="execution-history-header">
-    <button
-      //   role="button"
-      className="scheduler-back-arrow-icon"
-      //   onClick={handleBackButton}
-    >
+    <button className="scheduler-back-arrow-icon" onClick={handleBackButton}>
       <iconLeftArrow.react
         tag="div"
         className="icon-white logo-alignment-style cursor-icon"
       />
     </button>
     <div className="scheduler-page-title execution-header-wrap-arrow">
-      Execution History:
-      {/* {scheduleName} */}
+      Execution History:{' '}
+      {!scheduleName ? (
+        <LoadingSpinner iconClassName="spinner-schedule-title" />
+      ) : (
+        scheduleName
+      )}
     </div>
     <div className="log-btn right-panel-wrapper">
-      <div
-        className="horizontal-element-wrapper"
-        role="button"
-        // onClick={handleLogs}
+      <button
+        className="horizontal-element-wrapper log-btn-element"
+        onClick={handleLogs}
       >
         <div className="create-icon log-icon cursor-icon">
           <iconCreateCluster.react tag="div" className="logo-alignment-style" />
         </div>
         <div className="create-text cursor-icon">{VIEW_CLOUD_LOGS}</div>
-      </div>
+      </button>
     </div>
   </div>
 );
