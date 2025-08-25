@@ -132,12 +132,13 @@ export interface ILoadingStateComposerListing {
   projectId: boolean;
   region: boolean;
   environment: boolean;
+  importErrors: boolean;
   dags: boolean;
   update: string;
   trigger: string;
   editNotebook: string;
-  editDag: string;
   delete: boolean;
+  editSchedule: string;
 }
 
 export interface IDagList {

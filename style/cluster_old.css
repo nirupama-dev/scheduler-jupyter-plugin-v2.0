@@ -239,10 +239,6 @@
   text-align: center;
 }
 
-.no-data-style {
-  margin: 10px 15px;
-}
-
 .error-view-parent {
   display: flex;
   align-items: center;

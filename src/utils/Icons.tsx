@@ -36,6 +36,8 @@ import ListCompleteWithErrorIcon from '../../style/icons/list_completed_with_err
 import DeleteIconSmall from '../../style/icons/delete_icon.svg';
 import PreviousIcon from '../../style/icons/previous_page.svg';
 import NextIcon from '../../style/icons/next_page.svg';
+import expandLessIcon from '../../style/icons/expand_less.svg';
+import expandMoreIcon from '../../style/icons/expand_more.svg';
 import createClusterIcon from '../../style/icons/create_cluster_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
@@ -136,6 +138,16 @@ export const iconPrevious = new LabIcon({
 export const iconNext = new LabIcon({
   name: 'launcher:next-icon',
   svgstr: NextIcon
+});
+
+export const iconExpandLess = new LabIcon({
+  name: 'launcher:expand-less-icon',
+  svgstr: expandLessIcon
+});
+
+export const iconExpandMore = new LabIcon({
+  name: 'launcher:expand-more-icon',
+  svgstr: expandMoreIcon
 });
 
 export const iconCreateCluster = new LabIcon({

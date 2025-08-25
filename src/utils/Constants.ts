@@ -126,6 +126,8 @@ export const SCHEDULE_LABEL_COMPOSER = 'Composer';
 export const TITLE_LAUNCHER_CATEGORY = 'Google Cloud Resources';
 
 export const GCS_PLUGIN_ID = 'gcs-jupyter-plugin:plugin';
+export const POLLING_DAG_LIST_INTERVAL = 10000;
+export const POLLING_IMPORT_ERROR_INTERVAL = 30000;
 
 export const EXECUTION_MODE_OPTIONS = [
   {
