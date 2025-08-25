@@ -19,7 +19,10 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import {
   IDeleteSchedulerAPIResponse,
+  IDownloadFile,
+  IExecutionPayload,
   IFormattedResponse,
+  IOutputFileExistsPayload,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
   IUpdateSchedulerArgs,
@@ -35,6 +38,8 @@ import {
 } from '../../interfaces/VertexInterface';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { settingController } from '../../utils/Config';
+import { vertexScheduleRunResponseTransformation } from '../../utils/vertexExecutionHistoryTransformation';
+import path from 'path';
 export class VertexServices {
   /**
    * Fetches machine types for a given region.
@@ -403,6 +408,131 @@ export class VertexServices {
       const errorResponse = `Failed to delete the ${scheduleDisplayName} : ${error}`;
       handleErrorToast({
         error: errorResponse
+      });
+    }
+  };
+
+  static readonly executionHistoryServiceList = async (
+    executionPayload: IExecutionPayload
+  ) => {
+    const { region, scheduleId, selectedMonth, abortControllers } =
+      executionPayload;
+    if (!scheduleId || !selectedMonth) {
+      return null;
+    }
+
+    try {
+      const signal = settingController(abortControllers);
+      const selected_month = selectedMonth.format('YYYY-MM-DDTHH:mm:ssZ[Z]');
+      const schedule_id = scheduleId.split('/').pop();
+      const serviceURL = 'api/vertex/listNotebookExecutionJobs';
+
+      const vertexExecutionHistoryScheduleRunList = await requestAPI(
+        `${serviceURL}?region_id=${region}&schedule_id=${schedule_id}&start_date=${selected_month}&order_by=createTime desc`,
+        { signal }
+      );
+
+      const executionHistoryScheduleData =
+        vertexScheduleRunResponseTransformation(
+          vertexExecutionHistoryScheduleRunList
+        );
+      return executionHistoryScheduleData;
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        error instanceof TypeError &&
+        error.toString().includes(ABORT_MESSAGE)
+      ) {
+        return null; // Return null on abort
+      } else {
+        SchedulerLoggingService.log(
+          `Error in execution history API: ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        handleErrorToast({
+          error: `Error in fetching the execution history: ${error}`
+        });
+        return {
+          scheduleRuns: [],
+          groupedDates: { grey: [], red: [], green: [], darkGreen: [] }
+        };
+      }
+    }
+  };
+
+  //Funtion to check weather output file exists or not
+  static readonly outputFileExists = async (
+    outputFileExistsPayload: IOutputFileExistsPayload
+  ) => {
+    try {
+      const { bucketName, scheduleRunId, fileName, abortControllers } =
+        outputFileExistsPayload;
+      const signal = settingController(abortControllers);
+      const formattedResponse = await requestAPI(
+        `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${scheduleRunId}&file_name=${fileName}`,
+        { signal }
+      );
+      if (formattedResponse === 'true') {
+        return true;
+      } else {
+        return true;
+      }
+    } catch (lastRunError: any) {
+      if (typeof lastRunError === 'object' && lastRunError !== null) {
+        if (
+          lastRunError instanceof TypeError &&
+          lastRunError.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          `Error checking output file ${lastRunError}`,
+          LOG_LEVEL.ERROR
+        );
+      }
+    }
+  };
+
+  static readonly downloadJobAPIService = async (
+    downloadPayload: IDownloadFile
+  ) => {
+    try {
+      const { gcsUrl, fileName, scheduleRunId, scheduleName } = downloadPayload;
+      const bucketName = gcsUrl?.split('//')[1];
+      const formattedResponse: any = await requestAPI(
+        `api/storage/downloadOutput?bucket_name=${bucketName}&job_run_id=${scheduleRunId}&file_name=${fileName}`,
+        {
+          method: 'POST'
+        }
+      );
+      if (formattedResponse.status === 0) {
+        const base_filename = path.basename(
+          formattedResponse.downloaded_filename
+        );
+        Notification.success(
+          `${base_filename} has been successfully downloaded from the ${scheduleName} job history`,
+          {
+            autoClose: false
+          }
+        );
+      } else {
+        SchedulerLoggingService.log(
+          'Error in downloading the job history',
+          LOG_LEVEL.ERROR
+        );
+        Notification.error('Error in downloading the job history', {
+          autoClose: false
+        });
+      }
+    } catch (error) {
+      SchedulerLoggingService.log(
+        'Error in downloading the job history',
+        LOG_LEVEL.ERROR
+      );
+      Notification.error('Error in downloading the job history', {
+        autoClose: false
       });
     }
   };

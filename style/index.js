@@ -29,3 +29,4 @@ import './createVertexScheduler.css';
 import './createComposerScheduler.css';
 import './common.css';
 import './listComposerSchedule.css';
+import './vertexExecutionHistory.css';

@@ -31,10 +31,6 @@
   font-size: 12px !important;
 }
 
-.vertex-list-table-parent {
-  overflow: auto;
-}
-
 .actions-icon-btn {
   display: flex;
 }
@@ -46,15 +42,6 @@
 .scroll-list {
   overflow: auto;
   height: calc(100vh - 298px);
-}
-
-.table-cell-overflow {
-  min-width: 25%;
-  max-width: 12%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  position: relative;
 }
 
 .success_icon {
@@ -79,10 +66,6 @@
 
 .text-icon {
   line-height: 2;
-}
-
-.no-data-style {
-  margin: 10px 15px;
 }
 
 .pagination-parent-view-main {

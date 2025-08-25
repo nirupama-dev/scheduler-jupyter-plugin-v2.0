@@ -334,7 +334,10 @@ const ListVertexSchedule = ({
     setActivePaginationVariables(saveActivePaginationVariables());
     // Converts the slashes and other special characters into a safe format that React Router will treat as a single string
     const scheduleId = encodeURIComponent(schedulerData?.name.split('/').pop());
-    navigate(`/execution-vertex-history/${scheduleId}`);
+    const selectedScheduleName = encodeURIComponent(schedulerData?.displayName);
+    navigate(
+      `/execution-vertex-history/${scheduleId}/${region}/${selectedScheduleName}`
+    );
   };
 
   /**
@@ -679,7 +682,7 @@ const ListVertexSchedule = ({
 
       {vertexScheduleList.length > 0 ? (
         <>
-          <div className="notebook-templates-list-tabl e-parent vertex-list-table-parent table-space-around scroll-list">
+          <div className="notebook-templates-list-tabl e-parent table-cell-flow table-space-around scroll-list">
             <TableData
               getTableProps={getTableProps}
               headerGroups={headerGroups}

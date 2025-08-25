@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { scheduleMode } from '../utils/Constants';
 
 import {
@@ -29,6 +29,7 @@ import {
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
 import { IEdiModeData, ILabelValue } from './CommonInterface';
 import { HeaderProps, Renderer } from 'react-table';
+import { PickersDayProps } from '@mui/x-date-pickers';
 
 export interface ICreateVertexSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -292,4 +293,101 @@ export interface IVertexListPayload {
   nextToken: string | null | undefined;
   scheduleListPageLength: number;
   abortControllers: any;
+}
+
+export interface IVertexScheduleRun {
+  name: string;
+  createTime: string;
+  updateTime: string;
+  gcsOutputUri: string;
+  jobState: string;
+  gcsNotebookSource: { uri: string };
+  displayName: string;
+  status?: { code: string; message: string };
+}
+
+export interface IGroupedExecutionHistoryDates {
+  grey: string[];
+  red: string[];
+  green: string[];
+  darkGreen: string[];
+}
+
+export interface IExecutionPayload {
+  region: string;
+  scheduleId: string;
+  selectedMonth: Dayjs | null;
+  abortControllers: any;
+}
+
+export interface IVertexExecutionHistoryCellProps {
+  getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
+  value: string | any;
+  column: {
+    Header: string;
+  };
+  row: {
+    original: {
+      id: string;
+      status: string;
+      scheduleId: string;
+      state: string;
+      gcsUrl: string;
+      fileName: string;
+    };
+  };
+  render: (value: string) => React.ReactNode;
+}
+
+export interface IScheduleRun {
+  state: string;
+  gcsUrl: string;
+  scheduleRunId: string;
+  scheduleId: string;
+  fileName: string;
+}
+
+export interface IVertexExecutionHistoryActionsProps {
+  data: {
+    scheduleRunId?: string;
+    state?: string;
+    gcsUrl?: string;
+    fileName?: string;
+  };
+  scheduleName: string;
+  fileExists?: boolean;
+}
+
+export interface IScheduleRunFiltered {
+  date: string;
+  actions?: any;
+  scheduleId?: string;
+  state?: string;
+  gcsUrl?: string;
+  fileName?: string;
+  code?: string;
+  statusMessage?: string;
+  time?: string;
+}
+
+export interface IOutputFileExistsPayload {
+  bucketName: string;
+  scheduleRunId: string;
+  fileName: string;
+  abortControllers: any;
+}
+
+export interface IDownloadFile {
+  gcsUrl: string;
+  fileName: string;
+  scheduleRunId: string;
+  scheduleName: string;
+}
+
+export interface ICustomDateProps extends PickersDayProps<Dayjs> {
+  selectedDate?: Dayjs | null;
+  greyListDates?: string[];
+  redListDates?: string[];
+  greenListDates?: string[];
+  darkGreenListDates?: string[];
 }

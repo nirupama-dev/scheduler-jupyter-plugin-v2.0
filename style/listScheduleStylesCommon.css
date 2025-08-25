@@ -72,11 +72,6 @@
   color: var(--jp-ui-font-color2);
 }
 
-.icon-buttons-style {
-  cursor: pointer;
-  padding-right: 5px;
-}
-
 .icon-buttons-style-disable {
   padding-right: 5px;
   color: rgb(245 245 245);
@@ -127,4 +122,25 @@
 
 .cursor-icon {
   cursor: pointer;
+}
+
+.table-right-space {
+  padding-right: 15px;
+}
+
+.table-cell-overflow {
+  min-width: 25%;
+  max-width: 12%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  position: relative;
+}
+
+.table-cell-flow {
+  overflow: auto;
+}
+
+.no-data-style {
+  margin: 10px 15px;
 }

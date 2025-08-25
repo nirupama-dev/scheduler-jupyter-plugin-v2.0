@@ -260,20 +260,20 @@ const VertexJobRuns = ({
     }
   };
 
-  const scheduleRunsList = async () => {
-    await VertexServices.executionHistoryServiceList(
-      region,
-      schedulerData,
-      selectedMonth,
-      setIsLoading,
-      setVertexScheduleRunsList,
-      setGreyListDates,
-      setRedListDates,
-      setGreenListDates,
-      setDarkGreenListDates,
-      abortControllers
-    );
-  };
+  // const scheduleRunsList = async () => {
+  //   await VertexServices.executionHistoryServiceList(
+  //     region,
+  //     schedulerData,
+  //     selectedMonth,
+  //     setIsLoading,
+  //     setVertexScheduleRunsList,
+  //     setGreyListDates,
+  //     setRedListDates,
+  //     setGreenListDates,
+  //     setDarkGreenListDates,
+  //     abortControllers
+  //   );
+  // };
 
   useEffect(() => {
     if (selectedMonth !== null) {

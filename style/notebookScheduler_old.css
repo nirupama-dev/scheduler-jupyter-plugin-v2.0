@@ -45,42 +45,8 @@
   color: var(--jp-ui-font-color0);
 }
 
-.execution-history-left-wrapper {
-  width: 400px;
-  border: 1px solid var(--jp-layout-color3);
-}
-
-.execution-history-full-wrapper {
-  width: 100%;
-  border: 1px solid var(--jp-layout-color3);
-}
-
-.execution-history-right-wrapper {
-  width: calc(100% - 400px);
-  border: 1px solid var(--jp-layout-color3);
-  border-left: none;
-  overflow: auto;
-}
-
-.execution-history-right-wrapper-scroll {
-  overflow: hidden;
-}
-
-.execution-history-main-full-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
 .dag-runs-list-table-parent {
   overflow: auto;
-}
-
-.scheduler-back-arrow-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding-left: 10px;
 }
 
 .dag-runs-table-body {
@@ -254,11 +220,6 @@
   height: 24px;
 }
 
-.execution-history-header {
-  height: 48px;
-  display: flex;
-}
-
 .accordion-section {
   background: #f2dede;
   margin: 10px 0;
@@ -301,10 +262,6 @@
   margin-right: 10px;
 }
 
-.sub-title-heading {
-  padding: 0;
-}
-
 .tab-text-sub-cl .error-message {
   color: #b71c1c;
 }
@@ -316,10 +273,6 @@
 
 .table-cell-width {
   width: 512px !important;
-}
-
-.log-icon {
-  padding-top: 8px;
 }
 
 /* Optional: Adjustments for other elements */
@@ -365,10 +318,6 @@
   color: #f57c00;
 }
 
-.success-message-top {
-  padding-top: 15px;
-}
-
 .warning-message {
   padding-top: 3px;
 }
@@ -396,18 +345,6 @@
 .spinner-loader-modal {
   width: 14px !important;
   height: 14px !important;
-}
-
-.date-box-shadow {
-  box-shadow: 0 3px 10px rgb(0 0 0 / 20%);
-}
-
-.execution-wrapper-border-none {
-  border: none;
-}
-
-.execution-top-border {
-  border-top: 1px solid var(--jp-layout-color3);
 }
 
 .action-btn-execution {
@@ -486,22 +423,8 @@
   height: 100vh;
 }
 
-.calender-top {
-  padding-top: 30px;
-}
-
-.table-execution-history-vertex {
-  height: calc(100vh - 212px);
-}
-
 .table-main-execution {
   padding-right: 15px;
-}
-
-.log-btn {
-  padding: 10px;
-  margin-left: auto;
-  width: 11%;
 }
 
 .error-message-warn {
@@ -520,21 +443,6 @@
 
 .list-level-component {
   max-height: 0;
-}
-
-.calender-date-time-wrapper {
-  position: relative;
-}
-
-.calender-status-icon {
-  margin: 0 auto;
-  position: absolute;
-  bottom: 4px;
-  left: 17px;
-}
-
-.calendar-status-icon-double {
-  left: 16.2px;
 }
 
 .autocomplete-space {

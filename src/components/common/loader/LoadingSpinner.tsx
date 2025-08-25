@@ -5,17 +5,18 @@ import { ILoaderProps } from '../../../interfaces/CommonInterface';
 const LoadingSpinner: React.FC<ILoaderProps> = ({
   message,
   iconClassName,
-  parentTagClassName
+  parentTagClassName,
+  messageClassName
 }) => {
   return (
-    <div className={parentTagClassName}>
+    <div className={`${parentTagClassName} horizontal-element-wrapper`}>
       <CircularProgress
         className={iconClassName}
         size={18}
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-      {message || ''}
+      <div className={messageClassName}>{message ? message : ''}</div>
     </div>
   );
 };
