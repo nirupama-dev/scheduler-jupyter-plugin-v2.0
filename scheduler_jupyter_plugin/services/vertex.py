@@ -102,71 +102,9 @@ class Client:
 
     async def create_schedule(self, job, file_path, bucket_name):
         try:
-            schedule_value = (
-                CRON_EVERY_MINUTE if job.schedule_value == "" else job.schedule_value
-            )
-            cron = (
-                schedule_value
-                if job.time_zone == "UTC"
-                else f"TZ={job.time_zone} {schedule_value}"
-            )
-            machine_type = job.machine_type.split(" ", 1)[0]
-            disk_type = job.disk_type.split(" ", 1)[0]
-
-            # getting list of strings from UI, the api accepts dictionary, so converting it
-            parameters = {
-                param.split(":")[0]: param.split(":")[1] for param in job.parameters
-            }
-
-            notebook_source = (
-                file_path if "gs://" in file_path else f"gs://{bucket_name}/{file_path}"
-            )
-
             api_endpoint = f"https://{job.region}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{job.region}/schedules"
             headers = self.create_headers()
-            payload = {
-                "displayName": job.display_name,
-                "cron": cron,
-                "maxConcurrentRunCount": "1",
-                "createNotebookExecutionJobRequest": {
-                    "parent": f"projects/{self.project_id}/locations/{job.region}",
-                    "notebookExecutionJob": {
-                        "displayName": job.display_name,
-                        "parameters": parameters,
-                        "labels": {
-                            "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench",
-                        },
-                        "customEnvironmentSpec": {
-                            "machineSpec": {
-                                "machineType": machine_type,
-                                "acceleratorType": job.accelerator_type,
-                                "acceleratorCount": job.accelerator_count,
-                            },
-                            "persistentDiskSpec": {
-                                "diskType": disk_type,
-                                "diskSizeGb": job.disk_size,
-                            },
-                            "networkSpec": {
-                                "enableInternetAccess": "TRUE",
-                                "network": job.network,
-                                "subnetwork": job.subnetwork,
-                            },
-                        },
-                        "gcsNotebookSource": {"uri": notebook_source},
-                        "gcsOutputUri": job.cloud_storage_bucket,
-                        "serviceAccount": job.service_account,
-                        "kernelName": job.kernel_name,
-                        "workbenchRuntime": {},
-                    },
-                },
-            }
-            if job.max_run_count:
-                payload["maxRunCount"] = job.max_run_count
-            if job.start_time:
-                payload["startTime"] = job.start_time
-            if job.end_time:
-                payload["endTime"] = job.end_time
-
+            payload = job
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
             ) as response:

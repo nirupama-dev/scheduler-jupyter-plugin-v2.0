@@ -69,6 +69,11 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
         }
       />
 
+      <Route
+        path="/edit/:schedulerType/:scheduleId/:region/:projectId/:environment"
+        element={<CreateNotebookSchedule />}
+      />
+
       <Route path="/list" element={<ScheduleListingView />}>
         <Route
           path="vertex"

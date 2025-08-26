@@ -26,7 +26,6 @@ import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
 import { authApi } from '../common/login/Config';
-import { DropdownOption } from '../../interfaces/FormInterface';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import {
   IComposerEnvAPIResponse,
@@ -40,17 +39,18 @@ import {
 } from '../../utils/Constants';
 import { FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
+import { ILabelValue } from '../../interfaces/CommonInterface';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
 > = ({ control, errors, setValue, watch, setError }) => {
-  const [regionOptions, setRegionOptions] = useState<DropdownOption[]>([]);
-  const [envOptions, setEnvOptions] = useState<DropdownOption[]>([]);
+  const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
+  const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
     IComposerEnvAPIResponse[]
   >([]);
-  const [clusterOptions, setClusterOptions] = useState<DropdownOption[]>([]);
-  const [serverlessOptions, setServerlessOptions] = useState<DropdownOption[]>(
+  const [clusterOptions, setClusterOptions] = useState<ILabelValue<string>[]>([]);
+  const [serverlessOptions, setServerlessOptions] = useState<ILabelValue<string>[]>(
     []
   );
   const [emailList, setEmailList] = useState<string[]>([]);
@@ -64,7 +64,7 @@ export const CreateComposerSchedule: React.FC<
   });
 
   const timezones = Object.keys(tzdata.zones).sort();
-  const timeZoneOptions: DropdownOption[] = timezones.map(zone => ({
+  const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
     label: zone,
     value: zone
   }));
@@ -104,7 +104,7 @@ export const CreateComposerSchedule: React.FC<
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
     // if (selectedProjectId) {
-    //   const regionList: DropdownOption[] = ComputeServices.regionAPIService(
+    //   const regionList: ILabelValue<string>[] = ComputeServices.regionAPIService(
     //     selectedProjectId,
     //   );
 
@@ -171,23 +171,23 @@ export const CreateComposerSchedule: React.FC<
   }, [selectedRegion, setValue]);
 
   useEffect(() => {
+  const fetchData = async () => {
     if (executionMode === 'cluster') {
       setValue('serverless', '');
-      ComposerServices.listClustersAPIService(
-        setClusterOptions,
-        setLoadingState
-      );
+      const clusterOptionsFromAPI = await ComposerServices.listClustersAPIService();
+      setClusterOptions(clusterOptionsFromAPI);
     } else if (executionMode === 'serverless') {
       setValue('cluster', '');
-      ComposerServices.listSessionTemplatesAPIService(
-        setServerlessOptions,
-        setLoadingState
-      );
+      const serverlessOptionsFromAPI = await ComposerServices.listSessionTemplatesAPIService();
+      setServerlessOptions(serverlessOptionsFromAPI);
     } else {
       setClusterOptions([]);
       setServerlessOptions([]);
     }
-  }, [executionMode, setValue]);
+  };
+
+  fetchData();
+}, [executionMode, setValue]);
 
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(

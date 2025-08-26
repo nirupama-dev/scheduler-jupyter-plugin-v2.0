@@ -89,8 +89,8 @@ const getDefaultVertexValues = (
   diskSize: DEFAULT_DISK_SIZE,
   scheduleMode: 'runNow',
   internalScheduleMode: 'cronFormat',
-  scheduleField: '', // Empty string for direct cron input
-  scheduleValue: CRON_FOR_SCHEDULE_EVERY_MIN, // Default for user-friendly cron
+  scheduleFieldCronFormat: '', // Empty string for direct cron input
+  scheduleValueUserFriendly: CRON_FOR_SCHEDULE_EVERY_MIN, // Default for user-friendly cron
   startTime: dayjs().toISOString(), // Default to current date/time, may be cleared by component logic
   endTime: dayjs().toISOString(), // Default to current date/time, may be cleared by component logic
   maxRunCount: '',
@@ -121,7 +121,7 @@ const getDefaultComposerValues = (
   emailOnFailure: false,
   emailOnRetry: false,
   emailOnSuccess: false,
-  email_recipients: [], // Default for array of emails
+  emailRecipients: [], // Default for array of emails
   runOption: 'runNow',
   cluster: initialKernelDetails?.kernalDetails?.selectedClusterName ?? '',
   serverless: initialKernelDetails.kernalDetails?.selectedServerlessName ?? '',
@@ -137,86 +137,90 @@ export const getInitialFormValues = (
   initialKernelDetails: INotebookKernalSchdulerDefaults,
   sessionContext: ISessionContext | null | undefined
 ): CombinedCreateFormValues => {
-  console.log('Initial Kernel Details:', initialKernelDetails);
+  if(!sessionContext?.path){
+    throw new Error("Notebook path not found in this session" )
+  }
   if (initialKernelDetails.schedulerType === 'composer') {
     return getDefaultComposerValues(
       initialKernelDetails,
-      sessionContext?.path || ''
+      sessionContext?.path
     );
   }
-  // Default to Vertex if no criteria or criteria is 'vertex'
+  // Default to Vertex if no criteria or criteria is 'vertex' and load default vertex values.
   return getDefaultVertexValues(
     initialKernelDetails,
-    sessionContext?.path || ''
+    sessionContext?.path 
   );
+  
 };
 
 /**
  *
- * @param existingData Existing data to edit, which should match the CombinedCreateFormValues type.
+ * @param existingScheduleData Existing data to edit, which should match the CombinedCreateFormValues type.
  * This function merges existing data with default values for the form.
  * @returns
  */
-export const getEditFormValues = (
-  existingData: any,
-  sessionContext: ISessionContext
-): CombinedCreateFormValues => {
-  // Create a dummy INotebookKernalSchdulerDefaults to satisfy the getDefault*Values function signatures.
-  // This ensures the required 'kernalDetails' structure is present, even if empty.
-  const dummyInitialKernelDetails: INotebookKernalSchdulerDefaults = {
-    schedulerType: existingData.schedulerSelection || 'vertex',
-    kernalDetails: {
-      kernelDisplayName: existingData.kernelName || DEFAULT_KERNEL,
-      executionMode: existingData.executionMode || 'local',
-      selectedClusterName: existingData.cluster || '',
-      selectedServerlessName: existingData.serverless || '',
-      isDataprocKernel: false
-    }
-  };
+// export const getEditFormValues = (
+//   schedulerType: SchedulerType,
+//   existingScheduleData: VertexSchedulerFormValues| ComposerSchedulerFormValues
+// ): CombinedCreateFormValues => {
 
-  if (existingData.schedulerSelection === 'vertex') {
-    const vertexDefaults = getDefaultVertexValues(
-      dummyInitialKernelDetails,
-      sessionContext.path
-    );
-    return {
-      ...vertexDefaults, // Start with defaults
-      ...existingData, // Overlay existing data (prioritizes existingData for most fields)
-      jobId: existingData.jobId,
-      jobName: existingData.jobName,
-      inputFile: existingData.gcsSourceFilePath,
-      // For optional fields that might be empty/null in existingData, ensure defaults are applied if not present
-      scheduleField: existingData.scheduleField,
-      scheduleValue: existingData.scheduleValue,
-      maxRunCount: existingData.maxRunCount,
-      startTime: existingData.startTime,
-      endTime: existingData.endTime,
-      timeZone: existingData.timeZone,
-      acceleratorType: existingData.acceleratorType,
-      acceleratorCount: existingData.acceleratorCount,
-      parameters: existingData.parameters,
-      networkOption: existingData.networkOption,
-      primaryNetwork: existingData.primaryNetwork,
-      subNetwork: existingData.subnetwork,
-      sharedNetwork: existingData.sharedNetwork
-    };
-  } else if (existingData.schedulerSelection === 'composer') {
-    const composerDefaults = getDefaultComposerValues(
-      dummyInitialKernelDetails,
-      sessionContext.path
-    );
-    return {
-      ...composerDefaults,
-      ...existingData,
-      inputFile: sessionContext.path,
-      // Composer-specific merging for optional fields
-      email_recipients:
-        existingData.email_recipients ?? composerDefaults.email_recipients,
-      scheduleValue:
-        existingData.scheduleValue ?? composerDefaults.scheduleValue,
-      timeZone: existingData.timeZone ?? composerDefaults.timeZone
-    };
-  }
-  // Fallback if schedulerSelection is not recognized, default to Vertex
-  return getDefaultVertexValues(dummyInitialKernelDetails, sessionContext.path);
-};
+//   if (schedulerType === 'vertex' ) {
+//   const vertexData = existingScheduleData as VertexSchedulerFormValues;
+//   return {
+//   schedulerSelection: schedulerType,
+//   jobName: vertexData.display_name,
+//   inputFile: vertexData.input_filename,
+//   machineType: vertexData.machine_type,
+//   kernelName: vertexData.kernel_name,
+//   acceleratorType: vertexData.accelerator_type,
+//   acceleratorCount: vertexData.accelerator_count,
+//   vertexRegion: vertexData.region,
+//   cloudStorageBucket: vertexData.cloud_storage_bucket,
+//   serviceAccount: vertexData.service_account,
+//   networkOption: '',
+//   primaryNetwork: vertexData.primary_network || '', // Will be dynamically set by primaryNetworkSelected if 'networkInThisProject'
+//   subNetwork: vertexData.sub_network || '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'
+//   diskType: vertexData.disk_type || '',
+//   diskSize: vertexData.disk_size || '',
+//   scheduleMode:  vertexData.schedule_mode || 'runNow',
+//   internalScheduleMode: 'cronFormat',
+//   scheduleFieldCronFormat: vertexData.cron,
+//   scheduleValueUserFriendly: vertexData.cron, // TO Do need to be converted
+//   startTime: vertexData.start_time,
+//   endTime: vertexData.end_time,
+//   maxRunCount: vertexData.max_run_count || '',
+//   timeZone: vertexData.time_zone || DEFAULT_TIME_ZONE,
+//   parameters: vertexData.parameters?.map(param => ({
+//     key: param.key,
+//     value: param.value
+//   })) || [],
+//   };
+//   } else if (existingScheduleData.schedulerSelection === 'composer') {
+//     const composerData = existingScheduleData as IComposerSchedulePayload;
+//     return { 
+//       schedulerSelection: 'composer',
+//       jobName: composerData.job_name,
+//       inputFile: composerData.input_filename,
+//       projectId: composerData.project_id,
+//       composerRegion: composerData.region,
+//       environment: composerData.composer_environment_name,
+//       executionMode: composerData.execution_mode || 'local',
+//       retryCount: composerData.retry_count || 0,
+//       scheduleMode: composerData.schedule_mode || 'runNow',
+//       internalScheduleMode: 'cronFormat',
+//       scheduleFieldCronFormat: composerData.cron,
+//       scheduleValueUserFriendly: composerData.cron, // TO Do need to be converted
+//       startTime: composerData.start_time,
+//       endTime: composerData.end_time,
+//       maxRunCount: composerData.max_run_count || '',
+//       timeZone: composerData.time_zone || DEFAULT_TIME_ZONE,
+//       parameters: composerData.parameters?.map(param => ({
+//         key: param.key,
+//         value: param.value
+//       })) || [],  
+//     };
+//   }
+//   // Fallback if schedulerSelection is not recognized, default to Vertex
+//   return getDefaultVertexValues(dummyInitialKernelDetails, sessionContext.path);
+// };

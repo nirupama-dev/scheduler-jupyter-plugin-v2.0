@@ -26,7 +26,6 @@ export const LOGIN_STATE = '1';
 export const STATUS_SUCCESS = 'SUCCEEDED';
 export const API_HEADER_BEARER = 'Bearer ';
 export const API_HEADER_CONTENT_TYPE = 'application/json';
-export type scheduleMode = 'runNow' | 'runSchedule';
 export const gcpServiceUrls = (async () => {
   return await ConfigService.gcpServiceUrlsAPI();
 })();

@@ -30,7 +30,6 @@ import { VertexServices } from '../../services/vertex/VertexServices'; // Assumi
 import { StorageServices } from '../../services/common/Storage';
 import { IamServices } from '../../services/common/Iam';
 import { ComputeServices } from '../../services/common/Compute'; // Ensure this is imported
-import { authApi } from '../common/login/Config';
 import { ILabelValue } from '../../interfaces/CommonInterface';
 import { createVertexSchema } from '../../schemas/CreateVertexSchema';
 import { z } from 'zod';
@@ -80,8 +79,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   setValue,
   getValues,
   trigger,
-  // sessionContext,
-  editModeData
+  credentials,
+  editScheduleData
   // ... other props
 }) => {
   // Local state for dropdown options (fetched dynamically)
@@ -115,7 +114,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     subNetwork: false,
     sharedNetwork: false,
     hostProject: false // Initialized
-    // createOperation: false
   });
 
   // Timezones for dropdown
@@ -160,12 +158,15 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
   // --- Data Fetching Callbacks (Calling Services & Managing Component State) ---
 
+  /**
+   * Fetches the default region for the Vertex scheduler.
+   */
   const fetchRegion = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, region: true }));
     try {
-      const credentials = await authApi(); // Assuming authApi returns { region_id: string }
+    
       if (credentials?.region_id) {
-        if (!editModeData || !getValues('vertexRegion')) {
+        if (!editScheduleData || !getValues('vertexRegion')) {
           setValue('vertexRegion', credentials.region_id);
         }
       }
@@ -175,8 +176,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     } finally {
       setLoadingState(prev => ({ ...prev, region: false }));
     }
-  }, [setValue, getValues, editModeData]);
+  }, [setValue, getValues, editScheduleData]);
 
+  /**
+   * Fetches the available machine types for the selected region.
+   * @param region The selected region.
+   */
   const fetchMachineTypes = useCallback(
     async (region: string) => {
       if (!region) {
@@ -201,7 +206,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         );
 
         if (
-          !editModeData?.editMode ||
+          !editScheduleData?.editMode ||
           !currentMachineTypeValue ||
           !isValidExisting
         ) {
@@ -233,9 +238,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setLoadingState(prev => ({ ...prev, machineType: false }));
       }
     },
-    [setValue, getValues, setMachineTypeList, editModeData]
+    [setValue, getValues, setMachineTypeList, editScheduleData]
   );
 
+  /**
+   * Fetches the available cloud storage buckets.
+   */
   const fetchCloudStorageBuckets = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
     try {
@@ -246,7 +254,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         b => b.value === currentBucketValue
       );
 
-      if (!editModeData?.editMode || !currentBucketValue || !isValidExisting) {
+      if (!editScheduleData?.editMode || !currentBucketValue || !isValidExisting) {
         const defaultSelected = fetchedBuckets.find(
           option => option.value === DEFAULT_CLOUD_STORAGE_BUCKET.value
         );
@@ -266,8 +274,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     } finally {
       setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));
     }
-  }, [setValue, getValues, editModeData]);
+  }, [setValue, getValues, editScheduleData]);
 
+  /**
+   * Fetches the available service accounts.
+   */
   const fetchServiceAccounts = useCallback(async () => {
     console.log('Fetching service accounts...');
     setLoadingState(prev => ({ ...prev, serviceAccount: true }));
@@ -282,7 +293,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       );
 
       if (
-        !editModeData?.editMode ||
+        !editScheduleData?.editMode ||
         !currentServiceAccountValue ||
         !isValidExisting
       ) {
@@ -303,8 +314,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     } finally {
       setLoadingState(prev => ({ ...prev, serviceAccount: false }));
     }
-  }, [setValue, getValues, editModeData]);
+  }, [setValue, getValues, editScheduleData]);
 
+  /**
+   * Fetches the host project information.
+   */
   const fetchHostProject = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, hostProject: true })); // Manage loading locally
     try {
@@ -317,6 +331,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, []);
 
+  /**
+   * 
+   */
   const fetchPrimaryNetworks = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, primaryNetwork: true }));
     try {
@@ -330,7 +347,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       );
 
       if (
-        !editModeData?.editMode ||
+        !editScheduleData?.editMode ||
         !currentPrimaryNetworkValue ||
         !isValidExisting
       ) {
@@ -347,8 +364,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     } finally {
       setLoadingState(prev => ({ ...prev, primaryNetwork: false }));
     }
-  }, [setValue, getValues, editModeData]);
+  }, [setValue, getValues, editScheduleData]);
 
+  /**
+   * Fetches the available sub-networks for the selected region and primary network.
+   * @param region The selected region.
+   * @param primaryNetworkValue The selected primary network.
+   */
   const fetchSubNetworks = useCallback(
     async (region: string, primaryNetworkValue: string) => {
       if (!region || !primaryNetworkValue) {
@@ -371,7 +393,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         );
 
         if (
-          !editModeData?.editMode ||
+          !editScheduleData?.editMode ||
           !currentSubnetworkValue ||
           !isValidExisting
         ) {
@@ -389,8 +411,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setLoadingState(prev => ({ ...prev, subNetwork: false }));
       }
     },
-    [setValue, getValues, editModeData]
+    [setValue, getValues, editScheduleData]
   );
+
+  /**
+   * Fetches the available shared networks for the selected host project and region.
+   * @param hostProjectName The selected host project.
+   * @param region The selected region.
+   */
 
   const fetchSharedNetworks = useCallback(
     async (hostProjectName: string, region: string) => {
@@ -413,7 +441,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           }))
         );
         // If in edit mode and a shared network was previously selected, try to re-select it
-        if (editModeData?.editMode) {
+        if (editScheduleData?.editMode) {
           const currentSharedNetwork = getValues('sharedNetwork');
           const found = sharedNetworkDetails.find(
             sn =>
@@ -433,7 +461,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setLoadingState(prev => ({ ...prev, sharedNetwork: false }));
       }
     },
-    [setValue, getValues, editModeData]
+    [setValue, getValues, editScheduleData]
   );
 
   // --- useEffects for Initial Data Fetching and Dynamic Form Updates ---
@@ -441,17 +469,17 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   // Initial API calls for static/independent dropdowns and default region
   useEffect(() => {
     // Set non-API dependent defaults if not in edit mode or values are empty
-    if (!editModeData?.editMode || !getValues('startTime'))
+    if (!editScheduleData?.editMode || !getValues('startTime'))
       setValue('startTime', dayjs().toISOString());
-    if (!editModeData?.editMode || !getValues('endTime'))
+    if (!editScheduleData?.editMode || !getValues('endTime'))
       setValue('endTime', dayjs().add(1, 'day').toISOString());
-    if (!editModeData?.editMode || !getValues('scheduleField'))
-      setValue('scheduleField', '');
-    if (!editModeData?.editMode || !getValues('scheduleValue'))
+    if (!editScheduleData?.editMode || !getValues('scheduleFieldCronFormat'))
+      setValue('scheduleFieldCronFormat', '');
+    if (!editScheduleData?.editMode || !getValues('scheduleValue'))
       setValue('scheduleValue', EVERY_MINUTE_CRON);
-    if (!editModeData?.editMode || !getValues('timeZone'))
+    if (!editScheduleData?.editMode || !getValues('timeZone'))
       setValue('timeZone', Intl.DateTimeFormat().resolvedOptions().timeZone);
-    if (!editModeData?.editMode || !getValues('networkOption'))
+    if (!editScheduleData?.editMode || !getValues('networkOption'))
       setValue('networkOption', DEFAULT_NETWORK_SELECTED);
 
     // Initial data fetches
@@ -463,7 +491,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, [
     setValue,
     getValues,
-    editModeData,
+    editScheduleData,
     fetchRegion,
     fetchCloudStorageBuckets,
     fetchServiceAccounts,
@@ -559,13 +587,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
   const handleDiskSizeBlur = useCallback(
     (event: React.FocusEvent<HTMLInputElement>) => {
+      const diskSizeValue = getValues('diskSize');
       // If disk size is blurred and is empty, set to default IF disk type is selected
-      if (event.target.value === '' && currentDiskType) {
+      if (diskSizeValue === '' && currentDiskType) {
         setValue('diskSize', DEFAULT_DISK_SIZE);
       }
       trigger('diskSize'); // Trigger validation on blur
     },
-    [setValue, currentDiskType, trigger]
+    [setValue, currentDiskType, trigger, getValues]
   );
 
   const getAcceleratedTypeOptions = useCallback(
@@ -957,8 +986,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           onChange={() => {
             if (watch('scheduleMode') === 'runNow') {
               setValue('internalScheduleMode', undefined);
-              setValue('scheduleField', '');
-              setValue('scheduleValue', '');
+              setValue('scheduleFieldCronFormat', '');
+              setValue('scheduleValueUserFriendly', '');
               setValue('startTime', '');
               setValue('endTime', '');
               setValue('maxRunCount', '');
@@ -966,8 +995,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             } else {
               if (!getValues('internalScheduleMode'))
                 setValue('internalScheduleMode', 'userFriendly');
-              if (!getValues('scheduleValue'))
-                setValue('scheduleValue', EVERY_MINUTE_CRON);
+              if (!getValues('scheduleValueUserFriendly'))
+                setValue('scheduleValueUserFriendly', EVERY_MINUTE_CRON);
               if (!getValues('startTime'))
                 setValue('startTime', dayjs().toISOString());
               if (!getValues('endTime'))
@@ -980,8 +1009,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             }
             trigger([
               'internalScheduleMode',
-              'scheduleField',
-              'scheduleValue',
+              'scheduleFieldCronFormat',
+              'scheduleValueUserFriendly',
               'startTime',
               'endTime',
               'maxRunCount',
@@ -1003,12 +1032,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               onChange={() => {
                 if (watch('internalScheduleMode') === 'cronFormat') {
                   setValue('scheduleValue', EVERY_MINUTE_CRON);
-                  setValue('scheduleField', '');
+                  setValue('scheduleFieldCronFormat', '');
                 } else {
-                  setValue('scheduleField', '');
+                  setValue('scheduleFieldCronFormat', '');
                   setValue('scheduleValue', EVERY_MINUTE_CRON);
                 }
-                trigger(['scheduleField', 'scheduleValue']);
+                trigger(['scheduleFieldCronFormat', 'scheduleValueUserFriendly']);
               }}
             />
 
@@ -1089,9 +1118,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 <FormInputText
                   label="Schedule*"
                   control={control}
-                  name="scheduleField"
-                  error={vertexErrors.scheduleField}
-                  onChangeCallback={() => trigger('scheduleField')}
+                  name="scheduleFieldCronFormat"
+                  error={vertexErrors.scheduleFieldCronFormat}
+                  onChangeCallback={() => trigger('scheduleFieldCronFormat')}
                 />
               </div>
               <div>
@@ -1109,14 +1138,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           currentInternalScheduleMode === 'userFriendly' && (
             <div className="scheduler-form-element-container">
               <Controller
-                name="scheduleValue"
+                name="scheduleValueUserFriendly"
                 control={control}
                 render={({ field }) => (
                   <Cron
                     value={field.value || ''}
                     setValue={(newValue: string) => {
                       field.onChange(newValue);
-                      trigger('scheduleValue');
+                      trigger('scheduleValueUserFriendly');
                     }}
                     allowedPeriods={
                       allowedPeriodsCron as PeriodType[] | undefined
@@ -1124,10 +1153,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   />
                 )}
               />
-              {vertexErrors.scheduleValue && (
+              {vertexErrors.scheduleValueUserFriendly && (
                 <ErrorMessage
                   message={
-                    vertexErrors.scheduleValue.message || 'Schedule is required'
+                    vertexErrors.scheduleValueUserFriendly.message || 'Schedule is required'
                   }
                   showIcon={false}
                 />

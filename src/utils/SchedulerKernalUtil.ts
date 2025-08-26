@@ -8,8 +8,7 @@ import { IKernelDetails } from '../interfaces/ComposerInterface';
 import { SchedulerType } from '../types/CommonSchedulerTypes';
 import { Kernel, KernelAPI, KernelSpecAPI } from '@jupyterlab/services';
 import { ComposerServices } from '../services/composer/ComposerServices';
-import { DropdownOption } from '../interfaces/FormInterface';
-import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
+import { ILabelValue, INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 
 /**
  * caching KernelAPI.listRunning() to improve preformance.
@@ -201,54 +200,26 @@ const extractSchedulerTypeAndKernelDetails = async (
 
 /**
  * Promisifies the listClustersAPIService to return a full list of cluster names.
- * @param initialClusterList Optional initial list of clusters for recursive calls.
- * @param nextPageToken Optional token for pagination.
  * @returns Promise resolving to an array of cluster names (strings).
  */
-const promisifiedListClusters = (): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    // This callback will receive the final accumulated list from SchedulerService's internal recursion
-    const setClusterOptionsCallback = (
-      action: React.SetStateAction<DropdownOption[]>
-    ) => {
-      if (typeof action === 'function') {
-        const finalOptions = action([]); // Call the function to get the actual array
-        resolve(finalOptions.map(option => option.value));
-      } else {
-        resolve(action.map(option => option.value));
-      }
-    };
-    console.log('Calling listClustersAPIService');
-
-    ComposerServices.listClustersAPIService(setClusterOptionsCallback).catch(
-      reject
-    ); // Propagate rejections from the service itself
-  });
+const promisifiedListClusters = async (): Promise<string[]> => {
+  const apiResponse = await ComposerServices.listClustersAPIService();
+  return apiResponse.map((option:ILabelValue<string>) => option.value);
 };
 
 /**
  * Promisifies the listSessionTemplatesAPIService to return a full list of serverless names.
- * @param initialServerlessList Optional initial list of serverless templates for recursive calls.
- * @param nextPageToken Optional token for pagination.
  * @returns Promise resolving to an array of serverless names (strings).
  */
-const promisifiedListSessionTemplates = (): Promise<string[]> => {
-  return new Promise((resolve, reject) => {
-    const setServerlessOptionsCallback = (
-      action: React.SetStateAction<DropdownOption[]>
-    ) => {
-      if (typeof action === 'function') {
-        const finalOptions = action([]);
-        resolve(finalOptions.map(option => option.value));
-      } else {
-        resolve(action.map(option => option.value));
-      }
-    };
-    console.log('Calling listSessionTemplatesAPIService');
-    ComposerServices.listSessionTemplatesAPIService(
-      setServerlessOptionsCallback
-    ).catch(reject); // Propagate rejections from the service itself
-  });
+const promisifiedListSessionTemplates = async(): Promise<string[]> => {
+   // Await the API call to get the resolved array of objects
+    const apiResponse = await ComposerServices.listSessionTemplatesAPIService();
+
+    // Map the resolved array of objects to an array of string values
+    const templateValues = apiResponse.map((option :ILabelValue<string>) => option.value);
+
+    // Return the final array
+    return templateValues;
 };
 
 /**

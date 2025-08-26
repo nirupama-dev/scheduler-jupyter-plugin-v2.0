@@ -20,6 +20,8 @@ import { ISessionContext } from '@jupyterlab/apputils';
 import { IKernelDetails } from './ComposerInterface';
 import { SchedulerType } from '../types/CommonSchedulerTypes';
 import { JupyterLab } from '@jupyterlab/application';
+import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema';
+import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
 
 export interface IAuthCredentials {
   access_token?: string;
@@ -75,9 +77,12 @@ export interface INotebookKernalSchdulerDefaults {
   kernalDetails?: IKernelDetails;
 }
 
-export interface IEdiModeData {
+export interface IEditScheduleData {
   editMode: boolean;
-  existingData: any;
+  region?: string;
+  projectId?: string;
+  environment?: string;
+  existingScheduleData?: VertexSchedulerFormValues | ComposerSchedulerFormValues;
 }
 
 //Remove this if same as ISchedulerRoutesProps
@@ -87,7 +92,7 @@ export interface ICreateNotebookScheduleProps {
     | INotebookKernalSchdulerDefaults
     | null
     | undefined;
-  editModeData?: IEdiModeData | null | undefined;
+  editModeData?: IEditScheduleData | null | undefined;
 }
 
 export interface Parameter {

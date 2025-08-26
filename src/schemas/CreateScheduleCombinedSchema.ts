@@ -121,8 +121,8 @@ export const combinedCreateFormSchema = z
         // Schedule field required and not every minute cron
         if (vertexData.internalScheduleMode === 'cronFormat') {
           if (
-            !vertexData.scheduleField ||
-            vertexData.scheduleField.trim() === ''
+            !vertexData.scheduleFieldCronFormat ||
+            vertexData.scheduleFieldCronFormat.trim() === ''
           ) {
             ctx.addIssue({
               path: ['scheduleField'],
@@ -130,7 +130,7 @@ export const combinedCreateFormSchema = z
               message: 'Schedule field is required in cron format.'
             });
           }
-          if (vertexData.scheduleField === EVERY_MINUTE_CRON) {
+          if (vertexData.scheduleFieldCronFormat === EVERY_MINUTE_CRON) {
             ctx.addIssue({
               path: ['scheduleField'],
               code: z.ZodIssueCode.custom,
@@ -139,7 +139,7 @@ export const combinedCreateFormSchema = z
           }
         }
         if (vertexData.internalScheduleMode === 'userFriendly') {
-          if (vertexData.scheduleValue === EVERY_MINUTE_CRON) {
+          if (vertexData.scheduleValueUserFriendly === EVERY_MINUTE_CRON) {
             ctx.addIssue({
               path: ['scheduleValue'],
               code: z.ZodIssueCode.custom,
@@ -158,8 +158,8 @@ export const combinedCreateFormSchema = z
         composerData.emailOnSuccess
       ) {
         if (
-          !composerData.email_recipients ||
-          composerData.email_recipients.length === 0
+          !composerData.emailRecipients ||
+          composerData.emailRecipients.length === 0
         ) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

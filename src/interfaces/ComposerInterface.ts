@@ -20,12 +20,15 @@ import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchem
 import {
   Control,
   FieldErrors,
+  UseFormGetValues,
   UseFormSetError,
   UseFormSetValue,
+  UseFormTrigger,
   UseFormWatch
 } from 'react-hook-form';
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
 import { ExecutionMode } from '../types/CommonSchedulerTypes';
+import { IAuthCredentials, IEditScheduleData } from './CommonInterface';
 
 export interface ICreateComposerSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -33,32 +36,34 @@ export interface ICreateComposerSchedulerProps {
   watch: UseFormWatch<CombinedCreateFormValues>;
   setValue: UseFormSetValue<CombinedCreateFormValues>;
   setError: UseFormSetError<ComposerSchedulerFormValues>;
+  getValues: UseFormGetValues<CombinedCreateFormValues>;
+  trigger: UseFormTrigger<CombinedCreateFormValues>;
+  credentials: IAuthCredentials
+  editScheduleData?: IEditScheduleData | null;
 }
 
 export interface IComposerSchedulePayload {
-  job_name: string;
   dag_id?: string;
   input_filename: string;
   project_id: string;
-  region: string;
-  composer_environment_name: string;
+  region_id: string;
+  composer_environment: string;
   output_formats: string[];
   parameters: string;
-  serverless_name?: Record<string, never>;
+  serverless_name?: string;
   cluster_name?: string;
-  execution_mode: string;
+  mode_selected: string;
   schedule_value?: string;
   retry_count: number | undefined;
   retry_delay: number | undefined;
-  email_failure: boolean;
-  email_retry: boolean;
+  email_failure?: string;
+  email_retry?: string;
+  email_success?: string;
   email_recipients?: string[];
-  run_option: 'runNow' | 'runOnSchedule';
-  stop_cluster: boolean;
+  stop_cluster: string;
   time_zone?: string;
-  local_kernel?: boolean;
-  email_success?: boolean;
   packages_to_install?: string[];
+  error?: string;
 }
 
 export interface IUpdateSchedulerAPIResponse {
