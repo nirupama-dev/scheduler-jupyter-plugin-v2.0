@@ -32,7 +32,7 @@ import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
-import { DropdownOption } from '../../interfaces/FormInterface';
+import { IDropdownOption } from '../../interfaces/FormInterface';
 
 /**
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
@@ -191,30 +191,25 @@ export class ComposerServices {
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
-  ): Promise<DropdownOption[]> => {
-    try {
-      const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
-        `composerList?project_id=${projectId}&region_id=${region}`
-      );
+  ): Promise<IDropdownOption[]> => {
+    const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
+      `composerList?project_id=${projectId}&region_id=${region}`
+    );
 
-      if (!Array.isArray(formattedResponse)) {
-        // Handle unexpected response format
-        throw new Error('Invalid response format for composer environments');
-      }
-
-      const environmentOptions: DropdownOption[] = formattedResponse.map(
-        (env: IComposerEnvAPIResponse) => ({
-          label: env.label,
-          value: env.name
-        })
-      );
-      environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
-
-      return environmentOptions;
-    } catch (error) {
-      // Re-throw the error so the calling component can handle it
-      throw error;
+    if (!Array.isArray(formattedResponse)) {
+      // This custom error will now be thrown and caught by the caller.
+      throw new Error('Invalid response format for composer environments');
     }
+
+    const environmentOptions: IDropdownOption[] = formattedResponse.map(
+      (env: IComposerEnvAPIResponse) => ({
+        label: env.label,
+        value: env.name
+      })
+    );
+    environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+    return environmentOptions;
   };
 
   /**
@@ -478,6 +473,7 @@ export class ComposerServices {
       });
     }
   };
+
   static readonly listDagInfoAPIService = async (
     composerSelected: string,
     region: string,
@@ -502,7 +498,16 @@ export class ComposerServices {
         bucketName: formattedResponse[1]
       };
     } catch (error) {
-      // Re-throw the error so the calling component can handle it
+      if (!toast.isActive('dagListError')) {
+        const errorMessage =
+          typeof error === 'object' && error !== null && 'message' in error
+            ? error.message
+            : 'Unknown error';
+
+        toast.error(`Failed to fetch schedule list: ${errorMessage}`, {
+          toastId: 'dagListError'
+        });
+      }
       throw error;
     }
   };
@@ -579,6 +584,7 @@ export class ComposerServices {
       setDownloadOutputDagRunId('');
     }
   };
+
   static readonly handleDeleteSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
@@ -593,6 +599,7 @@ export class ComposerServices {
     );
     return deleteResponse;
   };
+
   static readonly handleUpdateSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
@@ -609,6 +616,7 @@ export class ComposerServices {
 
     return formattedResponse;
   };
+
   static readonly listDagTaskInstancesListService = async (
     composerName: string,
     dagId: string,
@@ -650,6 +658,7 @@ export class ComposerServices {
       });
     }
   };
+
   static readonly listDagTaskLogsListService = async (
     composerName: string,
     dagId: string,
@@ -676,18 +685,15 @@ export class ComposerServices {
       });
     }
   };
+
   static readonly handleImportErrordataService = async (
     composerSelectedList: string,
-    setImportErrorData: (value: string[]) => void,
-    setImportErrorEntries: (value: number) => void,
     project: string,
     region: string,
-    abortControllers: any,
-    isImportErrorLoading: { current: boolean }
+    abortControllers?: any
   ) => {
-    // setting controller to abort pending api call
     const controller = new AbortController();
-    abortControllers.current.push(controller);
+    // abortControllers.current.push(controller);
     const signal = controller.signal;
 
     try {
@@ -695,29 +701,28 @@ export class ComposerServices {
         `importErrorsList?composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
         { signal }
       );
-      setImportErrorData(data?.import_errors);
-      setImportErrorEntries(data?.total_entries);
-      if (data) {
-        isImportErrorLoading.current = false; // for future development add return statements only after this flag is turned false.
-      }
+      return data;
     } catch (reason) {
-      isImportErrorLoading.current = false; // for future development add return statements only after this flag is turned false.
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&
           reason.toString().includes(ABORT_MESSAGE)
         ) {
+          // Return nothing if the request was aborted
           return;
         }
-      } else {
-        const errorResponse = `Error in fetching import errors list : ${reason}`;
-        if (!toast.isActive('importListError')) {
-          toast.error(errorResponse, {
-            ...toastifyCustomStyle,
-            toastId: 'importListError'
-          });
-        }
       }
+
+      // Handle and display the error notification
+      const errorResponse = `Error in fetching import errors list: ${reason}`;
+      if (!toast.isActive('importListError')) {
+        toast.error(errorResponse, {
+          ...toastifyCustomStyle,
+          toastId: 'importListError'
+        });
+      }
+      // Return nothing on error
+      return;
     }
   };
 

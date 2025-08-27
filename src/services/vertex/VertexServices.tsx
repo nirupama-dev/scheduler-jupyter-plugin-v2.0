@@ -18,9 +18,13 @@
 import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import {
+  IDeleteSchedulerAPIResponse,
   IFormattedResponse,
+  ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
   IUpdateSchedulerArgs,
+  IVertexDeleteAPIArgs,
+  IVertexListPayload
 } from '../../interfaces/VertexInterface';
 import { ABORT_MESSAGE } from '../../utils/Constants';
 import { LOG_LEVEL, SchedulerLoggingService } from '../common/LoggingService';
@@ -29,12 +33,11 @@ import {
   IAcceleratorConfig,
   IMachineType
 } from '../../interfaces/VertexInterface';
-// import { HTTP_STATUS_FORBIDDEN, URL_LINK_PATTERN } from "../../utils/Constants";
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { aiplatform_v1 } from 'googleapis';
 
 
-
+import { settingController } from '../../utils/Config';
 export class VertexServices {
   /**
    * Fetches machine types for a given region.
@@ -99,52 +102,58 @@ export class VertexServices {
    * an error message, and a loading state.
    */
   static readonly listVertexSchedules = async (
-    region: string,
-    pageLength: number = 25
+    listVertexPayload: IVertexListPayload
     //TODO: other api error
   ) => {
-    try {
-      //TODO implement abort logic and next page logic
+    const { region, nextToken, scheduleListPageLength, abortControllers } =
+      listVertexPayload;
 
+    try {
+      const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/listSchedules';
-      let urlparam = `?region_id=${region}&page_size=${pageLength}`;
+      let urlparam = `?region_id=${region}&page_size=${scheduleListPageLength}`;
+
+      if (nextToken) {
+        urlparam += `&page_token=${nextToken}`;
+      }
 
       // API call
-      const formattedResponse : aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse = await requestAPI(
-        serviceURL + urlparam
-        //     , {
-        //   signal
-        // }
-      );
+      const formattedResponse : aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse = await requestAPI(serviceURL + urlparam, {
+        signal
+      });
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
-        // setVertexScheduleList([]);
-        // setNextPageToken(null);
-        // setHasNextPageToken(false);
         return {
           schedulesList: [],
+          nextPageToken: null,
+          hasNextPageToken: false,
           error: '',
           isLoading: false
         };
+      
       }
 
       const {
-        schedules
-        //nextPageToken,
+        schedules,
+        nextPageToken
         //error
       } = formattedResponse as IFormattedResponse;
+
+      //TODO error handling for API enablement error
 
       if (schedules && schedules.length > 0) {
         return {
           schedulesList: schedules,
+          nextPageToken: nextPageToken ? nextPageToken : null,
           error: '',
           isLoading: false
         };
       } else {
         return {
           schedulesList: [],
-          error: 'No schedules found',
-          isLoading: false
+          nextPageToken: null,
+          hasNextPageToken: false,
+          error: 'No schedules found'
         };
       }
     } catch (error: any) {
@@ -156,12 +165,6 @@ export class VertexServices {
           return;
         }
       } else {
-        // Handle errors during the API call
-        // setVertexScheduleList([]);
-        // setNextPageToken(null);
-        // setHasNextPageToken(false);
-        // setIsApiError(true);
-        // setApiError('An error occurred while fetching schedules.');
         SchedulerLoggingService.log(
           `Error listing vertex schedules ${error}`,
           LOG_LEVEL.ERROR
@@ -172,78 +175,69 @@ export class VertexServices {
 
         return {
           schedulesList: [],
-          error: 'An error occurrd while fetching schedules.',
-          isLoading: false
+          nextPageToken: null,
+          hasNextPageToken: false,
+          error: 'An error occurred while fetching schedules: ' + error
         };
       }
-    } finally {
-      // setIsLoading(false); // Ensure loading is stopped
     }
   };
 
-  static readonly fetchLastFiveRunStatus = (schedule: any, region: string) => {
-    // TODO add abort call
-    const scheduleId = schedule.name.split('/').pop();
-    const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
-    let res: any = [];
-    requestAPI(
-      serviceURLLastRunResponse +
-        `?region_id=${region}&schedule_id=${scheduleId}&page_size=5&order_by=createTime desc`
-      //   { signal }
-    )
-      .then((jobExecutionList: any) => {
-        console.log('jobExecutionlist from sevice', jobExecutionList);
-        const lastFiveRun = jobExecutionList.map((job: any) => job.jobState);
-        schedule.jobState = lastFiveRun;
-        console.log('lastFiveRn from service', lastFiveRun);
-        res = lastFiveRun;
-      })
-      .catch((lastRunError: any) => {
-        SchedulerLoggingService.log(
-          'Error fetching last five job executions',
-          LOG_LEVEL.ERROR
-        );
-
-        res = [];
-      });
-    console.log('res from services', res);
-    return res;
+  static readonly fetchLastFiveRunStatus = async (
+    schedule: any,
+    region: string,
+    abortControllers: any
+  ) => {
+    try {
+      const signal = settingController(abortControllers);
+      const scheduleId = schedule.name.split('/').pop();
+      const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
+      const jobExecutionList: any = await requestAPI(
+        serviceURLLastRunResponse +
+          `?region_id=${region}&schedule_id=${scheduleId}&page_size=5&order_by=createTime desc`,
+        { signal }
+      );
+      // jobExecutionList should be an array
+      const lastFiveRun = Array.isArray(jobExecutionList)
+        ? jobExecutionList.map((job: any) => job.jobState)
+        : [];
+      return lastFiveRun;
+    } catch (lastRunError: any) {
+      SchedulerLoggingService.log(
+        'Error fetching last five job executions',
+        LOG_LEVEL.ERROR
+      );
+      return [];
+    }
   };
 
   static readonly handleUpdateSchedulerPauseAPIService = async (
-    args: IUpdateSchedulerArgs
+    activatePayload: IUpdateSchedulerArgs
   ) => {
-    // setResumeLoading(scheduleId);
-
-    // // setting controller to abort pending api call
-    // const controller = new AbortController();
-    // abortControllers.current.push(controller);
-    // const signal = controller.signal;
-    const { scheduleId, region, displayName } = args;
+    const { scheduleId, region, displayName, abortControllers } =
+      activatePayload;
 
     try {
+      const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/pauseSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`,
         {
-          method: 'POST'
-          //   signal
+          method: 'POST',
+          signal
         }
       );
       if (Object.keys(formattedResponse).length === 0) {
         Notification.success(`Schedule ${displayName} updated successfully`, {
           autoClose: false
         });
-        // setResumeLoading('');
       } else {
-        // setResumeLoading('');
         SchedulerLoggingService.log('Error in pause schedule', LOG_LEVEL.ERROR);
         Notification.error('Failed to pause schedule', {
           autoClose: false
         });
       }
     } catch (error) {
-      //   setResumeLoading('');
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -265,34 +259,26 @@ export class VertexServices {
   };
 
   static readonly handleUpdateSchedulerResumeAPIService = async (
-    args: IUpdateSchedulerArgs
-    // setResumeLoading: (value: string) => void,
-    // abortControllers: any
+    activatePayload: IUpdateSchedulerArgs
   ) => {
-    // setResumeLoading(scheduleId);
-
-    // setting controller to abort pending api call
-    // const controller = new AbortController();
-    // abortControllers.current.push(controller);
-    // const signal = controller.signal;
-    const { scheduleId, region, displayName } = args;
+    const { scheduleId, region, displayName, abortControllers } =
+      activatePayload;
 
     try {
+      const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/resumeSchedule';
       const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
         {
-          method: 'POST'
-          //   signal
+          method: 'POST',
+          signal
         }
       );
       if (Object.keys(formattedResponse).length === 0) {
         Notification.success(`Schedule ${displayName} updated successfully`, {
           autoClose: false
         });
-        // setResumeLoading('');
       } else {
-        // setResumeLoading('');
         SchedulerLoggingService.log(
           'Error in resume schedule',
           LOG_LEVEL.ERROR
@@ -302,7 +288,6 @@ export class VertexServices {
         });
       }
     } catch (error) {
-      //   setResumeLoading('');
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -320,6 +305,97 @@ export class VertexServices {
           error: errorResponse
         });
       }
+    }
+  };
+
+  static readonly triggerSchedule = async (
+    triggerPayload: IUpdateSchedulerArgs
+  ) => {
+    const { scheduleId, region, displayName, abortControllers } =
+      triggerPayload;
+
+    try {
+      const signal = settingController(abortControllers);
+      const serviceURL = 'api/vertex/triggerSchedule';
+      const data: ITriggerSchedule = await requestAPI(
+        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
+        {
+          method: 'POST',
+          signal
+        }
+      );
+      if (data.name) {
+        Notification.success(`${displayName} triggered successfully `, {
+          autoClose: false
+        });
+      } else {
+        Notification.error(`Failed to Trigger ${displayName}`, {
+          autoClose: false
+        });
+      }
+    } catch (reason) {
+      if (typeof reason === 'object' && reason !== null) {
+        if (
+          reason instanceof TypeError &&
+          reason.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          `Error in Trigger schedule ${reason}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Failed to Trigger schedule : ${reason}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      }
+    }
+  };
+
+  static readonly handleDeleteSchedulerAPIService = async (
+    deletePayload: IVertexDeleteAPIArgs
+  ) => {
+    const {
+      region,
+      uniqueScheduleId,
+      scheduleDisplayName,
+      listVertexScheduleInfoAPI
+    } = deletePayload;
+    try {
+      const serviceURL = 'api/vertex/deleteSchedule';
+      const deleteResponse: IDeleteSchedulerAPIResponse = await requestAPI(
+        serviceURL + `?region_id=${region}&schedule_id=${uniqueScheduleId}`,
+        { method: 'DELETE' }
+      );
+
+      if (deleteResponse && deleteResponse.done) {
+        listVertexScheduleInfoAPI(null); // Refresh the list after deletion
+        Notification.success(
+          `Deleted job ${deletePayload.scheduleDisplayName}. It might take a few minutes for the job to be deleted from the list of jobs.`,
+          {
+            autoClose: false
+          }
+        );
+      } else {
+        Notification.error(
+          `Failed to delete the ${deletePayload.scheduleDisplayName}`,
+          {
+            autoClose: false
+          }
+        );
+      }
+      // return deleteResponse;
+    } catch (error) {
+      SchedulerLoggingService.log(
+        `Error in Delete api ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to delete the ${scheduleDisplayName} : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
     }
   };
 

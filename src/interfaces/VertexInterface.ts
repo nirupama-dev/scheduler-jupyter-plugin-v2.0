@@ -25,9 +25,8 @@ import {
   UseFormWatch
 } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
-import { IAuthCredentials, IEditScheduleData, ILabelValue, Parameter } from './CommonInterface';
+import { IAuthCredentials, IEditScheduleData, ILabelValue } from './CommonInterface';
 import { HeaderProps, Renderer } from 'react-table';
-import dayjs from 'dayjs';
 
 export interface ICreateVertexSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -38,34 +37,6 @@ export interface ICreateVertexSchedulerProps {
   trigger: UseFormTrigger<CombinedCreateFormValues>;
   credentials: IAuthCredentials;
   editScheduleData: IEditScheduleData | null | undefined;
-}
-/*
- * Interface for the payload sent from the Create Vertex Scheduler form to the create API.
- */
-export interface IVertexSchedulePayload {
-  job_id?: string;
-  input_filename: string;
-  display_name: string;
-  machine_type: string;
-  kernel_name: string;
-  region: string;
-  cloud_storage_bucket: string;
-  service_account: string
-  network_option: 'networkInThisProject' | 'networkSharedFromHostProject'|'';
-  primary_network?: string;
-  sub_network?: string;
-  disk_type: string;
-  disk_size: string;
-  accelerator_type?: string;
-  accelerator_count?: string;
-  schedule_mode: string;
-  schedule_value?: string; // Optional: only for scheduled jobs
-  cron?: string; // Optional: only for scheduled jobs
-  time_zone?: string; // Optional: only for scheduled jobs
-  max_run_count?: string; // Optional: only for scheduled jobs
-  start_time?: dayjs.Dayjs; // Optional: only for scheduled jobs
-  end_time?: dayjs.Dayjs; // Optional: only for scheduled jobs
-  parameters?: Parameter[]; //future enhancement: optional parameters for the job
 }
 
 export interface IMachineType {
@@ -136,8 +107,7 @@ export interface ILastScheduledRunResponse {
 export interface IPaginationViewProps {
   canPreviousPage: boolean;
   canNextPage: boolean;
-  currentStartIndex: number;
-  currentLastIndex: number;
+  pageNumber: number;
   handleNextPage: () => void;
   handlePreviousPage: () => void;
   isLoading: boolean;
@@ -149,6 +119,7 @@ export interface IActivePaginationVariables {
   totalCount: number; // size of each page with pagination
   pageTokenList: string[];
   nextPageToken: string | null;
+  pageNumber: number;
 }
 
 // Define the expected type for formattedResponse
@@ -189,7 +160,7 @@ export interface IVertexCellProps {
   getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
   value: string | any;
   column: {
-    Header?: string | undefined | Renderer<HeaderProps<{}>>;
+    Header?: string | undefined | Renderer<HeaderProps<object>>;
   };
   row: {
     original: {
@@ -220,14 +191,46 @@ export interface IVertexScheduleList {
 }
 
 export interface IVertexListingLoadingState {
+  initialLoading: boolean;
   isLoading: boolean;
   regionLoader: boolean;
+  editScheduleLoader: boolean;
+  isLoadingTableContent: boolean;
+}
+
+export interface IVertexSelectedActionProps {
+  resumePauseLoading?: string;
+  triggerLoading?: string;
+  editScheduleLoading?: string;
+  deleteLoading?: string;
 }
 
 export interface IUpdateSchedulerArgs {
   scheduleId: string;
   region: string;
   displayName: string;
-  // setResumeLoading: (value: string) => void;
-  // abortControllers: any;
+  abortControllers: any;
+}
+
+export interface ISheduleToDelete {
+  scheduleId: string;
+  displayName: string;
+  deletePopUpShow: boolean;
+  deletingStatus?: boolean;
+}
+
+export interface IVertexDeleteAPIArgs {
+  region: string;
+  uniqueScheduleId: string;
+  scheduleDisplayName: string;
+  listVertexScheduleInfoAPI: (
+    nextPageTokenToLoad: string | null | undefined
+  ) => void;
+}
+
+export interface IVertexListPayload {
+  region: string;
+  nextToken: string | null | undefined;
+  scheduleListPageLength: number;
+  abortControllers: any;
 }

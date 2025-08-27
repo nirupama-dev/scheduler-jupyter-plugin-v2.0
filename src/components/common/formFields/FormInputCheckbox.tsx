@@ -23,9 +23,9 @@
 import React from 'react';
 import { Checkbox, FormControlLabel } from '@mui/material';
 import { Controller } from 'react-hook-form';
-import { FormInputCheckboxProps } from '../../../interfaces/FormInterface';
+import { IFormInputCheckboxProps } from '../../../interfaces/FormInterface';
 
-export const FormInputCheckbox: React.FC<FormInputCheckboxProps> = ({
+export const FormInputCheckbox: React.FC<IFormInputCheckboxProps> = ({
   name,
   control,
   label,

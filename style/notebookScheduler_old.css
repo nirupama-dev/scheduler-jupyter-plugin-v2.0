@@ -322,10 +322,6 @@
   padding-top: 8px;
 }
 
-.cursor-icon {
-  cursor: pointer;
-}
-
 /* Optional: Adjustments for other elements */
 .notebook-template-table-data {
   padding-left: 15px;
@@ -450,13 +446,6 @@
   cursor: pointer;
 }
 
-.pagination-numbers {
-  font-size: 0.9rem;
-
-  /* Adjust text color */
-  color: #555;
-}
-
 .pagination-arrow {
   display: flex;
   align-items: center;
@@ -527,17 +516,6 @@
 .expand-btn {
   color: #3367d6;
   font-weight: bold;
-}
-
-.pagination-parent-view-main {
-  display: flex;
-  justify-content: flex-end;
-
-  /* Adjust spacing between elements */
-  gap: 1rem;
-
-  /* Add some padding around the component */
-  padding: 0.5rem;
 }
 
 .list-level-component {

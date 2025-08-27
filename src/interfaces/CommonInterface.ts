@@ -67,11 +67,6 @@ export interface IPath {
   path?: string;
 }
 
-export interface Parameter {
-  key: string;
-  value: string;
-}
-
 export interface INotebookKernalSchdulerDefaults {
   schedulerType: SchedulerType;
   kernalDetails?: IKernelDetails;
@@ -95,7 +90,7 @@ export interface ICreateNotebookScheduleProps {
   editModeData?: IEditScheduleData | null | undefined;
 }
 
-export interface Parameter {
+export interface IParameter {
   key: string;
   value: string;
 }
@@ -105,8 +100,8 @@ export interface ILabelValue<T, U = T> {
   value: U;
 }
 
-export interface LoaderProps {
-  message: string;
-  iconClassName: string;
-  parentTagClassName: string;
+export interface ILoaderProps {
+  message?: string;
+  iconClassName?: string;
+  parentTagClassName?: string;
 }
