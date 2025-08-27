@@ -86,13 +86,6 @@
   width: 150px;
 }
 
-.spin-loader-main-execution-history {
-  display: flex;
-  max-height: 100%;
-  justify-content: center;
-  align-items: center;
-}
-
 .filter-cluster-overlay {
   height: 42px;
   padding-left: 15px;
@@ -120,18 +113,6 @@
   outline: none;
 }
 
-.create-text {
-  font-style: normal;
-  font-weight: 500;
-  font-size: 13px;
-  line-height: 32px;
-  display: flex;
-  align-items: center;
-  text-align: center;
-  text-transform: uppercase;
-  color: #3367d6;
-}
-
 .filter-cluster-text {
   font-style: normal;
   font-weight: 500;
@@ -140,14 +121,6 @@
   display: flex;
   align-items: center;
   text-align: center;
-}
-
-.create-icon {
-  display: flex;
-  height: 18px;
-  width: 18px;
-  color: #3367d6;
-  margin-top: -1px;
 }
 
 .filter-cluster-icon {
