@@ -16,10 +16,6 @@
   max-width: 294px;
 }
 
-.table-right-space {
-  padding-right: 15px;
-}
-
 .table-space-around {
   padding: 0 10px;
 }
@@ -65,4 +61,9 @@
 
 .no-data-style {
   margin: 10px 15px;
+}
+
+.icon-buttons-style {
+  cursor: pointer;
+  padding-right: 5px;
 }

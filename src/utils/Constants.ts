@@ -252,6 +252,9 @@ export const LOADER_CONTENT_VERTEX_LISTING_SCREEN =
 export const LOADER_CONTENT_COMPOSER_LISTING_SCREEN =
   'Loading Composer Schedules...';
 
+export const LOADER_CONTENT_VERTEX_EXECUTION_SCREEN =
+  'Loading Vertex Schedule Execution...';
+
 export const LISTING_SCREEN_HEADING = [
   {
     Header: 'Schedule Name',
@@ -281,4 +284,15 @@ export const LISTING_SCREEN_HEADING = [
     Header: 'Actions',
     accessor: 'actions'
   }
+];
+
+export const VIEW_CLOUD_LOGS = 'VIEW CLOUD LOGS';
+
+export const VERTEX_EXECUTION_HISTORY_TABLE_HEADER = [
+  { Header: 'State', accessor: 'state' },
+  { Header: 'Date', accessor: 'date' },
+  { Header: 'Time', accessor: 'time' },
+  { Header: 'Code', accessor: 'code' },
+  { Header: 'Status Message', accessor: 'statusMessage' },
+  { Header: 'Actions', accessor: 'actions' }
 ];
