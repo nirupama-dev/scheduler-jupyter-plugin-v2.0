@@ -312,43 +312,6 @@ export const CreateNotebookSchedule = (
         fetchComposerEditData(scheduleId, region, projectId, environment);
       }
 
-      // set Kernal and schedule value on edit, for further form implementation.
-      // let executionModeFromExistingData: ExecutionMode = 'local';
-      // let existingServerless = undefined;
-      // let existingCluster = undefined;
-      // if (
-      //   editScheduleData?.existingScheduleData &&
-      //   editScheduleData.existingScheduleData.schedulerSelection === 'composer'
-      // ) {
-      //   executionModeFromExistingData =
-      //     (editScheduleData.existingScheduleData as ComposerSchedulerFormValues)
-      //       .executionMode ?? 'local';
-      //   existingServerless = (
-      //     editScheduleData.existingScheduleData as ComposerSchedulerFormValues
-      //   ).serverless;
-      //   existingCluster = (
-      //     editScheduleData.existingScheduleData as ComposerSchedulerFormValues
-      //   ).cluster;
-      // }
-      // setKernalAndScheduleValue({
-      //   schedulerType: schedulerType,
-      //   kernalDetails: {
-      //     executionMode: executionModeFromExistingData, //local by default
-      //     isDataprocKernel:
-      //       schedulerType === 'composer'
-      //         ? executionModeFromExistingData === 'cluster' ||
-      //           executionModeFromExistingData === 'serverless'
-      //         : false,
-      //     kernelDisplayName:
-      //       schedulerType === 'composer'
-      //         ? (existingServerless ?? existingCluster ?? '')
-      //         : '',
-      //     selectedServerlessName: existingServerless, // undefined by default
-      //     selectedClusterName: existingCluster // undefined by default
-      //   }
-      // });
-
-      // Set form values that need to be preset
       setValue('schedulerSelection', schedulerType);
     
     }
@@ -422,65 +385,65 @@ export const CreateNotebookSchedule = (
    * Effect to set the initial form values based on the scheduler type.
    */
 
-  useEffect(() => {
+// useEffect(() => {
     // This effect runs when preFetchedInitialDetails changes or when the component mounts
     // and preFetchedInitialDetails is initially null/undefined.
-    let isMounted = true;
-    (async () => {
-      console.log(
-        'Component mounted or preFetchedInitialDetails changed. Current value:',
-        preFetchedInitialDetails
-      );
-      let loadedDetails: INotebookKernalSchdulerDefaults;
-      // If preFetchedInitialDetails is available, use it; otherwise, fetch the default scheduler type
-      if (preFetchedInitialDetails) {
-        loadedDetails = preFetchedInitialDetails;
-        console.log(
-          'Using pre-fetched Initial Scheduler Details:',
-          loadedDetails
-        );
-      } else {
-        try {
-          loadedDetails = (await getDefaultSchedulerTypeOnLoad(sessionContext))
-            .kernalAndSchedulerDetails;
-          console.log(
-            'Fallback fetched Initial Scheduler Details:',
-            loadedDetails
-          );
-        } catch (error) {
-          console.error(
-            'Failed to fetch initial scheduler details in fallback:',
-            error
-          );
-          loadedDetails = {
-            schedulerType: 'vertex',
-            kernalDetails: {
-              executionMode: 'local',
-              isDataprocKernel: false,
-              kernelDisplayName: ''
-            }
-          };
-        }
-      }
-      if (isMounted) {
-        setKernalAndScheduleValue(loadedDetails);
-        setValue('schedulerSelection', loadedDetails.schedulerType);
-        setValue(
-          'executionMode',
-          loadedDetails.kernalDetails?.executionMode || 'local'
-        );
-        setValue(
-          'serverless',
-          loadedDetails.kernalDetails?.selectedServerlessName
-        );
-        setValue('cluster', loadedDetails.kernalDetails?.selectedClusterName);
-        console.log('Scheduler Selection set to:', loadedDetails.schedulerType);
-      }
-    })();
-    return () => {
-      isMounted = false;
-    };
-  }, [preFetchedInitialDetails, sessionContext, setValue]);
+  //   let isMounted = true;
+  //   (async () => {
+  //     console.log(
+  //       'Component mounted or preFetchedInitialDetails changed. Current value:',
+  //       preFetchedInitialDetails
+  //     );
+  //     let loadedDetails: INotebookKernalSchdulerDefaults;
+  //     // If preFetchedInitialDetails is available, use it; otherwise, fetch the default scheduler type
+  //     if (preFetchedInitialDetails) {
+  //       loadedDetails = preFetchedInitialDetails;
+  //       console.log(
+  //         'Using pre-fetched Initial Scheduler Details:',
+  //         loadedDetails
+  //       );
+  //     } else {
+  //       try {
+  //         loadedDetails = (await getDefaultSchedulerTypeOnLoad(sessionContext))
+  //           .kernalAndSchedulerDetails;
+  //         console.log(
+  //           'Fallback fetched Initial Scheduler Details:',
+  //           loadedDetails
+  //         );
+  //       } catch (error) {
+  //         console.error(
+  //           'Failed to fetch initial scheduler details in fallback:',
+  //           error
+  //         );
+  //         loadedDetails = {
+  //           schedulerType: 'vertex',
+  //           kernalDetails: {
+  //             executionMode: 'local',
+  //             isDataprocKernel: false,
+  //             kernelDisplayName: ''
+  //           }
+  //         };
+  //       }
+  //     }
+  //     if (isMounted) {
+  //       setKernalAndScheduleValue(loadedDetails);
+  //       setValue('schedulerSelection', loadedDetails.schedulerType);
+  //       setValue(
+  //         'executionMode',
+  //         loadedDetails.kernalDetails?.executionMode || 'local'
+  //       );
+  //       setValue(
+  //         'serverless',
+  //         loadedDetails.kernalDetails?.selectedServerlessName
+  //       );
+  //       setValue('cluster', loadedDetails.kernalDetails?.selectedClusterName);
+  //       console.log('Scheduler Selection set to:', loadedDetails.schedulerType);
+  //     }
+  //   })();
+  //   return () => {
+  //     isMounted = false;
+  //   };
+  // }, [preFetchedInitialDetails, sessionContext, setValue]);
 
   const schedulerSelection = watch('schedulerSelection'); // Get the current value of the radio button
   /**
@@ -658,19 +621,7 @@ export const CreateNotebookSchedule = (
               editScheduleData={editScheduleData}
             />
           )}
-          {schedulerSelection === 'composer' && (
-            <CreateComposerSchedule
-              control={control}
-              errors={errors}
-              setValue={setValue}
-              watch={watch}
-              setError={setError}
-              getValues={getValues}
-              trigger={trigger}
-              credentials={credentials}
-              editScheduleData={editScheduleData}
-            />
-          )}
+          
           <div className="save-overlay">
             <Button
               variant="contained"
