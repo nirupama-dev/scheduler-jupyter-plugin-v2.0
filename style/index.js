@@ -30,3 +30,4 @@ import './createComposerScheduler.css';
 import './common.css';
 import './listComposerSchedule.css';
 import './vertexExecutionHistory.css';
+import './composerExecutionHistory.css';

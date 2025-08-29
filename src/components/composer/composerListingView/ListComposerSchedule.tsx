@@ -150,6 +150,12 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
   };
 
+  const handleDagIdSelection = (composerName: string, dagId: string) => {
+    navigate(
+      `/execution-composer-history/${dagId}/${selectedProjectId}/${selectedRegion}/${composerName}/${bucketName}`
+    );
+  };
+
   /**
    * Check if GCS plugin is installed
    * If installed, set isGCSPluginInstalled to true
@@ -569,11 +575,11 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         return (
           <td {...cell.getCellProps()} className="scheduler-table-data">
             <span
-            // onClick={() => {
-            //   if (composerEnvSelected) {
-            //     handleDagIdSelection(composerEnvSelected, cell.value);
-            //   }
-            // }}
+              onClick={() => {
+                if (selectedEnv) {
+                  handleDagIdSelection(selectedEnv, cell.value);
+                }
+              }}
             >
               {cell.value}
             </span>

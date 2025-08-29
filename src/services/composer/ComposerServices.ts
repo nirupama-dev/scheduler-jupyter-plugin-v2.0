@@ -28,7 +28,6 @@ import {
   IComposerEnvAPIResponse,
   IComposerSchedulePayload,
   IDagList,
-  IDagRunList,
   ILoadingStateComposer,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse,
@@ -452,143 +451,32 @@ export class ComposerServices {
     }
   };
 
-  static readonly listDagRunsListService = async (
-    composerName: string,
-    dagId: string,
-    startDate: string,
-    endDate: string,
-    setDagRunsList: (value: IDagRunList[]) => void,
-    setDagRunId: (value: string) => void,
-    setIsLoading: (value: boolean) => void,
-    setGreyListDates: (value: string[]) => void,
-    setRedListDates: (value: string[]) => void,
-    setGreenListDates: (value: string[]) => void,
-    setDarkGreenListDates: (value: string[]) => void,
-    projectId: string,
-    region: string,
-    currentOffsetValue?: number,
-    previousDagRunDataList?: object
-  ) => {
-    const offset = currentOffsetValue ?? 0;
-    setIsLoading(true);
-    const start_date = startDate;
-    const end_date = endDate;
-    setGreyListDates([]);
-    setRedListDates([]);
-    setGreenListDates([]);
-    setDarkGreenListDates([]);
+  static readonly listDagRunsListService = async (payload: {
+    composerName: string;
+    dagId: string;
+    startDate: string;
+    endDate: string;
+    projectId: string;
+    region: string;
+    offset?: number;
+  }): Promise<any> => {
+    const {
+      composerName,
+      dagId,
+      startDate,
+      endDate,
+      projectId,
+      region,
+      offset = 0
+    } = payload;
+
+    const serviceURL = `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${startDate}&end_date=${endDate}&offset=${offset}&project_id=${projectId}&region_id=${region}`;
+
     try {
-      const data: any = await requestAPI(
-        `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${start_date}&end_date=${end_date}&offset=${offset}&project_id=${projectId}&region_id=${region}`
-      );
-
-      let transformDagRunListDataCurrent = [];
-      if (data && data?.dag_runs?.length > 0) {
-        transformDagRunListDataCurrent = data.dag_runs.map((dagRun: any) => {
-          if (dagRun.start_date !== null) {
-            return {
-              dagRunId: dagRun.dag_run_id,
-              filteredDate: new Date(dagRun.start_date),
-              state: dagRun.state,
-              date: new Date(dagRun.start_date).toDateString(),
-              time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
-            };
-          }
-        });
-      }
-      transformDagRunListDataCurrent = transformDagRunListDataCurrent.filter(
-        (dagRunData: any) => {
-          if (dagRunData) {
-            return dagRunData;
-          }
-        }
-      );
-      const existingDagRunsListData = previousDagRunDataList ?? [];
-      //setStateAction never type issue
-      const allDagRunsListData: any = [
-        ...(existingDagRunsListData as []),
-        ...transformDagRunListDataCurrent
-      ];
-
-      if (data?.dag_runs?.length + offset !== data.total_entries) {
-        this.listDagRunsListService(
-          composerName,
-          dagId,
-          startDate,
-          endDate,
-          setDagRunsList,
-          setDagRunId,
-          setIsLoading,
-          setGreyListDates,
-          setRedListDates,
-          setGreenListDates,
-          setDarkGreenListDates,
-          projectId,
-          region,
-          data.dag_runs.length + offset,
-          allDagRunsListData
-        );
-      } else {
-        const transformDagRunListData = allDagRunsListData;
-
-        if (transformDagRunListData?.length > 0) {
-          // Group by date first, then by status
-          const groupedDataByDateStatus = transformDagRunListData.reduce(
-            (result: any, item: any) => {
-              const date = item.filteredDate;
-              const status = item.state;
-
-              result[date] ??= {};
-
-              result[date][status] ??= [];
-
-              result[date][status].push(item);
-
-              return result;
-            },
-            {}
-          );
-
-          const greyList: string[] = [];
-          const redList: string[] = [];
-          const greenList: string[] = [];
-          const darkGreenList: string[] = [];
-
-          Object.keys(groupedDataByDateStatus).forEach(dateValue => {
-            if (
-              groupedDataByDateStatus[dateValue].running ||
-              groupedDataByDateStatus[dateValue].queued
-            ) {
-              greyList.push(dateValue);
-            } else if (groupedDataByDateStatus[dateValue].failed) {
-              redList.push(dateValue);
-            } else if (
-              groupedDataByDateStatus[dateValue].success &&
-              groupedDataByDateStatus[dateValue].success.length === 1
-            ) {
-              greenList.push(dateValue);
-            } else {
-              darkGreenList.push(dateValue);
-            }
-          });
-
-          setGreyListDates(greyList);
-          setRedListDates(redList);
-          setGreenListDates(greenList);
-          setDarkGreenListDates(darkGreenList);
-
-          setDagRunsList(transformDagRunListData);
-        } else {
-          setDagRunsList([]);
-          setGreyListDates([]);
-          setRedListDates([]);
-          setGreenListDates([]);
-          setDarkGreenListDates([]);
-        }
-        setIsLoading(false);
-      }
-    } catch (reason) {
-      const errorResponse = `Error in listing dag runs..\n${reason}`;
+      const data: any = await requestAPI(serviceURL);
+      return data;
+    } catch (error) {
+      const errorResponse = `Error in listing dag runs..\n${error}`;
       handleErrorToast({
         error: errorResponse
       });
