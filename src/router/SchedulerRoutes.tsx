@@ -71,7 +71,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
       />
 
       <Route
-        path="/edit/:schedulerTypeOne/:id"
+        path="/edit/:schedulerType/:scheduleId/:region/:projectId?/:environment?"
         element={<CreateNotebookSchedule />}
       />
 
