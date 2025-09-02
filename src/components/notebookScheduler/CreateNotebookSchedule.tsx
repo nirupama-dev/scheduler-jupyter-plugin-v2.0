@@ -286,7 +286,7 @@ export const CreateNotebookSchedule = (
    * Authentication
    */
   useEffect(() => {
-    let credentials = authApi();
+    const credentials = authApi();
     if (!credentials) {
       //TO DO: Reroute Login
     }
@@ -301,10 +301,10 @@ export const CreateNotebookSchedule = (
    */
   useEffect(() => {
     if (editScheduleData?.editMode && scheduleId && region) {
-      if (schedulerType == 'vertex') {
+      if (schedulerType === 'vertex') {
         fetchVertexEditData(scheduleId, region);
       }
-      if (schedulerType == 'composer' && projectId && environment) {
+      if (schedulerType === 'composer' && projectId && environment) {
         fetchComposerEditData(scheduleId, region, projectId, environment);
       }
 
