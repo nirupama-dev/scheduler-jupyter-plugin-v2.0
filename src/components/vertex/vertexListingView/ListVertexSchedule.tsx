@@ -642,7 +642,7 @@ const ListVertexSchedule = ({
               page={page}
               prepareRow={prepareRow}
               tableDataCondition={tableDataCondition}
-              fromPage="vertex"
+              fromPage="Vertex"
             />
             {vertexScheduleList.length > 0 && (
               <PaginationComponent
