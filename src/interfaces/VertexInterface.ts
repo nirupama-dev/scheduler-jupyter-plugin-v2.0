@@ -391,3 +391,11 @@ export interface ICustomDateProps extends PickersDayProps<Dayjs> {
   greenListDates?: string[];
   darkGreenListDates?: string[];
 }
+
+export interface IVertexListingInputProps {
+  region: string;
+  handleRegion: (regionSelected: ILabelValue<string> | null) => void;
+  loaderState: IVertexListingLoadingState;
+  regionDisable: boolean;
+  handleCurrentPageRefresh: () => void;
+}
