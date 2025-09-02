@@ -117,7 +117,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
               <Loader
                 message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
                 iconClassName="spin-loader-custom-style"
-                parentTagClassName='"spin-loader-main spin-loader-listing'
+                parentTagClassName="spin-loader-main spin-loader-listing"
               />
             }
           >

@@ -144,3 +144,7 @@
 .no-data-style {
   margin: 10px 15px;
 }
+
+.table-row-pad {
+  padding-left: 15px;
+}

@@ -296,3 +296,6 @@ export const VERTEX_EXECUTION_HISTORY_TABLE_HEADER = [
   { Header: 'Status Message', accessor: 'statusMessage' },
   { Header: 'Actions', accessor: 'actions' }
 ];
+
+export const VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT =
+  'Loading Vertex Schedule Runs...';
