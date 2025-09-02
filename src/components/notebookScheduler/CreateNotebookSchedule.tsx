@@ -593,7 +593,7 @@ export const CreateNotebookSchedule = (
             className="logo-alignment-style" //icon-white
           />
         </div>
-        <div className="create-job-scheduler-title">
+        <div className="scheduler-page-title">
           {
             editScheduleData&& editScheduleData.editMode ? 'Update Scheduled Notebook Job' :
             'Create Scheduled Notebook Job'

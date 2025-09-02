@@ -104,4 +104,5 @@ export interface ILoaderProps {
   message?: string;
   iconClassName?: string;
   parentTagClassName?: string;
+  messageClassName?: string;
 }

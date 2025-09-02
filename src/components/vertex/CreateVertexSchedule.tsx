@@ -736,7 +736,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       {currentMachineType &&
         selectedMachineType?.acceleratorConfigs &&
         selectedMachineType.acceleratorConfigs.length > 0 && (
-          <div className="execution-history-main-wrapper">
+          <div className="horizontal-element-wrapper">
             <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
               <FormInputDropdown
                 name="acceleratorType"
@@ -815,7 +815,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Disk Type and Size */}
-      <div className="execution-history-main-wrapper">
+      <div className="horizontal-element-wrapper">
         <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
             name="diskType"
@@ -894,7 +894,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
       {/* Conditional Network Fields */}
       {currentNetworkOption === DEFAULT_NETWORK_SELECTED ? ( // 'networkInThisProject'
-        <div className="execution-history-main-wrapper">
+        <div className="horizontal-element-wrapper">
           <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
             <FormInputDropdown
               name="primaryNetwork"
@@ -1054,7 +1054,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               }}
             />
 
-            <div className="execution-history-main-wrapper">
+            <div className="horizontal-element-wrapper">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <div className="cscheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
                   <Controller
