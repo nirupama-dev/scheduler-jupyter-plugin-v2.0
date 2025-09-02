@@ -8,7 +8,10 @@ import { IKernelDetails } from '../interfaces/ComposerInterface';
 import { SchedulerType } from '../types/CommonSchedulerTypes';
 import { Kernel, KernelAPI, KernelSpecAPI } from '@jupyterlab/services';
 import { ComposerServices } from '../services/composer/ComposerServices';
-import { ILabelValue, INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
+import {
+  ILabelValue,
+  INotebookKernalSchdulerDefaults
+} from '../interfaces/CommonInterface';
 
 /**
  * caching KernelAPI.listRunning() to improve preformance.
@@ -204,22 +207,24 @@ const extractSchedulerTypeAndKernelDetails = async (
  */
 const promisifiedListClusters = async (): Promise<string[]> => {
   const apiResponse = await ComposerServices.listClustersAPIService();
-  return apiResponse.map((option:ILabelValue<string>) => option.value);
+  return apiResponse.map((option: ILabelValue<string>) => option.value);
 };
 
 /**
  * Promisifies the listSessionTemplatesAPIService to return a full list of serverless names.
  * @returns Promise resolving to an array of serverless names (strings).
  */
-const promisifiedListSessionTemplates = async(): Promise<string[]> => {
-   // Await the API call to get the resolved array of objects
-    const apiResponse = await ComposerServices.listSessionTemplatesAPIService();
+const promisifiedListSessionTemplates = async (): Promise<string[]> => {
+  // Await the API call to get the resolved array of objects
+  const apiResponse = await ComposerServices.listSessionTemplatesAPIService();
 
-    // Map the resolved array of objects to an array of string values
-    const templateValues = apiResponse.map((option :ILabelValue<string>) => option.value);
+  // Map the resolved array of objects to an array of string values
+  const templateValues = apiResponse.map(
+    (option: ILabelValue<string>) => option.value
+  );
 
-    // Return the final array
-    return templateValues;
+  // Return the final array
+  return templateValues;
 };
 
 /**

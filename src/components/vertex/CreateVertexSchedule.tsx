@@ -164,7 +164,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const fetchRegion = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, region: true }));
     try {
-    
       if (credentials?.region_id) {
         if (!editScheduleData || !getValues('vertexRegion')) {
           setValue('vertexRegion', credentials.region_id);
@@ -254,7 +253,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         b => b.value === currentBucketValue
       );
 
-      if (!editScheduleData?.editMode || !currentBucketValue || !isValidExisting) {
+      if (
+        !editScheduleData?.editMode ||
+        !currentBucketValue ||
+        !isValidExisting
+      ) {
         const defaultSelected = fetchedBuckets.find(
           option => option.value === DEFAULT_CLOUD_STORAGE_BUCKET.value
         );
@@ -332,7 +335,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, []);
 
   /**
-   * 
+   *
    */
   const fetchPrimaryNetworks = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, primaryNetwork: true }));
@@ -1050,7 +1053,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   setValue('scheduleFieldCronFormat', '');
                   setValue('scheduleValue', EVERY_MINUTE_CRON);
                 }
-                trigger(['scheduleFieldCronFormat', 'scheduleValueUserFriendly']);
+                trigger([
+                  'scheduleFieldCronFormat',
+                  'scheduleValueUserFriendly'
+                ]);
               }}
             />
 
@@ -1169,7 +1175,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               {vertexErrors.scheduleValueUserFriendly && (
                 <ErrorMessage
                   message={
-                    vertexErrors.scheduleValueUserFriendly.message || 'Schedule is required'
+                    vertexErrors.scheduleValueUserFriendly.message ||
+                    'Schedule is required'
                   }
                   showIcon={false}
                 />

@@ -77,7 +77,9 @@ export interface IEditScheduleData {
   region?: string;
   projectId?: string;
   environment?: string;
-  existingScheduleData?: VertexSchedulerFormValues | ComposerSchedulerFormValues;
+  existingScheduleData?:
+    | VertexSchedulerFormValues
+    | ComposerSchedulerFormValues;
 }
 
 //Remove this if same as ISchedulerRoutesProps

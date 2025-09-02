@@ -64,12 +64,9 @@ export class AuthenticationService {
       }
     } catch (reason) {
       console.error(`Error on GET credentials.\n${reason}`);
-      Notification.error(
-        'Error on GET credentials',
-        {
-          autoClose: false
-        }
-      );
+      Notification.error('Error on GET credentials', {
+        autoClose: false
+      });
       return undefined;
     }
   };

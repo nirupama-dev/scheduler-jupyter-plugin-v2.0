@@ -38,14 +38,12 @@ import { IDropdownOption } from '../../interfaces/FormInterface';
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
  */
 export class ComposerServices {
-
   /**
    * Fetches the list of Cluster Options available.
-   * @param nextPageToken 
-   * @param previousClustersList 
+   * @param nextPageToken
+   * @param previousClustersList
    */
   static readonly listClustersAPIService = async (
- 
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
   ) => {
@@ -110,14 +108,12 @@ export class ComposerServices {
    * @param previousSessionTemplatesList - Previously fetched session templates.
    */
   static readonly listSessionTemplatesAPIService = async (
-    
     nextPageToken?: string,
     previousSessionTemplatesList?: object
   ) => {
     const pageToken = nextPageToken ?? '';
-    
+
     try {
-      
       const serviceURL = `runtimeList?pageSize=500&pageToken=${pageToken}`;
 
       const formattedResponse: any = await requestAPI(serviceURL);
@@ -168,7 +164,6 @@ export class ComposerServices {
         return;
       }
     } catch (error) {
-     
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
@@ -214,11 +209,11 @@ export class ComposerServices {
 
   /**
    * Creates or Updates a Cloud Composer Notebook Schedule Job.
-   * @param composerScheduleData 
-   * @param projectId 
-   * @param region 
-   * @param isEditMode 
-   * @returns 
+   * @param composerScheduleData
+   * @param projectId
+   * @param region
+   * @param isEditMode
+   * @returns
    */
   static readonly saveComposerNotebookJobSchedule = async (
     composerScheduleData: IComposerSchedulePayload,
@@ -227,11 +222,11 @@ export class ComposerServices {
     isEditMode?: boolean
   ): Promise<boolean> => {
     try {
-      if(!projectId){
-        projectId= composerScheduleData.project_id;
+      if (!projectId) {
+        projectId = composerScheduleData.project_id;
       }
-      if(!region){
-        region=composerScheduleData.region_id;
+      if (!region) {
+        region = composerScheduleData.region_id;
       }
       console.log('project: ', projectId, 'region', region);
       const createScheduleResponse: any = await requestAPI(
@@ -248,12 +243,13 @@ export class ComposerServices {
         });
         return false;
       } else {
-       
-        if (isEditMode) {  // In case of update Schedule
+        if (isEditMode) {
+          // In case of update Schedule
           Notification.success('Notebook Job Scheduler Successfully Updated', {
             autoClose: false
           });
-        } else { // create schedule
+        } else {
+          // create schedule
           Notification.success('Notebook Job Scheduler Successfully Created', {
             autoClose: false
           });

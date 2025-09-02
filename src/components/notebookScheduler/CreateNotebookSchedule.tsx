@@ -44,12 +44,8 @@ import {
   IEditScheduleData,
   IAuthCredentials
 } from '../../interfaces/CommonInterface';
-import {
-  VertexSchedulerFormValues
-} from '../../schemas/CreateVertexSchema';
-import {
-  ComposerSchedulerFormValues,
-} from '../../schemas/CreateComposerSchema';
+import { VertexSchedulerFormValues } from '../../schemas/CreateVertexSchema';
+import { ComposerSchedulerFormValues } from '../../schemas/CreateComposerSchema';
 import { getInitialFormValues } from '../../utils/FormDefaults';
 import { Button } from '@mui/material';
 import { IComposerSchedulePayload } from '../../interfaces/ComposerInterface';
@@ -350,7 +346,6 @@ export const CreateNotebookSchedule = (
 
       // Set form values that need to be preset
       setValue('schedulerSelection', schedulerType);
-    
     }
   }, [scheduleId, projectId, region, environment]);
 
@@ -387,20 +382,21 @@ export const CreateNotebookSchedule = (
    */
   const schedulerFormValues = useMemo(() => {
     //Load existing data in case of EDIT
-    if(editScheduleData && editScheduleData.editMode && editScheduleData.existingScheduleData){
+    if (
+      editScheduleData &&
+      editScheduleData.editMode &&
+      editScheduleData.existingScheduleData
+    ) {
       return editScheduleData.existingScheduleData;
     }
-    try{
-    //Load default values on CREATE
-    return getInitialFormValues(
-      kernalAndScheduleValue,
-      sessionContext
-    );
-  }catch(error){
-    console.error("Error loading Scheduler form values:", error);
-    //TODO: Reroute
-    return {};
-  }
+    try {
+      //Load default values on CREATE
+      return getInitialFormValues(kernalAndScheduleValue, sessionContext);
+    } catch (error) {
+      console.error('Error loading Scheduler form values:', error);
+      //TODO: Reroute
+      return {};
+    }
   }, [schedulerType]);
 
   const {
@@ -594,10 +590,9 @@ export const CreateNotebookSchedule = (
           />
         </div>
         <div className="scheduler-page-title">
-          {
-            editScheduleData&& editScheduleData.editMode ? 'Update Scheduled Notebook Job' :
-            'Create Scheduled Notebook Job'
-          }
+          {editScheduleData && editScheduleData.editMode
+            ? 'Update Scheduled Notebook Job'
+            : 'Create Scheduled Notebook Job'}
         </div>
       </div>
       <form onSubmit={handleSubmit(data => onSubmit(data, credentials))}>

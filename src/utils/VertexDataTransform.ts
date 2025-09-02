@@ -61,7 +61,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
     maxConcurrentRunCount: '1',
     ...(VertexScheduleData.maxRunCount
       ? { maxRunCount: VertexScheduleData.maxRunCount }
-      :{}),
+      : {}),
     ...(VertexScheduleData.startTime
       ? { startTime: VertexScheduleData.startTime }
       : {}),
