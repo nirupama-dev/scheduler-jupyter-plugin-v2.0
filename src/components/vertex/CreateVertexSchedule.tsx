@@ -175,6 +175,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       setValue('vertexRegion', ''); // Clear region on error
     } finally {
       setLoadingState(prev => ({ ...prev, region: false }));
+      trigger('vertexRegion');
     }
   }, [setValue, getValues, editScheduleData]);
 
@@ -229,6 +230,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           setValue('acceleratorType', '');
           setValue('acceleratorCount', '');
         }
+        trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
       } catch (error) {
         setMachineTypeList([]);
         setValue('machineType', '');
@@ -236,6 +238,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('acceleratorCount', '');
       } finally {
         setLoadingState(prev => ({ ...prev, machineType: false }));
+        trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
       }
     },
     [setValue, getValues, setMachineTypeList, editScheduleData]
@@ -313,6 +316,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       setValue('serviceAccount', '');
     } finally {
       setLoadingState(prev => ({ ...prev, serviceAccount: false }));
+      trigger(['serviceAccount']);
+
     }
   }, [setValue, getValues, editScheduleData]);
 
@@ -363,6 +368,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       handleErrorToast({ error: 'Failed to fetch primary networks.' });
     } finally {
       setLoadingState(prev => ({ ...prev, primaryNetwork: false }));
+      trigger('primaryNetwork');
     }
   }, [setValue, getValues, editScheduleData]);
 
@@ -409,6 +415,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         handleErrorToast({ error: 'Failed to fetch subNetworks.' });
       } finally {
         setLoadingState(prev => ({ ...prev, subNetwork: false }));
+        trigger('subNetwork');
+        trigger('primaryNetwork'); // Ensure primary network validation is updated
       }
     },
     [setValue, getValues, editScheduleData]
@@ -459,6 +467,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         handleErrorToast({ error: 'Failed to fetch shared networks.' });
       } finally {
         setLoadingState(prev => ({ ...prev, sharedNetwork: false }));
+        trigger('sharedNetwork');
       }
     },
     [setValue, getValues, editScheduleData]
@@ -509,7 +518,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   useEffect(() => {
     console.log('Fetching machine types for region:', currentRegion);
     fetchMachineTypes(currentRegion);
-  }, [currentRegion, fetchMachineTypes]);
+    trigger('machineType');
+  }, [currentRegion, fetchMachineTypes, trigger]);
 
   // Effect for Subnetworks dependent on Primary Network and Region
   useEffect(() => {
@@ -554,6 +564,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('machineType', '');
         setValue('acceleratorType', '');
         setValue('acceleratorCount', '');
+        setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
         setValue('subNetwork', ''); // Clear the actual subNetwork field
         setValue('sharedNetwork', { network: '', subnetwork: '' });
@@ -574,6 +585,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('machineType', '');
         setValue('acceleratorType', '');
         setValue('acceleratorCount', '');
+        setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
         setValue('subNetwork', ''); // Clear the actual subNetwork field
         setValue('sharedNetwork', { network: '', subnetwork: '' });
@@ -893,7 +905,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Conditional Network Fields */}
-      {currentNetworkOption === DEFAULT_NETWORK_SELECTED ? ( // 'networkInThisProject'
+      {currentNetworkOption === 'networkInThisProject' ? ( // 'networkInThisProject'
         <div className="execution-history-main-wrapper">
           <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
             <FormInputDropdown

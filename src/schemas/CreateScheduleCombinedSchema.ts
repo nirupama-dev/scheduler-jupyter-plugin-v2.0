@@ -164,7 +164,7 @@ export const combinedCreateFormSchema = z
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: 'Email recipients is required field',
-            path: ['email']
+            path: ['emailRecipients']
           });
         }
       }
