@@ -529,7 +529,8 @@ const ListVertexSchedule = ({
       totalCount: totalCount,
       pageTokenList: pageTokenList,
       nextPageToken: nextPageToken,
-      pageNumber: pageNumber
+      pageNumber: pageNumber,
+      region: region
     };
     return currentPaginationVariables;
   };
@@ -563,7 +564,11 @@ const ListVertexSchedule = ({
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
           setLoaderState(prevState => ({ ...prevState, regionLoader: false }));
-          setRegion(credentials.region_id);
+          if (!activePaginationVariables) {
+            setRegion(credentials.region_id);
+          } else {
+            setRegion(activePaginationVariables.region);
+          }
         }
       })
       .catch(error => {

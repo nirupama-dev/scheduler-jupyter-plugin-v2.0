@@ -174,6 +174,7 @@ export interface IActivePaginationVariables {
   pageTokenList: string[];
   nextPageToken: string | null;
   pageNumber: number;
+  region: string;
 }
 
 // Define the expected type for formattedResponse
