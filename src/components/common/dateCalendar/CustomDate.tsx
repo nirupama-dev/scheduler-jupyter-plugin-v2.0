@@ -32,6 +32,7 @@ export default function CustomDate(props: ICustomDateProps) {
     redListDates,
     greenListDates,
     darkGreenListDates,
+    isLoading,
     ...dateProps
   } = props;
   const { day, disabled } = dateProps;
@@ -161,7 +162,7 @@ export default function CustomDate(props: ICustomDateProps) {
           transition: 'none'
         }}
       />
-      {dateInfo.StatusIcon && !dateInfo.isSelected && (
+      {dateInfo.StatusIcon && !dateInfo.isSelected && !isLoading && (
         <div
           className={
             day.date() > 9

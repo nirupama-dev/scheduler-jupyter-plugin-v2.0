@@ -37,5 +37,6 @@ declare module '@mui/x-date-pickers/PickersDay' {
     redListDates?: string[];
     greenListDates?: string[];
     darkGreenListDates?: string[];
+    isLoading?: boolean;
   }
 }

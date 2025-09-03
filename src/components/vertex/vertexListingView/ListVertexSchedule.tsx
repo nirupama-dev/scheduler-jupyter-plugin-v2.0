@@ -331,11 +331,12 @@ const ListVertexSchedule = ({
     }
 
     // Converts the slashes and other special characters into a safe format that React Router will treat as a single string
-    const scheduleId = encodeURIComponent(schedulerData?.name.split('/').pop());
-    const selectedScheduleName = encodeURIComponent(schedulerData?.displayName);
-    navigate(
-      `/execution-vertex-history/${scheduleId}/${region}/${selectedScheduleName}`
-    );
+    const scheduleId = schedulerData?.name.split('/').pop();
+    const scheduleName = schedulerData?.displayName;
+    const createTime = schedulerData?.createTime;
+    navigate('/execution-vertex-history', {
+      state: { scheduleId, region, scheduleName, createTime }
+    });
   };
 
   /**
