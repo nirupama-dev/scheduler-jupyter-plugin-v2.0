@@ -15,25 +15,21 @@
  * limitations under the License.
  */
 
-import {
-  Autocomplete,
-  Button,
-  CircularProgress,
-  TextField
-} from '@mui/material';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import {
   LISTING_SCREEN_HEADING,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN,
-  SCHEDULE_LABEL_VERTEX,
-  VERTEX_REGIONS
+  SCHEDULE_LABEL_VERTEX
 } from '../../../utils/Constants';
 import { ILabelValue } from '../../../interfaces/CommonInterface';
 import { authApi } from '../../common/login/Config';
-import {
-  ErrorMessage,
-  handleErrorToast
-} from '../../common/notificationHandling/ErrorUtils';
+import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import { usePagination, useTable } from 'react-table';
 import { VertexServices } from '../../../services/vertex/VertexServices';
 import {
@@ -52,6 +48,8 @@ import { useNavigate } from 'react-router-dom';
 import DeletePopup from '../../common/table/DeletePopup';
 import { abortApiCall } from '../../../utils/Config';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
+import VertexListingInputLayout from './VertexListingInput';
+import { useVertexContext } from '../../../context/vertex/VertexListContext';
 
 const ListVertexSchedule = ({
   abortControllers
@@ -59,6 +57,13 @@ const ListVertexSchedule = ({
   abortControllers: any;
 }) => {
   const navigate = useNavigate();
+
+  // Consume the context value
+  const vertexContext = useVertexContext();
+  const activePaginationVariables = vertexContext?.activePaginationVariables;
+  const setActivePaginationVariables =
+    vertexContext?.setActivePaginationVariables;
+
   const [region, setRegion] = useState<string>('');
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
@@ -92,10 +97,6 @@ const ListVertexSchedule = ({
 
   const columns = useMemo(() => LISTING_SCREEN_HEADING, []);
 
-  const [activePaginationVariables, setActivePaginationVariables] = useState<
-    IActivePaginationVariables | null | undefined
-  >();
-
   // pagination variables
   const [scheduleListPageLength, setScheduleListPageLength] =
     useState<number>(25); // size of each page with pagination
@@ -113,16 +114,20 @@ const ListVertexSchedule = ({
 
   /**
    * Handles the selection of region
+   * @param {string | null} region selected
    */
-  const handleRegion = (regionSelected: ILabelValue<string> | null) => {
-    // Abort previous APIs
-    abortApiCall(abortControllers);
-    if (regionSelected) {
-      setRegion(regionSelected.value);
-    } else {
-      setRegion('');
-    }
-  };
+  const handleRegion = useCallback(
+    (regionSelected: ILabelValue<string> | null) => {
+      // Abort previous APIs
+      abortApiCall(abortControllers);
+      if (regionSelected) {
+        setRegion(regionSelected.value);
+      } else {
+        setRegion('');
+      }
+    },
+    [region, abortControllers]
+  );
 
   const {
     getTableProps,
@@ -145,65 +150,59 @@ const ListVertexSchedule = ({
 
   /**
    * Get list of schedules
+   * @param {string} nextToken: token for next page
    */
-  const listVertexScheduleInfoAPI = async (
-    nextToken: string | null | undefined
-  ) => {
-    setLoaderState(prevState => ({
-      ...prevState,
-      isLoading: true,
-      isLoadingTableContent: true
-    }));
-    setRegionDisable(true);
-    const listVertexPayload = {
-      region,
-      nextToken,
-      scheduleListPageLength,
-      abortControllers
-    };
-    const scheduleApiData = await VertexServices.listVertexSchedules(
-      listVertexPayload
-      // setIsLoading,
-      // setIsApiError,
-      // setApiError,
-      // setNextPageToken,
-      // nextToken,
-      // setCanNextPage,
-      // setApiEnableUrl,
-      // scheduleListPageLength,
-      // abortControllers
-    );
-    if (scheduleApiData && Array.isArray(scheduleApiData.schedulesList)) {
-      setVertexScheduleList(scheduleApiData.schedulesList);
+  const listVertexScheduleInfoAPI = useCallback(
+    async (nextToken: string | null | undefined) => {
       setLoaderState(prevState => ({
         ...prevState,
-        initialLoading: false,
-        isLoading: false,
-        isLoadingTableContent: false
+        isLoading: true,
+        isLoadingTableContent: true
       }));
+      setRegionDisable(true);
+      const listVertexPayload = {
+        region,
+        nextToken,
+        scheduleListPageLength,
+        abortControllers
+      };
+      const scheduleApiData =
+        await VertexServices.listVertexSchedules(listVertexPayload);
+      if (scheduleApiData && Array.isArray(scheduleApiData.schedulesList)) {
+        setVertexScheduleList(scheduleApiData.schedulesList);
+        setLoaderState(prevState => ({
+          ...prevState,
+          initialLoading: false,
+          isLoading: false,
+          isLoadingTableContent: false
+        }));
 
-      setRegionDisable(false);
-      // Fetch last five run status for all schedules in parallel
-      scheduleApiData.schedulesList.forEach(schedule => {
-        VertexServices.fetchLastFiveRunStatus(
-          schedule,
-          region,
-          abortControllers
-        ).then(lastFiveRun => {
-          setVertexScheduleList(prevList =>
-            prevList.map(item =>
-              item.displayName === schedule.displayName
-                ? {
-                    ...item,
-                    jobState: Array.isArray(lastFiveRun) ? lastFiveRun : []
-                  }
-                : item
-            )
-          );
+        setNextPageToken(scheduleApiData.nextPageToken);
+
+        setRegionDisable(false);
+        // Fetch last five run status for all schedules in parallel
+        scheduleApiData.schedulesList.forEach(schedule => {
+          VertexServices.fetchLastFiveRunStatus(
+            schedule,
+            region,
+            abortControllers
+          ).then(lastFiveRun => {
+            setVertexScheduleList(prevList =>
+              prevList.map(item =>
+                item.displayName === schedule.displayName
+                  ? {
+                      ...item,
+                      jobState: Array.isArray(lastFiveRun) ? lastFiveRun : []
+                    }
+                  : item
+              )
+            );
+          });
         });
-      });
-    }
-  };
+      }
+    },
+    [region, scheduleListPageLength, abortControllers]
+  );
 
   /**
    * For applying pagination
@@ -212,6 +211,7 @@ const ListVertexSchedule = ({
     const hasListChanged = previousScheduleList.current !== vertexScheduleList;
     const hasNextPageTokenChanged =
       previousNextPageToken.current !== nextPageToken;
+
     // Reset pagination variables only if the list has changed or next page token has changed
     // or if the resetToCurrentPage is true.
     if (resetToCurrentPage || (hasListChanged && hasNextPageTokenChanged)) {
@@ -222,7 +222,6 @@ const ListVertexSchedule = ({
         previousNextPageToken.current = nextPageToken;
       }
     }
-    setActivePaginationVariables(null); // reset once api has loaded the active pagination variables on return back
   }, [nextPageToken, vertexScheduleList, scheduleListPageLength]);
 
   /**
@@ -321,17 +320,16 @@ const ListVertexSchedule = ({
   /**
    * Function that redirects to Job Execution History
    * @param {any} schedulerData schedule data to be retrieved
-   * @param {string} scheduleName name of the schedule
    * @param paginationVariables current page details (to be restored when user clicks back to Schedule Listing)
    */
-  const handleScheduleIdSelection = (
-    schedulerData: any,
-    scheduleName: string
-  ) => {
+  const handleScheduleIdSelection = (schedulerData: any) => {
     // Abort previous APIs
     abortApiCall(abortControllers);
 
-    setActivePaginationVariables(saveActivePaginationVariables());
+    if (setActivePaginationVariables) {
+      setActivePaginationVariables(saveActivePaginationVariables());
+    }
+
     // Converts the slashes and other special characters into a safe format that React Router will treat as a single string
     const scheduleId = encodeURIComponent(schedulerData?.name.split('/').pop());
     const selectedScheduleName = encodeURIComponent(schedulerData?.displayName);
@@ -341,9 +339,9 @@ const ListVertexSchedule = ({
   };
 
   /**
-   *
-   * @param pageTokenListToLoad available only in case navigating  back from another screen
-   * @param nextPageTokenToLoad available only in case navigating back from another screen
+   * Refresh the current page
+   * @param {string[] | undefined | null} pageTokenListToLoad available only in case navigating  back from another screen
+   * @param {string | null | undefined} nextPageTokenToLoad available only in case navigating back from another screen
    */
   const handleCurrentPageRefresh = async (
     pageTokenListToLoad: string[] | undefined | null,
@@ -462,7 +460,7 @@ const ListVertexSchedule = ({
     setLoaderState(prevState => ({ ...prevState, editScheduleLoader: true }));
     const encodedScheduleId = encodeURIComponent(scheduleId);
     navigate(
-      `/edit/${SCHEDULE_LABEL_VERTEX.toLocaleLowerCase()}/${encodedScheduleId}`
+      `/edit/${SCHEDULE_LABEL_VERTEX.toLocaleLowerCase()}/${encodedScheduleId}/${region}`
     );
     setLoaderState(prevState => ({ ...prevState, editScheduleLoader: false }));
   };
@@ -492,6 +490,7 @@ const ListVertexSchedule = ({
 
   /**
    * Handles the deletion of a scheduler by invoking the API service to delete it.
+   * @param {string | null | undefined} newPageToken - Token for next page
    */
   const handleDeleteScheduler = async (
     newPageToken: string | null | undefined
@@ -591,13 +590,15 @@ const ListVertexSchedule = ({
   };
 
   /**
-   *
-   * @param reloadPagination parameter specifies if the page has to refresh.
    * Function resets all variables except nextPageToken
    * which would be automatically taken care during rendering.
+   * @param {boolean} reloadPagination parameter specifies if the page has to refresh.
    */
   const resetPaginationVariables = (reloadPagination: boolean) => {
-    setActivePaginationVariables(null); //
+    if (setActivePaginationVariables) {
+      setActivePaginationVariables(null);
+    }
+
     setLoaderState(prevState => ({ ...prevState, isLoading: true }));
     setResetToCurrentPage(reloadPagination);
     setCanPreviousPage(false);
@@ -623,62 +624,13 @@ const ListVertexSchedule = ({
 
   return (
     <>
-      <div className="select-text-overlay-scheduler">
-        <div className="enable-text-label">
-          <div className="scheduler-form-element-container">
-            <Autocomplete
-              className="scheduler-tag-style"
-              options={VERTEX_REGIONS}
-              value={
-                VERTEX_REGIONS.find(option => option.value === region) || null
-              }
-              getOptionLabel={option => option.label}
-              onChange={(_event, val) => handleRegion(val)}
-              renderInput={params => (
-                <TextField
-                  {...params}
-                  label="Region*"
-                  InputProps={{
-                    ...params.InputProps,
-                    endAdornment: (
-                      <>
-                        {loaderState.regionLoader ? (
-                          <CircularProgress
-                            aria-label="Loading Spinner"
-                            data-testid="loader"
-                            size={18}
-                          />
-                        ) : null}
-                        {params.InputProps.endAdornment}
-                      </>
-                    )
-                  }}
-                />
-              )}
-              clearIcon={false}
-              loading={loaderState.regionLoader}
-              disabled={regionDisable}
-            />
-            {!loaderState.isLoading && !region && (
-              <ErrorMessage message="Region is required" showIcon={false} />
-            )}
-          </div>
-        </div>
-
-        <div className="btn-refresh">
-          <Button
-            disabled={loaderState.isLoading}
-            className="btn-refresh-text"
-            variant="outlined"
-            aria-label="cancel Batch"
-            onClick={() => {
-              handleCurrentPageRefresh(null, null);
-            }}
-          >
-            <div>REFRESH</div>
-          </Button>
-        </div>
-      </div>
+      <VertexListingInputLayout
+        region={region}
+        handleRegion={handleRegion}
+        loaderState={loaderState}
+        regionDisable={regionDisable}
+        handleCurrentPageRefresh={() => handleCurrentPageRefresh(null, null)}
+      />
 
       {vertexScheduleList.length > 0 ? (
         <>
@@ -692,7 +644,7 @@ const ListVertexSchedule = ({
               page={page}
               prepareRow={prepareRow}
               tableDataCondition={tableDataCondition}
-              fromPage="vertex"
+              fromPage="Vertex"
             />
             {vertexScheduleList.length > 0 && (
               <PaginationComponent
