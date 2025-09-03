@@ -399,3 +399,10 @@ export interface IVertexListingInputProps {
   regionDisable: boolean;
   handleCurrentPageRefresh: () => void;
 }
+
+export interface IVertexListContext {
+  activePaginationVariables: IActivePaginationVariables | null;
+  setActivePaginationVariables: React.Dispatch<
+    React.SetStateAction<IActivePaginationVariables | null>
+  >;
+}

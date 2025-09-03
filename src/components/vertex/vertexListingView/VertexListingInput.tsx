@@ -35,9 +35,8 @@ const VertexListingInputLayout: FC<IVertexListingInputProps> = ({
 }) => (
   <div className="select-text-overlay-scheduler">
     <div className="enable-text-label">
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container content-pd-space">
         <Autocomplete
-          className="scheduler-tag-style"
           options={VERTEX_REGIONS}
           value={VERTEX_REGIONS.find(option => option.value === region) || null}
           getOptionLabel={option => option.label}
