@@ -49,6 +49,7 @@ import DeletePopup from '../../common/table/DeletePopup';
 import { abortApiCall } from '../../../utils/Config';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
 import VertexListingInputLayout from './VertexListingInput';
+import { useVertexContext } from '../../../context/vertex/VertexListContext';
 
 const ListVertexSchedule = ({
   abortControllers
@@ -56,6 +57,13 @@ const ListVertexSchedule = ({
   abortControllers: any;
 }) => {
   const navigate = useNavigate();
+
+  // Consume the context value
+  const vertexContext = useVertexContext();
+  const activePaginationVariables = vertexContext?.activePaginationVariables;
+  const setActivePaginationVariables =
+    vertexContext?.setActivePaginationVariables;
+
   const [region, setRegion] = useState<string>('');
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
@@ -88,10 +96,6 @@ const ListVertexSchedule = ({
   const data = vertexScheduleList;
 
   const columns = useMemo(() => LISTING_SCREEN_HEADING, []);
-
-  const [activePaginationVariables, setActivePaginationVariables] = useState<
-    IActivePaginationVariables | null | undefined
-  >();
 
   // pagination variables
   const [scheduleListPageLength, setScheduleListPageLength] =
@@ -207,6 +211,7 @@ const ListVertexSchedule = ({
     const hasListChanged = previousScheduleList.current !== vertexScheduleList;
     const hasNextPageTokenChanged =
       previousNextPageToken.current !== nextPageToken;
+
     // Reset pagination variables only if the list has changed or next page token has changed
     // or if the resetToCurrentPage is true.
     if (resetToCurrentPage || (hasListChanged && hasNextPageTokenChanged)) {
@@ -217,7 +222,6 @@ const ListVertexSchedule = ({
         previousNextPageToken.current = nextPageToken;
       }
     }
-    setActivePaginationVariables(null); // reset once api has loaded the active pagination variables on return back
   }, [nextPageToken, vertexScheduleList, scheduleListPageLength]);
 
   /**
@@ -316,28 +320,23 @@ const ListVertexSchedule = ({
   /**
    * Function that redirects to Job Execution History
    * @param {any} schedulerData schedule data to be retrieved
-   * @param {string} scheduleName name of the schedule
    * @param paginationVariables current page details (to be restored when user clicks back to Schedule Listing)
    */
-  const handleScheduleIdSelection = useCallback(
-    (schedulerData: any, scheduleName: string) => {
-      // Abort previous APIs
-      abortApiCall(abortControllers);
+  const handleScheduleIdSelection = (schedulerData: any) => {
+    // Abort previous APIs
+    abortApiCall(abortControllers);
 
+    if (setActivePaginationVariables) {
       setActivePaginationVariables(saveActivePaginationVariables());
-      // Converts the slashes and other special characters into a safe format that React Router will treat as a single string
-      const scheduleId = encodeURIComponent(
-        schedulerData?.name.split('/').pop()
-      );
-      const selectedScheduleName = encodeURIComponent(
-        schedulerData?.displayName
-      );
-      navigate(
-        `/execution-vertex-history/${scheduleId}/${region}/${selectedScheduleName}`
-      );
-    },
-    [region, navigate, abortControllers]
-  );
+    }
+
+    // Converts the slashes and other special characters into a safe format that React Router will treat as a single string
+    const scheduleId = encodeURIComponent(schedulerData?.name.split('/').pop());
+    const selectedScheduleName = encodeURIComponent(schedulerData?.displayName);
+    navigate(
+      `/execution-vertex-history/${scheduleId}/${region}/${selectedScheduleName}`
+    );
+  };
 
   /**
    * Refresh the current page
@@ -596,7 +595,10 @@ const ListVertexSchedule = ({
    * @param {boolean} reloadPagination parameter specifies if the page has to refresh.
    */
   const resetPaginationVariables = (reloadPagination: boolean) => {
-    setActivePaginationVariables(null); //
+    if (setActivePaginationVariables) {
+      setActivePaginationVariables(null);
+    }
+
     setLoaderState(prevState => ({ ...prevState, isLoading: true }));
     setResetToCurrentPage(reloadPagination);
     setCanPreviousPage(false);
