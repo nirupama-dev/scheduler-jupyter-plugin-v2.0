@@ -460,7 +460,7 @@ const ListVertexSchedule = ({
     setLoaderState(prevState => ({ ...prevState, editScheduleLoader: true }));
     const encodedScheduleId = encodeURIComponent(scheduleId);
     navigate(
-      `/edit/${SCHEDULE_LABEL_VERTEX.toLocaleLowerCase()}/${encodedScheduleId}`
+      `/edit/${SCHEDULE_LABEL_VERTEX.toLocaleLowerCase()}/${encodedScheduleId}/${region}`
     );
     setLoaderState(prevState => ({ ...prevState, editScheduleLoader: false }));
   };
