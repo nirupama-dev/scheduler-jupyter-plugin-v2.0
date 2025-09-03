@@ -137,21 +137,14 @@ export const getInitialFormValues = (
   initialKernelDetails: INotebookKernalSchdulerDefaults,
   sessionContext: ISessionContext | null | undefined
 ): CombinedCreateFormValues => {
-  if(!sessionContext?.path){
-    throw new Error("Notebook path not found in this session" )
+  if (!sessionContext?.path) {
+    throw new Error('Notebook path not found in this session');
   }
   if (initialKernelDetails.schedulerType === 'composer') {
-    return getDefaultComposerValues(
-      initialKernelDetails,
-      sessionContext?.path
-    );
+    return getDefaultComposerValues(initialKernelDetails, sessionContext?.path);
   }
   // Default to Vertex if no criteria or criteria is 'vertex' and load default vertex values.
-  return getDefaultVertexValues(
-    initialKernelDetails,
-    sessionContext?.path 
-  );
-  
+  return getDefaultVertexValues(initialKernelDetails, sessionContext?.path);
 };
 
 /**
@@ -198,7 +191,7 @@ export const getInitialFormValues = (
 //   };
 //   } else if (existingScheduleData.schedulerSelection === 'composer') {
 //     const composerData = existingScheduleData as IComposerSchedulePayload;
-//     return { 
+//     return {
 //       schedulerSelection: 'composer',
 //       jobName: composerData.job_name,
 //       inputFile: composerData.input_filename,
@@ -218,7 +211,7 @@ export const getInitialFormValues = (
 //       parameters: composerData.parameters?.map(param => ({
 //         key: param.key,
 //         value: param.value
-//       })) || [],  
+//       })) || [],
 //     };
 //   }
 //   // Fallback if schedulerSelection is not recognized, default to Vertex

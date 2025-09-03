@@ -19,7 +19,10 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import {
   IDeleteSchedulerAPIResponse,
+  IDownloadFile,
+  IExecutionPayload,
   IFormattedResponse,
+  IOutputFileExistsPayload,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
   IUpdateSchedulerArgs,
@@ -36,8 +39,9 @@ import {
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { aiplatform_v1 } from 'googleapis';
 
-
 import { settingController } from '../../utils/Config';
+import { vertexScheduleRunResponseTransformation } from '../../utils/vertexExecutionHistoryTransformation';
+import path from 'path';
 export class VertexServices {
   /**
    * Fetches machine types for a given region.
@@ -118,9 +122,10 @@ export class VertexServices {
       }
 
       // API call
-      const formattedResponse : aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse = await requestAPI(serviceURL + urlparam, {
-        signal
-      });
+      const formattedResponse: aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse =
+        await requestAPI(serviceURL + urlparam, {
+          signal
+        });
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
         return {
@@ -130,7 +135,6 @@ export class VertexServices {
           error: '',
           isLoading: false
         };
-      
       }
 
       const {
@@ -399,6 +403,131 @@ export class VertexServices {
     }
   };
 
+  static readonly executionHistoryServiceList = async (
+    executionPayload: IExecutionPayload
+  ) => {
+    const { region, scheduleId, selectedMonth, abortControllers } =
+      executionPayload;
+    if (!scheduleId || !selectedMonth) {
+      return null;
+    }
+
+    try {
+      const signal = settingController(abortControllers);
+      const selected_month = selectedMonth.format('YYYY-MM-DDTHH:mm:ssZ[Z]');
+      const schedule_id = scheduleId.split('/').pop();
+      const serviceURL = 'api/vertex/listNotebookExecutionJobs';
+
+      const vertexExecutionHistoryScheduleRunList = await requestAPI(
+        `${serviceURL}?region_id=${region}&schedule_id=${schedule_id}&start_date=${selected_month}&order_by=createTime desc`,
+        { signal }
+      );
+
+      const executionHistoryScheduleData =
+        vertexScheduleRunResponseTransformation(
+          vertexExecutionHistoryScheduleRunList
+        );
+      return executionHistoryScheduleData;
+    } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        error instanceof TypeError &&
+        error.toString().includes(ABORT_MESSAGE)
+      ) {
+        return null; // Return null on abort
+      } else {
+        SchedulerLoggingService.log(
+          `Error in execution history API: ${error}`,
+          LOG_LEVEL.ERROR
+        );
+        handleErrorToast({
+          error: `Error in fetching the execution history: ${error}`
+        });
+        return {
+          scheduleRuns: [],
+          groupedDates: { grey: [], red: [], green: [], darkGreen: [] }
+        };
+      }
+    }
+  };
+
+  //Funtion to check weather output file exists or not
+  static readonly outputFileExists = async (
+    outputFileExistsPayload: IOutputFileExistsPayload
+  ) => {
+    try {
+      const { bucketName, scheduleRunId, fileName, abortControllers } =
+        outputFileExistsPayload;
+      const signal = settingController(abortControllers);
+      const formattedResponse = await requestAPI(
+        `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${scheduleRunId}&file_name=${fileName}`,
+        { signal }
+      );
+      if (formattedResponse === 'true') {
+        return true;
+      } else {
+        return true;
+      }
+    } catch (lastRunError: any) {
+      if (typeof lastRunError === 'object' && lastRunError !== null) {
+        if (
+          lastRunError instanceof TypeError &&
+          lastRunError.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      } else {
+        SchedulerLoggingService.log(
+          `Error checking output file ${lastRunError}`,
+          LOG_LEVEL.ERROR
+        );
+      }
+    }
+  };
+
+  static readonly downloadJobAPIService = async (
+    downloadPayload: IDownloadFile
+  ) => {
+    try {
+      const { gcsUrl, fileName, scheduleRunId, scheduleName } = downloadPayload;
+      const bucketName = gcsUrl?.split('//')[1];
+      const formattedResponse: any = await requestAPI(
+        `api/storage/downloadOutput?bucket_name=${bucketName}&job_run_id=${scheduleRunId}&file_name=${fileName}`,
+        {
+          method: 'POST'
+        }
+      );
+      if (formattedResponse.status === 0) {
+        const base_filename = path.basename(
+          formattedResponse.downloaded_filename
+        );
+        Notification.success(
+          `${base_filename} has been successfully downloaded from the ${scheduleName} job history`,
+          {
+            autoClose: false
+          }
+        );
+      } else {
+        SchedulerLoggingService.log(
+          'Error in downloading the job history',
+          LOG_LEVEL.ERROR
+        );
+        Notification.error('Error in downloading the job history', {
+          autoClose: false
+        });
+      }
+    } catch (error) {
+      SchedulerLoggingService.log(
+        'Error in downloading the job history',
+        LOG_LEVEL.ERROR
+      );
+      Notification.error('Error in downloading the job history', {
+        autoClose: false
+      });
+    }
+  };
+
   static readonly getVertexJobScheduleDetails = async (
     jobId: string,
     region: string | undefined
@@ -406,13 +535,13 @@ export class VertexServices {
     if (region) {
       try {
         const serviceURL = 'api/vertex/getSchedule';
-        const vertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule = await requestAPI(
-          serviceURL + `?region_id=${region}&schedule_id=${jobId}`
-        );
+        const vertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
+          await requestAPI(
+            serviceURL + `?region_id=${region}&schedule_id=${jobId}`
+          );
 
-       if (vertexScheduleData && Object.keys(vertexScheduleData).length > 0) {
+        if (vertexScheduleData && Object.keys(vertexScheduleData).length > 0) {
           return vertexScheduleData;
-
         } else {
           Notification.error('Error fetching schedule details', {
             autoClose: false
@@ -433,28 +562,34 @@ export class VertexServices {
             LOG_LEVEL.ERROR
           );
           const errorResponse = `Error in updating notebook. ${reason}`;
-          
-          Notification.error(`Error fetching schedule details: ${errorResponse}`, {
-            autoClose: false
-          });
+
+          Notification.error(
+            `Error fetching schedule details: ${errorResponse}`,
+            {
+              autoClose: false
+            }
+          );
           return;
         }
       }
-    }else{
-      Notification.error('Error fetching schedule details. No region information available.', {
-        autoClose: false
-      });
+    } else {
+      Notification.error(
+        'Error fetching schedule details. No region information available.',
+        {
+          autoClose: false
+        }
+      );
       return;
     }
   };
-  
-/**
- * Create a Vertex Scheduler
- * @param vertexSchedulePayload - The payload containing the scheduler details
- * @param setCreateCompleted - Callback to set the create completed state
- * @param setCreatingVertexScheduler - Callback to set the creating vertex scheduler state
- * @param setCreateMode - Callback to set the create mode state
- */
+
+  /**
+   * Create a Vertex Scheduler
+   * @param vertexSchedulePayload - The payload containing the scheduler details
+   * @param setCreateCompleted - Callback to set the create completed state
+   * @param setCreatingVertexScheduler - Callback to set the creating vertex scheduler state
+   * @param setCreateMode - Callback to set the create mode state
+   */
   static readonly createVertexNotebookJobSchedule = async (
     vertexSchedulePayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule,
     region: string
@@ -476,7 +611,7 @@ export class VertexServices {
             autoClose: false
           }
         );
-       return true;
+        return true;
       }
     } catch (reason: any) {
       SchedulerLoggingService.log(
@@ -504,9 +639,8 @@ export class VertexServices {
   static readonly updateVertexNotebookJobSchedule = async (
     jobId: string,
     region: string,
-    updatedVertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule,
+    updatedVertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule
   ) => {
-    
     try {
       const data: any = await requestAPI(
         `api/vertex/updateSchedule?region_id=${region}&schedule_id=${jobId}`,
@@ -538,12 +672,11 @@ export class VertexServices {
       handleErrorToast({
         error: `Error updating schedule: ${reason}`
       });
-      return false
+      return false;
     }
   };
 }
 
-  
 // Helper to transform raw API response into IMachineType structure
 const uiConfigAPIResponseTransform = (rawItem: any): IMachineType => {
   const transformedAccelerators: IAcceleratorConfig[] = [];

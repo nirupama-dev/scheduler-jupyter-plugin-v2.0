@@ -164,7 +164,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const fetchRegion = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, region: true }));
     try {
-    
       if (credentials?.region_id) {
         if (!editScheduleData || !getValues('vertexRegion')) {
           setValue('vertexRegion', credentials.region_id);
@@ -257,7 +256,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         b => b.value === currentBucketValue
       );
 
-      if (!editScheduleData?.editMode || !currentBucketValue || !isValidExisting) {
+      if (
+        !editScheduleData?.editMode ||
+        !currentBucketValue ||
+        !isValidExisting
+      ) {
         const defaultSelected = fetchedBuckets.find(
           option => option.value === DEFAULT_CLOUD_STORAGE_BUCKET.value
         );
@@ -337,7 +340,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, []);
 
   /**
-   * 
+   *
    */
   const fetchPrimaryNetworks = useCallback(async () => {
     setLoadingState(prev => ({ ...prev, primaryNetwork: true }));
@@ -748,7 +751,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       {currentMachineType &&
         selectedMachineType?.acceleratorConfigs &&
         selectedMachineType.acceleratorConfigs.length > 0 && (
-          <div className="execution-history-main-wrapper">
+          <div className="horizontal-element-wrapper">
             <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
               <FormInputDropdown
                 name="acceleratorType"
@@ -827,7 +830,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Disk Type and Size */}
-      <div className="execution-history-main-wrapper">
+      <div className="horizontal-element-wrapper">
         <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
             name="diskType"
@@ -1062,11 +1065,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   setValue('scheduleFieldCronFormat', '');
                   setValue('scheduleValue', EVERY_MINUTE_CRON);
                 }
-                trigger(['scheduleFieldCronFormat', 'scheduleValueUserFriendly']);
+                trigger([
+                  'scheduleFieldCronFormat',
+                  'scheduleValueUserFriendly'
+                ]);
               }}
             />
 
-            <div className="execution-history-main-wrapper">
+            <div className="horizontal-element-wrapper">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <div className="cscheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
                   <Controller
@@ -1181,7 +1187,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               {vertexErrors.scheduleValueUserFriendly && (
                 <ErrorMessage
                   message={
-                    vertexErrors.scheduleValueUserFriendly.message || 'Schedule is required'
+                    vertexErrors.scheduleValueUserFriendly.message ||
+                    'Schedule is required'
                   }
                   showIcon={false}
                 />

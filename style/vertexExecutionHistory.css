@@ -1,0 +1,151 @@
+.execution-history-header {
+  height: 48px;
+  display: flex;
+}
+
+.scheduler-back-arrow-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  padding-left: 10px;
+  border: none;
+  background: none;
+}
+
+.log-btn {
+  padding: 10px;
+  margin-left: auto;
+}
+
+.create-icon {
+  display: flex;
+  height: 18px;
+  width: 18px;
+  color: #3367d6;
+  margin-top: -1px;
+}
+
+.log-icon {
+  padding-top: 8px;
+}
+
+.create-text {
+  font-style: normal;
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 32px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  text-transform: uppercase;
+  color: #3367d6;
+}
+
+.execution-header-wrap-arrow {
+  padding: 0 15px 0 5px;
+}
+
+.execution-history-main-full-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.execution-top-border {
+  border-top: 1px solid var(--jp-layout-color3);
+}
+
+.execution-history-full-wrapper {
+  width: 100%;
+}
+
+.spin-loader-main-execution-history {
+  display: flex;
+  max-height: 100%;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner-schedule-title {
+  padding: 8px 0 0 10px;
+}
+
+.log-btn-element {
+  border: none;
+  background: none;
+}
+
+.execution-history-right-wrapper {
+  width: calc(100% - 400px);
+  border: 1px solid var(--jp-layout-color3);
+  border-left: none;
+  overflow: auto;
+}
+
+.execution-history-right-wrapper-scroll {
+  overflow: hidden;
+}
+
+.success-message-top {
+  padding-top: 15px;
+}
+
+.sub-title-heading {
+  padding: 0;
+}
+
+.schedule-runs-table-data-state-success {
+  background-color: #34a853;
+  color: var(--jp-border-color3);
+  border-radius: 22px;
+  margin: 5px 15px;
+  display: flex;
+  width: 71px;
+  text-transform: capitalize;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.schedule-runs-table-data-state-failure {
+  background-color: #ea3323;
+  color: var(--jp-border-color3);
+  border-radius: 22px;
+  margin: 5px 15px;
+  display: flex;
+  width: 71px;
+  text-transform: capitalize;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.schedule-runs-table-data-state-queued {
+  background-color: #aeaeae;
+  color: var(--jp-border-color3);
+  border-radius: 22px;
+  margin: 5px 15px;
+  display: flex;
+  width: 71px;
+  text-transform: capitalize;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.schedule-runs-table-data-state-running {
+  background-color: #00bfa5;
+  color: var(--jp-border-color3);
+  border-radius: 22px;
+  margin: 5px 15px;
+  display: flex;
+  width: 71px;
+  text-transform: capitalize;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+.table-execution-history-vertex {
+  height: calc(100vh - 212px);
+}

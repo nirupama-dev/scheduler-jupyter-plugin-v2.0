@@ -49,10 +49,12 @@ export const CreateComposerSchedule: React.FC<
   const [composerEnvData, setComposerEnvData] = useState<
     IComposerEnvAPIResponse[]
   >([]);
-  const [clusterOptions, setClusterOptions] = useState<ILabelValue<string>[]>([]);
-  const [serverlessOptions, setServerlessOptions] = useState<ILabelValue<string>[]>(
+  const [clusterOptions, setClusterOptions] = useState<ILabelValue<string>[]>(
     []
   );
+  const [serverlessOptions, setServerlessOptions] = useState<
+    ILabelValue<string>[]
+  >([]);
   const [emailList, setEmailList] = useState<string[]>([]);
   const [loadingState, setLoadingState] = useState<ILoadingStateComposer>({
     projectId: false,
@@ -171,23 +173,25 @@ export const CreateComposerSchedule: React.FC<
   }, [selectedRegion, setValue]);
 
   useEffect(() => {
-  const fetchData = async () => {
-    if (executionMode === 'cluster') {
-      setValue('serverless', '');
-      const clusterOptionsFromAPI = await ComposerServices.listClustersAPIService();
-      setClusterOptions(clusterOptionsFromAPI);
-    } else if (executionMode === 'serverless') {
-      setValue('cluster', '');
-      const serverlessOptionsFromAPI = await ComposerServices.listSessionTemplatesAPIService();
-      setServerlessOptions(serverlessOptionsFromAPI);
-    } else {
-      setClusterOptions([]);
-      setServerlessOptions([]);
-    }
-  };
+    const fetchData = async () => {
+      if (executionMode === 'cluster') {
+        setValue('serverless', '');
+        const clusterOptionsFromAPI =
+          await ComposerServices.listClustersAPIService();
+        setClusterOptions(clusterOptionsFromAPI);
+      } else if (executionMode === 'serverless') {
+        setValue('cluster', '');
+        const serverlessOptionsFromAPI =
+          await ComposerServices.listSessionTemplatesAPIService();
+        setServerlessOptions(serverlessOptionsFromAPI);
+      } else {
+        setClusterOptions([]);
+        setServerlessOptions([]);
+      }
+    };
 
-  fetchData();
-}, [executionMode, setValue]);
+    fetchData();
+  }, [executionMode, setValue]);
 
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
