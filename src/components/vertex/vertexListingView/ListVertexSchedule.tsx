@@ -331,11 +331,12 @@ const ListVertexSchedule = ({
     }
 
     // Converts the slashes and other special characters into a safe format that React Router will treat as a single string
-    const scheduleId = encodeURIComponent(schedulerData?.name.split('/').pop());
-    const selectedScheduleName = encodeURIComponent(schedulerData?.displayName);
-    navigate(
-      `/execution-vertex-history/${scheduleId}/${region}/${selectedScheduleName}`
-    );
+    const scheduleId = schedulerData?.name.split('/').pop();
+    const scheduleName = schedulerData?.displayName;
+    const createTime = schedulerData?.createTime;
+    navigate('/execution-vertex-history', {
+      state: { scheduleId, region, scheduleName, createTime }
+    });
   };
 
   /**
@@ -529,7 +530,8 @@ const ListVertexSchedule = ({
       totalCount: totalCount,
       pageTokenList: pageTokenList,
       nextPageToken: nextPageToken,
-      pageNumber: pageNumber
+      pageNumber: pageNumber,
+      region: region
     };
     return currentPaginationVariables;
   };
@@ -563,7 +565,11 @@ const ListVertexSchedule = ({
       .then(credentials => {
         if (credentials?.region_id && credentials?.project_id) {
           setLoaderState(prevState => ({ ...prevState, regionLoader: false }));
-          setRegion(credentials.region_id);
+          if (!activePaginationVariables) {
+            setRegion(credentials.region_id);
+          } else {
+            setRegion(activePaginationVariables.region);
+          }
         }
       })
       .catch(error => {

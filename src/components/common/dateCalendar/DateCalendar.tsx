@@ -31,7 +31,8 @@ const ExecutionCalendar = ({
   greyListDates,
   redListDates,
   greenListDates,
-  darkGreenListDates
+  darkGreenListDates,
+  isLoading
 }: any) => (
   <div className="execution-history-left-wrapper calender-top execution-wrapper-border-none">
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -49,7 +50,8 @@ const ExecutionCalendar = ({
             greyListDates,
             redListDates,
             greenListDates,
-            darkGreenListDates
+            darkGreenListDates,
+            isLoading
           }
         }}
       />
