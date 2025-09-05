@@ -174,6 +174,7 @@ export interface IActivePaginationVariables {
   pageTokenList: string[];
   nextPageToken: string | null;
   pageNumber: number;
+  region: string;
 }
 
 // Define the expected type for formattedResponse
@@ -390,4 +391,20 @@ export interface ICustomDateProps extends PickersDayProps<Dayjs> {
   redListDates?: string[];
   greenListDates?: string[];
   darkGreenListDates?: string[];
+  isLoading?: boolean;
+}
+
+export interface IVertexListingInputProps {
+  region: string;
+  handleRegion: (regionSelected: ILabelValue<string> | null) => void;
+  loaderState: IVertexListingLoadingState;
+  regionDisable: boolean;
+  handleCurrentPageRefresh: () => void;
+}
+
+export interface IVertexListContext {
+  activePaginationVariables: IActivePaginationVariables | null;
+  setActivePaginationVariables: React.Dispatch<
+    React.SetStateAction<IActivePaginationVariables | null>
+  >;
 }

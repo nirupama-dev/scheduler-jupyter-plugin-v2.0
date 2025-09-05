@@ -28,6 +28,7 @@ import {
   LOADER_CONTENT_VERTEX_EXECUTION_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
+import { VertexListProvider } from '../context/vertex/VertexListprovider';
 
 /**
  *
@@ -65,89 +66,108 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   );
 
   return (
-    <Routes>
-      <Route path="/" element={<Navigate to="/list" replace />} />
-      <Route
-        path="/create"
-        element={
-          <CreateNotebookSchedule
-            sessionContext={sessionContext}
-            initialKernalScheduleDetails={initialKernalSchedulerDetails}
-          />
-        }
-      />
-
-      <Route
-        path="/edit/:schedulerTypeOne/:id"
-        element={<CreateNotebookSchedule />}
-      />
-
-      <Route path="/list" element={<ScheduleListingView />}>
+    <VertexListProvider>
+      <Routes>
+        <Route path="/" element={<Navigate to="/list" replace />} />
         <Route
-          path="vertex"
+          path="/create"
           element={
-            <Suspense
-              fallback={
-                <Loader
-                  message={LOADER_CONTENT_VERTEX_LISTING_SCREEN}
-                  iconClassName="spin-loader-custom-style"
-                  parentTagClassName="spin-loader-main spin-loader-listing"
-                />
-              }
-            >
-              <ListVertexSchedule abortControllers={abortControllers} />
-            </Suspense>
+            <CreateNotebookSchedule
+              sessionContext={sessionContext}
+              initialKernalScheduleDetails={initialKernalSchedulerDetails}
+            />
           }
         />
+
         <Route
-          path="composer"
+          path="/edit/:schedulerType/:scheduleId/:region/:projectId?/:environment?"
+          element={<CreateNotebookSchedule />}
+        />
+
+        <Route path="/list" element={<ScheduleListingView />}>
+          <Route
+            path="vertex"
+            element={
+              <Suspense
+                fallback={
+                  <Loader
+                    message={LOADER_CONTENT_VERTEX_LISTING_SCREEN}
+                    iconClassName="spin-loader-custom-style"
+                    parentTagClassName="spin-loader-main spin-loader-listing"
+                  />
+                }
+              >
+                <ListVertexSchedule abortControllers={abortControllers} />
+              </Suspense>
+            }
+          />
+
+          <Route
+            path="composer"
+            element={
+              <Suspense
+                fallback={
+                  <Loader
+                    message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN}
+                    iconClassName="spin-loader-custom-style"
+                    parentTagClassName='"spin-loader-main spin-loader-listing'
+                  />
+                }
+              >
+                <ListComposerSchedule app={app} />
+              </Suspense>
+            }
+          />
+        </Route>
+        <Route
+          path="/execution-vertex-history"
           element={
             <Suspense
               fallback={
                 <Loader
-                  message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN}
+                  message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
                   iconClassName="spin-loader-custom-style"
                   parentTagClassName='"spin-loader-main spin-loader-listing'
                 />
               }
             >
-              <ListComposerSchedule app={app} />
+              <VertexExecutionHistory abortControllers={abortControllers} />
             </Suspense>
           }
         />
-      </Route>
-      <Route
-        path="/execution-vertex-history/:scheduleId/:region/:scheduleName"
-        element={
-          <Suspense
-            fallback={
-              <Loader
-                message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
-                iconClassName="spin-loader-custom-style"
-                parentTagClassName='"spin-loader-main spin-loader-listing'
-              />
-            }
-          >
-            <VertexExecutionHistory abortControllers={abortControllers} />
-          </Suspense>
-        }
-      />
-      <Route
-        path="/execution-composer-history/:dagId/:projectId/:region/:composerName/:bucketName"
-        element={
-          <Suspense
-            fallback={
-              <Loader
-                message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
-                iconClassName="spin-loader-custom-style"
-                parentTagClassName='"spin-loader-main spin-loader-listing'
-              />
-            }
-          >
-            <ComposerExecutionHistory />
-          </Suspense>
-        }
-      />
-    </Routes>
+        <Route
+          path="/execution-vertex-history/:scheduleId/:region/:scheduleName"
+          element={
+            <Suspense
+              fallback={
+                <Loader
+                  message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
+                  iconClassName="spin-loader-custom-style"
+                  parentTagClassName='"spin-loader-main spin-loader-listing'
+                />
+              }
+            >
+              <VertexExecutionHistory abortControllers={abortControllers} />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/execution-composer-history/:dagId/:projectId/:region/:composerName/:bucketName"
+          element={
+            <Suspense
+              fallback={
+                <Loader
+                  message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
+                  iconClassName="spin-loader-custom-style"
+                  parentTagClassName='"spin-loader-main spin-loader-listing'
+                />
+              }
+            >
+              <ComposerExecutionHistory />
+            </Suspense>
+          }
+        />
+      </Routes>
+    </VertexListProvider>
   );
 }

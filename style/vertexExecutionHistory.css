@@ -90,7 +90,7 @@
   padding-top: 15px;
 }
 
-.sub-title-heading {
+.padding-zero {
   padding: 0;
 }
 
@@ -148,4 +148,12 @@
 
 .table-execution-history-vertex {
   height: calc(100vh - 212px);
+}
+
+.table-row-element-pad {
+  padding-left: 20px;
+}
+
+.table-col-status-align {
+  padding-left: 10px;
 }

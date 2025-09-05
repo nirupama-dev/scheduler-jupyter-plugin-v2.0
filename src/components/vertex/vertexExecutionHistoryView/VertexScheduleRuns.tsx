@@ -26,7 +26,10 @@ import {
   IScheduleRunFiltered
 } from '../../../interfaces/VertexInterface';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
-import { VERTEX_EXECUTION_HISTORY_TABLE_HEADER } from '../../../utils/Constants';
+import {
+  VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT,
+  VERTEX_EXECUTION_HISTORY_TABLE_HEADER
+} from '../../../utils/Constants';
 
 const VertexJobRuns = ({
   vertexScheduleRunsList,
@@ -73,10 +76,7 @@ const VertexJobRuns = ({
       switch (cell.column.Header) {
         case 'Actions':
           return (
-            <td
-              {...cell.getCellProps()}
-              className="scheduler-table-data sub-title-heading"
-            >
+            <td {...cell.getCellProps()} className="scheduler-table-data">
               <VertexExecutionHistoryActions
                 data={cell.row.original}
                 scheduleName={scheduleName}
@@ -94,7 +94,10 @@ const VertexJobRuns = ({
           const className =
             stateClasses[cell.value as keyof typeof stateClasses] || '';
           return (
-            <td {...cell.getCellProps()} className="scheduler-table-data">
+            <td
+              {...cell.getCellProps()}
+              className="scheduler-table-data padding-zero"
+            >
               <div className={`${className} execution-state`}>
                 {cell.render('Cell')}
               </div>
@@ -104,7 +107,14 @@ const VertexJobRuns = ({
         case 'Code':
         case 'Status Message':
           return (
-            <td {...cell.getCellProps()} className="scheduler-table-data">
+            <td
+              {...cell.getCellProps()}
+              className={
+                cell.column.Header === 'Code'
+                  ? 'scheduler-table-data table-row-element-pad'
+                  : 'scheduler-table-data table-col-status-align'
+              }
+            >
               {cell.value === '-' ? (
                 <iconDash.react tag="div" />
               ) : (
@@ -139,7 +149,7 @@ const VertexJobRuns = ({
     <div>
       {isLoading ? (
         <LoadingSpinner
-          message="Loading Vertex History"
+          message={VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT}
           messageClassName="element-space-sm"
           parentTagClassName="spin-loader-main"
         />
