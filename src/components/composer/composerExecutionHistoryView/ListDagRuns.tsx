@@ -54,12 +54,10 @@ const ListDagRuns = ({
   region: string;
   dagRunsList: IDagRunList[];
 }): JSX.Element => {
-  // const [dagRunsCurrentDateList, setDagRunsCurrentDateList] = useState([]);
   const [downloadOutputDagRunId, setDownloadOutputDagRunId] = useState('');
   const [listDagRunHeight, setListDagRunHeight] = useState(
     window.innerHeight - 485
   );
-  // const [initialLoad, setInitialLoad] = useState(true);
 
   function handleUpdateHeight() {
     const updateHeight = window.innerHeight - 485;
@@ -188,8 +186,8 @@ const ListDagRuns = ({
     );
   };
 
-  const handleDagRunStateClick = (data: any) => {
-    handleDagRunClick(data.dagRunId);
+  const handleDagRunStateClick = (rowData: any) => {
+    handleDagRunClick(rowData.dagRunId);
   };
 
   const handleDownloadOutput = async (event: React.MouseEvent) => {
@@ -230,28 +228,8 @@ const ListDagRuns = ({
     );
   };
 
-  // const handleSelectedDateChange = () => {
-  //   gotoPage(0);
-  //   const currentDate = selectedDate
-  //     ? new Date(selectedDate.toDate()).toDateString()
-  //     : null;
-  //   const currentDateDagRunList: any = dagRunsList.filter((dagRun: any) => {
-  //     return dagRun.date === currentDate;
-  //   });
-  //   if (currentDateDagRunList.length > 0) {
-  //     setDagRunsCurrentDateList(currentDateDagRunList);
-  //     setDagRunId(
-  //       currentDateDagRunList[currentDateDagRunList.length - 1].dagRunId
-  //     );
-  //   } else {
-  //     setDagRunsCurrentDateList([]);
-  //     setDagRunId('');
-  //   }
-  // };
-
   return (
     <div>
-      {/* The condition now checks the length of the filtered list */}
       {data.length > 0 ? (
         <div>
           <div

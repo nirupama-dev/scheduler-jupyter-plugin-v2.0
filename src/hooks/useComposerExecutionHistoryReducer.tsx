@@ -16,8 +16,7 @@
  */
 
 import dayjs, { Dayjs } from 'dayjs';
-import { useCallback, useEffect, useReducer } from 'react';
-import { PickersDayProps } from '@mui/x-date-pickers/PickersDay';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { ComposerServices } from '../services/composer/ComposerServices';
 import { handleDebounce } from '../utils/Config';
 
@@ -25,8 +24,6 @@ const executionHistoryReducer = (state: any, action: any) => {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
-    case 'SET_PROJECT_ID':
-      return { ...state, projectId: action.payload };
     case 'SET_CALENDAR_DATES':
       return {
         ...state,
@@ -41,8 +38,6 @@ const executionHistoryReducer = (state: any, action: any) => {
       return { ...state, startDate: action.payload };
     case 'SET_END_DATE':
       return { ...state, endDate: action.payload };
-    case 'SET_CURRENT_DATE':
-      return { ...state, currentDate: action.payload };
     case 'SET_DAG_RUNS_LIST':
       return { ...state, dagRunsList: action.payload };
     case 'SET_HEIGHT':
@@ -78,6 +73,7 @@ export const useComposerExecutionHistory = (
 ) => {
   const [state, dispatch] = useReducer(executionHistoryReducer, initialState);
   const { startDate, endDate, dagRunsList, selectedDate } = state;
+  const previousDagRunIdRef = useRef<string>('');
 
   const handleUpdateHeight = useCallback(() => {
     const updateHeight = window.innerHeight - 145;
@@ -89,7 +85,6 @@ export const useComposerExecutionHistory = (
   useEffect(() => {
     handleUpdateHeight();
     window.addEventListener('resize', debouncedHandleUpdateHeight);
-
     return () => {
       window.removeEventListener('resize', debouncedHandleUpdateHeight);
     };
@@ -115,15 +110,12 @@ export const useComposerExecutionHistory = (
           offset: currentOffset
         });
 
-        // Combine existing and new data
         const allData = [...allDagRunsData, ...(data?.dag_runs ?? [])];
 
-        // If there are more pages, recursively call this function again
         if (allData.length < data?.total_entries) {
           return fetchDagRuns(allData.length, allData);
         }
 
-        // Data transformation and grouping (now in the hook)
         const transformedList = allData.map((dagRun: any) => ({
           dagRunId: dagRun.dag_run_id,
           filteredDate: new Date(dagRun.start_date),
@@ -163,8 +155,6 @@ export const useComposerExecutionHistory = (
           ) {
             greenList.push(dateValue);
           } else {
-            // This condition implies multiple successful runs or a mix of states not
-            // caught by the previous conditions.
             darkGreenList.push(dateValue);
           }
         });
@@ -179,11 +169,6 @@ export const useComposerExecutionHistory = (
           }
         });
         dispatch({ type: 'SET_DAG_RUNS_LIST', payload: transformedList });
-        if (transformedList.length > 0) {
-          const lastRunId =
-            transformedList[transformedList.length - 1].dagRunId;
-          dispatch({ type: 'SET_DAG_RUN_ID', payload: lastRunId });
-        }
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
@@ -203,18 +188,11 @@ export const useComposerExecutionHistory = (
       payload: dayjs(new Date().toLocaleDateString())
     });
 
-    const props = {} as PickersDayProps<Dayjs>;
-    const { day, isFirstVisibleCell, isLastVisibleCell } = props;
-    if (isFirstVisibleCell) {
-      dispatch({
-        type: 'SET_START_DATE',
-        payload: new Date(day.toDate()).toISOString()
-      });
-    }
-    if (isLastVisibleCell) {
-      dispatch({ type: 'SET_END_DATE', payload: day.toDate().toISOString() });
-    }
-  }, []);
+    const startOfMonth = dayjs().startOf('month').toISOString();
+    const endOfMonth = dayjs().endOf('month').toISOString();
+    dispatch({ type: 'SET_START_DATE', payload: startOfMonth });
+    dispatch({ type: 'SET_END_DATE', payload: endOfMonth });
+  }, [dispatch]);
 
   const filteredDagRunsList = dagRunsList.filter((dagRun: any) => {
     const currentDate = selectedDate
@@ -223,34 +201,34 @@ export const useComposerExecutionHistory = (
     return dagRun.date === currentDate;
   });
 
-  const handleDateSelection = useCallback(
-    (selectedDate: Dayjs | string) => {
-      // Set the selected date
-      dispatch({ type: 'SET_SELECTED_DATE', payload: selectedDate });
+  // Use a ref to prevent unnecessary dispatches
+  useEffect(() => {
+    const newDagRunId =
+      filteredDagRunsList.length > 0
+        ? filteredDagRunsList[filteredDagRunsList.length - 1].dagRunId
+        : '';
 
-      const currentDate = dayjs(selectedDate).toDate().toDateString();
-      const filteredList = dagRunsList.filter(
-        (dagRun: any) => dagRun.date === currentDate
-      );
-      if (filteredList.length > 0) {
-        const lastRunId = filteredList[filteredList.length - 1].dagRunId;
-        dispatch({ type: 'SET_DAG_RUN_ID', payload: lastRunId });
-      } else {
-        dispatch({ type: 'SET_DAG_RUN_ID', payload: '' });
-      }
+    if (newDagRunId !== previousDagRunIdRef.current) {
+      dispatch({ type: 'SET_DAG_RUN_ID', payload: newDagRunId });
+    }
+    previousDagRunIdRef.current = newDagRunId;
+  }, [filteredDagRunsList, dispatch]);
+
+  const handleDateSelection = useCallback(
+    (newDate: Dayjs) => {
+      dispatch({ type: 'SET_SELECTED_DATE', payload: newDate });
+      // When a new date is selected, we clear the previous dagRunId to trigger a new fetch/render if needed.
+      dispatch({ type: 'SET_DAG_RUN_ID', payload: '' });
     },
-    [dispatch, dagRunsList]
+    [dispatch]
   );
 
   const handleMonthChange = useCallback(
-    (selectedMonth: dayjs.Dayjs | ((date: dayjs.Dayjs) => dayjs.Dayjs)) => {
-      const resolvedMonth =
-        typeof selectedMonth === 'function'
-          ? selectedMonth(dayjs())
-          : selectedMonth;
-      if (resolvedMonth) {
-        dispatch({ type: 'SET_MONTH', payload: resolvedMonth });
-      }
+    (newMonth: dayjs.Dayjs) => {
+      const startOfMonth = newMonth.startOf('month').toISOString();
+      const endOfMonth = newMonth.endOf('month').toISOString();
+      dispatch({ type: 'SET_START_DATE', payload: startOfMonth });
+      dispatch({ type: 'SET_END_DATE', payload: endOfMonth });
     },
     [dispatch]
   );
@@ -286,7 +264,6 @@ export const useComposerExecutionHistory = (
     handleDateSelection,
     handleMonthChange,
     handleLogs,
-    handleDagRunClick,
-    dispatch
+    handleDagRunClick
   };
 };

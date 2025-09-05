@@ -36,12 +36,11 @@ const ComposerExecutionHistory = (): JSX.Element => {
     redListDates,
     greenListDates,
     darkGreenListDates,
-    dagRunsList,
+    filteredDagRunsList,
     handleDateSelection,
     handleMonthChange,
     handleLogs,
     height,
-    filteredDagRunsList,
     handleDagRunClick,
     dagRunId
   } = useComposerExecutionHistory(
@@ -52,7 +51,6 @@ const ComposerExecutionHistory = (): JSX.Element => {
   );
 
   console.log('dagRunId', dagRunId);
-  console.log('dagRunsList', dagRunsList);
 
   const calendarProps = {
     createTime,

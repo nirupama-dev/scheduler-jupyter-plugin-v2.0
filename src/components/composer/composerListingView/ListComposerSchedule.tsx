@@ -678,7 +678,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
             getTableProps={getTableProps}
             headerGroups={headerGroups}
             getTableBodyProps={getTableBodyProps}
-            isLoading={loadingState.dags}
+            isLoading={!dagList && loadingState.dags}
             rows={rows}
             page={page}
             prepareRow={prepareRow}
