@@ -169,7 +169,7 @@ const extractSchedulerTypeAndKernelDetails = async (
     return {
       kernalAndSchedulerDetails: {
         schedulerType,
-        kernalDetails: {
+        kernelDetails: {
           executionMode: kernelDetails.executionMode,
           kernelDisplayName: sessionContext?.kernelDisplayName ?? '',
           selectedServerlessName: kernelDetails.selectedServerlessName,
@@ -188,7 +188,7 @@ const extractSchedulerTypeAndKernelDetails = async (
     return {
       kernalAndSchedulerDetails: {
         schedulerType: 'vertex',
-        kernalDetails: {
+        kernelDetails: {
           executionMode: 'local',
           kernelDisplayName: sessionContext?.kernelDisplayName ?? '',
           selectedServerlessName: undefined,
@@ -243,7 +243,7 @@ export const getDefaultSchedulerTypeOnLoad = async (
 }> => {
   const kernalAndSchedulerDetails: INotebookKernalSchdulerDefaults = {
     schedulerType: 'vertex',
-    kernalDetails: {
+    kernelDetails: {
       executionMode: 'local',
       kernelDisplayName: sessionContext?.kernelDisplayName ?? '',
       selectedServerlessName: undefined,

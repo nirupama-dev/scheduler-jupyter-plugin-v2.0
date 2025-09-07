@@ -69,7 +69,7 @@ export interface IPath {
 
 export interface INotebookKernalSchdulerDefaults {
   schedulerType: SchedulerType;
-  kernalDetails?: IKernelDetails;
+  kernelDetails?: IKernelDetails;
 }
 
 export interface IEditScheduleData {
@@ -108,3 +108,9 @@ export interface ILoaderProps {
   parentTagClassName?: string;
   messageClassName?: string;
 }
+
+export interface IInitialScheduleFormData {
+    credentials?: IAuthCredentials | undefined;
+    editModeData?: IEditScheduleData;
+    initialDefaults?: INotebookKernalSchdulerDefaults;
+  }

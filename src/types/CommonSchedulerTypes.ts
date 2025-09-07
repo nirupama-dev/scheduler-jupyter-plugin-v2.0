@@ -27,3 +27,8 @@ export type NetworkOption =
   | 'networkInThisProject'
   | 'networkSharedFromHostProject'
   | ''; // Define NetworkOption type
+export type RadioOption = {
+  label: string;
+  value: string;
+  disabled?: boolean; // Make it optional
+};

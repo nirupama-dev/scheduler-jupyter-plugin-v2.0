@@ -49,36 +49,44 @@ export const DISK_MAX_SIZE = 65536;
 
 export const EVERY_MINUTE_CRON = '* * * * *';
 
+export const VERTEX_SCHEDULER_NAME = 'vertex';
+
+export const COMPOSER_SCHEDULER_NAME = 'composer';
+
 export const SCHEDULER_OPTIONS = [
   {
     label: 'Vertex',
-    value: 'vertex'
+    value: VERTEX_SCHEDULER_NAME
   },
   {
     label: 'Composer',
-    value: 'composer'
+    value: COMPOSER_SCHEDULER_NAME
   }
 ];
-export const DEFAULT_SCHEDULER_SELECTED = 'vertex';
+
+export const DEFAULT_SCHEDULER_SELECTED = VERTEX_SCHEDULER_NAME;
 
 export const NETWORK_CONFIGURATION_LABEL = 'Network Configuration';
 
 export const NETWORK_CONFIGURATION_LABEL_DESCRIPTION =
   'Establishes connectivity for VM instances in the cluster';
 
+export const NETWORK_IN_THIS_PROJECT_VALUE = 'networkInThisProject';
+
+export const NETWORK_SHARED_FROM_HOST_PROJECT_VALUE = 'networkSharedFromHostProject';
+
 export const NETWORK_OPTIONS = [
   {
     label: 'Network in this project',
-    value: 'networkInThisProject'
+    value: NETWORK_IN_THIS_PROJECT_VALUE
   },
   {
     label: 'Network shared from host project',
-    value: 'networkSharedFromHostProject'
+    value: NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
   }
 ];
-export const DEFAULT_NETWORK_SELECTED = 'networkInThisProject';
+export const DEFAULT_NETWORK_SELECTED = NETWORK_IN_THIS_PROJECT_VALUE;
 
-export const DEFAULT_HOST_PROJECT_NETWORK = 'networkSharedFromHostProject';
 
 export const SHARED_NETWORK_DOC_URL =
   'https://cloud.google.com/vpc/docs/shared-vpc';

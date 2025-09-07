@@ -41,6 +41,7 @@ export interface ICreateVertexSchedulerProps {
   setValue: UseFormSetValue<CombinedCreateFormValues>;
   getValues: UseFormGetValues<CombinedCreateFormValues>;
   trigger: UseFormTrigger<CombinedCreateFormValues>;
+  isValid: boolean
   credentials: IAuthCredentials;
   editScheduleData: IEditScheduleData | null | undefined;
 }
