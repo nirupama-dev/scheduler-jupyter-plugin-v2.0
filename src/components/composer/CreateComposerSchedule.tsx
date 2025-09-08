@@ -34,11 +34,12 @@ import {
   ILoadingStateComposer
 } from '../../interfaces/ComposerInterface';
 import {
+  composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
   SCHEDULE_MODE_OPTIONS
 } from '../../utils/Constants';
-import { FormGroup } from '@mui/material';
+import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
 
 export const CreateComposerSchedule: React.FC<
@@ -301,6 +302,24 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={errors.environment}
+          getOptionDisabled={option =>
+            composerEnvironmentStateListForCreate !== option.state
+          }
+          renderOption={(props: any, option: any) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                {composerEnvironmentStateListForCreate === option.state ? (
+                  <div>{option.value}</div>
+                ) : (
+                  <div className="env-option-row">
+                    <div>{option.value}</div>
+                    <div>{option.state}</div>
+                  </div>
+                )}
+              </Box>
+            );
+          }}
         />
       </div>
       <div className="create-scheduler-label block-seperation">

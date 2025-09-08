@@ -39,7 +39,7 @@ import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 import { Dispatch, SetStateAction } from 'react';
-import { IDropdownOption } from '../../interfaces/FormInterface';
+import { IDropdownOption, IEnvDropDownOption } from '../../interfaces/FormInterface';
 
 export class ComposerServices {
   static readonly listClustersAPIService = async (
@@ -198,7 +198,7 @@ export class ComposerServices {
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
-  ): Promise<IDropdownOption[]> => {
+  ): Promise<IEnvDropDownOption[]> => {
     const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
       `composerList?project_id=${projectId}&region_id=${region}`
     );
@@ -208,10 +208,11 @@ export class ComposerServices {
       throw new Error('Invalid response format for composer environments');
     }
 
-    const environmentOptions: IDropdownOption[] = formattedResponse.map(
+    const environmentOptions: IEnvDropDownOption[] = formattedResponse.map(
       (env: IComposerEnvAPIResponse) => ({
         label: env.label,
-        value: env.name
+        value: env.name,
+        state: env.state,
       })
     );
     environmentOptions.sort((a, b) => a.label.localeCompare(b.label));

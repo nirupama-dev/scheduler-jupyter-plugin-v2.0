@@ -299,3 +299,6 @@ export const VERTEX_EXECUTION_HISTORY_TABLE_HEADER = [
 
 export const VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT =
   'Loading Vertex Schedule Runs...';
+
+export const composerEnvironmentStateList = ['RUNNING', 'UPDATING'];
+export const composerEnvironmentStateListForCreate = 'RUNNING';
