@@ -39,7 +39,10 @@ import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 import { Dispatch, SetStateAction } from 'react';
-import { IDropdownOption, IEnvDropDownOption } from '../../interfaces/FormInterface';
+import {
+  IDropdownOption,
+  IEnvDropDownOption
+} from '../../interfaces/FormInterface';
 
 export class ComposerServices {
   static readonly listClustersAPIService = async (
@@ -212,7 +215,7 @@ export class ComposerServices {
       (env: IComposerEnvAPIResponse) => ({
         label: env.label,
         value: env.name,
-        state: env.state,
+        state: env.state
       })
     );
     environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
