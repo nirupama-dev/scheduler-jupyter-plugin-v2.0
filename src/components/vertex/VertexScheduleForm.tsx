@@ -156,8 +156,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
   // --- REFACTORED: CONSOLIDATED DATA FETCHING CALLBACKS ---
   const fetchAllInitialData = useCallback(async () => {
-    if (!isVertexForm || !credentials) return;
-
     setLoadingState(prev => ({
       ...prev,
       cloudStorageBucket: true,
@@ -291,7 +289,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   // A single effect for initial data fetching and setting defaults
   // The fetchAllInitialData function is now called here.
   useEffect(() => {
-    if (!isVertexForm || !credentials) return;
+    if (!isVertexForm || !credentials) {
+      return;
+    }
 
     // Fetch all static data concurrently
     fetchAllInitialData();
@@ -558,7 +558,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
   const showSharedNetworkError = useMemo(() => {
     if (currentNetworkOption === 'networkSharedFromHostProject') {
-      if (loadingState.hostProject) return null;
+      if (loadingState.hostProject) {
+        return null;
+      }
       if (!hostProject || Object.keys(hostProject).length === 0) {
         return 'No host project configured or accessible. Please ensure a host project is set up for shared VPC networks.';
       }

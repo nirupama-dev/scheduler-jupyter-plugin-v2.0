@@ -78,7 +78,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
         />
 
         <Route
-          path="/list/:region?/:projectId?/:environment?"
+          path="/list"
           element={<ScheduleListingView />}
         >
           <Route

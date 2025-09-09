@@ -194,13 +194,15 @@ export const transformVertexScheduleResponseToZodSchema = (
     inputFile: inputFileName,
     jobName: vertexScheduleData.displayName ?? '',
     vertexRegion:
-      vertexScheduleData.name?.match(/locations\/([^\/]+)/)?.[1] ??
+      vertexScheduleData.name?.match(/locations\/([^/]+)/)?.[1] ??
       scheduleRegion,
-    cloudStorageBucket:
-      vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob?.gcsOutputUri!?.replace(
-        'gs://',
-        ''
-      ),
+    cloudStorageBucket: vertexScheduleData.createNotebookExecutionJobRequest
+      ?.notebookExecutionJob?.gcsOutputUri
+      ? vertexScheduleData.createNotebookExecutionJobRequest.notebookExecutionJob.gcsOutputUri.replace(
+          'gs://',
+          ''
+        )
+      : '',
     machineType:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.customEnvironmentSpec?.machineSpec?.machineType ?? '',
