@@ -556,7 +556,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     (cell: ICellProps) => {
       if (cell.column.Header === 'Actions') {
         return (
-          <td {...cell.getCellProps()} className="scheduler-table-data">
+          <td {...cell.getCellProps()} className="scheduler-table-data table-cell-overflow">
             {renderActions(
               cell.row.original,
               isGCSPluginInstalled,
@@ -691,7 +691,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         )}
       </div>
       {dagList.length > 0 ? (
-        <div className="table-space-around">
+        <div className="notebook-templates-list-tabl e-parent table-cell-flow table-space-around scroll-list">
           <TableData
             getTableProps={getTableProps}
             headerGroups={headerGroups}

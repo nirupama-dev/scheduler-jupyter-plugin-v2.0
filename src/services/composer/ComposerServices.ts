@@ -283,7 +283,7 @@ export class ComposerServices {
     bucketName: string,
     dagId: string
   ): Promise<any> => {
-    const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
+    const serviceURL = `getInputFileName?&dag_id=${dagId}&bucket_name=${bucketName}`;
     const formattedResponse: any = await requestAPI(serviceURL, {
       method: 'POST'
     });
