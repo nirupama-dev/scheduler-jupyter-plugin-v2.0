@@ -31,13 +31,13 @@ import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
  */
 export const transformZodSchemaToVertexSchedulePayload = (
   VertexScheduleData: VertexSchedulerFormValues,
-  projectId: string,
-  region: string
+  projectId: string
 ) => {
   console.log(
     'Vertex Schedule Data from UI:',
     JSON.stringify(VertexScheduleData, null, 2)
   );
+
   let combinedCronSchedule =
     VertexScheduleData.scheduleFieldCronFormat || CRON_FOR_SCHEDULE_EVERY_MIN;
   const isUtc = VertexScheduleData.timeZone === 'UTC';
@@ -45,15 +45,26 @@ export const transformZodSchemaToVertexSchedulePayload = (
     combinedCronSchedule = `TZ=${VertexScheduleData.timeZone} ${combinedCronSchedule}`;
   }
 
-  const getGcsUri = (path: string): string => {
+  const getGcsUri = (path: string, bucketName?: string): string => {
     if (path.startsWith('gs://')) {
       return path;
     }
-    const [bucket, ...rest] = path.split('/');
-    return `gs://${bucket}/${rest.join('/')}`;
+    if (path.startsWith('gs:')) {
+      return path.replace('gs:', 'gs://');
+    }
+    if (bucketName) {
+      return `gs://${bucketName}/${path}`;
+    }
+    return 'gs://' + path;
   };
-  const notebookSourceUri = getGcsUri(VertexScheduleData.inputFile);
+
   const outputBucketUri = getGcsUri(VertexScheduleData.cloudStorageBucket);
+
+  const bucketName = outputBucketUri
+    ? outputBucketUri.split('//')[1].split('/')[0]
+    : undefined;
+
+  const notebookSourceUri = getGcsUri(VertexScheduleData.inputFile, bucketName);
 
   const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule = {
     displayName: VertexScheduleData.jobName,
@@ -61,7 +72,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
     maxConcurrentRunCount: '1',
     ...(VertexScheduleData.maxRunCount
       ? { maxRunCount: VertexScheduleData.maxRunCount }
-      : {}),
+      : { maxRunCount: '1' }),
     ...(VertexScheduleData.startTime
       ? { startTime: VertexScheduleData.startTime }
       : {}),
@@ -69,13 +80,9 @@ export const transformZodSchemaToVertexSchedulePayload = (
       ? { endTime: VertexScheduleData.endTime }
       : {}),
     createNotebookExecutionJobRequest: {
-      parent: `projects/${projectId}/locations/${region}`,
+      parent: `projects/${projectId}/locations/${VertexScheduleData.vertexRegion}`,
       notebookExecutionJob: {
         displayName: VertexScheduleData.jobName,
-        ...(VertexScheduleData.parameters
-          ? { parameters: VertexScheduleData.parameters }
-          : {}),
-
         labels: {
           'aiplatform.googleapis.com/colab_enterprise_entry_service':
             'workbench'
@@ -83,13 +90,19 @@ export const transformZodSchemaToVertexSchedulePayload = (
         customEnvironmentSpec: {
           machineSpec: {
             machineType: VertexScheduleData.machineType,
-            acceleratorType: VertexScheduleData.acceleratorType ?? undefined,
-            acceleratorCount: VertexScheduleData.acceleratorCount
-              ? Number(VertexScheduleData.acceleratorCount)
-              : undefined
+            ...(VertexScheduleData.acceleratorType !== ''
+              ? {
+                  acceleratorType: VertexScheduleData.acceleratorType
+                }
+              : {}),
+            ...(VertexScheduleData.acceleratorType !== ''
+              ? {
+                  acceleratorCount: Number(VertexScheduleData.acceleratorCount)
+                }
+              : {})
           },
           persistentDiskSpec: {
-            diskType: VertexScheduleData.diskType,
+            diskType: VertexScheduleData.diskType.split(' ')[0], // extract valid key from the expanded full key value
             diskSizeGb: VertexScheduleData.diskSize
           },
           networkSpec: {
@@ -144,7 +157,7 @@ export const transformVertexScheduleResponseToZodSchema = (
       .pop()!;
   const primaryNetworkLink =
     vertexScheduleData?.createNotebookExecutionJobRequest?.notebookExecutionJob
-      ?.customEnvironmentSpec?.networkSpec?.network!;
+      ?.customEnvironmentSpec?.networkSpec?.network;
 
   // eslint-disable-next-line no-useless-escape
   const projectInNetwork = primaryNetworkLink?.match(/projects\/([^\/]+)/);
@@ -168,6 +181,12 @@ export const transformVertexScheduleResponseToZodSchema = (
     vertexScheduleData.maxRunCount === '1'
       ? 'runNow'
       : 'runSchedule';
+  const acceleratorCount =
+    vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
+      ?.customEnvironmentSpec?.machineSpec?.acceleratorCount ?? '';
+  const acceleratorType =
+    vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
+      ?.customEnvironmentSpec?.machineSpec?.acceleratorType ?? '';
 
   const vertexScheduleDataForForm: VertexSchedulerFormValues = {
     schedulerSelection: 'vertex',
@@ -185,11 +204,8 @@ export const transformVertexScheduleResponseToZodSchema = (
     machineType:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.customEnvironmentSpec?.machineSpec?.machineType!,
-    acceleratorCount:
-      vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob?.customEnvironmentSpec?.machineSpec?.acceleratorCount!.toString(),
-    acceleratorType:
-      vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
-        ?.customEnvironmentSpec?.machineSpec?.acceleratorType!,
+    acceleratorCount: acceleratorCount.toString(),
+    acceleratorType: acceleratorType,
     kernelName:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.kernelName!,
@@ -204,18 +220,14 @@ export const transformVertexScheduleResponseToZodSchema = (
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.serviceAccount!,
     networkOption: networkOption,
-    primaryNetwork: primaryNetwork,
-    subNetwork: subnetwork,
-    scheduleFieldCronFormat: cron,
-    internalScheduleMode: 'cronFormat',
+    primaryNetwork: primaryNetwork ?? '',
+    subNetwork: subnetwork ?? '',
+    scheduleFieldCronFormat: scheduleMode !== 'runNow' ? cron : '',
+    internalScheduleMode: scheduleMode !== 'runNow' ? 'cronFormat' : undefined,
     timeZone: timeZone,
-    maxRunCount: vertexScheduleData.maxRunCount!,
-    startTime: vertexScheduleData.startTime
-      ? vertexScheduleData.startTime
-      : undefined,
-    endTime: vertexScheduleData.endTime
-      ? vertexScheduleData.endTime
-      : undefined,
+    maxRunCount: scheduleMode !== 'runNow' ? vertexScheduleData.maxRunCount! : undefined,
+    startTime: scheduleMode !== 'runNow' ? vertexScheduleData.startTime ?? undefined : undefined,
+    endTime: scheduleMode !== 'runNow' ? vertexScheduleData.endTime?? undefined : undefined,
     scheduleMode: scheduleMode
   };
 

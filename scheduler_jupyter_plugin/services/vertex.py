@@ -100,9 +100,9 @@ class Client:
 
         return blob_name if blob_name else file_path
 
-    async def create_schedule(self, job, file_path, bucket_name):
+    async def create_schedule(self, job, region_id):
         try:
-            api_endpoint = f"https://{job.region}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{job.region}/schedules"
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules"
             headers = self.create_headers()
             payload = job
             async with self.client_session.post(
@@ -123,24 +123,25 @@ class Client:
             self.log.exception(f"Error creating schedule: {str(e)}")
             raise RuntimeError(f"Error creating schedule: {str(e)}")
 
-    async def create_job_schedule(self, input_data):
+    async def create_job_schedule(self, job, region_id):
+        print('job:', job)
         try:
-            job = DescribeVertexJob(**input_data)
-            storage_bucket = job.cloud_storage_bucket.split("//")[-1]
-
-            if "gs://" in job.input_filename:
-                input_filename = job.input_filename
-            elif "gs:" in job.input_filename:
-                input_filename = job.input_filename.replace("gs:", "gs://", 1)
+            storage_bucket = job['createNotebookExecutionJobRequest']['notebookExecutionJob']['gcsOutputUri'].split("//")[-1]
+            gcs_notebook_source = job['createNotebookExecutionJobRequest']['notebookExecutionJob']['gcsNotebookSource']['uri']
+            if "gs://" in gcs_notebook_source:
+                input_filename = gcs_notebook_source
+            elif "gs:" in gcs_notebook_source:
+                input_filename = gcs_notebook_source.replace("gs:", "gs://", 1)
             else:
-                input_filename = job.input_filename
+                input_filename = gcs_notebook_source
 
-            file_path = await self.upload_to_gcs(
-                storage_bucket, input_filename, job.display_name
+            await self.upload_to_gcs(
+                storage_bucket, input_filename, job['displayName']
             )
-            res = await self.create_schedule(job, file_path, storage_bucket)
+            res = await self.create_schedule(job, region_id)
             return res
         except Exception as e:
+            print('error:', str(e))
             return {"error": str(e)}
 
     async def create_new_bucket(self, input_data):

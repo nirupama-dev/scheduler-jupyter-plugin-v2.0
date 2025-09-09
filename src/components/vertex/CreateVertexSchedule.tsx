@@ -1024,6 +1024,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           error={vertexErrors.scheduleMode}
           onChange={() => {
             if (watch('scheduleMode') === 'runNow') {
+              console.log('Resetting schedule fields for Run Now mode');
               setValue('internalScheduleMode', undefined);
               setValue('scheduleFieldCronFormat', '');
               setValue('scheduleValueUserFriendly', '');

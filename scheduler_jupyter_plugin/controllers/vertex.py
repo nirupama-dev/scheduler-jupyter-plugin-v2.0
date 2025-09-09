@@ -45,11 +45,13 @@ class VertexScheduleCreateController(APIHandler):
     async def post(self):
         try:
             input_data = self.get_json_body()
+            region_id = self.get_argument("region_id")
+            print("Input data received for creating job schedule:", input_data)
             async with aiohttp.ClientSession() as client_session:
                 client = vertex.Client(
                     await credentials.get_cached(), self.log, client_session
                 )
-                result = await client.create_job_schedule(input_data)
+                result = await client.create_job_schedule(input_data, region_id)
                 self.finish(json.dumps(result))
         except Exception as e:
             self.log.exception(f"Error creating job schedule: {str(e)}")

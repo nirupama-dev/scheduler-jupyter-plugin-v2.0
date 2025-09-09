@@ -27,14 +27,12 @@ import {
   DEFAULT_SERVICE_ACCOUNT,
   DEFAULT_TIME_ZONE,
   DISK_TYPE_VALUE,
-  CRON_FOR_SCHEDULE_EVERY_MIN,
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME
 } from './Constants';
 import { INotebookKernalSchdulerDefaults, IInitialScheduleFormData } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
-import dayjs from 'dayjs';
 
 /**
  * Formats a timestamp into a specific string format.
@@ -97,12 +95,12 @@ const getDefaultVertexValues = (
   diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
   diskSize: DEFAULT_DISK_SIZE,
   scheduleMode: 'runNow',
-  internalScheduleMode: 'cronFormat',
-  scheduleFieldCronFormat: '', // Empty string for direct cron input
-  scheduleValueUserFriendly: CRON_FOR_SCHEDULE_EVERY_MIN, // Default for user-friendly cron
-  startTime: dayjs().toISOString(), // Default to current date/time, may be cleared by component logic
-  endTime: dayjs().toISOString(), // Default to current date/time, may be cleared by component logic
-  maxRunCount: '',
+  internalScheduleMode: undefined,
+  scheduleFieldCronFormat: '', 
+  scheduleValueUserFriendly: '', 
+  startTime: undefined,
+  endTime: undefined,
+  maxRunCount: undefined,
   timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone
   parameters: []
 };

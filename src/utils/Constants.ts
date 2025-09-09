@@ -53,13 +53,17 @@ export const VERTEX_SCHEDULER_NAME = 'vertex';
 
 export const COMPOSER_SCHEDULER_NAME = 'composer';
 
+export const SCHEDULE_LABEL_VERTEX = 'Vertex';
+
+export const SCHEDULE_LABEL_COMPOSER = 'Composer';
+
 export const SCHEDULER_OPTIONS = [
   {
-    label: 'Vertex',
+    label: SCHEDULE_LABEL_VERTEX,
     value: VERTEX_SCHEDULER_NAME
   },
   {
-    label: 'Composer',
+    label: SCHEDULE_LABEL_COMPOSER,
     value: COMPOSER_SCHEDULER_NAME
   }
 ];
@@ -125,10 +129,6 @@ export const SCHEDULE_FORMAT_DESCRIPTION = `Schedules are specified using unix-c
 export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
 
 export const LISTING_PAGE_HEADING = 'Scheduled Jobs';
-
-export const SCHEDULE_LABEL_VERTEX = 'Vertex';
-
-export const SCHEDULE_LABEL_COMPOSER = 'Composer';
 
 export const TITLE_LAUNCHER_CATEGORY = 'Google Cloud Resources';
 

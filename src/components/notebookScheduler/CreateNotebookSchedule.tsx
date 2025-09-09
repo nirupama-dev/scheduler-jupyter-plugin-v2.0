@@ -29,7 +29,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { iconLeftArrow } from '../../utils/Icons';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
-import { COMPOSER_SCHEDULER_NAME, SCHEDULER_OPTIONS, VERTEX_SCHEDULER_NAME } from '../../utils/Constants';
+import {
+  COMPOSER_SCHEDULER_NAME,
+  SCHEDULER_OPTIONS,
+  VERTEX_SCHEDULER_NAME
+} from '../../utils/Constants';
 import { CreateVertexSchedule } from '../vertex/CreateVertexSchedule';
 import { CreateComposerSchedule } from '../composer/CreateComposerSchedule';
 import {
@@ -48,7 +52,7 @@ import { getInitialFormValues } from '../../utils/FormDefaults';
 import { Button } from '@mui/material';
 import { IComposerSchedulePayload } from '../../interfaces/ComposerInterface';
 import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { SchedulerType } from '../../types/CommonSchedulerTypes';
 import { VertexServices } from '../../services/vertex/VertexServices';
 import { ComposerServices } from '../../services/composer/ComposerServices';
@@ -97,14 +101,16 @@ export const CreateNotebookSchedule = (
     environment: string;
   }>();
 
-
   /**
    * A unified state to manage all form-related data including edit mode,
    * authentication, and scheduler details.
    */
-  const [initialFormData, setInitialFormData] = useState<IInitialScheduleFormData>({});
+  const [initialFormData, setInitialFormData] =
+    useState<IInitialScheduleFormData>({});
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  const navigate = useNavigate();
 
   /**
    * Fetches auth credentials and initial form data on component mount.
@@ -119,7 +125,7 @@ export const CreateNotebookSchedule = (
         console.error('Invalid credentials');
         return;
       }
-      
+
       let kernelSchedulerData: INotebookKernalSchdulerDefaults | undefined;
       let editScheduleData: IEditScheduleData | undefined;
 
@@ -202,15 +208,17 @@ export const CreateNotebookSchedule = (
    * when the underlying data has been fetched and is available.
    */
   const initialFormValues = useMemo(() => {
-    if (initialFormData.editModeData?.editMode && initialFormData.editModeData.existingScheduleData) {
+    if (
+      initialFormData.editModeData?.editMode &&
+      initialFormData.editModeData.existingScheduleData
+    ) {
       return initialFormData.editModeData.existingScheduleData;
     }
     if (initialFormData.initialDefaults) {
       return getInitialFormValues(initialFormData, sessionContext);
     }
-    return null; // Return null or some default value if data isn't ready
-  }, [initialFormData, schedulerTypeForEdit, sessionContext]);
-
+    return {} as CombinedCreateFormValues; // Return null or some default value if data isn't ready
+  }, [isDataLoaded, initialFormData, schedulerTypeForEdit, sessionContext]);
 
   const {
     handleSubmit,
@@ -224,86 +232,89 @@ export const CreateNotebookSchedule = (
     setError
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
-    values: initialFormValues || undefined,
+    values: initialFormValues,
     mode: 'all'
   });
 
   const schedulerSelection = watch('schedulerSelection');
   // Watch for changes in schedulerSelection to reset form values accordingly
-useEffect(() => {
-  const isEditMode = initialFormData.editModeData?.editMode;
-  if (!isEditMode && initialFormData.initialDefaults) {
-    const commonFields = {
-      jobName: getValues('jobName'),
-      inputFile: getValues('inputFile'),
-    };
+  useEffect(() => {
+    const isEditMode = initialFormData.editModeData?.editMode;
+    if (!isEditMode && initialFormData.initialDefaults) {
+      const commonFields = {
+        jobName: getValues('jobName'),
+        inputFile: getValues('inputFile')
+      };
 
-    if (schedulerSelection === VERTEX_SCHEDULER_NAME) {
-      // Get a new set of default Vertex-specific values
-      const vertexDefaults = getInitialFormValues(
-        { ...initialFormData, initialDefaults: { ...initialFormData.initialDefaults, schedulerType: VERTEX_SCHEDULER_NAME } },
-        sessionContext
-      ) as VertexSchedulerFormValues;
+      if (schedulerSelection === VERTEX_SCHEDULER_NAME) {
+        // Get a new set of default Vertex-specific values
+        const vertexDefaults = getInitialFormValues(
+          {
+            ...initialFormData,
+            initialDefaults: {
+              ...initialFormData.initialDefaults,
+              schedulerType: VERTEX_SCHEDULER_NAME
+            }
+          },
+          sessionContext
+        ) as VertexSchedulerFormValues;
 
-      // Merge common fields with new Vertex-specific defaults
-      reset({
-        ...commonFields,
-        ...vertexDefaults,
-        schedulerSelection: VERTEX_SCHEDULER_NAME,
-      });
-    } else if (schedulerSelection === COMPOSER_SCHEDULER_NAME) {
-      // Get a new set of default Composer-specific values
-      const composerDefaults = getInitialFormValues(
-        { ...initialFormData, initialDefaults: { ...initialFormData.initialDefaults, schedulerType: COMPOSER_SCHEDULER_NAME } },
-        sessionContext
-      ) as ComposerSchedulerFormValues;
+        // Merge common fields with new Vertex-specific defaults
+        reset({
+          ...commonFields,
+          ...vertexDefaults,
+          schedulerSelection: VERTEX_SCHEDULER_NAME
+        });
+      } else if (schedulerSelection === COMPOSER_SCHEDULER_NAME) {
+        // Get a new set of default Composer-specific values
+        const composerDefaults = getInitialFormValues(
+          {
+            ...initialFormData,
+            initialDefaults: {
+              ...initialFormData.initialDefaults,
+              schedulerType: COMPOSER_SCHEDULER_NAME
+            }
+          },
+          sessionContext
+        ) as ComposerSchedulerFormValues;
 
-      // Merge common fields with new Composer-specific defaults
-      reset({
-        ...commonFields,
-        ...composerDefaults,
-        schedulerSelection: COMPOSER_SCHEDULER_NAME,
-      });
+        // Merge common fields with new Composer-specific defaults
+        reset({
+          ...commonFields,
+          ...composerDefaults,
+          schedulerSelection: COMPOSER_SCHEDULER_NAME
+        });
+      }
     }
-  }
-}, [schedulerSelection, initialFormData, sessionContext, reset, getValues]);
+  }, [schedulerSelection, initialFormData, sessionContext, reset, getValues]);
 
   // Show loading state while fetching initial data
-   if (!isDataLoaded) {
+  if (!isDataLoaded) {
     return <div>Loading...</div>;
   }
 
- /**
-  *
-  * @param data The form data submitted from the Create Notebook Schedule form.
-  * @param credentials The authentication credentials for the user.
-  */
-  const onSubmit = async (
-    data: CombinedCreateFormValues
-  ) => {
+  /**
+   *
+   * @param data The form data submitted from the Create Notebook Schedule form.
+   * @param credentials The authentication credentials for the user.
+   */
+  const onSubmit = async (data: CombinedCreateFormValues) => {
     console.log('On Submit');
     if (!initialFormData.credentials) {
-    console.error('Credentials not available.');
-    //TODO: handle credentials
-    return;
-  }
+      console.error('Credentials not available.');
+      //TODO: handle credentials
+      return;
+    }
     let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
+    let routingParamForListing= '';
     //vertex payload creation
-    if (
-      data.schedulerSelection === 'vertex' &&
-      initialFormData.credentials.project_id &&
-      initialFormData.credentials.region_id
-    ) {
+    if (data.schedulerSelection === VERTEX_SCHEDULER_NAME &&  initialFormData.credentials.project_id) {
       const vertexData = data as VertexSchedulerFormValues;
       const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
-        transformZodSchemaToVertexSchedulePayload(
-          vertexData,
-          initialFormData.credentials?.project_id,
-          initialFormData.credentials?.region_id
-        );
+        transformZodSchemaToVertexSchedulePayload(vertexData, initialFormData.credentials.project_id);
       console.log('Vertex Payload:', vertexPayload);
 
-       if (initialFormData.editModeData?.editMode && scheduleId) {
+      if (initialFormData.editModeData?.editMode && scheduleId) {
         isSaveSuccessfull =
           await VertexServices.updateVertexNotebookJobSchedule(
             scheduleId,
@@ -317,9 +328,9 @@ useEffect(() => {
             vertexData.vertexRegion
           );
       }
-
+      routingParamForListing= '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
       //composer payload creation
-    } else if (data.schedulerSelection === 'composer') {
+    } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
       const composerData = data as ComposerSchedulerFormValues;
       const packagesToInstall: string[] = []; // TODO
       const composerPayload: IComposerSchedulePayload =
@@ -335,12 +346,14 @@ useEffect(() => {
           composerPayload.region_id, // ToDO
           initialFormData.editModeData?.editMode
         );
+        routingParamForListing= `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
     }
     console.log('is save successful', isSaveSuccessfull);
     if (isSaveSuccessfull) {
       //TODO: // redirect to list page or show success message
+      navigate(`/list/${routingParamForListing}`);
     } else {
-      //TODO: Retain the form.
+      //TODO: Retain the form. probably remove this.
     }
   };
 
@@ -350,15 +363,16 @@ useEffect(() => {
     reset(); // Reset form to default values
     // TODO: Add navigation logic
   };
-  console.log(' Scheduler:', schedulerSelection );
- //return if form is not valid
-   if (
+  console.log(' Scheduler:', schedulerSelection);
+  //return if form is not valid
+  if (
     !initialFormData.credentials ||
     (!initialFormData.initialDefaults && !initialFormData.editModeData) ||
-    (initialFormData.editModeData?.editMode && !initialFormData.editModeData.existingScheduleData)
-) {
+    (initialFormData.editModeData?.editMode &&
+      !initialFormData.editModeData.existingScheduleData)
+  ) {
     return <div>Loading...</div>;
-}
+  }
   return (
     <div className="component-level">
       <div className="create-form-header">
@@ -369,12 +383,12 @@ useEffect(() => {
           />
         </div>
         <div className="create-job-scheduler-title">
-         {initialFormData.editModeData?.editMode
+          {initialFormData.editModeData?.editMode
             ? 'Update Scheduled Notebook Job'
             : 'Create Scheduled Notebook Job'}
         </div>
       </div>
-  <form onSubmit={handleSubmit(data => onSubmit(data))}>
+      <form onSubmit={handleSubmit(data => onSubmit(data))}>
         <div className="common-fields">
           <div className="scheduler-tag-style">
             <FormInputText
@@ -406,7 +420,9 @@ useEffect(() => {
                 ...option,
                 disabled:
                   initialFormData.editModeData?.editMode ||
-                  (initialFormData.initialDefaults?.kernelDetails?.executionMode !== 'local' && option.value === 'vertex')
+                  (initialFormData.initialDefaults?.kernelDetails
+                    ?.executionMode !== 'local' &&
+                    option.value === 'vertex')
               }))}
               error={errors.schedulerSelection}
             />
@@ -415,12 +431,12 @@ useEffect(() => {
           {schedulerSelection === VERTEX_SCHEDULER_NAME && (
             <CreateVertexSchedule
               control={control}
-              errors={errors as Record<keyof VertexSchedulerFormValues, any>} 
+              errors={errors as Record<keyof VertexSchedulerFormValues, any>}
               setValue={setValue}
               watch={watch}
               getValues={getValues}
               trigger={trigger}
-              isValid={isValid} 
+              isValid={isValid}
               credentials={initialFormData.credentials}
               editScheduleData={initialFormData.editModeData}
             />
@@ -428,7 +444,7 @@ useEffect(() => {
           {schedulerSelection === COMPOSER_SCHEDULER_NAME && (
             <CreateComposerSchedule
               control={control}
-              errors={errors as Record<keyof ComposerSchedulerFormValues, any>} 
+              errors={errors as Record<keyof ComposerSchedulerFormValues, any>}
               setValue={setValue}
               watch={watch}
               setError={setError}

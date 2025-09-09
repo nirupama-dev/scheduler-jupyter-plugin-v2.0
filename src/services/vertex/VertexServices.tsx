@@ -595,7 +595,7 @@ export class VertexServices {
     region: string
   ) => {
     try {
-      const data: any = await requestAPI('api/vertex/createJobScheduler', {
+      const data: any = await requestAPI(`api/vertex/createJobScheduler?region_id=${region}`, {
         body: JSON.stringify(vertexSchedulePayload),
         method: 'POST'
       });
