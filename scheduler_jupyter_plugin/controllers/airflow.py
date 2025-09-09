@@ -226,6 +226,12 @@ class EditDagController(AirflowHandler):
     async def _handle_post(self, client):
         return await client.edit_jobs(self.dag_id, self.bucket_name)
 
+class GetComposerJobScheduleController(AirflowHandler):
+    def description(self):
+        return "job"
+
+    async def _handle_post(self, client):
+        return await client.get_job_schedule(self.dag_id, self.project_id, self.region_id, self.composer_environment)
 
 class ImportErrorController(AirflowHandler):
     def description(self):

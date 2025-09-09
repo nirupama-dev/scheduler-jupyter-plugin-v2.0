@@ -17,19 +17,13 @@
 
 import { requestAPI } from '../../handler/Handler';
 import { LOG_LEVEL, SchedulerLoggingService } from '../common/LoggingService';
-import { JupyterLab } from '@jupyterlab/application';
-import {
-  ABORT_MESSAGE,
-  HTTP_STATUS_BAD_REQUEST,
-  scheduleMode
-} from '../../utils/Constants';
+import { ABORT_MESSAGE, HTTP_STATUS_BAD_REQUEST } from '../../utils/Constants';
 import {
   IClusterAPIResponse,
   IComposerEnvAPIResponse,
   IComposerSchedulePayload,
   IDagList,
   IDagRunList,
-  ILoadingStateComposer,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse,
   IListDagInfoAPIServiceResponse
@@ -38,27 +32,29 @@ import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
-import { Dispatch, SetStateAction } from 'react';
 import { IDropdownOption } from '../../interfaces/FormInterface';
 
+/**
+ * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
+ */
 export class ComposerServices {
+  /**
+   * Fetches the list of Cluster Options available.
+   * @param nextPageToken
+   * @param previousClustersList
+   */
   static readonly listClustersAPIService = async (
-    setClusterOptions: Dispatch<SetStateAction<IDropdownOption[]>>,
-    setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
   ) => {
     const pageToken = nextPageToken ?? '';
     try {
-      if (setLoadingState) {
-        setLoadingState(prev => ({ ...prev, cluster: true }));
-      }
       const serviceURL = `clusterList?pageSize=500&pageToken=${pageToken}`;
 
-      const formattedResponse: any = await requestAPI(serviceURL);
+      const clusterListResponse: any = await requestAPI(serviceURL);
       let transformClusterListData = [];
-      if (formattedResponse?.clusters) {
-        transformClusterListData = formattedResponse?.clusters?.map(
+      if (clusterListResponse?.clusters) {
+        transformClusterListData = clusterListResponse?.clusters?.map(
           (data: IClusterAPIResponse) => {
             return {
               clusterName: data.clusterName
@@ -73,59 +69,51 @@ export class ComposerServices {
         ...transformClusterListData
       ];
 
-      if (formattedResponse.nextPageToken) {
+      if (clusterListResponse.nextPageToken) {
         this.listClustersAPIService(
-          setClusterOptions,
-          formattedResponse.nextPageToken,
+          clusterListResponse.nextPageToken,
           allClustersData
         );
       } else {
         const transformClusterListData = allClustersData;
 
-        const keyLabelStructure = transformClusterListData.map(
+        const clusterOptionList = transformClusterListData.map(
           (obj: { clusterName: string }) => ({
             label: obj.clusterName,
             value: obj.clusterName
           })
         );
 
-        setClusterOptions(keyLabelStructure);
+        return clusterOptionList;
       }
-      if (formattedResponse?.error) {
+      if (clusterListResponse?.error) {
         handleErrorToast({
-          error: formattedResponse?.error
+          error: clusterListResponse?.error
         });
-        if (setLoadingState) {
-          setLoadingState(prev => ({ ...prev, cluster: false }));
-        }
+        return;
       }
     } catch (error) {
-      if (setLoadingState) {
-        setLoadingState(prev => ({ ...prev, cluster: false }));
-      }
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
       const errorResponse = `Failed to fetch clusters : ${error}`;
       handleErrorToast({
         error: errorResponse
       });
+      return;
     }
   };
 
+  /**
+   * Fetches the list of session templates from the Composer API.
+   * @param nextPageToken - Token for fetching the next page of results.
+   * @param previousSessionTemplatesList - Previously fetched session templates.
+   */
   static readonly listSessionTemplatesAPIService = async (
-    setServerlessOptions: Dispatch<SetStateAction<IDropdownOption[]>>,
-    setLoadingState?: Dispatch<SetStateAction<ILoadingStateComposer>>,
-    setIsLoadingKernelDetail?: (value: boolean) => void,
     nextPageToken?: string,
     previousSessionTemplatesList?: object
   ) => {
     const pageToken = nextPageToken ?? '';
-    if (setIsLoadingKernelDetail) {
-      setIsLoadingKernelDetail(true);
-    }
+
     try {
-      if (setLoadingState) {
-        setLoadingState(prev => ({ ...prev, serverless: true }));
-      }
       const serviceURL = `runtimeList?pageSize=500&pageToken=${pageToken}`;
 
       const formattedResponse: any = await requestAPI(serviceURL);
@@ -153,13 +141,13 @@ export class ComposerServices {
       if (formattedResponse.nextPageToken) {
         this.listSessionTemplatesAPIService(
           // setServerlessDataList,
-          setServerlessOptions,
+          // setServerlessOptions,
           formattedResponse.nextPageToken,
           allSessionTemplatesData
         );
       } else {
         const transformSessionTemplateListData = allSessionTemplatesData;
-        const keyLabelStructure = transformSessionTemplateListData.map(
+        const serverlessOptionList = transformSessionTemplateListData.map(
           (obj: { serverlessName: string }) => ({
             label: obj.serverlessName,
             value: obj.serverlessName
@@ -167,23 +155,15 @@ export class ComposerServices {
         );
 
         // setServerlessDataList(transformSessionTemplateListData);
-        setServerlessOptions(keyLabelStructure);
-        if (setIsLoadingKernelDetail) {
-          setIsLoadingKernelDetail(false);
-        }
+        return serverlessOptionList;
       }
       if (formattedResponse?.error) {
         handleErrorToast({
           error: formattedResponse?.error
         });
-        if (setLoadingState) {
-          setLoadingState(prev => ({ ...prev, serverless: false }));
-        }
+        return;
       }
     } catch (error) {
-      if (setLoadingState) {
-        setLoadingState(prev => ({ ...prev, serverless: false }));
-      }
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
@@ -192,9 +172,17 @@ export class ComposerServices {
       handleErrorToast({
         error: errorResponse
       });
+
+      return;
     }
   };
 
+  /**
+   * Fetches the list of Composer environments.
+   * @param projectId - The ID of the project.
+   * @param region - The region to fetch environments from.
+   * @returns A promise that resolves to an array of dropdown options for Composer environments.
+   */
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
@@ -219,71 +207,78 @@ export class ComposerServices {
     return environmentOptions;
   };
 
-  static readonly createJobSchedulerService = async (
-    payload: IComposerSchedulePayload,
-    app: JupyterLab,
-    setCreateCompleted: (value: boolean) => void,
-    setCreatingScheduler: (value: boolean) => void,
-    editMode: boolean,
-    projectId: string,
-    region: string,
-    selectedMode: string,
-    packageInstalledList: string[],
-    setPackageEditFlag: (value: boolean) => void
-  ) => {
-    setCreatingScheduler(true);
+  /**
+   * Creates or Updates a Cloud Composer Notebook Schedule Job.
+   * @param composerScheduleData
+   * @param projectId
+   * @param region
+   * @param isEditMode
+   * @returns
+   */
+  static readonly saveComposerNotebookJobSchedule = async (
+    composerScheduleData: IComposerSchedulePayload,
+    projectId?: string,
+    region?: string,
+    isEditMode?: boolean
+  ): Promise<boolean> => {
     try {
-      const data: any = await requestAPI(
+      if (!projectId) {
+        projectId = composerScheduleData.project_id;
+      }
+      if (!region) {
+        region = composerScheduleData.region_id;
+      }
+      console.log('project: ', projectId, 'region', region);
+      const createScheduleResponse: any = await requestAPI(
         `createJobScheduler?project_id=${projectId}&region_id=${region}`,
         {
-          body: JSON.stringify(payload),
+          body: JSON.stringify(composerScheduleData),
           method: 'POST'
         }
       );
-      if (data?.error) {
+      // Check if the schedule was created successfully
+      if (createScheduleResponse?.error) {
         handleErrorToast({
-          error: data.error
+          error: createScheduleResponse.error
         });
-        setCreatingScheduler(false);
+        return false;
       } else {
-        if (editMode) {
-          Notification.success('Job scheduler successfully updated', {
+        if (isEditMode) {
+          // In case of update Schedule
+          Notification.success('Notebook Job Scheduler Successfully Updated', {
             autoClose: false
           });
-          if (packageInstalledList.length > 0) {
-            Notification.success(
-              'Installation of packages will take sometime',
-              {
-                autoClose: false
-              }
-            );
-          }
-          setPackageEditFlag(false);
         } else {
-          Notification.success('Job scheduler successfully created', {
+          // create schedule
+          Notification.success('Notebook Job Scheduler Successfully Created', {
             autoClose: false
           });
-          if (packageInstalledList.length > 0) {
-            Notification.success(
-              'Installation of packages will take sometime',
-              {
-                autoClose: false
-              }
-            );
-          }
         }
-        setCreatingScheduler(false);
-        setCreateCompleted(true);
+        // If there are packages to install, notify the user
+        if (
+          composerScheduleData.packages_to_install &&
+          composerScheduleData.packages_to_install.length > 0
+        ) {
+          Notification.success('Installation of packages will take sometime', {
+            autoClose: false
+          });
+        }
+        return true;
       }
     } catch (reason) {
-      setCreatingScheduler(false);
       handleErrorToast({
         error: reason
       });
+      return false;
     }
   };
-
-  static readonly editNotebookSchedulerService = async (
+  /**
+   * Edits the notebook in a scheduled job.
+   * @param bucketName - The name of the bucket.
+   * @param dagId - The ID of the DAG.
+   * @returns A promise that resolves to the response from the API.
+   */
+  static readonly editNotebookInScheduledJob = async (
     bucketName: string,
     dagId: string
   ): Promise<any> => {
@@ -294,161 +289,41 @@ export class ComposerServices {
     return formattedResponse;
   };
 
-  static readonly editJobSchedulerService = async (
-    bucketName: string,
-    dagId: string,
-    composerEnvSelected: IComposerEnvAPIResponse | null,
-    setEditDagLoading: (value: string) => void,
-    setIsLocalKernel: (value: boolean) => void,
-    setPackageEditFlag: (value: boolean) => void,
-    setCreateCompleted?: (value: boolean) => void,
-    setJobNameSelected?: (value: string) => void,
-    setComposerEnvSelected?: (value: IComposerEnvAPIResponse | null) => void,
-    setScheduleMode?: (value: scheduleMode) => void,
-    setScheduleValue?: (value: string) => void,
-    setInputFileSelected?: (value: string) => void,
-    setParameterDetail?: (value: string[]) => void,
-    setParameterDetailUpdated?: (value: string[]) => void,
-    setSelectedMode?: (value: string) => void,
-    setClusterSelected?: (value: string) => void,
-    setServerlessSelected?: (value: string) => void,
-    setServerlessDataSelected?: (value: Record<string, never>) => void,
-    serverlessDataList?: string[],
-    setServerlessDataList?: (value: string[]) => void,
-    setServerlessList?: (value: string[]) => void,
-    setRetryCount?: (value: number) => void,
-    setRetryDelay?: (value: number) => void,
-    setEmailOnFailure?: (value: boolean) => void,
-    setEmailonRetry?: (value: boolean) => void,
-    setEmailOnSuccess?: (value: boolean) => void,
-    setEmailList?: (value: string[]) => void,
-    setStopCluster?: (value: boolean) => void,
-    setTimeZoneSelected?: (value: string) => void,
-    setEditMode?: (value: boolean) => void,
-    setIsLoadingKernelDetail?: (value: boolean) => void,
-    region?: string,
-    setRegion?: (value: string) => void,
-    projectId?: string,
-    setProjectId?: (value: string) => void
+  /**
+   * Fetch the data of a scheduled composer job.
+   * @param bucketName - The name of the bucket.
+   * @param dagId - The ID of the DAG.
+   */
+  static readonly getComposerJobScheduleDetails = async (
+    dagId: string | undefined,
+    region: string | undefined,
+    projectId: string | undefined,
+    environment: string | undefined
   ) => {
-    setEditDagLoading(dagId);
-    if (region && setRegion) {
-      setRegion(region);
-    }
-    if (projectId && setProjectId) {
-      setProjectId(projectId);
-    }
     try {
-      const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
-      const formattedResponse: any = await requestAPI(serviceURL, {
-        method: 'POST'
-      });
-      if (
-        setCreateCompleted &&
-        setJobNameSelected &&
-        setComposerEnvSelected &&
-        setScheduleMode &&
-        setScheduleValue &&
-        setInputFileSelected &&
-        setParameterDetail &&
-        setParameterDetailUpdated &&
-        setSelectedMode &&
-        setClusterSelected &&
-        setServerlessSelected &&
-        setServerlessDataSelected &&
-        serverlessDataList &&
-        setServerlessDataList &&
-        setServerlessList &&
-        setRetryCount &&
-        setRetryDelay &&
-        setEmailOnFailure &&
-        setEmailonRetry &&
-        setEmailOnSuccess &&
-        setEmailList &&
-        setStopCluster &&
-        setTimeZoneSelected &&
-        setEditMode &&
-        dagId !== null
-      ) {
-        setJobNameSelected(dagId);
-        setComposerEnvSelected(composerEnvSelected);
-        setInputFileSelected(formattedResponse.input_filename);
-
-        if (formattedResponse.mode_selected === 'local') {
-          setIsLocalKernel(true);
-          setPackageEditFlag(true);
-          if (formattedResponse.parameters.length > 0) {
-            const parameterList = formattedResponse.parameters[0]
-              .split(',')
-              .map((item: any) => item.trim());
-            setParameterDetail(parameterList);
-            setParameterDetailUpdated(parameterList);
-          }
-        } else {
-          setParameterDetail(formattedResponse.parameters);
-          setParameterDetailUpdated(formattedResponse.parameters);
-        }
-
-        setSelectedMode(formattedResponse.mode_selected);
-        setClusterSelected(formattedResponse.cluster_name);
-        setServerlessSelected(formattedResponse.serverless_name);
-        if (formattedResponse.mode_selected === 'serverless') {
-          // await this.listSessionTemplatesAPIService(
-          //   setServerlessDataList,
-          //   setServerlessList,
-          //   setIsLoadingKernelDetail
-          // );
-          if (serverlessDataList.length > 0) {
-            const selectedData: any = serverlessDataList.filter(
-              (serverless: any) => {
-                return (
-                  serverless.serverlessName ===
-                  formattedResponse.serverless_name
-                );
-              }
-            );
-            if (selectedData.length > 0) {
-              setServerlessDataSelected(selectedData[0].serverlessData);
-            }
-          }
-        }
-        setRetryCount(formattedResponse.retry_count);
-        setRetryDelay(formattedResponse.retry_delay);
-        formattedResponse.email_failure.toLowerCase() === 'true'
-          ? setEmailOnFailure(true)
-          : setEmailOnFailure(false);
-        formattedResponse.email_delay.toLowerCase() === 'true'
-          ? setEmailonRetry(true)
-          : setEmailonRetry(false);
-        formattedResponse.email_success.toLowerCase() === 'true'
-          ? setEmailOnSuccess(true)
-          : setEmailOnSuccess(false);
-        setEmailList(formattedResponse.email);
-        formattedResponse.stop_cluster.toLowerCase() === 'true'
-          ? setStopCluster(true)
-          : setStopCluster(false);
-        if (formattedResponse.time_zone === '') {
-          setTimeZoneSelected(Intl.DateTimeFormat().resolvedOptions().timeZone);
-        } else {
-          setTimeZoneSelected(formattedResponse.time_zone);
-        }
-        setEditMode(true);
-        setCreateCompleted(false);
-        if (formattedResponse.schedule_value === '@once') {
-          setScheduleMode('runNow');
-          setScheduleValue('');
-        } else if (formattedResponse.schedule_value !== '@once') {
-          setScheduleMode('runSchedule');
-          setScheduleValue(formattedResponse.schedule_value);
-        }
+      const serviceURL = `getComposerJobSchedule?dag_id=${dagId}&project_id=${projectId}&region_id=${region}&composer_environment=${environment}`;
+      const composerJobScheduleDetails: IComposerSchedulePayload =
+        await requestAPI(serviceURL, {
+          method: 'POST'
+        });
+      if (composerJobScheduleDetails.error) {
+        handleErrorToast({
+          error: `Error on getting schedule details.\n${composerJobScheduleDetails.error}`
+        });
+        return;
       }
-      setEditDagLoading('');
+      console.log(
+        'ComposerServices: Fetched Composer Job Schedule Details:',
+        composerJobScheduleDetails
+      );
+
+      return composerJobScheduleDetails;
     } catch (reason) {
-      setEditDagLoading('');
-      const errorResponse = `Error on POST {dataToSend}.\n${reason}`;
+      const errorResponse = `Error on getting schedule details.\n${reason}`;
       handleErrorToast({
         error: errorResponse
       });
+      return;
     }
   };
 

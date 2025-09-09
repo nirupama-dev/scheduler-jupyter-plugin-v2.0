@@ -29,10 +29,10 @@ from scheduler_jupyter_plugin.commons.constants import (
     HTTP_STATUS_NETWORK_CONNECT_TIMEOUT as HTTP_STATUS_SERVER_ERROR_END,
     HTTP_STATUS_OK,
 )
-
+import scheduler_jupyter_plugin.services.executor as executor
 
 class Client:
-    def __init__(self, credentials, log, client_session):
+    def __init__(self, credentials, log, client_session, main_client):
         self.log = log
         if not (
             ("access_token" in credentials)
@@ -45,6 +45,7 @@ class Client:
         self.project_id = credentials["project_id"]
         self.region_id = credentials["region_id"]
         self.client_session = client_session
+        self.executor_client = executor.Client(credentials, log, client_session)
 
     def create_headers(self):
         return {
@@ -283,6 +284,129 @@ class Client:
         except Exception as e:
             self.log.exception(f"Error reading dag file: {str(e)}")
             return {"error": str(e)}
+
+    async def get_job_schedule(self, dag_id, project_id, region_id, composer_environment):
+        try:
+            # Step 1: Get the bucket name using the existing service function
+            bucket_name = await self.executor_client.get_bucket(composer_environment, project_id, region_id)
+
+            if not bucket_name:
+                # Handle the case where the bucket name could not be retrieved
+                raise RuntimeError("Could not retrieve the Composer bucket name.")
+            
+            # Step 2: Get the DAG file
+            cluster_name = ""
+            serverless_name = ""
+            email_on_success = "False"
+            stop_cluster_check = "False"
+            mode_selected = "serverless"
+            time_zone = ""
+            pattern = r"parameters\s*=\s*'''(.*?)'''"
+            file_response = await self.get_dag_file(dag_id, bucket_name)
+            content_str = file_response.decode("utf-8")
+            file_content = re.sub(r"(?<!\\)\\(?!n)", "", content_str)
+
+            if file_content:
+                for line in file_content.split("\n"):
+                    if "input_notebook" in line:
+                        input_notebook = line.split("=")[-1].strip().strip("'\"")
+                        break
+
+                for line in file_content.split("\n"):
+                    match = re.search(pattern, file_content, re.DOTALL)
+                    if match:
+                        parameters_yaml = match.group(1)
+                        parameters_list = [
+                            line.strip()
+                            for line in parameters_yaml.split("\n")
+                            if line.strip()
+                        ]
+                    else:
+                        parameters_list = []
+
+                for line in file_content.split("\n"):
+                    if "email" in line:
+                        # Extract the email string from the line
+                        email_str = (
+                            line.split(":")[-1].strip().strip("'\"").replace(",", "")
+                        )
+                        # Use regular expression to extract email addresses
+                        email_list = re.findall(
+                            r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+                            email_str,
+                        )
+                        # Remove quotes from the email addresses
+                        email_list = [email.strip("'\"") for email in email_list]
+                        break
+                for line in file_content.split("\n"):
+                    if "cluster_name" in line:
+                        cluster_name = (
+                            line.split(":")[-1]
+                            .strip()
+                            .strip("'\"}")
+                            .split("'")[0]
+                            .strip()
+                        )  # Extract project_id from the line
+                    elif "submit_pyspark_job" in line:
+                        mode_selected = "cluster"
+                    elif "execute_notebook_task" in line:
+                        mode_selected = "local"
+                    elif "'retries'" in line:
+                        retries = line.split(":")[-1].strip().strip("'\"},")
+                        retry_count = int(
+                            retries.strip("'\"")
+                        )  # Extract retry_count from the line
+                    elif "retry_delay" in line:
+                        retry_delay = int(
+                            line.split("int('")[1].split("')")[0]
+                        )  # Extract retry_delay from the line
+                    elif "email_on_failure" in line:
+                        email_on_failure = line.split(":")[1].strip().replace(",", "")
+                    elif "email_on_retry" in line:
+                        email_on_retry = line.split(":")[1].strip().replace(",", "")
+                    elif "email_on_success" in line:
+                        email_on_success = line.split(":")[1].strip()
+                    elif "schedule_interval" in line:
+                        schedule_interval = (
+                            line.split("=")[-1]
+                            .strip()
+                            .strip("'\"")
+                            .rsplit(",", 1)[0]
+                            .rstrip("'\"")
+                        )  # Extract schedule_interval from the line
+                    elif "stop_cluster_check" in line:
+                        stop_cluster_check = line.split("=")[-1].strip().strip("'\"")
+                    elif "serverless_name" in line:
+                        serverless_name = line.split("=")[-1].strip().strip("'\"")
+                    elif "time_zone" in line:
+                        time_zone = line.split("=")[-1].strip().strip("'\"")
+
+                payload = {
+                    "dag_id": dag_id,
+                    "input_filename": input_notebook,
+                    "project_id": project_id,
+                    "region_id": region_id,
+                    "composer_environment": composer_environment,
+                    "parameters": parameters_list,
+                    "mode_selected": mode_selected,
+                    "cluster_name": cluster_name,
+                    "serverless_name": serverless_name,
+                    "retry_count": retry_count,
+                    "retry_delay": retry_delay,
+                    "email_failure": email_on_failure,
+                    "email_delay": email_on_retry,
+                    "email_success": email_on_success,
+                    "email": email_list,
+                    "schedule_value": schedule_interval,
+                    "stop_cluster": stop_cluster_check,
+                    "time_zone": time_zone,
+                }
+                return payload
+
+            else:
+                self.log.exception("No Dag file found")
+        except Exception as e:
+            self.log.exception(f"Error downloading dag file: {str(e)}")
 
     async def edit_jobs(self, dag_id, bucket_name):
         try:

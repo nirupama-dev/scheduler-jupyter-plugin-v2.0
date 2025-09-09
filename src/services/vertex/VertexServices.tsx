@@ -37,6 +37,8 @@ import {
   IMachineType
 } from '../../interfaces/VertexInterface';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { aiplatform_v1 } from 'googleapis';
+
 import { settingController } from '../../utils/Config';
 import { vertexScheduleRunResponseTransformation } from '../../utils/vertexExecutionHistoryTransformation';
 import path from 'path';
@@ -94,6 +96,7 @@ export class VertexServices {
       return []; // Return empty array on caught exception
     }
   }
+
   /**
    * Lists Vertex schedules for a given region.
    * This service now returns the fetched data and handles its own error notifications.
@@ -119,9 +122,10 @@ export class VertexServices {
       }
 
       // API call
-      const formattedResponse = await requestAPI(serviceURL + urlparam, {
-        signal
-      });
+      const formattedResponse: aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse =
+        await requestAPI(serviceURL + urlparam, {
+          signal
+        });
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
         return {
@@ -131,13 +135,6 @@ export class VertexServices {
           error: '',
           isLoading: false
         };
-        // setNextPageToken(null);
-        // setHasNextPageToken(false);
-        // return {
-        //   schedulesList: [],
-        //   error: '',
-        //   isLoading: false
-        // };
       }
 
       const {
@@ -172,12 +169,6 @@ export class VertexServices {
           return;
         }
       } else {
-        // Handle errors during the API call
-        // setVertexScheduleList([]);
-        // setNextPageToken(null);
-        // setHasNextPageToken(false);
-        // setIsApiError(true);
-        // setApiError('An error occurred while fetching schedules.');
         SchedulerLoggingService.log(
           `Error listing vertex schedules ${error}`,
           LOG_LEVEL.ERROR
@@ -534,6 +525,157 @@ export class VertexServices {
       Notification.error('Error in downloading the job history', {
         autoClose: false
       });
+    }
+  };
+
+  static readonly getVertexJobScheduleDetails = async (
+    jobId: string,
+    region: string | undefined
+  ) => {
+    if (region) {
+      try {
+        const serviceURL = 'api/vertex/getSchedule';
+        const vertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
+          await requestAPI(
+            serviceURL + `?region_id=${region}&schedule_id=${jobId}`
+          );
+
+        if (vertexScheduleData && Object.keys(vertexScheduleData).length > 0) {
+          return vertexScheduleData;
+        } else {
+          Notification.error('Error fetching schedule details', {
+            autoClose: false
+          });
+          return;
+        }
+      } catch (reason) {
+        if (typeof reason === 'object' && reason !== null) {
+          if (
+            reason instanceof TypeError &&
+            reason.toString().includes(ABORT_MESSAGE)
+          ) {
+            return;
+          }
+        } else {
+          SchedulerLoggingService.log(
+            `Error in update api ${reason}`,
+            LOG_LEVEL.ERROR
+          );
+          const errorResponse = `Error in updating notebook. ${reason}`;
+
+          Notification.error(
+            `Error fetching schedule details: ${errorResponse}`,
+            {
+              autoClose: false
+            }
+          );
+          return;
+        }
+      }
+    } else {
+      Notification.error(
+        'Error fetching schedule details. No region information available.',
+        {
+          autoClose: false
+        }
+      );
+      return;
+    }
+  };
+
+  /**
+   * Create a Vertex Scheduler
+   * @param vertexSchedulePayload - The payload containing the scheduler details
+   * @param setCreateCompleted - Callback to set the create completed state
+   * @param setCreatingVertexScheduler - Callback to set the creating vertex scheduler state
+   * @param setCreateMode - Callback to set the create mode state
+   */
+  static readonly createVertexNotebookJobSchedule = async (
+    vertexSchedulePayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule,
+    region: string
+  ) => {
+    try {
+      const data: any = await requestAPI(
+        `api/vertex/createJobScheduler?region_id=${region}`,
+        {
+          body: JSON.stringify(vertexSchedulePayload),
+          method: 'POST'
+        }
+      );
+      if (data.error) {
+        handleErrorToast({
+          error: data.error
+        });
+        return false;
+      } else {
+        Notification.success(
+          `Job ${vertexSchedulePayload.displayName} successfully created`,
+          {
+            autoClose: false
+          }
+        );
+        return true;
+      }
+    } catch (reason: any) {
+      SchedulerLoggingService.log(
+        `Error creating schedule: ${reason}`,
+        LOG_LEVEL.ERROR
+      );
+      handleErrorToast({
+        error: reason
+      });
+      return false;
+    }
+  };
+
+  /**
+   * Update a Vertex Job Scheduler
+   * @param jobId - The ID of the job to edit
+   * @param region - The region of the job
+   * @param updatedVertexScheduleData - The updated job details
+   * @param setCreateCompleted - Callback to set the create completed state
+   * @param setCreatingVertexScheduler - Callback to set the creating vertex scheduler state
+   * @param gcsPath - The GCS path for the notebook
+   * @param setEditMode - Callback to set the edit mode state
+   * @param setCreateMode - Callback to set the create mode state
+   */
+  static readonly updateVertexNotebookJobSchedule = async (
+    jobId: string,
+    region: string,
+    updatedVertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule
+  ) => {
+    try {
+      const data: any = await requestAPI(
+        `api/vertex/updateSchedule?region_id=${region}&schedule_id=${jobId}`,
+        {
+          body: JSON.stringify(updatedVertexScheduleData),
+          method: 'POST'
+        }
+      );
+      if (data.error) {
+        handleErrorToast({
+          error: data.error
+        });
+        return false;
+      } else {
+        Notification.success(
+          `Job ${updatedVertexScheduleData.displayName} successfully updated`,
+          {
+            autoClose: false
+          }
+        );
+        return true;
+      }
+    } catch (reason: any) {
+      console.error(`Error updating schedule: ${reason}`);
+      SchedulerLoggingService.log(
+        `Error updating schedule: ${reason}`,
+        LOG_LEVEL.ERROR
+      );
+      handleErrorToast({
+        error: `Error updating schedule: ${reason}`
+      });
+      return false;
     }
   };
 }

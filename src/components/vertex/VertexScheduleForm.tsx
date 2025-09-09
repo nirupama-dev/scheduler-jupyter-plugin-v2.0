@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,10 +26,10 @@ import {
   ErrorMessage,
   handleErrorToast
 } from '../common/notificationHandling/ErrorUtils';
-import { VertexServices } from '../../services/vertex/VertexServices'; // Assuming VertexServices is correctly path'd
+import { VertexServices } from '../../services/vertex/VertexServices';
 import { StorageServices } from '../../services/common/Storage';
 import { IamServices } from '../../services/common/Iam';
-import { ComputeServices } from '../../services/common/Compute'; // Ensure this is imported
+import { ComputeServices } from '../../services/common/Compute';
 import { ILabelValue } from '../../interfaces/CommonInterface';
 import { createVertexSchema } from '../../schemas/CreateVertexSchema';
 import { z } from 'zod';
@@ -61,8 +61,7 @@ import {
   DEFAULT_DISK_SIZE,
   SHARED_NETWORK_DOC_URL,
   EVERY_MINUTE_CRON,
-  NETWORK_IN_THIS_PROJECT_VALUE,
-  NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
+  DEFAULT_KERNEL
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -73,7 +72,6 @@ import {
   IMachineType,
   ISharedNetwork
 } from '../../interfaces/VertexInterface';
-import { RadioOption } from '../../types/CommonSchedulerTypes';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -82,18 +80,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   setValue,
   getValues,
   trigger,
-  isValid,
   credentials,
   editScheduleData
-  // ... other props
 }) => {
-  // Local state for dropdown options (fetched dynamically)
+  // Separate states for data lists
   const [machineTypeList, setMachineTypeList] = useState<IMachineType[]>([]);
   const [cloudStorageList, setCloudStorageList] = useState<
     ILabelValue<string>[]
   >([]);
-  const [newBucketCreated, setNewBucketCreated] = useState<string | null>(null);
-  const [isCreatingBucket, setIsCreatingBucket] = useState(false);
   const [serviceAccountList, setServiceAccountList] = useState<
     ILabelValue<string>[]
   >([]);
@@ -108,7 +102,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   >([]);
   const [hostProject, setHostProject] = useState<any | null>(null);
 
-  // Consolidated loading state for all API calls initiated by this component
+  // Consolidated loading state as requested
   const [loadingState, setLoadingState] = useState<ILoadingStateVertex>({
     region: false,
     machineType: false,
@@ -117,8 +111,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     primaryNetwork: false,
     subNetwork: false,
     sharedNetwork: false,
-    hostProject: false // Initialized
+    hostProject: false
   });
+
+  const [isCreatingBucket, setIsCreatingBucket] = useState(false);
+  const [newBucketCreated, setNewBucketCreated] = useState<string | null>(null);
 
   // Timezones for dropdown
   const timezones: ILabelValue<string>[] = useMemo(
@@ -131,6 +128,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         })),
     []
   );
+
+  // Watch form values for conditional rendering and API dependencies
   const currentRegion = watch('vertexRegion');
   const currentMachineType = watch('machineType');
   const currentAcceleratorType = watch('acceleratorType');
@@ -140,6 +139,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const currentInternalScheduleMode = watch('internalScheduleMode');
   const currentPrimaryNetwork = watch('primaryNetwork');
   const currentSchedulerSelection = watch('schedulerSelection');
+
   const isVertexForm = currentSchedulerSelection === 'vertex';
   const vertexErrors = isVertexForm
     ? (errors as FieldErrors<z.infer<typeof createVertexSchema>>)
@@ -154,312 +154,113 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     [machineTypeList, currentMachineType]
   );
 
-  // --- Data Fetching Callbacks (Calling Services & Managing Component State) ---
-
-  /**
-   * Fetches the default region for the Vertex scheduler.
-   */
-  const fetchRegion = useCallback(async () => {
-    console.log('fetchRegion');
-    setLoadingState(prev => ({ ...prev, region: true }));
-
-    let currentRegionValue = getValues('vertexRegion');
-
-    // If no value is currently set, try to use the default from credentials.
-    if (!currentRegionValue && credentials?.region_id) {
-      currentRegionValue = credentials.region_id;
-    }
-    console.log('Current Region Value:', currentRegionValue);
-
-    // Validate the determined regionToSet against the list of valid regions.
-    const isRegionValid = VERTEX_REGIONS.some(
-      region => region.value === currentRegionValue
-    );
-    console.log('Is Region Valid:', isRegionValid);
-    // If the region is valid, set it; otherwise, clear the field.
-    if (!isRegionValid) {
-      setValue('vertexRegion', '');
-    }
-    setLoadingState(prev => ({ ...prev, region: false }));
-    trigger([
-      'vertexRegion',
-      'machineType',
-      'acceleratorType',
-      'acceleratorCount'
+  // --- REFACTORED: CONSOLIDATED DATA FETCHING CALLBACKS ---
+  const fetchAllInitialData = useCallback(async () => {
+    setLoadingState(prev => ({
+      ...prev,
+      cloudStorageBucket: true,
+      serviceAccount: true,
+      primaryNetwork: true,
+      hostProject: true
+    }));
+    // Fetching independent dropdowns
+    const [
+      cloudStorageList,
+      serviceAccountList,
+      primaryNetworkList,
+      hostProjectList
+    ] = await Promise.allSettled([
+      StorageServices.cloudStorageAPIService(),
+      IamServices.serviceAccountAPIService(),
+      ComputeServices.primaryNetworkAPIService(),
+      ComputeServices.getParentProjectAPIService()
     ]);
-  }, [setValue, getValues, editScheduleData]);
 
-  /**
-   * Fetches the available machine types for the selected region.
-   * @param region The selected region.
-   */
-  const fetchMachineTypes = useCallback(
-    async (region: string) => {
-      console.log('fetchMachineTypes');
-      if (!region) {
-        setMachineTypeList([]);
-        if (isVertexForm) {
-          setValue('machineType', '');
-          setValue('acceleratorType', '');
-          setValue('acceleratorCount', '');
-        }
-        return;
-      }
-
-      setLoadingState(prev => ({ ...prev, machineType: true }));
-      try {
-        const fetchedMachines =
-          await VertexServices.machineTypeAPIService(region);
-        setMachineTypeList(fetchedMachines);
-
-        const currentMachineTypeValue = getValues('machineType');
-        // Check if the current value is already valid.
-        const isCurrentValueValid = fetchedMachines.some(
-          m => m.machineType.value === currentMachineTypeValue
-        );
-
-        // Only set a new value if the current value is NOT valid, and if the form is in creation mode
-        if (!isCurrentValueValid && !editScheduleData?.editMode) {
-          let machineTypeToSet = '';
-
-          // Prioritize default value if it exists in the fetched list.
-          const defaultMachine = fetchedMachines.find(
-            item => item.machineType.value === DEFAULT_MACHINE_TYPE.value
-          );
-
-          if (defaultMachine) {
-            machineTypeToSet = defaultMachine.machineType.value;
-          } else if (fetchedMachines.length > 0) {
-            // Fallback to the first available machine type.
-            machineTypeToSet = fetchedMachines[0].machineType.value;
-          }
-
-          setValue('machineType', machineTypeToSet);
-
-          // Reset accelerators whenever the machine type changes.
-          setValue('acceleratorType', '');
-          setValue('acceleratorCount', '');
-        }
-      } catch (error) {
-        // Handle all errors in one place.
-        setMachineTypeList([]);
-        setValue('machineType', '');
-        setValue('acceleratorType', '');
-        setValue('acceleratorCount', '');
-      } finally {
-        // Ensure loading state and triggers are consistent.
-        setLoadingState(prev => ({ ...prev, machineType: false }));
-        trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
-      }
-    },
-    [setValue, getValues, editScheduleData]
-  );
-
-  /**
-   * Fetches the available cloud storage buckets.
-   */
-  const fetchCloudStorageBuckets = useCallback(async () => {
-    setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
-    console.log('fetchCloudStorageBuckets');
-    try {
-      const fetchedBuckets = await StorageServices.cloudStorageAPIService();
-      setCloudStorageList(fetchedBuckets);
-      const currentBucketValue = getValues('cloudStorageBucket');
-      const isValidExisting = fetchedBuckets.some(
-        b => b.value === currentBucketValue
-      );
-
-      if (
-        !editScheduleData?.editMode ||
-        !currentBucketValue ||
-        !isValidExisting
-      ) {
-        const defaultSelected = fetchedBuckets.find(
-          option => option.value === DEFAULT_CLOUD_STORAGE_BUCKET.value
-        );
-        if (defaultSelected) {
-          setValue('cloudStorageBucket', defaultSelected.value);
-        } else if (fetchedBuckets.length > 0) {
-          setValue('cloudStorageBucket', fetchedBuckets[0].value);
-        } else {
-          setValue('cloudStorageBucket', '');
-        }
-      }
-    } catch (error) {
+    if (cloudStorageList.status === 'fulfilled') {
+      setCloudStorageList(cloudStorageList.value as ILabelValue<string>[]);
+    } else {
       setCloudStorageList([]);
-      if (isVertexForm) {
-        setValue('cloudStorageBucket', '');
-      }
-    } finally {
-      setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));
+      handleErrorToast({ error: 'Failed to fetch cloud storage buckets.' });
     }
-  }, [setValue, getValues, editScheduleData]);
 
-  /**
-   * Fetches the available service accounts.
-   */
-  const fetchServiceAccounts = useCallback(async () => {
-    console.log('Fetching service accounts...');
-    setLoadingState(prev => ({ ...prev, serviceAccount: true }));
-    try {
-      const response = await IamServices.serviceAccountAPIService();
-      setServiceAccountList(response);
-      // Set default or existing value if valid, otherwise reset
-      const currentServiceAccountValue = getValues('serviceAccount');
-      const isValidExisting = response.some(
-        sa => sa.value === currentServiceAccountValue
-      );
-
-      if (
-        !editScheduleData?.editMode ||
-        !currentServiceAccountValue ||
-        !isValidExisting
-      ) {
-        const defaultSelected = response.find(
-          item => item.value === DEFAULT_SERVICE_ACCOUNT
-        );
-        if (defaultSelected) {
-          setValue('serviceAccount', defaultSelected.value);
-        } else if (response.length > 0) {
-          setValue('serviceAccount', response[0].value);
-        } else {
-          setValue('serviceAccount', '');
-        }
-      }
-    } catch (error) {
+    if (serviceAccountList.status === 'fulfilled') {
+      setServiceAccountList(serviceAccountList.value as ILabelValue<string>[]);
+    } else {
       setServiceAccountList([]);
-      setValue('serviceAccount', '');
-    } finally {
-      setLoadingState(prev => ({ ...prev, serviceAccount: false }));
-      trigger(['serviceAccount']);
+      handleErrorToast({ error: 'Failed to fetch service accounts.' });
     }
-  }, [setValue, getValues, editScheduleData]);
 
-  /**
-   * Fetches the host project information.
-   */
-  const fetchHostProject = useCallback(async () => {
-    setLoadingState(prev => ({ ...prev, hostProject: true })); // Manage loading locally
-    console.log('fetchHostProject');
+    if (primaryNetworkList.status === 'fulfilled') {
+      setPrimaryNetworkList(primaryNetworkList.value as ILabelValue<string>[]);
+    } else {
+      setPrimaryNetworkList([]);
+      handleErrorToast({ error: 'Failed to fetch primary networks.' });
+    }
+
+    if (hostProjectList.status === 'fulfilled') {
+      setHostProject(hostProjectList.value);
+    } else {
+      setHostProject(null);
+      handleErrorToast({ error: 'Failed to fetch host project.' });
+    }
+
+    setLoadingState(prev => ({
+      ...prev,
+      cloudStorageBucket: false,
+      serviceAccount: false,
+      primaryNetwork: false,
+      hostProject: false
+    }));
+  }, [isVertexForm, credentials]);
+
+  // Dependent fetch for machine types
+  const fetchMachineTypes = useCallback(async (region: string) => {
+    if (!region) {
+      setMachineTypeList([]);
+      return;
+    }
+    setLoadingState(prev => ({ ...prev, machineType: true }));
     try {
-      const parentProject = await ComputeServices.getParentProjectAPIService(); // Service handles its own error/notification
-      console.log('Host project:', parentProject);
-      if (parentProject) {
-        setHostProject(parentProject);
-      } else {
-        setHostProject(null); // Set to null if response is falsy
-      }
+      const fetchedMachines =
+        await VertexServices.machineTypeAPIService(region);
+      setMachineTypeList(fetchedMachines);
     } catch (error) {
-      setHostProject(null); // Set to null on error
+      setMachineTypeList([]);
+      handleErrorToast({ error: 'Failed to fetch machine types.' });
     } finally {
-      setLoadingState(prev => ({ ...prev, hostProject: false }));
+      setLoadingState(prev => ({ ...prev, machineType: false }));
     }
   }, []);
 
-  /**
-   * Fetches the available primary networks.
-   */
-  const fetchPrimaryNetworks = useCallback(async () => {
-    setLoadingState(prev => ({ ...prev, primaryNetwork: true }));
-    console.log('fetchPrimaryNetworks');
-    try {
-      const response = await ComputeServices.primaryNetworkAPIService();
-      setPrimaryNetworkList(response);
-
-      // Set default or existing value if valid, otherwise reset
-      const currentPrimaryNetworkValue = getValues('primaryNetwork');
-      const isValidExisting = response.some(
-        n => n.value === currentPrimaryNetworkValue
-      );
-
-      if (!isValidExisting) {
-        setValue('primaryNetwork', ''); //primary network is optional and by default empty. it will reset to blank value if editmode had some invalid bvalue as well.
-        console.log(
-          'Resetting primary network to empty as existing value is invalid.'
-        );
-      }
-    } catch (error) {
-      setPrimaryNetworkList([]);
-      setValue('primaryNetwork', '');
-      handleErrorToast({ error: 'Failed to fetch primary networks.' });
-    } finally {
-      setLoadingState(prev => ({ ...prev, primaryNetwork: false }));
-      trigger('primaryNetwork');
-    }
-  }, [setValue, getValues, editScheduleData]);
-
-  /**
-   * Fetches the available sub-networks for the selected region and primary network.
-   * @param region The selected region.
-   * @param primaryNetworkValue The selected primary network.
-   */
+  // Dependent fetch for sub-networks
   const fetchSubNetworks = useCallback(
     async (region: string, primaryNetworkValue: string) => {
-      console.log('fetchSubNetworks');
-      console.log(
-        'Fetching subnetworks for region:',
-        region,
-        'and primary network:',
-        primaryNetworkValue
-      );
-
       if (!region || !primaryNetworkValue) {
         setSubNetworkList([]);
-        setValue('subNetwork', '');
         return;
       }
       setLoadingState(prev => ({ ...prev, subNetwork: true }));
       try {
-        const primaryNetworkLabel = primaryNetworkList.find(
-          n => n.value === primaryNetworkValue
-        )?.label;
-        console.log('Primary network label:', primaryNetworkLabel);
-        const subNetworkListResp = await ComputeServices.subNetworkAPIService(
+        const response = await ComputeServices.subNetworkAPIService(
           region,
-          primaryNetworkLabel
+          primaryNetworkValue
         );
-        setSubNetworkList(subNetworkListResp);
-        console.log('Fetched subnetworks:', subNetworkListResp);
-        // Set default or existing value if valid, otherwise reset
-        const currentSubnetworkValue = getValues('subNetwork');
-        const isValidExisting = subNetworkListResp.some(
-          sn => sn.value === currentSubnetworkValue
-        );
-
-        if (!isValidExisting) {
-          setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
-        }
+        setSubNetworkList(response);
       } catch (error) {
         setSubNetworkList([]);
-        setValue('subNetwork', '');
-        handleErrorToast({ error: 'Failed to fetch subNetworks.' });
+        handleErrorToast({ error: 'Failed to fetch sub-networks.' });
       } finally {
         setLoadingState(prev => ({ ...prev, subNetwork: false }));
-        trigger('subNetwork');
-        trigger('primaryNetwork'); // Ensure primary network validation is updated
       }
     },
-    [
-      setValue,
-      getValues,
-      editScheduleData,
-      currentNetworkOption,
-      currentPrimaryNetwork
-    ]
+    []
   );
 
-  /**
-   * Fetches the available shared networks for the selected host project and region.
-   * @param hostProjectName The selected host project.
-   * @param region The selected region.
-   */
-
+  // Dependent fetch for shared networks
   const fetchSharedNetworks = useCallback(
     async (hostProjectName: string, region: string) => {
-      console.log('fetchSharedNetworks');
       if (!hostProjectName || !region) {
         setSharedNetworkList([]);
-        setValue('sharedNetwork', { network: '', subnetwork: '' });
         return;
       }
       setLoadingState(prev => ({ ...prev, sharedNetwork: true }));
@@ -471,113 +272,191 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           );
         setSharedNetworkList(
           sharedNetworkDetails.map(sharedNetwork => ({
-            label: `${sharedNetwork.network}/${sharedNetwork.subnetwork}`, // Combine for display
-            value: sharedNetwork // Store the full object as value
+            label: `${sharedNetwork.network}/${sharedNetwork.subnetwork}`,
+            value: sharedNetwork
           }))
         );
-        // If in edit mode and a shared network was previously selected, try to re-select it
-        if (editScheduleData?.editMode) {
-          const currentSharedNetwork = getValues('sharedNetwork');
-          const found = sharedNetworkDetails.find(
-            sn =>
-              sn.network === currentSharedNetwork?.network &&
-              sn.subnetwork === currentSharedNetwork?.subnetwork
-          );
-          if (!found) {
-            // If previously selected network is no longer available, clear it
-            setValue('sharedNetwork', { network: '', subnetwork: '' });
-          }
-        }
       } catch (error) {
         setSharedNetworkList([]);
-        setValue('sharedNetwork', { network: '', subnetwork: '' });
         handleErrorToast({ error: 'Failed to fetch shared networks.' });
       } finally {
         setLoadingState(prev => ({ ...prev, sharedNetwork: false }));
-        trigger('sharedNetwork');
       }
     },
-    [setValue, getValues, editScheduleData]
+    []
   );
 
-  // --- useEffects for Initial Data Fetching and Dynamic Form Updates ---
-
-  // Initial API calls for static/independent dropdowns and default region
+  // A single effect for initial data fetching and setting defaults
+  // The fetchAllInitialData function is now called here.
   useEffect(() => {
-    // Initial data fetches
-    fetchRegion();
-    fetchCloudStorageBuckets();
-    fetchServiceAccounts();
-    fetchPrimaryNetworks();
-    fetchHostProject();
+    if (!isVertexForm || !credentials) {
+      return;
+    }
+
+    // Fetch all static data concurrently
+    fetchAllInitialData();
+
+    // Set non-API dependent defaults
+    if (!editScheduleData?.editMode || !getValues('diskType')) {
+      setValue('diskType', DISK_TYPE_VALUE[0].value);
+    }
+    if (!editScheduleData?.editMode || !getValues('diskSize')) {
+      setValue('diskSize', DEFAULT_DISK_SIZE);
+    }
+    if (!editScheduleData?.editMode || !getValues('networkOption')) {
+      setValue('networkOption', DEFAULT_NETWORK_SELECTED);
+    }
+    if (!editScheduleData?.editMode || !getValues('scheduleMode')) {
+      setValue('scheduleMode', 'runNow');
+    }
+    if (!editScheduleData?.editMode || !getValues('internalScheduleMode')) {
+      setValue('internalScheduleMode', 'userFriendly');
+    }
+    if (!editScheduleData?.editMode || !getValues('timeZone')) {
+      setValue('timeZone', Intl.DateTimeFormat().resolvedOptions().timeZone);
+    }
+    if (!editScheduleData?.editMode || !getValues('startTime')) {
+      setValue('startTime', dayjs().toISOString());
+    }
+    if (!editScheduleData?.editMode || !getValues('endTime')) {
+      setValue('endTime', dayjs().add(1, 'day').toISOString());
+    }
+    if (!editScheduleData?.editMode || !getValues('kernelName')) {
+      setValue('kernelName', DEFAULT_KERNEL);
+    }
   }, [
-    setValue,
-    getValues,
+    isVertexForm,
+    credentials,
     editScheduleData,
-    fetchRegion,
-    fetchCloudStorageBuckets,
-    fetchServiceAccounts,
-    fetchPrimaryNetworks,
-    fetchHostProject
+    fetchAllInitialData,
+    setValue,
+    getValues
   ]);
 
-  // Effect for Machine Types dependent on Region
+  // Effect for setting region and its dependent data
   useEffect(() => {
-    console.log(
-      'Use Effect: Fetching machine types for region:',
-      getValues('vertexRegion')
-    );
-    fetchMachineTypes(getValues('vertexRegion'));
-    trigger('machineType');
-  }, [currentRegion, fetchMachineTypes, trigger]);
+    if (isVertexForm && credentials?.region_id) {
+      // Set default region from credentials if not in edit mode or not set
+      if (!editScheduleData?.editMode || !getValues('vertexRegion')) {
+        setValue('vertexRegion', credentials.region_id);
+      }
+    }
+  }, [isVertexForm, credentials, editScheduleData, setValue, getValues]);
 
-  // Effect for Subnetworks dependent on Primary Network and Region
+  // Effects for setting default values on fetched lists
   useEffect(() => {
-    const networkOption = getValues('networkOption');
+    // Set Machine Type default if not already set or invalid
+    const currentMachineTypeValue = getValues('machineType');
+    if (
+      currentMachineTypeValue &&
+      !machineTypeList.some(
+        m => m.machineType.value === currentMachineTypeValue
+      )
+    ) {
+      setValue('machineType', '');
+    } else if (!currentMachineTypeValue && machineTypeList.length > 0) {
+      const defaultSelected = machineTypeList.find(
+        item => item.machineType.value === DEFAULT_MACHINE_TYPE.value
+      );
+      setValue(
+        'machineType',
+        defaultSelected?.machineType.value ||
+          machineTypeList[0].machineType.value
+      );
+    }
+  }, [machineTypeList, getValues, setValue]);
 
-    if (networkOption === NETWORK_SHARED_FROM_HOST_PROJECT_VALUE) {
-      // Logic for shared networks
-      fetchSharedNetworks(hostProject?.name || '', getValues('vertexRegion'));
-      // Ensure sub-network state is cleared
-      setValue('primaryNetwork', '');
-      setValue('subNetwork', '');
+  useEffect(() => {
+    // Set Cloud Storage default if not already set or invalid
+    const currentBucketValue = getValues('cloudStorageBucket');
+    if (
+      currentBucketValue &&
+      !cloudStorageList.some(b => b.value === currentBucketValue)
+    ) {
+      setValue('cloudStorageBucket', '');
+    } else if (!currentBucketValue && cloudStorageList.length > 0) {
+      const defaultSelected = cloudStorageList.find(
+        option => option.value === DEFAULT_CLOUD_STORAGE_BUCKET.value
+      );
+      setValue(
+        'cloudStorageBucket',
+        defaultSelected?.value || cloudStorageList[0].value
+      );
+    }
+  }, [cloudStorageList, getValues, setValue]);
+
+  useEffect(() => {
+    // Set Service Account default if not already set or invalid
+    const currentServiceAccountValue = getValues('serviceAccount');
+    if (
+      currentServiceAccountValue &&
+      !serviceAccountList.some(sa => sa.value === currentServiceAccountValue)
+    ) {
+      setValue('serviceAccount', '');
+    } else if (!currentServiceAccountValue && serviceAccountList.length > 0) {
+      const defaultSelected = serviceAccountList.find(
+        item => item.value === DEFAULT_SERVICE_ACCOUNT
+      );
+      setValue(
+        'serviceAccount',
+        defaultSelected?.value || serviceAccountList[0].value
+      );
+    }
+  }, [serviceAccountList, getValues, setValue]);
+
+  // Effects for dynamic form updates (dependent fetches)
+  useEffect(() => {
+    if (isVertexForm && currentRegion) {
+      fetchMachineTypes(currentRegion);
+    }
+  }, [isVertexForm, currentRegion, fetchMachineTypes]);
+
+  useEffect(() => {
+    if (
+      currentNetworkOption === 'networkInThisProject' &&
+      currentPrimaryNetwork
+    ) {
+      fetchSubNetworks(currentRegion, currentPrimaryNetwork);
     } else {
-      getValues('networkOption') ||
-        setValue('networkOption', NETWORK_IN_THIS_PROJECT_VALUE); //set default value if nothing is selected.
-      console.log('network option:', getValues('networkOption'));
-      fetchSubNetworks(currentRegion, currentPrimaryNetwork || '');
-      // Ensure shared network state is cleared
+      setSubNetworkList([]);
+      setValue('subNetwork', '');
+    }
+  }, [
+    currentNetworkOption,
+    currentPrimaryNetwork,
+    currentRegion,
+    fetchSubNetworks,
+    setValue
+  ]);
+
+  useEffect(() => {
+    if (currentNetworkOption === 'networkSharedFromHostProject') {
+      fetchSharedNetworks(hostProject?.name || '', currentRegion);
+    } else {
+      setSharedNetworkList([]);
       setValue('sharedNetwork', { network: '', subnetwork: '' });
     }
   }, [
-    currentRegion,
     currentNetworkOption,
-    currentPrimaryNetwork,
     hostProject,
-    getValues,
-    fetchSubNetworks,
+    currentRegion,
     fetchSharedNetworks,
     setValue
   ]);
-  // --- Callbacks for Form Field Interactions ---
 
+  // --- Callback handlers and memoized values (rest of the code is unchanged) ---
   const handleRegionChange = useCallback(
     (optionSelected: string | null, reason?: string) => {
-      console.log('Handle Region changed:', optionSelected, reason);
-
       if (optionSelected) {
         setValue('vertexRegion', optionSelected);
-        // Reset machine type and dependent fields when region changes
         setValue('machineType', '');
         setValue('acceleratorType', '');
         setValue('acceleratorCount', '');
         setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
-        setValue('subNetwork', ''); // Clear the actual subNetwork field
+        setValue('subNetwork', '');
         setValue('sharedNetwork', { network: '', subnetwork: '' });
-        // Trigger validation for these fields to show errors if they become invalid
         trigger([
-          'vertexRegion',
           'machineType',
           'acceleratorType',
           'acceleratorCount',
@@ -586,18 +465,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           'sharedNetwork'
         ]);
       } else if (reason === 'clear') {
-        setValue('vertexRegion', ''); // Clear region if cleared
-        // Reset machine type and dependent fields when region is cleared
-        setValue('machineType', '');
-        // Reset all dependent fields and their values
+        setValue('vertexRegion', '');
         setValue('machineType', '');
         setValue('acceleratorType', '');
         setValue('acceleratorCount', '');
         setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
-        setValue('subNetwork', ''); // Clear the actual subNetwork field
+        setValue('subNetwork', '');
         setValue('sharedNetwork', { network: '', subnetwork: '' });
-        // Trigger validation for these fields to show errors if they become invalid
         trigger([
           'machineType',
           'acceleratorType',
@@ -611,17 +486,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     [setValue, trigger]
   );
 
-  const handleDiskSizeBlur = useCallback(
-    (event: React.FocusEvent<HTMLInputElement>) => {
-      const diskSizeValue = getValues('diskSize');
-      // If disk size is blurred and is empty, set to default IF disk type is selected
-      if (diskSizeValue === '' && currentDiskType) {
-        setValue('diskSize', DEFAULT_DISK_SIZE);
-      }
-      trigger('diskSize'); // Trigger validation on blur
-    },
-    [setValue, currentDiskType, trigger, getValues]
-  );
+  const handleDiskSizeBlur = useCallback(() => {
+    const diskSizeValue = getValues('diskSize');
+    if (diskSizeValue === '' && currentDiskType) {
+      setValue('diskSize', DEFAULT_DISK_SIZE);
+    }
+    trigger('diskSize');
+  }, [setValue, currentDiskType, trigger, getValues]);
 
   const getAcceleratedTypeOptions = useCallback(
     (acceleratorConfigs: IAcceleratorConfig[]): ILabelValue<string>[] => {
@@ -646,7 +517,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         option => option.value.toLowerCase() === inputValue
       );
       if (!exactMatch && inputValue !== '') {
-        // Add "Create and Select" option with a unique prefix
         filteredOptions.push({
           label: `Create and Select "${state.inputValue}"`,
           value: `CREATE_NEW_BUCKET::${state.inputValue}`
@@ -659,23 +529,20 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
   const handleCloudStorageDropdownChange = useCallback(
     async (selectedOption: any | null) => {
-      console.log('Selected cloud storage option:', selectedOption);
       if (selectedOption && selectedOption.startsWith('CREATE_NEW_BUCKET::')) {
         const newBucketName = selectedOption.replace('CREATE_NEW_BUCKET::', '');
         if (newBucketName.trim() !== '') {
-          setNewBucketCreated(newBucketName);
           setIsCreatingBucket(true);
-          console.log('Creating new bucket:', newBucketName);
+          setNewBucketCreated(newBucketName);
           setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
           try {
             await StorageServices.newCloudStorageAPIService(newBucketName);
-            // Re-fetch buckets to include the newly created one and set it
             const updatedBucketList =
               await StorageServices.cloudStorageAPIService();
             setCloudStorageList(updatedBucketList);
             setValue('cloudStorageBucket', newBucketName);
           } catch (error) {
-            setValue('cloudStorageBucket', ''); // Clear selection on failure
+            setValue('cloudStorageBucket', '');
           } finally {
             setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));
             setIsCreatingBucket(false);
@@ -686,15 +553,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('cloudStorageBucket', selectedOption ? selectedOption : '');
       }
     },
-    [setValue, setCloudStorageList]
+    [setValue]
   );
 
-  // Error message for shared network if host project is missing or no networks
   const showSharedNetworkError = useMemo(() => {
     if (currentNetworkOption === 'networkSharedFromHostProject') {
       if (loadingState.hostProject) {
         return null;
-      } // Don't show error while loading host project
+      }
       if (!hostProject || Object.keys(hostProject).length === 0) {
         return 'No host project configured or accessible. Please ensure a host project is set up for shared VPC networks.';
       }
@@ -710,9 +576,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     loadingState.sharedNetwork,
     loadingState.hostProject
   ]);
-  console.log('Isvalid:', isValid);
-  console.log('Errors:', errors);
-  // --- Render Component UI ---
+
   return (
     <div>
       {/* Region Dropdown */}
@@ -726,7 +590,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           loading={loadingState.region}
           onChangeCallback={handleRegionChange}
           error={vertexErrors.vertexRegion}
-          disabled={editScheduleData?.editMode}
         />
       </div>
 
@@ -847,7 +710,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             customClass="scheduler-tag-style"
             error={vertexErrors.diskType}
             onChangeCallback={() => {
-              setValue('diskSize', ''); // Clear disk size when disk type changes
+              setValue('diskSize', '');
               trigger('diskSize');
             }}
           />
@@ -888,27 +751,20 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           name="networkOption"
           control={control}
           className="network-layout"
-          options={NETWORK_OPTIONS.map(option => {
-            const newOption: RadioOption = { ...option };
-            // Check if the current option is the "host project" option
-            if (option.value === 'networkSharedFromHostProject') {
-              // If there's no hostProject, disable this option
-              if (!hostProject?.name) {
-                newOption.disabled = true;
-              } // Add the host project name to the label if it exists
-              if (hostProject?.name) {
-                newOption.label = `${option.label} "${hostProject.name}"`;
-              }
-            }
-            return newOption;
-          })}
+          options={NETWORK_OPTIONS.map(option => ({
+            label:
+              option.value === 'networkSharedFromHostProject' &&
+              hostProject?.name
+                ? `${option.label} "${hostProject.name}"`
+                : option.label,
+            value: option.value
+          }))}
           error={vertexErrors.networkOption}
           onChange={() => {
-            // // Clear all network-related fields when network option changes
-            // setValue('primaryNetwork', '');
-            // setValue('subNetwork', '');
-            // setValue('sharedNetwork', { network: '', subnetwork: '' });
-            // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
+            setValue('primaryNetwork', '');
+            setValue('subNetwork', '');
+            setValue('sharedNetwork', { network: '', subnetwork: '' });
+            trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
           }}
         />
         <span className="sub-para tab-text-sub-cl">
@@ -921,7 +777,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Conditional Network Fields */}
-      {currentNetworkOption === 'networkInThisProject' ? ( // 'networkInThisProject'
+      {currentNetworkOption === 'networkInThisProject' ? (
         <div className="execution-history-main-wrapper">
           <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
             <FormInputDropdown
@@ -934,15 +790,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               error={vertexErrors.primaryNetwork}
               disabled={!currentRegion || loadingState.primaryNetwork}
               onChangeCallback={selected => {
-                console.log('Primary network selected:', selected);
-                console.log('Setting primary network to:', selected.value);
-                // setValue('primaryNetwork', selected ? selected.value : '');
-                setValue('subNetwork', ''); // Clear subnetwork when primary changes
-                trigger(['subNetwork']); // Trigger validation for subnetwork
+                setValue('primaryNetwork', selected ? selected.value : '');
+                setValue('subNetwork', '');
+                trigger(['subNetwork']);
               }}
             />
           </div>
-
           <div className="scheduler-form-element-container create-scheduler-form-element-input-fl">
             <FormInputDropdown
               name="subNetwork"
@@ -953,21 +806,17 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               loading={loadingState.subNetwork}
               error={vertexErrors.subNetwork}
               disabled={
-                !getValues('vertexRegion') ||
-                !getValues('primaryNetwork') ||
+                !currentRegion ||
+                !currentPrimaryNetwork ||
                 loadingState.subNetwork
               }
               onChangeCallback={selected => {
-                console.log('Sub network selected:', selected);
-                // setValue('subNetwork', selected ? selected.value : '');
-                trigger(['subNetwork']);
-                trigger('primaryNetwork'); // Ensure primary network validation is updated
+                setValue('subNetwork', selected ? selected.value : '');
               }}
             />
           </div>
         </div>
       ) : (
-        // 'networkSharedFromHostProject'
         <>
           <div className="scheduler-form-element-container">
             <FormInputDropdown
@@ -1026,7 +875,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           error={vertexErrors.scheduleMode}
           onChange={() => {
             if (watch('scheduleMode') === 'runNow') {
-              console.log('Resetting schedule fields for Run Now mode');
               setValue('internalScheduleMode', undefined);
               setValue('scheduleFieldCronFormat', '');
               setValue('scheduleValueUserFriendly', '');
@@ -1078,11 +926,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               error={vertexErrors.internalScheduleMode}
               onChange={() => {
                 if (watch('internalScheduleMode') === 'cronFormat') {
-                  setValue('scheduleValue', EVERY_MINUTE_CRON);
+                  setValue('scheduleValueUserFriendly', EVERY_MINUTE_CRON);
                   setValue('scheduleFieldCronFormat', '');
                 } else {
                   setValue('scheduleFieldCronFormat', '');
-                  setValue('scheduleValue', EVERY_MINUTE_CRON);
+                  setValue('scheduleValueUserFriendly', EVERY_MINUTE_CRON);
                 }
                 trigger([
                   'scheduleFieldCronFormat',

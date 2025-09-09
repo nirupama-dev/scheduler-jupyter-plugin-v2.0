@@ -100,73 +100,11 @@ class Client:
 
         return blob_name if blob_name else file_path
 
-    async def create_schedule(self, job, file_path, bucket_name):
+    async def create_schedule(self, job, region_id):
         try:
-            schedule_value = (
-                CRON_EVERY_MINUTE if job.schedule_value == "" else job.schedule_value
-            )
-            cron = (
-                schedule_value
-                if job.time_zone == "UTC"
-                else f"TZ={job.time_zone} {schedule_value}"
-            )
-            machine_type = job.machine_type.split(" ", 1)[0]
-            disk_type = job.disk_type.split(" ", 1)[0]
-
-            # getting list of strings from UI, the api accepts dictionary, so converting it
-            parameters = {
-                param.split(":")[0]: param.split(":")[1] for param in job.parameters
-            }
-
-            notebook_source = (
-                file_path if "gs://" in file_path else f"gs://{bucket_name}/{file_path}"
-            )
-
-            api_endpoint = f"https://{job.region}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{job.region}/schedules"
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules"
             headers = self.create_headers()
-            payload = {
-                "displayName": job.display_name,
-                "cron": cron,
-                "maxConcurrentRunCount": "1",
-                "createNotebookExecutionJobRequest": {
-                    "parent": f"projects/{self.project_id}/locations/{job.region}",
-                    "notebookExecutionJob": {
-                        "displayName": job.display_name,
-                        "parameters": parameters,
-                        "labels": {
-                            "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench",
-                        },
-                        "customEnvironmentSpec": {
-                            "machineSpec": {
-                                "machineType": machine_type,
-                                "acceleratorType": job.accelerator_type,
-                                "acceleratorCount": job.accelerator_count,
-                            },
-                            "persistentDiskSpec": {
-                                "diskType": disk_type,
-                                "diskSizeGb": job.disk_size,
-                            },
-                            "networkSpec": {
-                                "enableInternetAccess": "TRUE",
-                                "network": job.network,
-                                "subnetwork": job.subnetwork,
-                            },
-                        },
-                        "gcsNotebookSource": {"uri": notebook_source},
-                        "gcsOutputUri": job.cloud_storage_bucket,
-                        "serviceAccount": job.service_account,
-                        "kernelName": job.kernel_name,
-                        "workbenchRuntime": {},
-                    },
-                },
-            }
-            if job.max_run_count:
-                payload["maxRunCount"] = job.max_run_count
-            if job.start_time:
-                payload["startTime"] = job.start_time
-            if job.end_time:
-                payload["endTime"] = job.end_time
-
+            payload = job
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
             ) as response:
@@ -185,24 +123,25 @@ class Client:
             self.log.exception(f"Error creating schedule: {str(e)}")
             raise RuntimeError(f"Error creating schedule: {str(e)}")
 
-    async def create_job_schedule(self, input_data):
+    async def create_job_schedule(self, job, region_id):
+        print('job:', job)
         try:
-            job = DescribeVertexJob(**input_data)
-            storage_bucket = job.cloud_storage_bucket.split("//")[-1]
-
-            if "gs://" in job.input_filename:
-                input_filename = job.input_filename
-            elif "gs:" in job.input_filename:
-                input_filename = job.input_filename.replace("gs:", "gs://", 1)
+            storage_bucket = job['createNotebookExecutionJobRequest']['notebookExecutionJob']['gcsOutputUri'].split("//")[-1]
+            gcs_notebook_source = job['createNotebookExecutionJobRequest']['notebookExecutionJob']['gcsNotebookSource']['uri']
+            if "gs://" in gcs_notebook_source:
+                input_filename = gcs_notebook_source
+            elif "gs:" in gcs_notebook_source:
+                input_filename = gcs_notebook_source.replace("gs:", "gs://", 1)
             else:
-                input_filename = job.input_filename
+                input_filename = gcs_notebook_source
 
-            file_path = await self.upload_to_gcs(
-                storage_bucket, input_filename, job.display_name
+            await self.upload_to_gcs(
+                storage_bucket, input_filename, job['displayName']
             )
-            res = await self.create_schedule(job, file_path, storage_bucket)
+            res = await self.create_schedule(job, region_id)
             return res
         except Exception as e:
+            print('error:', str(e))
             return {"error": str(e)}
 
     async def create_new_bucket(self, input_data):
