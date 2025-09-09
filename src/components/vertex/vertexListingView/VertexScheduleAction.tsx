@@ -23,21 +23,13 @@ import {
   iconPlay,
   iconTrigger
 } from '../../../utils/Icons';
-import { LabIcon } from '@jupyterlab/ui-components';
 import { LabIconComponent } from '../../common/table/LabIcon';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import {
+  IActionButtonProps,
   IVertexListingLoadingState,
   IVertexSelectedActionProps
 } from '../../../interfaces/VertexInterface';
-
-interface IActionButtonProps {
-  title: string;
-  icon: LabIcon;
-  onClick?: (e: React.MouseEvent) => void;
-  disabled?: boolean;
-  className?: string;
-}
 
 const ActionButton: FC<IActionButtonProps> = ({
   title,

@@ -44,6 +44,7 @@ import FailedCircleIcon from '../../style/icons/failed-circle-icon.svg';
 import OrangeCircle from '../../style/icons/orange_icon.svg';
 import GreyCircle from '../../style/icons/grey_icon.svg';
 import downloadIcon from '../../style/icons/scheduler_download.svg';
+import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -183,4 +184,9 @@ export const IconGreyCircle = new LabIcon({
 export const iconDownload = new LabIcon({
   name: 'launcher:download-icon',
   svgstr: downloadIcon
+});
+
+export const IconsigninGoogle = new LabIcon({
+  name: 'launcher:signin_google_icon',
+  svgstr: signinGoogleIcon
 });

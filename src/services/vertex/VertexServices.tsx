@@ -109,8 +109,13 @@ export class VertexServices {
     listVertexPayload: IVertexListPayload
     //TODO: other api error
   ) => {
-    const { region, nextToken, scheduleListPageLength, abortControllers } =
-      listVertexPayload;
+    const {
+      region,
+      nextToken,
+      scheduleListPageLength,
+      abortControllers,
+      setAuthError
+    } = listVertexPayload;
 
     try {
       const signal = settingController(abortControllers);
@@ -122,10 +127,15 @@ export class VertexServices {
       }
 
       // API call
-      const formattedResponse: aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse =
-        await requestAPI(serviceURL + urlparam, {
+      const formattedResponse = await requestAPI(
+        serviceURL + urlparam,
+        {
           signal
-        });
+        },
+        setAuthError
+          ? (error: boolean | null) => setAuthError(error ?? false)
+          : undefined
+      );
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
         return {
@@ -157,7 +167,7 @@ export class VertexServices {
           schedulesList: [],
           nextPageToken: null,
           hasNextPageToken: false,
-          error: 'No schedules found'
+          error: formattedResponse
         };
       }
     } catch (error: any) {

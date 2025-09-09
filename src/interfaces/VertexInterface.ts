@@ -16,7 +16,7 @@
  */
 
 import { Dayjs } from 'dayjs';
-
+import { LabIcon } from '@jupyterlab/ui-components';
 import {
   Control,
   FieldErrors,
@@ -240,6 +240,7 @@ export interface IVertexListPayload {
   nextToken: string | null | undefined;
   scheduleListPageLength: number;
   abortControllers: any;
+  setAuthError: React.Dispatch<React.SetStateAction<boolean>> | undefined;
 }
 
 export interface IVertexScheduleRun {
@@ -348,9 +349,19 @@ export interface IVertexListingInputProps {
   handleCurrentPageRefresh: () => void;
 }
 
-export interface IVertexListContext {
+export interface ISchedulerContext {
   activePaginationVariables: IActivePaginationVariables | null;
   setActivePaginationVariables: React.Dispatch<
     React.SetStateAction<IActivePaginationVariables | null>
   >;
+  authError: boolean;
+  setAuthError: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export interface IActionButtonProps {
+  title: string;
+  icon: LabIcon;
+  onClick?: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+  className?: string;
 }

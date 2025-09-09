@@ -49,7 +49,7 @@ import DeletePopup from '../../common/table/DeletePopup';
 import { abortApiCall } from '../../../utils/Config';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
 import VertexListingInputLayout from './VertexListingInput';
-import { useVertexContext } from '../../../context/vertex/VertexListContext';
+import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 
 const ListVertexSchedule = ({
   abortControllers
@@ -61,10 +61,11 @@ const ListVertexSchedule = ({
   const navigate = useNavigate();
 
   // Consume the context value
-  const vertexContext = useVertexContext();
-  const activePaginationVariables = vertexContext?.activePaginationVariables;
+  const schedulerContext = useSchedulerContext();
+  const activePaginationVariables = schedulerContext?.activePaginationVariables;
   const setActivePaginationVariables =
-    vertexContext?.setActivePaginationVariables;
+    schedulerContext?.setActivePaginationVariables;
+  const setAuthError = schedulerContext?.setAuthError;
 
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
@@ -112,6 +113,14 @@ const ListVertexSchedule = ({
   const previousNextPageToken = useRef(nextPageToken);
   const [pageNumber, setPageNumber] = useState<number>(1); // Track current page number
   const [fetchNextPage, setFetchNextPage] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (schedulerContext?.authError) {
+      navigate('/login', {
+        state: { loginError: schedulerContext?.authError }
+      });
+    }
+  }, [schedulerContext?.authError]);
 
   /**
    * Handles the selection of region
@@ -165,7 +174,8 @@ const ListVertexSchedule = ({
         region,
         nextToken,
         scheduleListPageLength,
-        abortControllers
+        abortControllers,
+        setAuthError
       };
       const scheduleApiData =
         await VertexServices.listVertexSchedules(listVertexPayload);
@@ -639,6 +649,10 @@ const ListVertexSchedule = ({
       );
     }
   }, [region]);
+
+  useEffect(() => {
+    handleCurrentPageRefresh(null, null);
+  }, []);
 
   return (
     <>

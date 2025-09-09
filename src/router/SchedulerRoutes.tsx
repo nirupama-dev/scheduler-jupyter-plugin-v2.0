@@ -24,14 +24,14 @@ import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
 import Loader from '../components/common/loader/LoadingSpinner';
 import {
+  DEFAULT_LOADING_TEXT,
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_EXECUTION_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
-import { VertexListProvider } from '../context/vertex/VertexListprovider';
+import LoginErrorComponent from '../components/common/login/LoginErrorComponent';
 
 /**
- *
  * @param schedulerRouteProps
  * @returns
  * This component defines the routes for the scheduler application.
@@ -59,76 +59,90 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   );
 
   return (
-    <VertexListProvider>
-      <Routes>
-        <Route path="/" element={<Navigate to="/list" replace />} />
-        <Route
-          path="/create"
-          element={
-            <CreateNotebookSchedule
-              sessionContext={sessionContext}
-              initialKernalScheduleDetails={initialKernalSchedulerDetails}
-            />
-          }
-        />
-
-        <Route
-          path="/edit/:schedulerType/:scheduleId/:region/:projectId?/:environment?"
-          element={<CreateNotebookSchedule />}
-        />
-
-        <Route path="/list" element={<ScheduleListingView />}>
-          <Route
-            path="vertex"
-            element={
-              <Suspense
-                fallback={
-                  <Loader
-                    message={LOADER_CONTENT_VERTEX_LISTING_SCREEN}
-                    iconClassName="spin-loader-custom-style"
-                    parentTagClassName="spin-loader-main spin-loader-listing"
-                  />
-                }
-              >
-                <ListVertexSchedule abortControllers={abortControllers} />
-              </Suspense>
-            }
+    <Routes>
+      <Route path="/" element={<Navigate to="/list" replace />} />
+      <Route
+        path="/create"
+        element={
+          <CreateNotebookSchedule
+            sessionContext={sessionContext}
+            initialKernalScheduleDetails={initialKernalSchedulerDetails}
           />
+        }
+      />
 
-          <Route
-            path="composer"
-            element={
-              <Suspense
-                fallback={
-                  <Loader
-                    message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN}
-                    iconClassName="spin-loader-custom-style"
-                    parentTagClassName='"spin-loader-main spin-loader-listing'
-                  />
-                }
-              >
-                <ListComposerSchedule app={app} />
-              </Suspense>
-            }
-          />
-        </Route>
+      <Route
+        path="/edit/:schedulerType/:scheduleId/:region/:projectId?/:environment?"
+        element={<CreateNotebookSchedule />}
+      />
+
+      <Route path="/list" element={<ScheduleListingView />}>
         <Route
-          path="/execution-vertex-history"
+          path="vertex"
           element={
             <Suspense
               fallback={
                 <Loader
-                  message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
+                  message={LOADER_CONTENT_VERTEX_LISTING_SCREEN}
+                  iconClassName="spin-loader-custom-style"
+                  parentTagClassName="spin-loader-main spin-loader-listing"
+                />
+              }
+            >
+              <ListVertexSchedule abortControllers={abortControllers} />
+            </Suspense>
+          }
+        />
+
+        <Route
+          path="composer"
+          element={
+            <Suspense
+              fallback={
+                <Loader
+                  message={LOADER_CONTENT_COMPOSER_LISTING_SCREEN}
                   iconClassName="spin-loader-custom-style"
                   parentTagClassName='"spin-loader-main spin-loader-listing'
                 />
               }
             >
-              <VertexExecutionHistory abortControllers={abortControllers} />
+              <ListComposerSchedule app={app} />
             </Suspense>
           }
         />
-      </Routes>
-    </VertexListProvider>
+      </Route>
+      <Route
+        path="/execution-vertex-history"
+        element={
+          <Suspense
+            fallback={
+              <Loader
+                message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
+                iconClassName="spin-loader-custom-style"
+                parentTagClassName='"spin-loader-main spin-loader-listing'
+              />
+            }
+          >
+            <VertexExecutionHistory abortControllers={abortControllers} />
+          </Suspense>
+        }
+      />
+      <Route
+        path="/login"
+        element={
+          <Suspense
+            fallback={
+              <Loader
+                message={DEFAULT_LOADING_TEXT}
+                iconClassName="spin-loader-custom-style"
+                parentTagClassName='"spin-loader-main spin-loader-listing'
+              />
+            }
+          >
+            <LoginErrorComponent />
+          </Suspense>
+        }
+      />
+    </Routes>
   );
 }

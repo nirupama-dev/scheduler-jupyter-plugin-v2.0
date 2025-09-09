@@ -306,3 +306,7 @@ export const VERTEX_EXECUTION_HISTORY_TABLE_HEADER = [
 
 export const VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT =
   'Loading Vertex Schedule Runs...';
+
+export const AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR';
+
+export const DEFAULT_LOADING_TEXT = 'Loading...';
