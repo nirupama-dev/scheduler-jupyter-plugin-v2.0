@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 
+import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { IAuthCredentials } from '../../interfaces/CommonInterface';
 import { LOGIN_STATE, STATUS_SUCCESS } from '../../utils/Constants';
@@ -63,6 +64,10 @@ export class AuthenticationService {
       }
     } catch (reason) {
       console.error(`Error on GET credentials.\n${reason}`);
+      Notification.error('Error on GET credentials', {
+        autoClose: false
+      });
+      return undefined;
     }
   };
 }

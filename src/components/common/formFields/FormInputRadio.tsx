@@ -27,7 +27,7 @@ import {
 import { Controller } from 'react-hook-form';
 import { IFormInputProps } from '../../../interfaces/FormInterface';
 import {
-  DEFAULT_HOST_PROJECT_NETWORK,
+  NETWORK_SHARED_FROM_HOST_PROJECT_VALUE,
   NETWORK_OPTIONS,
   SHARED_NETWORK_DESCRIPTION,
   SHARED_NETWORK_DOC_URL
@@ -58,7 +58,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
             <Typography sx={{ fontSize: 13 }}>
               <>
                 {singleOption.label}
-                {singleOption.value === DEFAULT_HOST_PROJECT_NETWORK
+                {singleOption.value === NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
                   ? ` ${hasHostProject ? `"${hostProject?.name}"` : ''}`
                   : null}
               </>
@@ -66,6 +66,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
           }
           control={<Radio size="small" />}
           className="scheduler-label-font"
+          disabled={singleOption.disabled}
         />
         {singleOption.label === NETWORK_OPTIONS[1].label && (
           <>

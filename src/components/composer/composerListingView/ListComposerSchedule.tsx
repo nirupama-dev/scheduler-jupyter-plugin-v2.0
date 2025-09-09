@@ -336,7 +336,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, editNotebook: dag_id }));
 
       try {
-        const response = await ComposerServices.editNotebookSchedulerService(
+        const response = await ComposerServices.editNotebookInScheduledJob(
           bucketName,
           dag_id
         );

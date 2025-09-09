@@ -26,7 +26,6 @@ export const LOGIN_STATE = '1';
 export const STATUS_SUCCESS = 'SUCCEEDED';
 export const API_HEADER_BEARER = 'Bearer ';
 export const API_HEADER_CONTENT_TYPE = 'application/json';
-export type scheduleMode = 'runNow' | 'runSchedule';
 export const gcpServiceUrls = (async () => {
   return await ConfigService.gcpServiceUrlsAPI();
 })();
@@ -50,36 +49,48 @@ export const DISK_MAX_SIZE = 65536;
 
 export const EVERY_MINUTE_CRON = '* * * * *';
 
+export const VERTEX_SCHEDULER_NAME = 'vertex';
+
+export const COMPOSER_SCHEDULER_NAME = 'composer';
+
+export const SCHEDULE_LABEL_VERTEX = 'Vertex';
+
+export const SCHEDULE_LABEL_COMPOSER = 'Composer';
+
 export const SCHEDULER_OPTIONS = [
   {
-    label: 'Vertex',
-    value: 'vertex'
+    label: SCHEDULE_LABEL_VERTEX,
+    value: VERTEX_SCHEDULER_NAME
   },
   {
-    label: 'Composer',
-    value: 'composer'
+    label: SCHEDULE_LABEL_COMPOSER,
+    value: COMPOSER_SCHEDULER_NAME
   }
 ];
-export const DEFAULT_SCHEDULER_SELECTED = 'vertex';
+
+export const DEFAULT_SCHEDULER_SELECTED = VERTEX_SCHEDULER_NAME;
 
 export const NETWORK_CONFIGURATION_LABEL = 'Network Configuration';
 
 export const NETWORK_CONFIGURATION_LABEL_DESCRIPTION =
   'Establishes connectivity for VM instances in the cluster';
 
+export const NETWORK_IN_THIS_PROJECT_VALUE = 'networkInThisProject';
+
+export const NETWORK_SHARED_FROM_HOST_PROJECT_VALUE =
+  'networkSharedFromHostProject';
+
 export const NETWORK_OPTIONS = [
   {
     label: 'Network in this project',
-    value: 'networkInThisProject'
+    value: NETWORK_IN_THIS_PROJECT_VALUE
   },
   {
     label: 'Network shared from host project',
-    value: 'networkSharedFromHostProject'
+    value: NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
   }
 ];
-export const DEFAULT_NETWORK_SELECTED = 'networkInThisProject';
-
-export const DEFAULT_HOST_PROJECT_NETWORK = 'networkSharedFromHostProject';
+export const DEFAULT_NETWORK_SELECTED = NETWORK_IN_THIS_PROJECT_VALUE;
 
 export const SHARED_NETWORK_DOC_URL =
   'https://cloud.google.com/vpc/docs/shared-vpc';
@@ -118,10 +129,6 @@ export const SCHEDULE_FORMAT_DESCRIPTION = `Schedules are specified using unix-c
 export const allowedPeriodsCron = ['year', 'month', 'week', 'day', 'hour'];
 
 export const LISTING_PAGE_HEADING = 'Scheduled Jobs';
-
-export const SCHEDULE_LABEL_VERTEX = 'Vertex';
-
-export const SCHEDULE_LABEL_COMPOSER = 'Composer';
 
 export const TITLE_LAUNCHER_CATEGORY = 'Google Cloud Resources';
 

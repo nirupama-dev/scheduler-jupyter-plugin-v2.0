@@ -25,7 +25,7 @@ export interface IFormInputProps {
   label?: string;
   setValue?: any;
   className?: string;
-  options?: Array<{ label: string; value: string }>;
+  options?: Array<{ label: string; value: string; disabled?: boolean }>;
   error?: FieldError;
   [key: string]: any; // Allow additional props
   type?: string;

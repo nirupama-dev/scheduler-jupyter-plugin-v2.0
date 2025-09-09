@@ -22,3 +22,13 @@
 
 export type SchedulerType = 'vertex' | 'composer'; // Define SchedulerType type
 export type ExecutionMode = 'local' | 'serverless' | 'cluster'; // Define ExecutionMode type
+export type ScheduleMode = 'runNow' | 'runSchedule'; // Define ScheduleMode type
+export type NetworkOption =
+  | 'networkInThisProject'
+  | 'networkSharedFromHostProject'
+  | ''; // Define NetworkOption type
+export type RadioOption = {
+  label: string;
+  value: string;
+  disabled?: boolean; // Make it optional
+};

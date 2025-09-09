@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import dayjs, { Dayjs } from 'dayjs';
-import { scheduleMode } from '../utils/Constants';
+import { Dayjs } from 'dayjs';
 
 import {
   Control,
@@ -27,7 +26,11 @@ import {
   UseFormWatch
 } from 'react-hook-form';
 import { CombinedCreateFormValues } from '../schemas/CreateScheduleCombinedSchema';
-import { IEdiModeData, ILabelValue } from './CommonInterface';
+import {
+  IAuthCredentials,
+  IEditScheduleData,
+  ILabelValue
+} from './CommonInterface';
 import { HeaderProps, Renderer } from 'react-table';
 import { PickersDayProps } from '@mui/x-date-pickers';
 
@@ -38,33 +41,9 @@ export interface ICreateVertexSchedulerProps {
   setValue: UseFormSetValue<CombinedCreateFormValues>;
   getValues: UseFormGetValues<CombinedCreateFormValues>;
   trigger: UseFormTrigger<CombinedCreateFormValues>;
-  //sessionContext: ISessionContext;
-  editModeData: IEdiModeData | null | undefined;
-}
-/*
- * Interface for the payload sent from the Create Vertex Scheduler form to the create API.
- */
-export interface IVertexSchedulePayload {
-  input_filename: string;
-  display_name: string;
-  machine_type: string;
-  kernel_name: string;
-  region: string;
-  cloud_storage_bucket: string;
-  service_account: string;
-  network_option: 'networkInThisProject' | 'networkSharedFromHostProject';
-  primaryNetwork?: string;
-  subnetwork?: string;
-  disk_type: string;
-  disk_size: string;
-  accelerator_type?: string;
-  accelerator_count?: string;
-  schedule_value?: string; // Optional: only for scheduled jobs
-  time_zone?: string; // Optional: only for scheduled jobs
-  max_run_count?: string; // Optional: only for scheduled jobs
-  start_time?: string; // Optional: only for scheduled jobs
-  end_time?: string; // Optional: only for scheduled jobs
-  parameters?: string[]; //future enhancement: optional parameters for the job
+  isValid: boolean;
+  credentials: IAuthCredentials;
+  editScheduleData: IEditScheduleData | null | undefined;
 }
 
 export interface IMachineType {
@@ -86,39 +65,12 @@ export interface IMachineTypeFormatted {
   acceleratorConfigs?: IAcceleratorConfig[] | null; // Optional, can be array or null
 }
 
-export interface ICreatePayload {
-  job_id?: string;
-  input_filename: string;
-  display_name: string;
-  machine_type: string | null;
-  accelerator_type?: string;
-  accelerator_count?: string | null;
-  kernel_name: string | null;
-  region: string;
-  cloud_storage_bucket: string | null;
-  parameters?: string[];
-  service_account: any | undefined;
-  network_option: any | undefined;
-  network: any | undefined;
-  subnetwork: any | undefined;
-  shared_network?: any;
-  scheduleMode?: scheduleMode;
-  start_time: dayjs.Dayjs | string | null;
-  end_time: dayjs.Dayjs | string | null;
-  schedule_value: string | undefined;
-  time_zone?: string;
-  cron?: string | null;
-  max_run_count: string;
-  disk_type: string | null;
-  disk_size: string;
-  gcs_notebook_source?: string;
-}
 export interface IVertexScheduleList {
   displayName: string;
   schedule: string;
   status: string;
   jobState?: any[];
-  region: string;
+  // region: string;
 }
 export interface IUpdateSchedulerAPIResponse {
   status: number;
@@ -203,12 +155,6 @@ export interface IServiceAccount {
 export interface INetworkVertex {
   name: string;
   link: string;
-}
-
-export interface ISharedNetwork {
-  name: string;
-  network: string;
-  subnetwork: string;
 }
 
 export interface ISharedNetwork {
