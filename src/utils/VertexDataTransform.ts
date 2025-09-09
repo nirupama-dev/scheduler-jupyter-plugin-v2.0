@@ -145,16 +145,16 @@ export const transformVertexScheduleResponseToZodSchema = (
   const inputFileName =
     vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob?.gcsNotebookSource?.uri
       ?.split('/')
-      .pop()!;
+      .pop() ?? '';
   const jobId = vertexScheduleData.name?.split('/').pop();
   const primaryNetwork =
     vertexScheduleData?.createNotebookExecutionJobRequest?.notebookExecutionJob?.customEnvironmentSpec?.networkSpec?.network
       ?.split('/')
-      .pop()!;
+      .pop() ?? '';
   const subnetwork =
     vertexScheduleData?.createNotebookExecutionJobRequest?.notebookExecutionJob?.customEnvironmentSpec?.networkSpec?.subnetwork
       ?.split('/')
-      .pop()!;
+      .pop() ?? '';
   const primaryNetworkLink =
     vertexScheduleData?.createNotebookExecutionJobRequest?.notebookExecutionJob
       ?.customEnvironmentSpec?.networkSpec?.network;
@@ -192,7 +192,7 @@ export const transformVertexScheduleResponseToZodSchema = (
     schedulerSelection: 'vertex',
     jobId: jobId,
     inputFile: inputFileName,
-    jobName: vertexScheduleData.displayName!,
+    jobName: vertexScheduleData.displayName ?? '',
     vertexRegion:
       vertexScheduleData.name?.match(/locations\/([^\/]+)/)?.[1] ??
       scheduleRegion,
@@ -203,25 +203,25 @@ export const transformVertexScheduleResponseToZodSchema = (
       ),
     machineType:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
-        ?.customEnvironmentSpec?.machineSpec?.machineType!,
+        ?.customEnvironmentSpec?.machineSpec?.machineType ?? '',
     acceleratorCount: acceleratorCount.toString(),
     acceleratorType: acceleratorType,
     kernelName:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
-        ?.kernelName!,
+        ?.kernelName ?? '',
     diskType:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
-        ?.customEnvironmentSpec?.persistentDiskSpec?.diskType!,
+        ?.customEnvironmentSpec?.persistentDiskSpec?.diskType ?? '',
     diskSize:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
-        ?.customEnvironmentSpec?.persistentDiskSpec?.diskSizeGb!,
+        ?.customEnvironmentSpec?.persistentDiskSpec?.diskSizeGb ?? '',
 
     serviceAccount:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
-        ?.serviceAccount!,
+        ?.serviceAccount ?? '',
     networkOption: networkOption,
-    primaryNetwork: primaryNetwork ?? '',
-    subNetwork: subnetwork ?? '',
+    primaryNetwork: primaryNetwork,
+    subNetwork: subnetwork,
     scheduleFieldCronFormat: scheduleMode !== 'runNow' ? cron : '',
     internalScheduleMode: scheduleMode !== 'runNow' ? 'cronFormat' : undefined,
     timeZone: timeZone,
