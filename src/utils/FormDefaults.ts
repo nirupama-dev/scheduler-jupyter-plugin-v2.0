@@ -31,7 +31,10 @@ import {
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME
 } from './Constants';
-import { INotebookKernalSchdulerDefaults, IInitialScheduleFormData } from '../interfaces/CommonInterface';
+import {
+  INotebookKernalSchdulerDefaults,
+  IInitialScheduleFormData
+} from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
 
 /**
@@ -75,36 +78,36 @@ const getDefaultVertexValues = (
   const inputFilePath = sessionContext?.path;
   const selectedKernelName = sessionContext?.kernelPreference?.name;
   const isKernelValid = KERNEL_VALUE.some(
-        kernel => kernel.value === selectedKernelName
-      );
+    kernel => kernel.value === selectedKernelName
+  );
   console.log('Kernal Details:', initialSchedulerStateData, sessionContext);
   return {
-  schedulerSelection: VERTEX_SCHEDULER_NAME,
-  jobName: generateDefaultJobName(),
-  inputFile: inputFilePath, // input file is fetched from the Session context path
-  machineType: DEFAULT_MACHINE_TYPE.value, // Assumes DEFAULT_MACHINE_TYPE will be found by useEffect
-  kernelName: isKernelValid ? selectedKernelName! : DEFAULT_KERNEL, // Assumes DEFAULT_KERNEL will be found by useEffect
-  acceleratorType: '', // Null initially, set by user if machineType supports
-  acceleratorCount: '', // Null initially, set by user if acceleratorType chosen
-  vertexRegion: initialSchedulerStateData?.credentials?.region_id ?? '', //set from credentials.
-  cloudStorageBucket: DEFAULT_CLOUD_STORAGE_BUCKET.value, // Assumes DEFAULT_CLOUD_STORAGE_BUCKET will be found by useEffect
-  serviceAccount: DEFAULT_SERVICE_ACCOUNT, // Assumes DEFAULT_SERVICE_ACCOUNT will be found by useEffect
-  networkOption: DEFAULT_NETWORK_SELECTED,
-  primaryNetwork: '', // Will be dynamically set by primaryNetworkSelected if 'networkInThisProject'
-  subNetwork: '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'
-  diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
-  diskSize: DEFAULT_DISK_SIZE,
-  scheduleMode: 'runNow',
-  internalScheduleMode: undefined,
-  scheduleFieldCronFormat: '', 
-  scheduleValueUserFriendly: '', 
-  startTime: undefined,
-  endTime: undefined,
-  maxRunCount: undefined,
-  timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone
-  parameters: []
+    schedulerSelection: VERTEX_SCHEDULER_NAME,
+    jobName: generateDefaultJobName(),
+    inputFile: inputFilePath, // input file is fetched from the Session context path
+    machineType: DEFAULT_MACHINE_TYPE.value, // Assumes DEFAULT_MACHINE_TYPE will be found by useEffect
+    kernelName: isKernelValid ? selectedKernelName! : DEFAULT_KERNEL, // Assumes DEFAULT_KERNEL will be found by useEffect
+    acceleratorType: '', // Null initially, set by user if machineType supports
+    acceleratorCount: '', // Null initially, set by user if acceleratorType chosen
+    vertexRegion: initialSchedulerStateData?.credentials?.region_id ?? '', //set from credentials.
+    cloudStorageBucket: DEFAULT_CLOUD_STORAGE_BUCKET.value, // Assumes DEFAULT_CLOUD_STORAGE_BUCKET will be found by useEffect
+    serviceAccount: DEFAULT_SERVICE_ACCOUNT, // Assumes DEFAULT_SERVICE_ACCOUNT will be found by useEffect
+    networkOption: DEFAULT_NETWORK_SELECTED,
+    primaryNetwork: '', // Will be dynamically set by primaryNetworkSelected if 'networkInThisProject'
+    subNetwork: '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'
+    diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
+    diskSize: DEFAULT_DISK_SIZE,
+    scheduleMode: 'runNow',
+    internalScheduleMode: undefined,
+    scheduleFieldCronFormat: '',
+    scheduleValueUserFriendly: '',
+    startTime: undefined,
+    endTime: undefined,
+    maxRunCount: undefined,
+    timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone
+    parameters: []
+  };
 };
-}
 
 /**
  *
@@ -149,7 +152,10 @@ export const getInitialFormValues = (
     throw new Error('Notebook path not found in this session');
   }
   if (formState.initialDefaults?.schedulerType === 'composer') {
-    return getDefaultComposerValues(formState.initialDefaults, sessionContext?.path);
+    return getDefaultComposerValues(
+      formState.initialDefaults,
+      sessionContext?.path
+    );
   }
   // Default to Vertex if no criteria or criteria is 'vertex' and load default vertex values.
   return getDefaultVertexValues(formState, sessionContext);

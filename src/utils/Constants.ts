@@ -77,7 +77,8 @@ export const NETWORK_CONFIGURATION_LABEL_DESCRIPTION =
 
 export const NETWORK_IN_THIS_PROJECT_VALUE = 'networkInThisProject';
 
-export const NETWORK_SHARED_FROM_HOST_PROJECT_VALUE = 'networkSharedFromHostProject';
+export const NETWORK_SHARED_FROM_HOST_PROJECT_VALUE =
+  'networkSharedFromHostProject';
 
 export const NETWORK_OPTIONS = [
   {
@@ -90,7 +91,6 @@ export const NETWORK_OPTIONS = [
   }
 ];
 export const DEFAULT_NETWORK_SELECTED = NETWORK_IN_THIS_PROJECT_VALUE;
-
 
 export const SHARED_NETWORK_DOC_URL =
   'https://cloud.google.com/vpc/docs/shared-vpc';

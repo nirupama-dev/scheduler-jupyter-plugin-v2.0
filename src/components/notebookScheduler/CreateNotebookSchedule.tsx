@@ -306,12 +306,18 @@ export const CreateNotebookSchedule = (
       return;
     }
     let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
-    let routingParamForListing= '';
+    let routingParamForListing = '';
     //vertex payload creation
-    if (data.schedulerSelection === VERTEX_SCHEDULER_NAME &&  initialFormData.credentials.project_id) {
+    if (
+      data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
+      initialFormData.credentials.project_id
+    ) {
       const vertexData = data as VertexSchedulerFormValues;
       const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
-        transformZodSchemaToVertexSchedulePayload(vertexData, initialFormData.credentials.project_id);
+        transformZodSchemaToVertexSchedulePayload(
+          vertexData,
+          initialFormData.credentials.project_id
+        );
       console.log('Vertex Payload:', vertexPayload);
 
       if (initialFormData.editModeData?.editMode && scheduleId) {
@@ -328,7 +334,8 @@ export const CreateNotebookSchedule = (
             vertexData.vertexRegion
           );
       }
-      routingParamForListing= '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
+      routingParamForListing =
+        '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
       //composer payload creation
     } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
       const composerData = data as ComposerSchedulerFormValues;
@@ -346,7 +353,7 @@ export const CreateNotebookSchedule = (
           composerPayload.region_id, // ToDO
           initialFormData.editModeData?.editMode
         );
-        routingParamForListing= `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
+      routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
     }
     console.log('is save successful', isSaveSuccessfull);
     if (isSaveSuccessfull) {

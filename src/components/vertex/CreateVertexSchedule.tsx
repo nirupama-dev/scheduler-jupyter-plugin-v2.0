@@ -402,7 +402,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         'and primary network:',
         primaryNetworkValue
       );
-     
+
       if (!region || !primaryNetworkValue) {
         setSubNetworkList([]);
         setValue('subNetwork', '');
@@ -410,8 +410,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       }
       setLoadingState(prev => ({ ...prev, subNetwork: true }));
       try {
-         const primaryNetworkLabel= primaryNetworkList.find(n => n.value === primaryNetworkValue)?.label;
-         console.log('Primary network label:', primaryNetworkLabel);
+        const primaryNetworkLabel = primaryNetworkList.find(
+          n => n.value === primaryNetworkValue
+        )?.label;
+        console.log('Primary network label:', primaryNetworkLabel);
         const subNetworkListResp = await ComputeServices.subNetworkAPIService(
           region,
           primaryNetworkLabel
@@ -537,7 +539,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       // Logic for shared networks
       fetchSharedNetworks(hostProject?.name || '', getValues('vertexRegion'));
       // Ensure sub-network state is cleared
-     setValue('primaryNetwork', '');
+      setValue('primaryNetwork', '');
       setValue('subNetwork', '');
     } else {
       getValues('networkOption') ||

@@ -110,7 +110,7 @@ export interface ILoaderProps {
 }
 
 export interface IInitialScheduleFormData {
-    credentials?: IAuthCredentials | undefined;
-    editModeData?: IEditScheduleData;
-    initialDefaults?: INotebookKernalSchdulerDefaults;
-  }
+  credentials?: IAuthCredentials | undefined;
+  editModeData?: IEditScheduleData;
+  initialDefaults?: INotebookKernalSchdulerDefaults;
+}

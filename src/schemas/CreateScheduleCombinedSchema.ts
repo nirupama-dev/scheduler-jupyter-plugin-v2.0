@@ -61,7 +61,8 @@ export const combinedCreateFormSchema = z
           ctx.addIssue({
             path: ['sharedNetwork'],
             code: z.ZodIssueCode.custom,
-            message: 'Shared network is required when using shared network from a host project.'
+            message:
+              'Shared network is required when using shared network from a host project.'
           });
         }
       }

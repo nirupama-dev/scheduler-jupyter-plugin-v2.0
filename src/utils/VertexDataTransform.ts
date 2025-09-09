@@ -225,9 +225,16 @@ export const transformVertexScheduleResponseToZodSchema = (
     scheduleFieldCronFormat: scheduleMode !== 'runNow' ? cron : '',
     internalScheduleMode: scheduleMode !== 'runNow' ? 'cronFormat' : undefined,
     timeZone: timeZone,
-    maxRunCount: scheduleMode !== 'runNow' ? vertexScheduleData.maxRunCount! : undefined,
-    startTime: scheduleMode !== 'runNow' ? vertexScheduleData.startTime ?? undefined : undefined,
-    endTime: scheduleMode !== 'runNow' ? vertexScheduleData.endTime?? undefined : undefined,
+    maxRunCount:
+      scheduleMode !== 'runNow' ? vertexScheduleData.maxRunCount! : undefined,
+    startTime:
+      scheduleMode !== 'runNow'
+        ? (vertexScheduleData.startTime ?? undefined)
+        : undefined,
+    endTime:
+      scheduleMode !== 'runNow'
+        ? (vertexScheduleData.endTime ?? undefined)
+        : undefined,
     scheduleMode: scheduleMode
   };
 
