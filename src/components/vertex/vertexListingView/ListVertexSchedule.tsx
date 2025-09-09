@@ -57,7 +57,7 @@ const ListVertexSchedule = ({
   abortControllers: any;
 }) => {
   const { region: regionParam } = useParams<{ region: string }>();
-  const [region, setRegion] = useState<string>(regionParam || '');// assign from param if available
+  const [region, setRegion] = useState<string>(regionParam || ''); // assign from param if available
   const navigate = useNavigate();
 
   // Consume the context value
@@ -332,11 +332,12 @@ const ListVertexSchedule = ({
     }
 
     // Converts the slashes and other special characters into a safe format that React Router will treat as a single string
-    const scheduleId = encodeURIComponent(schedulerData?.name.split('/').pop());
-    const selectedScheduleName = encodeURIComponent(schedulerData?.displayName);
-    navigate(
-      `/execution-vertex-history/${scheduleId}/${region}/${selectedScheduleName}`
-    );
+    const scheduleId = schedulerData?.name.split('/').pop();
+    const scheduleName = schedulerData?.displayName;
+    const createTime = schedulerData?.createTime;
+    navigate('/execution-vertex-history', {
+      state: { scheduleId, region, scheduleName, createTime }
+    });
   };
 
   /**
@@ -530,7 +531,8 @@ const ListVertexSchedule = ({
       totalCount: totalCount,
       pageTokenList: pageTokenList,
       nextPageToken: nextPageToken,
-      pageNumber: pageNumber
+      pageNumber: pageNumber,
+      region: region
     };
     return currentPaginationVariables;
   };
@@ -559,24 +561,34 @@ const ListVertexSchedule = ({
   };
 
   useEffect(() => {
-    if (!region) {
+    const fetchRegion = async () => {
+      // Verify if region is already set from parameters, or if active pagination variables exist,
+
+      if (region) {
+        return;
+      }
+
+      if (activePaginationVariables) {
+        setRegion(activePaginationVariables.region);
+        return;
+      }
+
+      // Only proceed with the API call if region is not set AND activePaginationVariables is not available.
       setLoaderState(prevState => ({ ...prevState, regionLoader: true }));
-      authApi()
-        .then(credentials => {
-          if (credentials?.region_id && credentials?.project_id) {
-            setLoaderState(prevState => ({
-              ...prevState,
-              regionLoader: false
-            }));
-            setRegion(credentials.region_id);
-          }
-        })
-        .catch(error => {
-          handleErrorToast({
-            error: error
-          });
-        });
-    }
+
+      try {
+        const credentials = await authApi();
+        if (credentials?.region_id) {
+          setRegion(credentials.region_id);
+        }
+      } catch (error) {
+        handleErrorToast({ error });
+      } finally {
+        setLoaderState(prevState => ({ ...prevState, regionLoader: false }));
+      }
+    };
+
+    fetchRegion();
   }, []);
 
   /**

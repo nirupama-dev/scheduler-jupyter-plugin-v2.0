@@ -52,8 +52,6 @@ const executionHistoryReducer = (state: any, action: any) => {
       return { ...state, scheduleId: action.payload };
     case 'SET_VERTEX_RUNS':
       return { ...state, vertexScheduleRunsList: action.payload };
-    case 'SET_CREATED_TIME':
-      return { ...state, createTime: action.payload };
     default:
       return state;
   }
@@ -70,8 +68,7 @@ const initialState = {
   redListDates: [],
   greenListDates: [],
   darkGreenListDates: [],
-  projectId: '',
-  createTime: ''
+  projectId: ''
 };
 
 export const useExecutionHistory = (
@@ -103,15 +100,6 @@ export const useExecutionHistory = (
       dispatch({
         type: 'SET_VERTEX_RUNS',
         payload: executionData.scheduleRuns
-      });
-
-      dispatch({
-        type: 'SET_CREATED_TIME',
-        payload:
-          executionData.scheduleRuns.length > 0
-            ? executionData.scheduleRuns[executionData.scheduleRuns.length - 1]
-                .createTime
-            : ''
       });
     }
   };

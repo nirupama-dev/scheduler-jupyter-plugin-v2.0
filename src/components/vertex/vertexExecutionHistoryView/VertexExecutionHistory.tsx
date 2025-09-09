@@ -23,7 +23,7 @@ import ExecutionCalendar from '../../common/dateCalendar/DateCalendar';
 import VertexScheduleRuns from '../vertexExecutionHistoryView/VertexScheduleRuns';
 import { VertexServices } from '../../../services/vertex/VertexServices';
 import { IScheduleRun } from '../../../interfaces/VertexInterface';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { abortApiCall } from '../../../utils/Config';
 
 const VertexExecutionHistory = ({
@@ -32,13 +32,13 @@ const VertexExecutionHistory = ({
   abortControllers: any;
 }) => {
   const navigate = useNavigate();
-  const { scheduleId, region, scheduleName } = useParams();
+  const location = useLocation();
+  const { scheduleId, region, scheduleName, createTime } = location.state;
   const currentDate = new Date().toLocaleDateString();
   const [fileExists, setFileExists] = useState<object>({});
 
   const {
     vertexScheduleRunsList,
-    createTime,
     selectedDate,
     isLoading,
     greyListDates,
@@ -65,7 +65,8 @@ const VertexExecutionHistory = ({
     darkGreenListDates,
     handleDateSelection,
     handleMonthChange,
-    handleLogs
+    handleLogs,
+    isLoading
   };
 
   const vertexScheduleRunProps = {

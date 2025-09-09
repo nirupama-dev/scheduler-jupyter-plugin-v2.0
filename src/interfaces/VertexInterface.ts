@@ -126,6 +126,7 @@ export interface IActivePaginationVariables {
   pageTokenList: string[];
   nextPageToken: string | null;
   pageNumber: number;
+  region: string;
 }
 
 // Define the expected type for formattedResponse
@@ -336,6 +337,7 @@ export interface ICustomDateProps extends PickersDayProps<Dayjs> {
   redListDates?: string[];
   greenListDates?: string[];
   darkGreenListDates?: string[];
+  isLoading?: boolean;
 }
 
 export interface IVertexListingInputProps {

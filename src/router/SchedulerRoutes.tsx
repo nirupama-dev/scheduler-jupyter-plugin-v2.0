@@ -113,7 +113,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
           />
         </Route>
         <Route
-          path="/execution-vertex-history/:scheduleId/:region/:scheduleName"
+          path="/execution-vertex-history"
           element={
             <Suspense
               fallback={
