@@ -23,9 +23,15 @@ import { VertexListContext } from './VertexListContext';
 export const VertexListProvider = ({ children }: { children: ReactNode }) => {
   const [activePaginationVariables, setActivePaginationVariables] =
     useState<IActivePaginationVariables | null>(null);
+  const [vertexRouteState, setVertexRouteState] = useState({});
+  const [composerRouteState, setComposerRouteState] = useState({});
   const value = {
     activePaginationVariables,
-    setActivePaginationVariables
+    setActivePaginationVariables,
+    vertexRouteState,
+    setVertexRouteState,
+    composerRouteState,
+    setComposerRouteState
   };
   return (
     <VertexListContext.Provider value={value}>

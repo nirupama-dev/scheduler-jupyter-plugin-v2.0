@@ -66,6 +66,7 @@ import {
   transformComposerScheduleDataToZodSchema,
   transformZodSchemaToComposerSchedulePayload
 } from '../../utils/ComposerDataTransform';
+import { useVertexContext } from '../../context/vertex/VertexListContext';
 
 /**
  * Create Notebook Schedule Parent component that renders common components
@@ -100,6 +101,10 @@ export const CreateNotebookSchedule = (
     projectId: string;
     environment: string;
   }>();
+
+  const vertexContext = useVertexContext();
+  const setVertexRouteState = vertexContext?.setVertexRouteState;
+  const setComposerRouteState = vertexContext?.setComposerRouteState;
 
   /**
    * A unified state to manage all form-related data including edit mode,
@@ -337,13 +342,15 @@ export const CreateNotebookSchedule = (
       routingParamForListing =
         '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
       if (isSaveSuccessfull) {
-        //TODO: // redirect to list page or show success message
-        navigate('/list/vertex', {
-          state: {
+        if (setVertexRouteState) {
+          setVertexRouteState({
             schedulerName: VERTEX_SCHEDULER_NAME,
-            regionState: vertexData.vertexRegion
-          }
-        });
+            region: vertexData.vertexRegion
+          });
+        }
+
+        //TODO: // redirect to list page or show success message
+        navigate('/list');
       } else {
         //TODO: Retain the form. probably remove this.
       }
@@ -366,15 +373,17 @@ export const CreateNotebookSchedule = (
         );
       routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
       if (isSaveSuccessfull) {
-        //TODO: // redirect to list page or show success message
-        navigate('/list/composer', {
-          state: {
+        if (setComposerRouteState) {
+          setComposerRouteState({
             schedulerName: COMPOSER_SCHEDULER_NAME,
             region: composerData.composerRegion,
             projectId: composerData.projectId,
             environment: composerData.environment
-          }
-        });
+          });
+        }
+
+        //TODO: // redirect to list page or show success message
+        navigate('/list');
       } else {
         //TODO: Retain the form. probably remove this.
       }

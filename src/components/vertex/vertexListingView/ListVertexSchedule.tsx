@@ -44,7 +44,7 @@ import Loader from '../../common/loader/LoadingSpinner';
 import TableData from '../../common/table/TableData';
 import { renderActions } from './VertexScheduleAction';
 import { rowDataList } from './VertexListRow';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import DeletePopup from '../../common/table/DeletePopup';
 import { abortApiCall } from '../../../utils/Config';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
@@ -56,8 +56,7 @@ const ListVertexSchedule = ({
 }: {
   abortControllers: any;
 }) => {
-  const { schedulerName, regionState } = useLocation().state || {};
-  const [region, setRegion] = useState<string>(regionState || ''); // assign from param if available
+  const [region, setRegion] = useState<string>(''); // assign from param if available
   const navigate = useNavigate();
 
   // Consume the context value
@@ -65,6 +64,8 @@ const ListVertexSchedule = ({
   const activePaginationVariables = vertexContext?.activePaginationVariables;
   const setActivePaginationVariables =
     vertexContext?.setActivePaginationVariables;
+  const vertexRouteState = vertexContext?.vertexRouteState;
+  const setVertexRouteState = vertexContext?.setVertexRouteState;
 
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
