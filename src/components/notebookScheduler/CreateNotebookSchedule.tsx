@@ -336,6 +336,17 @@ export const CreateNotebookSchedule = (
       }
       routingParamForListing =
         '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
+      if (isSaveSuccessfull) {
+        //TODO: // redirect to list page or show success message
+        navigate('/list/vertex', {
+          state: {
+            schedulerName: VERTEX_SCHEDULER_NAME,
+            regionState: vertexData.vertexRegion
+          }
+        });
+      } else {
+        //TODO: Retain the form. probably remove this.
+      }
       //composer payload creation
     } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
       const composerData = data as ComposerSchedulerFormValues;
@@ -354,14 +365,27 @@ export const CreateNotebookSchedule = (
           initialFormData.editModeData?.editMode
         );
       routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
+      if (isSaveSuccessfull) {
+        //TODO: // redirect to list page or show success message
+        navigate('/list/composer', {
+          state: {
+            schedulerName: COMPOSER_SCHEDULER_NAME,
+            region: composerData.composerRegion,
+            projectId: composerData.projectId,
+            environment: composerData.environment
+          }
+        });
+      } else {
+        //TODO: Retain the form. probably remove this.
+      }
     }
     console.log('is save successful', isSaveSuccessfull);
-    if (isSaveSuccessfull) {
-      //TODO: // redirect to list page or show success message
-      navigate(`/list/${routingParamForListing}`);
-    } else {
-      //TODO: Retain the form. probably remove this.
-    }
+    // if (isSaveSuccessfull) {
+    //   //TODO: // redirect to list page or show success message
+    //   navigate(`/list/${routingParamForListing}`);
+    // } else {
+    //   //TODO: Retain the form. probably remove this.
+    // }
   };
 
   // Function to handle cancel action
