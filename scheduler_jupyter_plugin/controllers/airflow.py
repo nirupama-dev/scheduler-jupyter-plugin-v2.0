@@ -219,12 +219,12 @@ class DagRunTaskLogsController(AirflowHandler):
         )
 
 
-class EditDagController(AirflowHandler):
+class GetInputFileNameController(AirflowHandler):
     def description(self):
-        return "job"
+        return "notebook file"
 
     async def _handle_post(self, client):
-        return await client.edit_jobs(self.dag_id, self.bucket_name)
+        return await client.get_input_file_name(self.dag_id, self.bucket_name)
 
 class GetComposerJobScheduleController(AirflowHandler):
     def description(self):

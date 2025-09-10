@@ -164,7 +164,7 @@ def setup_handlers(web_app):
         "dagList": airflow.DagListController,
         "dagDelete": airflow.DagDeleteController,
         "dagUpdate": airflow.DagUpdateController,
-        "editJobScheduler": airflow.EditDagController,
+        "getInputFileName": airflow.GetInputFileNameController,
         "getComposerJobSchedule": airflow.GetComposerJobScheduleController,
         "importErrorsList": airflow.ImportErrorController,
         "triggerDag": airflow.TriggerDagController,
