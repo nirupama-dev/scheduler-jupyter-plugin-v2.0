@@ -109,13 +109,8 @@ export class VertexServices {
     listVertexPayload: IVertexListPayload
     //TODO: other api error
   ) => {
-    const {
-      region,
-      nextToken,
-      scheduleListPageLength,
-      abortControllers,
-      setAuthError
-    } = listVertexPayload;
+    const { region, nextToken, scheduleListPageLength, abortControllers } =
+      listVertexPayload;
 
     try {
       const signal = settingController(abortControllers);
@@ -127,15 +122,9 @@ export class VertexServices {
       }
 
       // API call
-      const formattedResponse = await requestAPI(
-        serviceURL + urlparam,
-        {
-          signal
-        },
-        setAuthError
-          ? (error: boolean | null) => setAuthError(error ?? false)
-          : undefined
-      );
+      const formattedResponse = await requestAPI(serviceURL + urlparam, {
+        signal
+      });
 
       if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
         return {

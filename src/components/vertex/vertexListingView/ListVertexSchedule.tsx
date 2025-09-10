@@ -65,7 +65,6 @@ const ListVertexSchedule = ({
   const activePaginationVariables = schedulerContext?.activePaginationVariables;
   const setActivePaginationVariables =
     schedulerContext?.setActivePaginationVariables;
-  const setAuthError = schedulerContext?.setAuthError;
 
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
@@ -113,14 +112,6 @@ const ListVertexSchedule = ({
   const previousNextPageToken = useRef(nextPageToken);
   const [pageNumber, setPageNumber] = useState<number>(1); // Track current page number
   const [fetchNextPage, setFetchNextPage] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (schedulerContext?.authError) {
-      navigate('/login', {
-        state: { loginError: schedulerContext?.authError }
-      });
-    }
-  }, [schedulerContext?.authError]);
 
   /**
    * Handles the selection of region
@@ -174,8 +165,7 @@ const ListVertexSchedule = ({
         region,
         nextToken,
         scheduleListPageLength,
-        abortControllers,
-        setAuthError
+        abortControllers
       };
       const scheduleApiData =
         await VertexServices.listVertexSchedules(listVertexPayload);

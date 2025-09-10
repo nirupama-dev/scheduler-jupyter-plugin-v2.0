@@ -15,8 +15,7 @@
  * limitations under the License.
  */
 
-import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
-import { AuthenticationError, requestAPI } from '../../../handler/Handler';
+import { requestAPI } from '../../../handler/Handler';
 import { IAuthCredentials } from '../../../interfaces/CommonInterface';
 import { AuthenticationService } from '../../../services/common/AuthenticationService';
 import { STATUS_SUCCESS } from '../../../utils/Constants';

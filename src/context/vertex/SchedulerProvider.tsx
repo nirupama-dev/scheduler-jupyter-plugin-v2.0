@@ -23,13 +23,10 @@ import { SchedulerContext } from './SchedulerContext';
 export const SchedulerProvider = ({ children }: { children: ReactNode }) => {
   const [activePaginationVariables, setActivePaginationVariables] =
     useState<IActivePaginationVariables | null>(null);
-  const [authError, setAuthError] = useState(false);
 
   const value = {
     activePaginationVariables,
-    setActivePaginationVariables,
-    authError,
-    setAuthError
+    setActivePaginationVariables
   };
 
   return (

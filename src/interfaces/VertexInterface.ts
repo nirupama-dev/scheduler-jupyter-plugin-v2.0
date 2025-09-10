@@ -240,7 +240,6 @@ export interface IVertexListPayload {
   nextToken: string | null | undefined;
   scheduleListPageLength: number;
   abortControllers: any;
-  setAuthError: React.Dispatch<React.SetStateAction<boolean>> | undefined;
 }
 
 export interface IVertexScheduleRun {
@@ -354,8 +353,6 @@ export interface ISchedulerContext {
   setActivePaginationVariables: React.Dispatch<
     React.SetStateAction<IActivePaginationVariables | null>
   >;
-  authError: boolean;
-  setAuthError: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export interface IActionButtonProps {

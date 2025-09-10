@@ -18,14 +18,7 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 import { AUTHENTICATION_ERROR } from '../utils/Constants';
-
-// A custom error class to make it easy to identify
-export class AuthenticationError extends Error {
-  constructor(message?: string) {
-    super(message);
-    this.name = 'AuthenticationError';
-  }
-}
+import { useNavigate } from 'react-router-dom';
 
 /**
  * Call the API extension
@@ -36,8 +29,7 @@ export class AuthenticationError extends Error {
  */
 export async function requestAPI<T>(
   endPoint = '',
-  init: RequestInit = {},
-  setAuthError: ((error: boolean | null) => void) | undefined = undefined
+  init: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
@@ -46,6 +38,8 @@ export async function requestAPI<T>(
     'scheduler-plugin',
     endPoint
   );
+
+  const navigate = useNavigate();
 
   let response: Response;
   try {
@@ -59,9 +53,8 @@ export async function requestAPI<T>(
   if (data.length > 0) {
     try {
       data = JSON.parse(data);
-      if (data?.hasOwnProperty(AUTHENTICATION_ERROR) && setAuthError) {
-        setAuthError(true);
-        throw new AuthenticationError('Authentication failed');
+      if (data?.hasOwnProperty(AUTHENTICATION_ERROR)) {
+        navigate('/login', { state: { loginError: true } });
       }
     } catch (error) {
       console.log('Not a JSON response body.', response);
