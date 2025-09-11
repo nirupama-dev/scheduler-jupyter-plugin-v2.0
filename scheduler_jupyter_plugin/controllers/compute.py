@@ -33,6 +33,13 @@ class RegionController(APIHandler):
             )
             regions = await compute_client.list_region(project_id)
             self.finish(json.dumps(regions))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching regions: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching regions: {str(e)}")
             self.finish({"error": str(e)})
@@ -48,6 +55,13 @@ class NetworkController(APIHandler):
             )
             network = await compute_client.get_network()
             self.finish(json.dumps(network))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching network: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching network: {str(e)}")
             self.finish({"error": str(e)})
@@ -65,6 +79,13 @@ class SubNetworkController(APIHandler):
             )
             sub_network = await compute_client.get_subnetwork(region_id, network_id)
             self.finish(json.dumps(sub_network))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching sub network: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching sub network: {str(e)}")
             self.finish({"error": str(e)})
@@ -84,6 +105,13 @@ class SharedNetworkController(APIHandler):
                 project_id, region_id
             )
             self.finish(json.dumps(shared_network))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching network shared from host: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching network shared from host: {str(e)}")
             self.finish({"error": str(e)})
@@ -99,6 +127,13 @@ class GetXpnHostController(APIHandler):
                 )
                 xpn_host = await client.get_xpn_host()
                 self.finish(json.dumps(xpn_host))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching xpn host: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching xpn host: {str(e)}")
             self.finish({"error": str(e)})

@@ -38,7 +38,7 @@ class Client:
             logging_client = logging.Client(
                 project=self.project_id, credentials=credentials
             )
-            log_entries = logging_client.list_entries(
+            log_entries = await logging_client.list_entries(
                 filter_=filter_query, page_size=1000, order_by="timestamp desc"
             )
             for item in log_entries:
@@ -65,7 +65,7 @@ class Client:
             return logs
         except Unauthenticated as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error fetching log entries: {str(e)}")
             return {"Error fetching log entries": str(e)}

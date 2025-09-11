@@ -43,48 +43,55 @@ class Client:
         }
 
     async def list_clusters(self, page_size, page_token):
-        try:
-            dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
-            api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/regions/{self.region_id}/clusters?pageSize={page_size}&pageToken={page_token}"
-            async with self.client_session.get(
-                api_endpoint, headers=self.create_headers()
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    return resp
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    return {
-                        "error": f"Failed to fetch clusters: {response.status} {await response.text()}"
+        dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
+        api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/regions/{self.region_id}/clusters?pageSize={page_size}&pageToken={page_token}"
+        async with self.client_session.get(
+            api_endpoint, headers=self.create_headers()
+        ) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                return resp
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
                     }
-
-        except Exception as e:
-            self.log.exception("Error fetching cluster list")
-            return {"error": str(e)}
+                )
+            else:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Failed to fetch clusters: {await response.json()}",
+                        "status": response.status,
+                    }
+                )
 
     async def list_runtime(self, page_size, page_token):
-        try:
-            dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
-            api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/locations/{self.region_id}/sessionTemplates?pageSize={page_size}&pageToken={page_token}"
-            async with self.client_session.get(
-                api_endpoint, headers=self.create_headers()
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    return resp
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    return {
-                        "error": f"Failed to fetch runtimes: {response.status} {await response.text()}"
+        dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
+        api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/locations/{self.region_id}/sessionTemplates?pageSize={page_size}&pageToken={page_token}"
+        async with self.client_session.get(
+            api_endpoint, headers=self.create_headers()
+        ) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                return resp
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
                     }
-        except Exception as e:
-            self.log.exception(f"Error fetching runtime list: {str(e)}")
-            return {"error": str(e)}
+                )
+            else:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Failed to fetch runtimes: {await response.json()}",
+                        "status": response.status,
+                    }
+                )
