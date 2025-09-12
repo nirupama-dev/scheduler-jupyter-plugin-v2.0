@@ -16,6 +16,7 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     DATAPROC_SERVICE_NAME,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_OK,
     HTTP_STATUS_UNAUTHORIZED,
 )
@@ -61,6 +62,13 @@ class Client:
                         "status": response.status,
                     }
                 )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Failed to fetch clusters: {response.reason}",
+                        "status": response.status,
+                    }
+                )
             else:
                 raise RuntimeError(
                     {
@@ -85,6 +93,13 @@ class Client:
                 raise RuntimeError(
                     {
                         "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Failed to fetch runtimes: {response.reason}",
                         "status": response.status,
                     }
                 )

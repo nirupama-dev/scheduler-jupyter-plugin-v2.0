@@ -19,6 +19,7 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
     HTTP_STATUS_UNAUTHORIZED,
@@ -99,6 +100,13 @@ class Client:
             elif response.status == HTTP_STATUS_FORBIDDEN:
                 resp = await response.json()
                 return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer list: {response.reason}",
+                        "status": response.status,
+                    }
+                )
             else:
                 self.log.exception("Error listing environments")
                 raise RuntimeError(
@@ -152,6 +160,13 @@ class Client:
             elif response.status == HTTP_STATUS_FORBIDDEN:
                 resp = await response.json()
                 return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer: {response.reason}",
+                        "status": response.status,
+                    }
+                )
             else:
                 self.log.exception("Error fetching environment")
                 raise RuntimeError(

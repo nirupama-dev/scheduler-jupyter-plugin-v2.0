@@ -21,6 +21,7 @@ from google.auth.exceptions import RefreshError
 from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_OK,
     HTTP_STATUS_NO_CONTENT,
     HTTP_STATUS_UNAUTHORIZED,
@@ -166,6 +167,13 @@ class Client:
                 raise RuntimeError(
                     {
                         "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting xpn host: {response.reason}",
                         "status": response.status,
                     }
                 )

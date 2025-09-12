@@ -36,6 +36,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
     GCS,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_UNAUTHORIZED,
     PACKAGE_NAME,
     WRAPPER_PAPPERMILL_FILE,
@@ -96,6 +97,13 @@ class Client:
                 raise RuntimeError(
                     {
                         "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer bucket: {response.reason}",
                         "status": response.status,
                     }
                 )

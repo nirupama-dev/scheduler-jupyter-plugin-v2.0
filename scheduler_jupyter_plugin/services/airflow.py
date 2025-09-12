@@ -21,6 +21,7 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_UNAUTHORIZED,
     STORAGE_SERVICE_DEFAULT_URL,
     STORAGE_SERVICE_NAME,
@@ -79,10 +80,17 @@ class Client:
                         "status": response.status,
                     }
                 )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting airflow uri: {response.reason}",
+                        "status": response.status,
+                    }
+                )
             else:
                 raise RuntimeError(
                     {
-                        "ERROR": f" Error getting airflow uri: {await response.json()}",
+                        "ERROR": f"Error getting airflow uri: {await response.json()}",
                         "status": response.status,
                     }
                 )

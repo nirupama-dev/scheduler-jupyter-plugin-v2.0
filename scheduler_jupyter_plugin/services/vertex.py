@@ -23,6 +23,7 @@ from google.cloud import storage
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     CRON_EVERY_MINUTE,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
     HTTP_STATUS_NO_CONTENT,
@@ -123,6 +124,10 @@ class Client:
                         "status": response.status,
                     }
                 )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
             else:
                 self.log.exception("Error creating the schedule")
                 raise RuntimeError(
@@ -202,6 +207,10 @@ class Client:
             elif response.status == HTTP_STATUS_FORBIDDEN:
                 resp = await response.json()
                 return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
             else:
                 self.log.exception(
                     f"Error getting vertex ui config: {response.reason} {await response.text()}"
@@ -220,7 +229,7 @@ class Client:
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
         else:
-            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
+            api_endpoint = f"https://us-central-1-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
         headers = self.create_headers()
         async with self.client_session.get(api_endpoint, headers=headers) as response:
@@ -295,6 +304,10 @@ class Client:
             elif response.status == HTTP_STATUS_FORBIDDEN:
                 resp = await response.json()
                 return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
             else:
                 self.log.exception(
                     f"Error listing schedules: {response.reason} {await response.text()}"
@@ -323,6 +336,10 @@ class Client:
                         "AUTHENTICATION_ERROR": await response.json(),
                         "status": response.status,
                     }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
                 )
             else:
                 self.log.exception(
@@ -353,6 +370,10 @@ class Client:
                         "status": response.status,
                     }
                 )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
             else:
                 self.log.exception(
                     f"Error resuming the schedule: {response.reason} {await response.text()}"
@@ -382,6 +403,10 @@ class Client:
                         "status": response.status,
                     }
                 )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
             else:
                 self.log.exception(
                     f"Error deleting the schedule: {response.reason} {await response.text()}"
@@ -406,6 +431,10 @@ class Client:
                         "AUTHENTICATION_ERROR": await response.json(),
                         "status": response.status,
                     }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
                 )
             else:
                 self.log.exception(
@@ -438,6 +467,10 @@ class Client:
                         "AUTHENTICATION_ERROR": await response.json(),
                         "status": response.status,
                     }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
                 )
             else:
                 self.log.exception(
@@ -539,6 +572,10 @@ class Client:
                         "status": response.status,
                     }
                 )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
             else:
                 self.log.exception(
                     f"Error updating the schedule: {response.reason} {await response.text()}"
@@ -585,6 +622,10 @@ class Client:
                         "AUTHENTICATION_ERROR": await response.json(),
                         "status": response.status,
                     }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
                 )
             else:
                 self.log.exception(
