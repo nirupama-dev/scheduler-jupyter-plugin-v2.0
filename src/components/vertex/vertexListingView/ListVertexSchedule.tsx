@@ -52,9 +52,11 @@ import VertexListingInputLayout from './VertexListingInput';
 import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 
 const ListVertexSchedule = ({
-  abortControllers
+  abortControllers,
+  app
 }: {
   abortControllers: any;
+  app: any;
 }) => {
   const { region: regionParam } = useParams<{ region: string }>();
   const [region, setRegion] = useState<string>(regionParam || ''); // assign from param if available
@@ -162,10 +164,11 @@ const ListVertexSchedule = ({
       }));
       setRegionDisable(true);
       const listVertexPayload = {
-        region,
+        region: 'us-central1',
         nextToken,
         scheduleListPageLength,
-        abortControllers
+        abortControllers,
+        app
       };
       const scheduleApiData =
         await VertexServices.listVertexSchedules(listVertexPayload);

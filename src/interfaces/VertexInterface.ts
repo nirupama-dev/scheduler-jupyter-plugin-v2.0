@@ -240,6 +240,7 @@ export interface IVertexListPayload {
   nextToken: string | null | undefined;
   scheduleListPageLength: number;
   abortControllers: any;
+  app: any;
 }
 
 export interface IVertexScheduleRun {

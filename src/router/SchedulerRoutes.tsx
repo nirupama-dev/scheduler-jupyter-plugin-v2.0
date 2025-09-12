@@ -91,7 +91,10 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                   />
                 }
               >
-                <ListVertexSchedule abortControllers={abortControllers} />
+                <ListVertexSchedule
+                  abortControllers={abortControllers}
+                  app={app}
+                />
               </Suspense>
             }
           />

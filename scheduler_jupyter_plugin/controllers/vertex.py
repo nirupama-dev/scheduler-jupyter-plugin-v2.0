@@ -90,6 +90,13 @@ class ScheduleListController(APIHandler):
                     region_id, page_size, next_page_token
                 )
                 self.finish(json.dumps(schedules))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+ 
+            self.log.exception(f"Error fetching list of schedules: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching list of schedules: {str(e)}")
             self.finish({"error": str(e)})

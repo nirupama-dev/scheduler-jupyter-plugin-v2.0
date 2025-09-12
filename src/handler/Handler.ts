@@ -17,19 +17,21 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import { AUTHENTICATION_ERROR } from '../utils/Constants';
-import { useNavigate } from 'react-router-dom';
+import {
+  AUTHENTICATION_ERROR,
+  OPEN_LOGIN_WIDGET_COMMAND
+} from '../utils/Constants';
 
 /**
  * Call the API extension
- *
  * @param endPoint API REST end point for the extension
  * @param init Initial values for the request
  * @returns The response body interpreted as JSON
  */
 export async function requestAPI<T>(
   endPoint = '',
-  init: RequestInit = {}
+  init: RequestInit = {},
+  app?: any
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
@@ -39,11 +41,12 @@ export async function requestAPI<T>(
     endPoint
   );
 
-  const navigate = useNavigate();
-
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
+    if (response.status === 401 && app) {
+      app.commands.execute(OPEN_LOGIN_WIDGET_COMMAND);
+    }
   } catch (error) {
     throw new ServerConnection.NetworkError(error as Error);
   }
@@ -54,7 +57,6 @@ export async function requestAPI<T>(
     try {
       data = JSON.parse(data);
       if (data?.hasOwnProperty(AUTHENTICATION_ERROR)) {
-        navigate('/login', { state: { loginError: true } });
       }
     } catch (error) {
       console.log('Not a JSON response body.', response);

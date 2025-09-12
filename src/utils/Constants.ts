@@ -18,6 +18,7 @@
 import { ILabelValue } from '../interfaces/CommonInterface';
 import { ConfigService } from '../services/common/ConfigService';
 
+export const PLUGIN_ID = 'scheduler-jupyter-plugin';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { version, name } = require('../../package.json');
 export const VERSION_DETAIL = version;
@@ -310,3 +311,5 @@ export const VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT =
 export const AUTHENTICATION_ERROR = 'AUTHENTICATION_ERROR';
 
 export const DEFAULT_LOADING_TEXT = 'Loading...';
+
+export const OPEN_LOGIN_WIDGET_COMMAND = `${PLUGIN_ID}:route-to-login-page`;

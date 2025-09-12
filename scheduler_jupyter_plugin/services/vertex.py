@@ -207,89 +207,94 @@ class Client:
         return get_description(cron)
 
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
-        try:
-            result = {}
-
-            if next_page_token:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
-
-            else:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
-
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    if not resp:
-                        return result
-                    else:
-                        schedule_list = []
-                        schedules = resp.get("schedules")
-                        for schedule in schedules:
-                            # filter for a workbench schedule 
-                            # ie atleast any one of the following is not available.
-                            # workbenchRuntime or kernel or customEnvironmentSpec
-                            if schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob") is None:
-                                continue
-                            notebook_execution_job = schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob")
-                            if (
-                                notebook_execution_job.get("workbenchRuntime") is None
-                                and notebook_execution_job.get("kernelName") is None
-                                and notebook_execution_job.get("customEnvironmentSpec") is None
-                            ):
-                                continue
-                            max_run_count = schedule.get("maxRunCount")
-                            cron = schedule.get("cron")
-                            cron_value = (
-                                cron.split(" ", 1)[1]
-                                if (cron and "TZ" in cron)
-                                else cron
-                            )
-                            if max_run_count == "1" and cron_value == CRON_EVERY_MINUTE:
-                                schedule_value = "run once"
-                            else:
-                                schedule_value = self.parse_schedule(cron)
-
-                            formatted_schedule = {
-                                "name": schedule.get("name"),
-                                "displayName": schedule.get("displayName"),
-                                "schedule": schedule_value,
-                                "status": schedule.get("state"),
-                                "createTime": schedule.get("createTime"),
-                                "nextRunTime": schedule.get("nextRunTime"),
-                                "gcsNotebookSourceUri": schedule.get(
-                                    "createNotebookExecutionJobRequest"
-                                )
-                                .get("notebookExecutionJob")
-                                .get("gcsNotebookSource"),
-                                "lastScheduledRunResponse": schedule.get(
-                                    "lastScheduledRunResponse"
-                                ),
-                            }
-                            schedule_list.append(formatted_schedule)
-                        resp["schedules"] = schedule_list
-                        result.update(resp)
-                        return result
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                elif response.status == HTTP_STATUS_FORBIDDEN:
-                    resp = await response.json()
-                    return resp
+        result = {}
+ 
+        if next_page_token:
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
+ 
+        else:
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
+ 
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                if not resp:
+                    return result
                 else:
-                    self.log.exception(
-                        f"Error listing schedules: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error listing schedules: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error fetching schedules: {str(e)}")
-            return {"Error fetching schedules": str(e)}
+                    schedule_list = []
+                    schedules = resp.get("schedules")
+                    for schedule in schedules:
+                        # filter for a workbench schedule
+                        # ie atleast any one of the following is not available.
+                        # workbenchRuntime or kernel or customEnvironmentSpec
+                        if (
+                            schedule.get("createNotebookExecutionJobRequest").get(
+                                "notebookExecutionJob"
+                            )
+                            is None
+                        ):
+                            continue
+                        notebook_execution_job = schedule.get(
+                            "createNotebookExecutionJobRequest"
+                        ).get("notebookExecutionJob")
+                        if (
+                            notebook_execution_job.get("workbenchRuntime") is None
+                            and notebook_execution_job.get("kernelName") is None
+                            and notebook_execution_job.get("customEnvironmentSpec")
+                            is None
+                        ):
+                            continue
+                        max_run_count = schedule.get("maxRunCount")
+                        cron = schedule.get("cron")
+                        cron_value = (
+                            cron.split(" ", 1)[1] if (cron and "TZ" in cron) else cron
+                        )
+                        if max_run_count == "1" and cron_value == CRON_EVERY_MINUTE:
+                            schedule_value = "run once"
+                        else:
+                            schedule_value = self.parse_schedule(cron)
+ 
+                        formatted_schedule = {
+                            "name": schedule.get("name"),
+                            "displayName": schedule.get("displayName"),
+                            "schedule": schedule_value,
+                            "status": schedule.get("state"),
+                            "createTime": schedule.get("createTime"),
+                            "nextRunTime": schedule.get("nextRunTime"),
+                            "gcsNotebookSourceUri": schedule.get(
+                                "createNotebookExecutionJobRequest"
+                            )
+                            .get("notebookExecutionJob")
+                            .get("gcsNotebookSource"),
+                            "lastScheduledRunResponse": schedule.get(
+                                "lastScheduledRunResponse"
+                            ),
+                        }
+                        schedule_list.append(formatted_schedule)
+                    resp["schedules"] = schedule_list
+                    result.update(resp)
+                    return result
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_FORBIDDEN:
+                resp = await response.json()
+                return resp
+            else:
+                self.log.exception(
+                    f"Error listing schedules: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def pause_schedule(self, region_id, schedule_id):
         try:

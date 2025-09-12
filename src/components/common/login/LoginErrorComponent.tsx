@@ -15,48 +15,41 @@
  * limitations under the License.
  */
 
-import React, { useEffect, useState } from 'react';
-import { login } from './Config';
+import React from 'react';
+// import { login } from './Config';
 import { IconsigninGoogle } from '../../../utils/Icons';
-import { useLocation } from 'react-router-dom';
+// import { useLocation } from 'react-router-dom';
 
 const LoginErrorComponent: React.FC = () => {
-  const location = useLocation();
-  const { loginError } = location.state;
-  const [error, setError] = useState(loginError);
+  // const location = useLocation();
+  // const { loginError } = location.state;
+  // const [error, setError] = useState(loginError);
 
-  useEffect(() => {
-    setError(loginError);
-  }, [loginError]);
+  // useEffect(() => {
+  //   setError(loginError);
+  // }, [loginError]);
 
   const handleLogin = async () => {
-    const result = await login();
-    setError(!result);
+    // const result = await login();
+    // setError(!result);
   };
 
-  console.log('login error component', error);
+  // console.log('login error component', error);
 
-  if (error) {
-    return (
-      <>
-        <div className="login-error">Please login to continue</div>
-        <div style={{ alignItems: 'center' }}>
-          <div
-            role="button"
-            className="signin-google-icon"
-            onClick={handleLogin}
-          >
-            <IconsigninGoogle.react
-              tag="div"
-              className="logo-alignment-style"
-            />
-          </div>
+  // if (error) {
+  return (
+    <>
+      <div className="login-error">Please login to continue</div>
+      <div style={{ alignItems: 'center' }}>
+        <div role="button" className="signin-google-icon" onClick={handleLogin}>
+          <IconsigninGoogle.react tag="div" className="logo-alignment-style" />
         </div>
-      </>
-    );
-  }
+      </div>
+    </>
+  );
+  // }
 
-  return null;
+  // return null;
 };
 
 export default LoginErrorComponent;
