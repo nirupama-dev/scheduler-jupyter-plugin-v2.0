@@ -83,7 +83,8 @@ export const CreateNotebookSchedule = (
    */
   const {
     sessionContext,
-    initialKernalScheduleDetails: preFetchedInitialDetails // kernal and scheduler type (vertex/composer)
+    initialKernalScheduleDetails: preFetchedInitialDetails, // kernal and scheduler type (vertex/composer)
+    app
   } = createScheduleProps; //sessionContext is used to fetch the initial kernel details
 
   /**
@@ -388,6 +389,7 @@ export const CreateNotebookSchedule = (
   // Function to handle cancel action
   const handleCancel = () => {
     console.log('Cancelled');
+    app.shell.activeWidget?.close();
     reset(); // Reset form to default values
     // TODO: Add navigation logic
   };
