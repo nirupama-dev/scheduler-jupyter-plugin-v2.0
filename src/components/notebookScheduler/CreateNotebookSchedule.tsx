@@ -305,14 +305,12 @@ export const CreateNotebookSchedule = (
    * @param credentials The authentication credentials for the user.
    */
   const onSubmit = async (data: CombinedCreateFormValues) => {
-    console.log('On Submit');
     if (!initialFormData.credentials) {
       console.error('Credentials not available.');
       //TODO: handle credentials
       return;
     }
     let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
-    // let routingParamForListing = '';
     //vertex payload creation
     if (
       data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
@@ -339,8 +337,6 @@ export const CreateNotebookSchedule = (
             vertexData.vertexRegion
           );
       }
-      // routingParamForListing =
-      //   '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
       if (isSaveSuccessfull) {
         if (setVertexRouteState) {
           setVertexRouteState({
@@ -371,7 +367,6 @@ export const CreateNotebookSchedule = (
           composerPayload.region_id, // ToDO
           initialFormData.editModeData?.editMode
         );
-      // routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
       if (isSaveSuccessfull) {
         if (setComposerRouteState) {
           setComposerRouteState({
@@ -388,13 +383,6 @@ export const CreateNotebookSchedule = (
         //TODO: Retain the form. probably remove this.
       }
     }
-    console.log('is save successful', isSaveSuccessfull);
-    // if (isSaveSuccessfull) {
-    //   //TODO: // redirect to list page or show success message
-    //   navigate(`/list/${routingParamForListing}`);
-    // } else {
-    //   //TODO: Retain the form. probably remove this.
-    // }
   };
 
   // Function to handle cancel action
@@ -403,7 +391,6 @@ export const CreateNotebookSchedule = (
     reset(); // Reset form to default values
     // TODO: Add navigation logic
   };
-  console.log(' Scheduler:', schedulerSelection);
   //return if form is not valid
   if (
     !initialFormData.credentials ||

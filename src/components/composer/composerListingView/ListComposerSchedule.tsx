@@ -574,7 +574,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     (cell: ICellProps) => {
       if (cell.column.Header === 'Actions') {
         return (
-          <td {...cell.getCellProps()} className="scheduler-table-data table-cell-overflow">
+          <td
+            {...cell.getCellProps()}
+            className="scheduler-table-data table-cell-overflow"
+          >
             {renderActions(
               cell.row.original,
               isGCSPluginInstalled,
