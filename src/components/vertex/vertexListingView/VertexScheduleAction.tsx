@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { FC } from 'react';
+import React from 'react';
 import {
   iconDeleteAction,
   iconEditNotebook,
@@ -23,48 +23,12 @@ import {
   iconPlay,
   iconTrigger
 } from '../../../utils/Icons';
-import { LabIcon } from '@jupyterlab/ui-components';
-import { LabIconComponent } from '../../common/table/LabIcon';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import {
   IVertexListingLoadingState,
   IVertexSelectedActionProps
 } from '../../../interfaces/VertexInterface';
-
-interface IActionButtonProps {
-  title: string;
-  icon: LabIcon;
-  onClick?: (e: React.MouseEvent) => void;
-  disabled?: boolean;
-  className?: string;
-}
-
-const ActionButton: FC<IActionButtonProps> = ({
-  title,
-  onClick,
-  icon,
-  disabled = false,
-  className = 'icon-buttons-style'
-}) => {
-  return (
-    <div
-      role="button"
-      className={disabled ? 'icon-buttons-style-disable' : className}
-      title={title}
-      onClick={e => {
-        if (!disabled) {
-          onClick?.(e);
-        }
-      }}
-    >
-      <LabIconComponent
-        icon={icon}
-        className="icon-white logo-alignment-style"
-        tag="div"
-      />
-    </div>
-  );
-};
+import { ActionButton } from '../../common/button/ActionButton';
 
 export const renderActions = (
   data: any,

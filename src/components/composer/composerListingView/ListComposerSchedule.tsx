@@ -19,7 +19,10 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputListingDropdown } from '../../common/formFields/FormInputDropdown';
 import { authApi } from '../../common/login/Config';
 import { useForm } from 'react-hook-form';
-import { IDropdownOption } from '../../../interfaces/FormInterface';
+import {
+  IDropdownOption,
+  IEnvDropDownOption
+} from '../../../interfaces/FormInterface';
 import { ComputeServices } from '../../../services/common/Compute';
 import {
   IDagList,
@@ -32,7 +35,7 @@ import { usePagination, useTable } from 'react-table';
 import { ICellProps } from '../../common/table/Utils';
 import { renderActions } from './RenderActions';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
-import { CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import {
   LOG_LEVEL,
   SchedulerLoggingService
@@ -40,6 +43,7 @@ import {
 import DeletePopup from '../../common/table/DeletePopup';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
+  composerEnvironmentStateList,
   GCS_PLUGIN_ID,
   POLLING_DAG_LIST_INTERVAL,
   POLLING_IMPORT_ERROR_INTERVAL
@@ -56,7 +60,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const setComposerRouteState = schedulerContext?.setComposerRouteState;
   const { control, setValue, watch } = useForm();
   const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
-  const [envOptions, setEnvOptions] = useState<IDropdownOption[]>([]);
+  const [envOptions, setEnvOptions] = useState<IEnvDropDownOption[]>([]);
   const [dagList, setDagList] = useState<IDagList[]>([]);
   const data = dagList;
   const [loadingState, setLoadingState] =
@@ -570,7 +574,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     (cell: ICellProps) => {
       if (cell.column.Header === 'Actions') {
         return (
-          <td {...cell.getCellProps()} className="scheduler-table-data">
+          <td {...cell.getCellProps()} className="scheduler-table-data table-cell-overflow">
             {renderActions(
               cell.row.original,
               isGCSPluginInstalled,
@@ -657,6 +661,26 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               setValue={setValue}
               loading={loadingState.environment}
               onChangeCallback={handleEnvChange}
+              getOptionDisabled={option =>
+                !composerEnvironmentStateList.includes(option.state as string)
+              }
+              renderOption={(props: any, option: any) => {
+                const { key, ...optionProps } = props;
+                return (
+                  <Box key={key} component="li" {...optionProps}>
+                    {composerEnvironmentStateList.includes(
+                      option.state as string
+                    ) ? (
+                      <div>{option.value}</div>
+                    ) : (
+                      <div className="env-option-row">
+                        <div>{option.value}</div>
+                        <div>{option.state}</div>
+                      </div>
+                    )}
+                  </Box>
+                );
+              }}
               //   error={errors.environment}
             />
           </div>
@@ -685,12 +709,12 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         )}
       </div>
       {dagList.length > 0 ? (
-        <div className="table-space-around">
+        <div className="notebook-templates-list-tabl e-parent table-cell-flow table-space-around scroll-list">
           <TableData
             getTableProps={getTableProps}
             headerGroups={headerGroups}
             getTableBodyProps={getTableBodyProps}
-            isLoading={loadingState.dags}
+            isLoading={!dagList && loadingState.dags}
             rows={rows}
             page={page}
             prepareRow={prepareRow}
