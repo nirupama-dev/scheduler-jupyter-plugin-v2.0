@@ -31,6 +31,7 @@ import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import {
   COMPOSER_SCHEDULER_NAME,
+  SCHEDULE_LABEL_VERTEX,
   SCHEDULER_OPTIONS,
   VERTEX_SCHEDULER_NAME
 } from '../../utils/Constants';
@@ -66,7 +67,7 @@ import {
   transformComposerScheduleDataToZodSchema,
   transformZodSchemaToComposerSchedulePayload
 } from '../../utils/ComposerDataTransform';
-import { useVertexContext } from '../../context/vertex/VertexListContext';
+import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 
 /**
  * Create Notebook Schedule Parent component that renders common components
@@ -102,9 +103,9 @@ export const CreateNotebookSchedule = (
     environment: string;
   }>();
 
-  const vertexContext = useVertexContext();
-  const setVertexRouteState = vertexContext?.setVertexRouteState;
-  const setComposerRouteState = vertexContext?.setComposerRouteState;
+  const schedulerContext = useSchedulerContext();
+  const setVertexRouteState = schedulerContext?.setVertexRouteState;
+  const setComposerRouteState = schedulerContext?.setComposerRouteState;
 
   /**
    * A unified state to manage all form-related data including edit mode,
@@ -311,7 +312,7 @@ export const CreateNotebookSchedule = (
       return;
     }
     let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
-    let routingParamForListing = '';
+    // let routingParamForListing = '';
     //vertex payload creation
     if (
       data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
@@ -323,7 +324,6 @@ export const CreateNotebookSchedule = (
           vertexData,
           initialFormData.credentials.project_id
         );
-      console.log('Vertex Payload:', vertexPayload);
 
       if (initialFormData.editModeData?.editMode && scheduleId) {
         isSaveSuccessfull =
@@ -339,12 +339,12 @@ export const CreateNotebookSchedule = (
             vertexData.vertexRegion
           );
       }
-      routingParamForListing =
-        '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
+      // routingParamForListing =
+      //   '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
       if (isSaveSuccessfull) {
         if (setVertexRouteState) {
           setVertexRouteState({
-            schedulerName: VERTEX_SCHEDULER_NAME,
+            schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
             region: vertexData.vertexRegion
           });
         }
@@ -371,7 +371,7 @@ export const CreateNotebookSchedule = (
           composerPayload.region_id, // ToDO
           initialFormData.editModeData?.editMode
         );
-      routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
+      // routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
       if (isSaveSuccessfull) {
         if (setComposerRouteState) {
           setComposerRouteState({

@@ -17,7 +17,7 @@
 
 import React, { ReactNode, useState } from 'react';
 import { IActivePaginationVariables } from '../../interfaces/VertexInterface';
-import { VertexListContext } from './VertexListContext';
+import { SchedulerContext } from './SchedulerContext';
 
 // Provider component
 export const VertexListProvider = ({ children }: { children: ReactNode }) => {
@@ -34,8 +34,8 @@ export const VertexListProvider = ({ children }: { children: ReactNode }) => {
     setComposerRouteState
   };
   return (
-    <VertexListContext.Provider value={value}>
+    <SchedulerContext.Provider value={value}>
       {children}
-    </VertexListContext.Provider>
+    </SchedulerContext.Provider>
   );
 };

@@ -348,7 +348,7 @@ export interface IVertexListingInputProps {
   handleCurrentPageRefresh: () => void;
 }
 
-export interface IVertexListContext {
+export interface ISchedulerContext {
   activePaginationVariables: IActivePaginationVariables | null;
   setActivePaginationVariables: React.Dispatch<
     React.SetStateAction<IActivePaginationVariables | null>

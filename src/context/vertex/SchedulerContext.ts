@@ -16,12 +16,12 @@
  */
 
 import { createContext, useContext } from 'react';
-import { IVertexListContext } from '../../interfaces/VertexInterface';
+import { ISchedulerContext } from '../../interfaces/VertexInterface';
 
 // Create the context
-export const VertexListContext = createContext<IVertexListContext | null>(null);
+export const SchedulerContext = createContext<ISchedulerContext | null>(null);
 
 // Create a custom hook to use the context
-export const useVertexContext = () => {
-  return useContext(VertexListContext);
+export const useSchedulerContext = () => {
+  return useContext(SchedulerContext);
 };

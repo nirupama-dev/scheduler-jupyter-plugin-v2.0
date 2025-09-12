@@ -28,7 +28,7 @@ import {
   LOADER_CONTENT_VERTEX_EXECUTION_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
-import { VertexListProvider } from '../context/vertex/VertexListprovider';
+import { VertexListProvider } from '../context/vertex/SchedulerProvider';
 
 /**
  *

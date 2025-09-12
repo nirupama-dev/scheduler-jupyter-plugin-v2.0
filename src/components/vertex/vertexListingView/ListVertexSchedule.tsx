@@ -49,7 +49,7 @@ import DeletePopup from '../../common/table/DeletePopup';
 import { abortApiCall } from '../../../utils/Config';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
 import VertexListingInputLayout from './VertexListingInput';
-import { useVertexContext } from '../../../context/vertex/VertexListContext';
+import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 
 const ListVertexSchedule = ({
   abortControllers
@@ -60,12 +60,12 @@ const ListVertexSchedule = ({
   const navigate = useNavigate();
 
   // Consume the context value
-  const vertexContext = useVertexContext();
-  const activePaginationVariables = vertexContext?.activePaginationVariables;
+  const schedulerContext = useSchedulerContext();
+  const activePaginationVariables = schedulerContext?.activePaginationVariables;
   const setActivePaginationVariables =
-    vertexContext?.setActivePaginationVariables;
-  const vertexRouteState = vertexContext?.vertexRouteState;
-  const setVertexRouteState = vertexContext?.setVertexRouteState;
+    schedulerContext?.setActivePaginationVariables;
+  const vertexRouteState = schedulerContext?.vertexRouteState;
+  const setVertexRouteState = schedulerContext?.setVertexRouteState;
 
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
@@ -589,7 +589,15 @@ const ListVertexSchedule = ({
       }
     };
 
-    fetchRegion();
+    if (vertexRouteState) {
+      setRegion(vertexRouteState.region);
+      if (setVertexRouteState) {
+        setVertexRouteState(null);
+      }
+      return;
+    } else {
+      fetchRegion();
+    }
   }, []);
 
   /**

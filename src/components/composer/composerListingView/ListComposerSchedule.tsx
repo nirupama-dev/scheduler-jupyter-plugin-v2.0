@@ -48,8 +48,12 @@ import { PaginationView } from '../../common/table/PaginationView';
 import ImportErrorPopup from './ImportErrorPopup';
 import { useNavigate } from 'react-router-dom';
 import PollingTimer from '../../../utils/PollingTimer';
+import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
+  const schedulerContext = useSchedulerContext();
+  const composerRouteState = schedulerContext?.composerRouteState;
+  const setComposerRouteState = schedulerContext?.setComposerRouteState;
   const { control, setValue, watch } = useForm();
   const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<IDropdownOption[]>([]);
@@ -466,7 +470,21 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         console.error('Failed to load initial auth credentials:', error);
       }
     };
-    loadInitialCredentials();
+
+    if (
+      composerRouteState.region &&
+      composerRouteState.environment &&
+      composerRouteState.projectId
+    ) {
+      setValue('projectId', composerRouteState.projectId);
+      setValue('composerRegion', composerRouteState.region);
+      setValue('environment', composerRouteState.environment);
+      if (setComposerRouteState) {
+        setComposerRouteState(null);
+      }
+    } else {
+      loadInitialCredentials();
+    }
   }, [setValue]);
 
   // --- Fetch Regions based on selected Project ID ---
