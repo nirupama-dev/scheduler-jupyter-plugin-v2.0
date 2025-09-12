@@ -32,7 +32,7 @@ import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
-import { IDropdownOption } from '../../interfaces/FormInterface';
+import { IEnvDropDownOption } from '../../interfaces/FormInterface';
 
 /**
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
@@ -186,7 +186,7 @@ export class ComposerServices {
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
-  ): Promise<IDropdownOption[]> => {
+  ): Promise<IEnvDropDownOption[]> => {
     const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
       `composerList?project_id=${projectId}&region_id=${region}`
     );
@@ -196,10 +196,11 @@ export class ComposerServices {
       throw new Error('Invalid response format for composer environments');
     }
 
-    const environmentOptions: IDropdownOption[] = formattedResponse.map(
+    const environmentOptions: IEnvDropDownOption[] = formattedResponse.map(
       (env: IComposerEnvAPIResponse) => ({
         label: env.label,
-        value: env.name
+        value: env.name,
+        state: env.state
       })
     );
     environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
@@ -282,7 +283,7 @@ export class ComposerServices {
     bucketName: string,
     dagId: string
   ): Promise<any> => {
-    const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
+    const serviceURL = `getInputFileName?&dag_id=${dagId}&bucket_name=${bucketName}`;
     const formattedResponse: any = await requestAPI(serviceURL, {
       method: 'POST'
     });
