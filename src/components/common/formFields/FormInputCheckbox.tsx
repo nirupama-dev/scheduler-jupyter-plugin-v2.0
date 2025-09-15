@@ -50,6 +50,11 @@ export const FormInputCheckbox: React.FC<IFormInputCheckboxProps> = ({
       label={label}
       disabled={disabled}
       value={isChecked}
+      sx={{
+        '& .MuiTypography-root': {
+          fontSize: '0.813rem' // Adjust the size as needed
+        }
+      }}
     />
   );
 };
