@@ -370,6 +370,7 @@ export const CreateNotebookSchedule = (
     reset(); // Reset form to default values
     // TODO: Add navigation logic
   };
+
   console.log(' Scheduler:', schedulerSelection);
   //return if form is not valid
   if (
@@ -380,108 +381,114 @@ export const CreateNotebookSchedule = (
   ) {
     return <div>Loading...</div>;
   }
+
   return (
-    <div className="component-level">
-      <div className="create-form-header">
-        <div role="button" className="back-arrow-icon" onClick={handleCancel}>
-          <iconLeftArrow.react
-            tag="div"
-            className="logo-alignment-style" //icon-white
-          />
-        </div>
-        <div className="create-job-scheduler-title">
-          {initialFormData.editModeData?.editMode
-            ? 'Update Scheduled Notebook Job'
-            : 'Create Scheduled Notebook Job'}
-        </div>
-      </div>
-      <form onSubmit={handleSubmit(data => onSubmit(data))}>
-        <div className="common-fields">
-          <div className="scheduler-tag-style">
-            <FormInputText
-              label="Job Name"
-              control={control}
-              name="jobName"
-              error={errors.jobName}
+    console.log('selected radio button', getValues('schedulerSelection')),
+    (
+      <div className="component-level">
+        <div className="create-form-header">
+          <div role="button" className="back-arrow-icon" onClick={handleCancel}>
+            <iconLeftArrow.react
+              tag="div"
+              className="logo-alignment-style" //icon-white
             />
           </div>
-
-          <div className="create-scheduler-form-element-input-file">
+          <div className="create-job-scheduler-title">
+            {initialFormData.editModeData?.editMode
+              ? 'Update Scheduled Notebook Job'
+              : 'Create Scheduled Notebook Job'}
+          </div>
+        </div>
+        <form onSubmit={handleSubmit(data => onSubmit(data))}>
+          <div className="common-fields">
             <div className="scheduler-tag-style">
               <FormInputText
-                label="Input File"
+                label="Job Name"
                 control={control}
-                name="inputFile"
-                error={errors.inputFile}
-                disabled={true}
+                name="jobName"
+                error={errors.jobName}
               />
             </div>
-          </div>
 
-          <div className="scheduler-form-element-container">
-            <FormInputRadio
-              name="schedulerSelection"
-              control={control}
-              className="schedule-radio-btn"
-              options={SCHEDULER_OPTIONS.map(option => ({
-                ...option,
-                disabled:
-                  initialFormData.editModeData?.editMode ||
-                  (initialFormData.initialDefaults?.kernelDetails
-                    ?.executionMode !== 'local' &&
-                    option.value === 'vertex')
-              }))}
-              error={errors.schedulerSelection}
-            />
-          </div>
-          {/* Conditionally render specific scheduler components */}
-          {schedulerSelection === VERTEX_SCHEDULER_NAME && (
-            <CreateVertexSchedule
-              control={control}
-              errors={errors as Record<keyof VertexSchedulerFormValues, any>}
-              setValue={setValue}
-              watch={watch}
-              getValues={getValues}
-              trigger={trigger}
-              isValid={isValid}
-              credentials={initialFormData.credentials}
-              editScheduleData={initialFormData.editModeData}
-            />
-          )}
-          {schedulerSelection === COMPOSER_SCHEDULER_NAME && (
-            <CreateComposerSchedule
-              control={control}
-              errors={errors as Record<keyof ComposerSchedulerFormValues, any>}
-              setValue={setValue}
-              watch={watch}
-              setError={setError}
-              getValues={getValues}
-              trigger={trigger}
-              credentials={initialFormData.credentials}
-              editScheduleData={initialFormData.editModeData}
-            />
-          )}
+            <div className="create-scheduler-form-element-input-file">
+              <div className="scheduler-tag-style">
+                <FormInputText
+                  label="Input File"
+                  control={control}
+                  name="inputFile"
+                  error={errors.inputFile}
+                  disabled={true}
+                />
+              </div>
+            </div>
 
-          <div className="save-overlay">
-            <Button
-              variant="contained"
-              aria-label="Create Schedule"
-              type="submit"
-              disabled={!isValid}
-            >
-              <div>CREATE</div>
-            </Button>
-            <Button
-              variant="outlined"
-              aria-label="cancel Batch"
-              type="button"
-              onClick={handleCancel}
-            >
-              <div>CANCEL</div>
-            </Button>
+            <div className="scheduler-form-element-container">
+              <FormInputRadio
+                name="schedulerSelection"
+                control={control}
+                className="schedule-radio-btn"
+                options={SCHEDULER_OPTIONS.map(option => ({
+                  ...option,
+                  disabled:
+                    initialFormData.editModeData?.editMode ||
+                    (initialFormData.initialDefaults?.kernelDetails
+                      ?.executionMode !== 'local' &&
+                      option.value === 'vertex')
+                }))}
+                error={errors.schedulerSelection}
+              />
+            </div>
+            {/* Conditionally render specific scheduler components */}
+            {schedulerSelection === VERTEX_SCHEDULER_NAME && (
+              <CreateVertexSchedule
+                control={control}
+                errors={errors as Record<keyof VertexSchedulerFormValues, any>}
+                setValue={setValue}
+                watch={watch}
+                getValues={getValues}
+                trigger={trigger}
+                isValid={isValid}
+                credentials={initialFormData.credentials}
+                editScheduleData={initialFormData.editModeData}
+              />
+            )}
+            {schedulerSelection === COMPOSER_SCHEDULER_NAME && (
+              <CreateComposerSchedule
+                control={control}
+                errors={
+                  errors as Record<keyof ComposerSchedulerFormValues, any>
+                }
+                setValue={setValue}
+                watch={watch}
+                setError={setError}
+                getValues={getValues}
+                trigger={trigger}
+                credentials={initialFormData.credentials}
+                editScheduleData={initialFormData.editModeData}
+              />
+            )}
+
+            <div className="save-overlay">
+              <Button
+                variant="contained"
+                aria-label="Create Schedule"
+                type="submit"
+                disabled={!isValid}
+              >
+                <div>CREATE</div>
+              </Button>
+              <Button
+                variant="outlined"
+                aria-label="cancel Batch"
+                type="button"
+                onClick={handleCancel}
+              >
+                <div>CANCEL</div>
+              </Button>
+            </div>
           </div>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
+    )
   );
 };

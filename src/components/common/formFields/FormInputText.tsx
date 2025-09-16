@@ -27,7 +27,8 @@ export const FormInputText = ({
   error,
   type,
   onBlurCallback,
-  disabled
+  disabled,
+  onChangeCallback
 }: IFormInputProps) => {
   return (
     <Controller
@@ -42,7 +43,12 @@ export const FormInputText = ({
           helperText={fieldError ? fieldError.message : null}
           size="small"
           error={!!fieldError}
-          onChange={onChange}
+          onChange={event => {
+            onChange(event); // Update react-hook-form state
+            if (onChangeCallback) {
+              onChangeCallback(event.target.value); // Trigger parent's sync logic
+            }
+          }}
           value={value ?? ''}
           fullWidth
           label={label}
