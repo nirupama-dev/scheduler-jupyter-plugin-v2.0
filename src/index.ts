@@ -141,6 +141,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
         widget.title.closable = true;
         app.shell.add(widget, 'main');
         app.shell.activateById(widget.id);
+        //TODO: Add logic to check is it exist. Focus should conme to existing widget
       }
     });
 

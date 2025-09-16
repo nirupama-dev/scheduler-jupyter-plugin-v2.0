@@ -21,6 +21,7 @@ import {
   AUTHENTICATION_ERROR,
   OPEN_LOGIN_WIDGET_COMMAND
 } from '../utils/Constants';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 /**
  * Call the API extension
@@ -31,7 +32,7 @@ import {
 export async function requestAPI<T>(
   endPoint = '',
   init: RequestInit = {},
-  app?: any
+  app?: JupyterFrontEnd
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
