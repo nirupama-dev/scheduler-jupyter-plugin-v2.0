@@ -98,7 +98,7 @@ const getDefaultVertexValues = (
     diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
     diskSize: DEFAULT_DISK_SIZE,
     scheduleMode: 'runNow',
-    internalScheduleMode: undefined,
+    internalScheduleMode: 'cronFormat',
     scheduleFieldCronFormat: '',
     scheduleValueUserFriendly: '',
     startTime: undefined,
