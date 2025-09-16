@@ -36,10 +36,6 @@ import { ICellProps } from '../../common/table/Utils';
 import { renderActions } from './RenderActions';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import { Box, CircularProgress } from '@mui/material';
-import {
-  LOG_LEVEL,
-  SchedulerLoggingService
-} from '../../../services/common/LoggingService';
 import DeletePopup from '../../common/table/DeletePopup';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
@@ -256,23 +252,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
 
         if (response?.status === 0) {
-          Notification.success(`Scheduler ${dag_id} updated successfully`, {
-            autoClose: false
-          });
-
           await handleEnvChange(selectedEnv ?? '');
-        } else {
-          const errorResponse = `Error in updating the schedule: ${response?.error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
         }
-      } catch (error) {
-        SchedulerLoggingService.log('Error in Update API', LOG_LEVEL.ERROR);
-        const errorResponse = `Error in updating the schedule: ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
       } finally {
         setLoadingState(prev => ({ ...prev, update: '' }));
       }
@@ -291,40 +272,12 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, trigger: dag_id }));
 
       try {
-        const response = await ComposerServices.triggerDagService(
+        await ComposerServices.triggerDagService(
           dag_id,
           selectedEnv ?? '',
           selectedProjectId,
           selectedRegion
         );
-
-        // Check for success or different types of errors
-        if (response?.error) {
-          if (response.length > 0) {
-            // This condition checks the response from checkRequiredPackages
-            Notification.error(
-              `Failed to trigger ${dag_id} : required packages are not installed`,
-              { autoClose: false }
-            );
-          } else {
-            Notification.error(
-              `Failed to trigger ${dag_id} : ${response?.error}`,
-              {
-                autoClose: false
-              }
-            );
-          }
-        } else {
-          // Success case
-          Notification.success(`${dag_id} triggered successfully `, {
-            autoClose: false
-          });
-        }
-      } catch (reason) {
-        // Catch network or unexpected errors
-        Notification.error(`Failed to trigger ${dag_id} : ${reason}`, {
-          autoClose: false
-        });
       } finally {
         setLoadingState(prev => ({ ...prev, trigger: '' }));
       }
@@ -343,16 +296,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
 
         if (response?.input_filename) {
           setInputNotebookFilePath(response.input_filename);
-        } else {
-          handleErrorToast({
-            error: `Error in fetching filename for ${dag_id}`
-          });
         }
-      } catch (reason) {
-        const errorResponse = `Error on POST: ${reason}`;
-        handleErrorToast({
-          error: errorResponse
-        });
       } finally {
         // Always reset the loading state
         setLoadingState(prev => ({ ...prev, editNotebook: '' }));
@@ -378,24 +322,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
 
       if (deleteResponse.status === 0) {
-        // Success: show notification and refresh the list
-        Notification.success(
-          `Deleted job ${selectedDagId}. It might take a few minutes for it to be deleted from the list of jobs.`,
-          { autoClose: false }
-        );
         await handleEnvChange(selectedEnv ?? ''); // Call the function to refresh the list
-      } else {
-        // Failure: show error notification
-        Notification.error(`Failed to delete the ${selectedDagId}`, {
-          autoClose: false
-        });
       }
-    } catch (error) {
-      // Handle network or unexpected errors
-      SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
-      Notification.error(`Failed to delete the ${selectedDagId} : ${error}`, {
-        autoClose: false
-      });
     } finally {
       setDeletePopupOpen(false); // Close the popup
       setLoadingState(prev => ({ ...prev, delete: false }));
@@ -533,11 +461,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           setValue('environment', '');
           setDagList([]);
         }
-      } catch (error) {
-        const errorResponse = `Failed to fetch composer environment list : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
       } finally {
         setLoadingState(prev => ({ ...prev, environment: false }));
       }
@@ -556,7 +479,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     (cell: ICellProps) => {
       if (cell.column.Header === 'Actions') {
         return (
-          <td {...cell.getCellProps()} className="scheduler-table-data table-cell-overflow">
+          <td
+            {...cell.getCellProps()}
+            className="scheduler-table-data table-cell-overflow"
+          >
             {renderActions(
               cell.row.original,
               isGCSPluginInstalled,
