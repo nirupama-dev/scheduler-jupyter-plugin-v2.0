@@ -388,11 +388,26 @@ export const CreateNotebookSchedule = (
 
   // Function to handle cancel action
   const handleCancel = () => {
-    console.log('Cancelled');
-    app.shell.activeWidget?.close();
-    reset(); // Reset form to default values
-    // TODO: Add navigation logic
+    if (initialFormData.editModeData?.editMode) {
+      if (setVertexRouteState && schedulerTypeForEdit === 'vertex') {
+        setVertexRouteState({
+          schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
+          region: initialFormData.editModeData.region
+        });
+      } else if (setComposerRouteState && schedulerTypeForEdit === 'composer') {
+        setComposerRouteState({
+          schedulerName: COMPOSER_SCHEDULER_NAME,
+          region: initialFormData.editModeData.region,
+          projectId: initialFormData.editModeData.projectId,
+          environment: initialFormData.editModeData.environment
+        });
+      }
+      navigate('/list');
+    } else {
+      app.shell.activeWidget?.close();
+    }
   };
+
   //return if form is not valid
   if (
     !initialFormData.credentials ||
@@ -402,6 +417,7 @@ export const CreateNotebookSchedule = (
   ) {
     return <div>Loading...</div>;
   }
+
   return (
     <div className="component-level">
       <div className="create-form-header">
