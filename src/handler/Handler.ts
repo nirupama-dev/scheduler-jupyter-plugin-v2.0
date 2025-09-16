@@ -17,10 +17,7 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import {
-  AUTHENTICATION_ERROR,
-  OPEN_LOGIN_WIDGET_COMMAND
-} from '../utils/Constants';
+import { OPEN_LOGIN_WIDGET_COMMAND } from '../utils/Constants';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 /**
@@ -57,8 +54,6 @@ export async function requestAPI<T>(
   if (data.length > 0) {
     try {
       data = JSON.parse(data);
-      if (data?.hasOwnProperty(AUTHENTICATION_ERROR)) {
-      }
     } catch (error) {
       console.log('Not a JSON response body.', response);
     }

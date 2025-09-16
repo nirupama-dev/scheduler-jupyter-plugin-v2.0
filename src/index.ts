@@ -133,15 +133,28 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(OPEN_LOGIN_WIDGET_COMMAND, {
       label: 'Login page',
       execute: () => {
-        const widget = new MainAreaWidget({
-          content: new AuthenticationWidget(themeManager)
-        });
-        widget.id = 'my-page-widget';
-        widget.title.label = 'My Page';
-        widget.title.closable = true;
-        app.shell.add(widget, 'main');
-        app.shell.activateById(widget.id);
-        //TODO: Add logic to check is it exist. Focus should conme to existing widget
+        const widgetId = 'login-widget'; // Define the unique ID once
+        const allWidgets = [...app.shell.widgets('main')];
+
+        const existingWidget = allWidgets.find(
+          widget => widget.id === widgetId
+        );
+
+        if (existingWidget) {
+          // If the widget already exists, activate it
+          app.shell.activateById(existingWidget.id);
+        } else {
+          // If the widget does not exist, create and add it
+          const widget = new MainAreaWidget({
+            content: new AuthenticationWidget(themeManager)
+          });
+
+          widget.id = 'login-widget';
+          widget.title.label = 'Login Page';
+          widget.title.closable = true;
+          app.shell.add(widget, 'main');
+          app.shell.activateById(widget.id);
+        }
       }
     });
 
