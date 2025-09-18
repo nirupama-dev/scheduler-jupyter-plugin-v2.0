@@ -21,6 +21,7 @@ from google.auth.exceptions import RefreshError
 from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_OK,
     HTTP_STATUS_NO_CONTENT,
     HTTP_STATUS_UNAUTHORIZED,
@@ -56,13 +57,13 @@ class Client:
             request = compute_v1.ListRegionsRequest(
                 project=project_id,
             )
-            response = regions_client.list(request=request)
+            response = await regions_client.list(request=request)
             for item in response:
                 regions.append(item.name)
             return regions
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error fetching regions: {str(e)}")
             return {"Error fetching regions": str(e)}
@@ -75,7 +76,7 @@ class Client:
             request = compute_v1.ListNetworksRequest(
                 project=self.project_id,
             )
-            response = networks_client.list(request=request)
+            response = await networks_client.list(request=request)
             for item in response.items:
                 networks.append(
                     proto.Message.to_dict(
@@ -87,7 +88,7 @@ class Client:
             return networks
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error fetching network: {str(e)}")
             return {"error": str(e)}
@@ -101,7 +102,7 @@ class Client:
                 project=self.project_id,
                 region=region_id,
             )
-            response = subnetworks_client.list(request=request)
+            response = await subnetworks_client.list(request=request)
             for item in response.items:
                 if network_id in item.network:
                     sub_networks.append(
@@ -114,7 +115,7 @@ class Client:
             return sub_networks
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error fetching sub network: {str(e)}")
             return {"error": str(e)}
@@ -127,7 +128,7 @@ class Client:
             request = compute_v1.ListUsableSubnetworksRequest(
                 project=project_id,
             )
-            response = subnetworks_client.list_usable(request=request)
+            response = await subnetworks_client.list_usable(request=request)
             for item in response:
                 if region_id in item.subnetwork:
                     shared_networks.append(
@@ -140,38 +141,47 @@ class Client:
             return shared_networks
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error fetching shared network: {str(e)}")
             return {"Error fetching network shared from host": str(e)}
 
     async def get_xpn_host(self):
-        try:
-            res = {}
-            api_endpoint = f"https://compute.googleapis.com/compute/v1/projects/{self.project_id}/getXpnHost"
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    if not resp:
-                        return res
-                    else:
-                        res["name"] = resp.get("name")
-                        return res
-                elif response.status == HTTP_STATUS_NO_CONTENT:
+        res = {}
+        api_endpoint = f"https://compute.googleapis.com/compute/v1/projects/{self.project_id}/getXpnHost"
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                if not resp:
                     return res
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
                 else:
-                    self.log.exception("Error getting xpn host")
-                    raise Exception(
-                        f"Error getting the xpn host: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error getting xpn host: {str(e)}")
-            return {"Error getting xpn host": str(e)}
+                    res["name"] = resp.get("name")
+                    return res
+            elif response.status == HTTP_STATUS_NO_CONTENT:
+                return res
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting xpn host: {response.reason}",
+                        "status": response.status,
+                    }
+                )
+            else:
+                self.log.exception("Error getting xpn host")
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting xpn host: {await response.json()}",
+                        "status": response.status,
+                    }
+                )

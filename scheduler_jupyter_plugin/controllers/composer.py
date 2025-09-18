@@ -36,6 +36,13 @@ class EnvironmentListController(APIHandler):
                 environments = await client.list_environments(project_id, region_id)
                 self.set_header("Content-Type", "application/json")
                 self.finish(json.dumps(environments, default=lambda x: x.dict()))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching composer environments: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching composer environments: {str(e)}")
             self.finish({"error": str(e)})
@@ -54,6 +61,13 @@ class EnvironmentGetController(APIHandler):
                 environment = await client.get_environment(env_name)
                 self.set_header("Content-Type", "application/json")
                 self.finish(json.dumps(environment, default=lambda x: x.dict()))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching composer environment: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching composer environment: {str(e)}")
             self.finish({"error": str(e)})

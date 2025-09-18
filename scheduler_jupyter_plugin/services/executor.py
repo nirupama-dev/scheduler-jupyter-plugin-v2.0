@@ -36,6 +36,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
     GCS,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_UNAUTHORIZED,
     PACKAGE_NAME,
     WRAPPER_PAPPERMILL_FILE,
@@ -78,41 +79,50 @@ class Client:
         }
 
     async def get_bucket(self, runtime_env, project_id, region_id):
-        try:
-            composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
-            if project_id and region_id:
-                api_endpoint = f"{composer_url}v1/projects/{project_id}/locations/{region_id}/environments/{runtime_env}"
+        composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
+        if project_id and region_id:
+            api_endpoint = f"{composer_url}v1/projects/{project_id}/locations/{region_id}/environments/{runtime_env}"
+        else:
+            api_endpoint = f"{composer_url}v1/projects/{self.project_id}/locations/{self.region_id}/environments/{runtime_env}"
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
+                return gcs_dag_path
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer bucket: {response.reason}",
+                        "status": response.status,
+                    }
+                )
             else:
-                api_endpoint = f"{composer_url}v1/projects/{self.project_id}/locations/{self.region_id}/environments/{runtime_env}"
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
-                    return gcs_dag_path
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    raise RuntimeError(
-                        f"Error getting composer bucket: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error getting bucket name: {str(e)}")
-            raise RuntimeError(f"Error getting composer bucket: {str(e)}")
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer bucket: {await response.json()}",
+                        "status": response.status,
+                    }
+                )
 
     async def check_file_exists(self, bucket_name, file_path, project_id):
         try:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(self._access_token)
-            bucket = storage.Client(credentials=credentials, project=project_id).bucket(
-                bucket_name
-            )
+            bucket = await storage.Client(
+                credentials=credentials, project=project_id
+            ).bucket(bucket_name)
             blob = bucket.blob(file_path)
             return blob.exists()
         except Exception as error:
@@ -130,7 +140,7 @@ class Client:
         try:
             credentials = oauth2.Credentials(self._access_token)
             storage_client = storage.Client(credentials=credentials, project=project_id)
-            bucket = storage_client.bucket(gcs_dag_bucket)
+            bucket = await storage_client.bucket(gcs_dag_bucket)
             if template_name:
                 env = Environment(
                     loader=PackageLoader(PACKAGE_NAME, TEMPLATES_FOLDER_PATH),
@@ -456,7 +466,7 @@ class Client:
             return 0
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as error:
             self.log.exception(f"Error downloading output notebook file: {str(error)}")
             return {"error": str(error)}

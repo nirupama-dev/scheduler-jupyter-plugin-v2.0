@@ -85,7 +85,7 @@ class CredentialsHandler(APIHandler):
     async def get(self):
         cached = await credentials.get_cached()
         if cached["config_error"] == 1:
-            self.log.exception(f"Error fetching credentials from gcloud")
+            self.log.exception("Error fetching credentials from gcloud")
         self.finish(json.dumps(cached))
 
 
@@ -164,7 +164,7 @@ def setup_handlers(web_app):
         "dagList": airflow.DagListController,
         "dagDelete": airflow.DagDeleteController,
         "dagUpdate": airflow.DagUpdateController,
-        "editJobScheduler": airflow.EditDagController,
+        "getInputFileName": airflow.GetInputFileNameController,
         "getComposerJobSchedule": airflow.GetComposerJobScheduleController,
         "importErrorsList": airflow.ImportErrorController,
         "triggerDag": airflow.TriggerDagController,

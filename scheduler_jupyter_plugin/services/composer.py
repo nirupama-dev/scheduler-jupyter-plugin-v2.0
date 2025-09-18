@@ -19,6 +19,7 @@ from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
     COMPOSER_SERVICE_NAME,
     CONTENT_TYPE,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
     HTTP_STATUS_UNAUTHORIZED,
@@ -50,109 +51,127 @@ class Client:
     async def list_environments(
         self, project_id=None, region_id=None
     ) -> List[ComposerEnvironment]:
-        try:
-            environments = []
-            composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
-            if project_id and region_id:
-                api_endpoint = f"{composer_url}/v1/projects/{project_id}/locations/{region_id}/environments"
-            else:
-                api_endpoint = f"{composer_url}/v1/projects/{self.project_id}/locations/{self.region_id}/environments"
+        environments = []
+        composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
+        if project_id and region_id:
+            api_endpoint = f"{composer_url}/v1/projects/{project_id}/locations/{region_id}/environments"
+        else:
+            api_endpoint = f"{composer_url}/v1/projects/{self.project_id}/locations/{self.region_id}/environments"
 
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    if not resp:
-                        return environments
-                    else:
-                        environment = resp.get("environments", [])
-                        for env in environment:
-                            path = env["name"]
-                            name = env["name"].split("/")[-1]
-                            state = env["state"]
-                            pypi_packages = (
-                                env.get("config", {})
-                                .get("softwareConfig", {})
-                                .get("pypiPackages", None)
-                            )
-                            environments.append(
-                                ComposerEnvironment(
-                                    name=name,
-                                    label=name,
-                                    description=f"Environment: {name}",
-                                    state=state,
-                                    file_extensions=["ipynb"],
-                                    metadata={"path": path},
-                                    pypi_packages=pypi_packages,
-                                )
-                            )
-                        return environments
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                elif response.status == HTTP_STATUS_FORBIDDEN:
-                    resp = await response.json()
-                    return resp
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                if not resp:
+                    return environments
                 else:
-                    self.log.exception("Error listing environments")
-                    raise RuntimeError(
-                        f"Error getting composer list: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error fetching environments list: {str(e)}")
-            return {"Error fetching environments list": str(e)}
-
-    async def get_environment(self, env_name) -> ComposerEnvironment:
-        try:
-            environment = {}
-            composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
-            api_endpoint = f"{composer_url}/v1/{env_name}"
-
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    if not resp:
-                        return environment
-                    else:
-                        path = resp.get("name")
-                        name = resp.get("name").split("/")[-1]
-                        state = resp.get("state")
+                    environment = resp.get("environments", [])
+                    for env in environment:
+                        path = env["name"]
+                        name = env["name"].split("/")[-1]
+                        state = env["state"]
                         pypi_packages = (
-                            resp.get("config", {})
+                            env.get("config", {})
                             .get("softwareConfig", {})
                             .get("pypiPackages", None)
                         )
-                        environment = ComposerEnvironment(
-                            name=name,
-                            label=name,
-                            description=f"Environment: {name}",
-                            state=state,
-                            file_extensions=["ipynb"],
-                            metadata={"path": path},
-                            pypi_packages=pypi_packages,
+                        environments.append(
+                            ComposerEnvironment(
+                                name=name,
+                                label=name,
+                                description=f"Environment: {name}",
+                                state=state,
+                                file_extensions=["ipynb"],
+                                metadata={"path": path},
+                                pypi_packages=pypi_packages,
+                            )
                         )
+                    return environments
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_FORBIDDEN:
+                resp = await response.json()
+                return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer list: {response.reason}",
+                        "status": response.status,
+                    }
+                )
+            else:
+                self.log.exception("Error listing environments")
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer list: {await response.json()}",
+                        "status": response.status,
+                    }
+                )
 
-                        return environment
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                elif response.status == HTTP_STATUS_FORBIDDEN:
-                    resp = await response.json()
-                    return resp
+    async def get_environment(self, env_name) -> ComposerEnvironment:
+        environment = {}
+        composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
+        api_endpoint = f"{composer_url}/v1/{env_name}"
+
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                if not resp:
+                    return environment
                 else:
-                    self.log.exception("Error fetching environment")
-                    raise RuntimeError(
-                        f"Error getting composer: {response.reason} {await response.text()}"
+                    path = resp.get("name")
+                    name = resp.get("name").split("/")[-1]
+                    state = resp.get("state")
+                    pypi_packages = (
+                        resp.get("config", {})
+                        .get("softwareConfig", {})
+                        .get("pypiPackages", None)
                     )
-        except Exception as e:
-            self.log.exception(f"Error fetching environment: {str(e)}")
-            return {"Error fetching environment": str(e)}
+                    environment = ComposerEnvironment(
+                        name=name,
+                        label=name,
+                        description=f"Environment: {name}",
+                        state=state,
+                        file_extensions=["ipynb"],
+                        metadata={"path": path},
+                        pypi_packages=pypi_packages,
+                    )
+
+                    return environment
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_FORBIDDEN:
+                resp = await response.json()
+                return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer: {response.reason}",
+                        "status": response.status,
+                    }
+                )
+            else:
+                self.log.exception("Error fetching environment")
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer: {await response.json()}",
+                        "status": response.status,
+                    }
+                )

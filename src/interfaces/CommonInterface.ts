@@ -100,6 +100,7 @@ export interface IParameter {
 export interface ILabelValue<T, U = T> {
   label: T;
   value: U;
+  state?: string;
 }
 
 export interface ILoaderProps {

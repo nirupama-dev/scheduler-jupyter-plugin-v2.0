@@ -311,3 +311,6 @@ export const VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT =
 export const DEFAULT_LOADING_TEXT = 'Loading...';
 
 export const OPEN_LOGIN_WIDGET_COMMAND = `${PLUGIN_ID}:route-to-login-page`;
+
+export const composerEnvironmentStateList = ['RUNNING', 'UPDATING'];
+export const composerEnvironmentStateListForCreate = 'RUNNING';

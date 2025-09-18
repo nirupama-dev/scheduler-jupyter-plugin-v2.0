@@ -32,7 +32,7 @@ import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
-import { IDropdownOption } from '../../interfaces/FormInterface';
+import { IEnvDropDownOption } from '../../interfaces/FormInterface';
 
 /**
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
@@ -186,25 +186,34 @@ export class ComposerServices {
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
-  ): Promise<IDropdownOption[]> => {
-    const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
-      `composerList?project_id=${projectId}&region_id=${region}`
-    );
+  ): Promise<IEnvDropDownOption[]> => {
+    try {
+      const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
+        `composerList?project_id=${projectId}&region_id=${region}`
+      );
 
-    if (!Array.isArray(formattedResponse)) {
-      // This custom error will now be thrown and caught by the caller.
-      throw new Error('Invalid response format for composer environments');
+      if (!Array.isArray(formattedResponse)) {
+        // This custom error will now be thrown and caught by the caller.
+        throw new Error('Invalid response format for composer environments');
+      }
+
+      const environmentOptions: IEnvDropDownOption[] = formattedResponse.map(
+        (env: IComposerEnvAPIResponse) => ({
+          label: env.label,
+          value: env.name,
+          state: env.state
+        })
+      );
+      environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+      return environmentOptions;
+    } catch (error) {
+      const errorResponse = `Failed to fetch composer environment list : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
+      throw error;
     }
-
-    const environmentOptions: IDropdownOption[] = formattedResponse.map(
-      (env: IComposerEnvAPIResponse) => ({
-        label: env.label,
-        value: env.name
-      })
-    );
-    environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
-
-    return environmentOptions;
   };
 
   /**
@@ -282,11 +291,24 @@ export class ComposerServices {
     bucketName: string,
     dagId: string
   ): Promise<any> => {
-    const serviceURL = `editJobScheduler?&dag_id=${dagId}&bucket_name=${bucketName}`;
-    const formattedResponse: any = await requestAPI(serviceURL, {
-      method: 'POST'
-    });
-    return formattedResponse;
+    try {
+      const serviceURL = `getInputFileName?&dag_id=${dagId}&bucket_name=${bucketName}`;
+      const formattedResponse: any = await requestAPI(serviceURL, {
+        method: 'POST'
+      });
+
+      if (!formattedResponse?.input_filename) {
+        handleErrorToast({
+          error: `Error in fetching filename for ${dagId}`
+        });
+      }
+      return formattedResponse;
+    } catch (reason) {
+      const errorResponse = `Error on POST: ${reason}`;
+      handleErrorToast({
+        error: errorResponse
+      });
+    }
   };
 
   /**
@@ -588,12 +610,34 @@ export class ComposerServices {
     project: string,
     fromPage?: string | undefined
   ): Promise<IUpdateSchedulerAPIResponse> => {
-    const serviceURL = `dagDelete?composer=${composerSelected}&dag_id=${dag_id}&from_page=${fromPage}&project_id=${project}&region_id=${region}`;
-    const deleteResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-      serviceURL,
-      { method: 'DELETE' }
-    );
-    return deleteResponse;
+    try {
+      const serviceURL = `dagDelete?composer=${composerSelected}&dag_id=${dag_id}&from_page=${fromPage}&project_id=${project}&region_id=${region}`;
+      const deleteResponse: IUpdateSchedulerAPIResponse = await requestAPI(
+        serviceURL,
+        { method: 'DELETE' }
+      );
+
+      if (deleteResponse.status === 0) {
+        // Success: show notification and refresh the list
+        Notification.success(
+          `Deleted job ${dag_id}. It might take a few minutes for it to be deleted from the list of jobs.`,
+          { autoClose: false }
+        );
+      } else {
+        // Failure: show error notification
+        Notification.error(`Failed to delete the ${dag_id}`, {
+          autoClose: false
+        });
+      }
+      return deleteResponse;
+    } catch (error) {
+      // Handle network or unexpected errors
+      SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
+      Notification.error(`Failed to delete the ${dag_id} : ${error}`, {
+        autoClose: false
+      });
+      throw error;
+    }
   };
 
   static readonly handleUpdateSchedulerAPIService = async (
@@ -603,14 +647,33 @@ export class ComposerServices {
     region: string,
     project: string
   ): Promise<IUpdateSchedulerAPIResponse> => {
-    const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}&project_id=${project}&region_id=${region}`;
+    try {
+      const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}&project_id=${project}&region_id=${region}`;
 
-    const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-      serviceURL,
-      { method: 'POST' }
-    );
+      const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
+        serviceURL,
+        { method: 'POST' }
+      );
+      if (formattedResponse?.status === 0) {
+        Notification.success(`Scheduler ${dag_id} updated successfully`, {
+          autoClose: false
+        });
+      } else {
+        const errorResponse = `Error in updating the schedule: ${formattedResponse?.error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+      }
 
-    return formattedResponse;
+      return formattedResponse;
+    } catch (error) {
+      SchedulerLoggingService.log('Error in Update API', LOG_LEVEL.ERROR);
+      const errorResponse = `Error in updating the schedule: ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
+      throw error;
+    }
   };
 
   static readonly listDagTaskInstancesListService = async (
@@ -728,30 +791,57 @@ export class ComposerServices {
     project: string,
     region: string
   ): Promise<any> => {
-    const data: any = await requestAPI(
-      `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
-      { method: 'POST' }
-    );
-
-    // If a 'Bad Request' error is returned, perform the secondary API call
-    if (data?.error && data?.error.includes('Bad Request')) {
-      const jsonstr = data?.error.slice(
-        data?.error.indexOf('{'),
-        data?.error.lastIndexOf('}') + 1
+    try {
+      const data: any = await requestAPI(
+        `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
+        { method: 'POST' }
       );
-      const errorObject = JSON.parse(jsonstr);
 
-      if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
-        const installedPackageList: any = await requestAPI(
-          `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
+      // If a 'Bad Request' error is returned, perform the secondary API call
+      if (data?.error && data?.error.includes('Bad Request')) {
+        const jsonstr = data?.error.slice(
+          data?.error.indexOf('{'),
+          data?.error.lastIndexOf('}') + 1
         );
-        // Return the response from the secondary API call to the handler
-        return installedPackageList;
-      }
-    }
+        const errorObject = JSON.parse(jsonstr);
 
-    // Otherwise, return the initial data
-    return data;
+        if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
+          const installedPackageList: any = await requestAPI(
+            `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
+          );
+          // Return the response from the secondary API call to the handler
+          return installedPackageList;
+        }
+      }
+
+      // Check for success or different types of errors
+      if (data?.error) {
+        if (data.length > 0) {
+          // This condition checks the response from checkRequiredPackages
+          Notification.error(
+            `Failed to trigger ${dagId} : required packages are not installed`,
+            { autoClose: false }
+          );
+        } else {
+          Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
+            autoClose: false
+          });
+        }
+      } else {
+        // Success case
+        Notification.success(`${dagId} triggered successfully `, {
+          autoClose: false
+        });
+      }
+
+      // Otherwise, return the initial data
+      return data;
+    } catch (reason) {
+      // Catch network or unexpected errors
+      Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
+        autoClose: false
+      });
+    }
   };
 
   static readonly listComposersAPICheckService = async () => {

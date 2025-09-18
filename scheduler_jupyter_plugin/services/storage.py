@@ -60,7 +60,7 @@ class Client:
             return {"status": 0, "downloaded_filename": destination_file_name}
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as error:
             self.log.exception(f"Error downloading output notebook file: {str(error)}")
             return {"error": str(error)}
@@ -72,13 +72,13 @@ class Client:
             storage_client = storage.Client(
                 credentials=credentials, project=self.project_id
             )
-            buckets = storage_client.list_buckets()
+            buckets = await storage_client.list_buckets()
             for bucket in buckets:
                 cloud_storage_buckets.append(bucket.name)
             return cloud_storage_buckets
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error fetching cloud storage buckets: {str(e)}")
             return {"error": str(e)}
@@ -90,7 +90,7 @@ class Client:
                 credentials=credentials, project=self.project_id
             )
             blob_name = f"{job_run_id}/{file_name}"
-            bucket = storage_client.bucket(bucket_name)
+            bucket = await storage_client.bucket(bucket_name)
             blob = bucket.blob(blob_name)
             if blob.exists():
                 return "true"
@@ -98,7 +98,7 @@ class Client:
                 return "false"
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as error:
             self.log.exception(f"Error checking output notebook file: {str(error)}")
             return {"error": str(error)}
