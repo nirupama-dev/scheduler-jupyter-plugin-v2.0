@@ -29,6 +29,13 @@ class ServiceAccountController(APIHandler):
             iam_admin_client = iam.Client(await credentials.get_cached(), self.log)
             service_account = await iam_admin_client.list_service_account()
             self.finish(json.dumps(service_account))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching service accounts: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching service accounts: {str(e)}")
             self.finish({"error": str(e)})

@@ -49,7 +49,7 @@ class Client:
             return account_list
         except Unauthenticated as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error listing service accounts: {str(e)}")
             return {"error": str(e)}

@@ -81,6 +81,13 @@ class AirflowHandler(APIHandler):
                 )
                 resp = await self._handle_get(client)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error in fetching: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching {self.description()}")
             self.finish({"error": str(e)})
@@ -97,6 +104,13 @@ class AirflowHandler(APIHandler):
                 )
                 resp = await self._handle_post(client)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error updating: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error updating {self.description()}")
             self.finish({"error": str(e)})
@@ -226,12 +240,16 @@ class GetInputFileNameController(AirflowHandler):
     async def _handle_post(self, client):
         return await client.get_input_file_name(self.dag_id, self.bucket_name)
 
+
 class GetComposerJobScheduleController(AirflowHandler):
     def description(self):
         return "job"
 
     async def _handle_post(self, client):
-        return await client.get_job_schedule(self.dag_id, self.project_id, self.region_id, self.composer_environment)
+        return await client.get_job_schedule(
+            self.dag_id, self.project_id, self.region_id, self.composer_environment
+        )
+
 
 class ImportErrorController(AirflowHandler):
     def description(self):
