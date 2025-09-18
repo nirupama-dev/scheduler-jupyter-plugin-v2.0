@@ -17,8 +17,8 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import { OPEN_LOGIN_WIDGET_COMMAND } from '../utils/Constants';
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { AuthenticationError } from '../exceptions/AuthenticationException';
 
 /**
  * Call the API extension
@@ -43,9 +43,13 @@ export async function requestAPI<T>(
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
     if (response.status === 401 && app) {
-      app.commands.execute(OPEN_LOGIN_WIDGET_COMMAND);
+      throw new AuthenticationError('Unauthorized', response);
     }
   } catch (error) {
+    // If a custom error was thrown above, re-throw it.
+    if (error instanceof AuthenticationError) {
+      throw error;
+    }
     throw new ServerConnection.NetworkError(error as Error);
   }
 
