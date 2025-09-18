@@ -66,7 +66,7 @@ class Client:
             storage_client = storage.Client(
                 credentials=credentials, project=self.project_id
             )
-            await storage_client.create_bucket(bucket_name)
+            storage_client.create_bucket(bucket_name)
         except Exception as error:
             self.log.exception(f"Error in creating Bucket: {error}")
             raise IOError(f"Error in creating Bucket: {error}")
@@ -77,7 +77,7 @@ class Client:
         storage_client = storage.Client(
             credentials=credentials, project=self.project_id
         )
-        bucket = await storage_client.bucket(bucket_name)
+        bucket = storage_client.bucket(bucket_name)
         blob_name = None
 
         if "gs:" not in file_path:

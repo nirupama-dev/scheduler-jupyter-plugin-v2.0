@@ -74,8 +74,10 @@ import {
   ISharedNetwork
 } from '../../interfaces/VertexInterface';
 import { RadioOption } from '../../types/CommonSchedulerTypes';
+import { handleOpenLoginWidget } from '../common/login/Config';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
+  app,
   control,
   errors,
   watch,
@@ -286,6 +288,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         }
       }
     } catch (error) {
+      handleOpenLoginWidget(app);
       setCloudStorageList([]);
       if (isVertexForm) {
         setValue('cloudStorageBucket', '');
@@ -675,6 +678,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             setCloudStorageList(updatedBucketList);
             setValue('cloudStorageBucket', newBucketName);
           } catch (error) {
+            handleOpenLoginWidget(app);
             setValue('cloudStorageBucket', ''); // Clear selection on failure
           } finally {
             setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));

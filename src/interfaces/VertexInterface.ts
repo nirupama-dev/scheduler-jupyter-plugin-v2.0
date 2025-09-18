@@ -33,8 +33,10 @@ import {
 } from './CommonInterface';
 import { HeaderProps, Renderer } from 'react-table';
 import { PickersDayProps } from '@mui/x-date-pickers';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export interface ICreateVertexSchedulerProps {
+  app: JupyterFrontEnd;
   control: Control<CombinedCreateFormValues>;
   errors: FieldErrors<CombinedCreateFormValues>;
   watch: UseFormWatch<CombinedCreateFormValues>;

@@ -26,7 +26,7 @@ import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
-import { authApi } from '../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../common/login/Config';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import {
   IComposerEnvAPIResponse,
@@ -45,7 +45,7 @@ import { ILabelValue } from '../../interfaces/CommonInterface';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
-> = ({ control, errors, setValue, watch, setError }) => {
+> = ({ app, control, errors, setValue, watch, setError }) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
   const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
@@ -150,6 +150,8 @@ export const CreateComposerSchedule: React.FC<
             selectedRegion
           );
           setEnvOptions(options);
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
         } finally {
           setLoadingState(prev => ({ ...prev, environment: false }));
         }
@@ -165,19 +167,23 @@ export const CreateComposerSchedule: React.FC<
 
   useEffect(() => {
     const fetchData = async () => {
-      if (executionMode === 'cluster') {
-        setValue('serverless', '');
-        const clusterOptionsFromAPI =
-          await ComposerServices.listClustersAPIService();
-        setClusterOptions(clusterOptionsFromAPI);
-      } else if (executionMode === 'serverless') {
-        setValue('cluster', '');
-        const serverlessOptionsFromAPI =
-          await ComposerServices.listSessionTemplatesAPIService();
-        setServerlessOptions(serverlessOptionsFromAPI);
-      } else {
-        setClusterOptions([]);
-        setServerlessOptions([]);
+      try {
+        if (executionMode === 'cluster') {
+          setValue('serverless', '');
+          const clusterOptionsFromAPI =
+            await ComposerServices.listClustersAPIService();
+          setClusterOptions(clusterOptionsFromAPI);
+        } else if (executionMode === 'serverless') {
+          setValue('cluster', '');
+          const serverlessOptionsFromAPI =
+            await ComposerServices.listSessionTemplatesAPIService();
+          setServerlessOptions(serverlessOptionsFromAPI);
+        } else {
+          setClusterOptions([]);
+          setServerlessOptions([]);
+        }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
       }
     };
 

@@ -21,6 +21,7 @@ import path from 'path';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 // import { ILoadingStateVertex } from '../../interfaces/VertexInterface';
 import { ILabelValue } from '../../interfaces/CommonInterface';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 export class StorageServices {
   // static readonly cloudStorageAPIService = (
@@ -121,6 +122,9 @@ export class StorageServices {
       }
       return []; // Return empty array if no data or unexpected format
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log(
         `Error listing cloud storage bucket: ${error}`,
         LOG_LEVEL.ERROR
@@ -159,13 +163,13 @@ export class StorageServices {
         throw new Error(formattedResponse.error); // Propagate API error message
       }
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log(
         `Error creating the cloud storage bucket ${error}`,
         LOG_LEVEL.ERROR
       );
-      // Original code did not have a handleErrorToast here for new bucket creation errors
-      // If you want one, add it like: handleErrorToast({ error: `Failed to create bucket: ${error}` });
-      throw error; // Re-throw so the calling component can still know if it failed (e.g., for loading states)
     }
   }
 
@@ -206,6 +210,9 @@ export class StorageServices {
       }
       setJobDownloadLoading(false);
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       setJobDownloadLoading(false);
       SchedulerLoggingService.log(
         'Error in downloading the job history',

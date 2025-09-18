@@ -69,13 +69,14 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
             <CreateNotebookSchedule
               sessionContext={sessionContext}
               initialKernalScheduleDetails={initialKernalSchedulerDetails}
+              app={app}
             />
           }
         />
 
         <Route
           path="/edit/:schedulerType/:scheduleId/:region/:projectId?/:environment?"
-          element={<CreateNotebookSchedule />}
+          element={<CreateNotebookSchedule app={app} />}
         />
 
         <Route path="/list" element={<ScheduleListingView />}>

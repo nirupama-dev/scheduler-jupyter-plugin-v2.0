@@ -61,7 +61,7 @@ import {
   transformVertexScheduleResponseToZodSchema,
   transformZodSchemaToVertexSchedulePayload
 } from '../../utils/VertexDataTransform';
-import { authApi } from '../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../common/login/Config';
 import {
   transformComposerScheduleDataToZodSchema,
   transformZodSchemaToComposerSchedulePayload
@@ -161,18 +161,22 @@ export const CreateNotebookSchedule = (
           projectId &&
           environment
         ) {
-          const fetchedData =
-            await ComposerServices.getComposerJobScheduleDetails(
-              scheduleId,
-              region,
-              projectId,
-              environment
-            );
-          if (fetchedData) {
-            editScheduleData.existingScheduleData =
-              transformComposerScheduleDataToZodSchema(fetchedData);
-          } else {
-            //TODO: redirect to listing.
+          try {
+            const fetchedData =
+              await ComposerServices.getComposerJobScheduleDetails(
+                scheduleId,
+                region,
+                projectId,
+                environment
+              );
+            if (fetchedData) {
+              editScheduleData.existingScheduleData =
+                transformComposerScheduleDataToZodSchema(fetchedData);
+            } else {
+              //TODO: redirect to listing.
+            }
+          } catch (authenticationError) {
+            handleOpenLoginWidget(createScheduleProps.app);
           }
         }
       } else {
@@ -346,14 +350,18 @@ export const CreateNotebookSchedule = (
           packagesToInstall
         );
 
-      isSaveSuccessfull =
-        await ComposerServices.saveComposerNotebookJobSchedule(
-          composerPayload,
-          composerPayload.project_id, // TODO: verify and optimize
-          composerPayload.region_id, // ToDO
-          initialFormData.editModeData?.editMode
-        );
-      routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
+      try {
+        isSaveSuccessfull =
+          await ComposerServices.saveComposerNotebookJobSchedule(
+            composerPayload,
+            composerPayload.project_id, // TODO: verify and optimize
+            composerPayload.region_id, // ToDO
+            initialFormData.editModeData?.editMode
+          );
+        routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
+      } catch (authenticationError) {
+        handleOpenLoginWidget(createScheduleProps.app);
+      }
     }
     console.log('is save successful', isSaveSuccessfull);
     if (isSaveSuccessfull) {
@@ -437,6 +445,7 @@ export const CreateNotebookSchedule = (
           {/* Conditionally render specific scheduler components */}
           {schedulerSelection === VERTEX_SCHEDULER_NAME && (
             <CreateVertexSchedule
+              app={createScheduleProps.app}
               control={control}
               errors={errors as Record<keyof VertexSchedulerFormValues, any>}
               setValue={setValue}
@@ -450,6 +459,7 @@ export const CreateNotebookSchedule = (
           )}
           {schedulerSelection === COMPOSER_SCHEDULER_NAME && (
             <CreateComposerSchedule
+              app={createScheduleProps.app}
               control={control}
               errors={errors as Record<keyof ComposerSchedulerFormValues, any>}
               setValue={setValue}
