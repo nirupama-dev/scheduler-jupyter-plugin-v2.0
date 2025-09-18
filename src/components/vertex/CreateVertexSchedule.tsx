@@ -37,6 +37,7 @@ import { Controller, FieldErrors } from 'react-hook-form';
 import dayjs from 'dayjs';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import Cron, { PeriodType } from 'react-js-cron';
+import 'react-js-cron/dist/styles.css';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import tzdata from 'tzdata';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -59,7 +60,6 @@ import {
   DEFAULT_CLOUD_STORAGE_BUCKET,
   DEFAULT_SERVICE_ACCOUNT,
   DEFAULT_DISK_SIZE,
-  SHARED_NETWORK_DOC_URL,
   EVERY_MINUTE_CRON,
   NETWORK_IN_THIS_PROJECT_VALUE,
   NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
@@ -731,7 +731,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Machine Type Dropdown */}
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="machineType"
           control={control}
@@ -804,7 +804,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         )}
 
       {/* Kernel Dropdown */}
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="kernelName"
           control={control}
@@ -816,7 +816,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Cloud Storage Bucket Dropdown */}
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="cloudStorageBucket"
           control={control}
@@ -837,7 +837,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Disk Type and Size */}
-      <div className="horizontal-element-wrapper">
+      <div className="horizontal-element-wrapper scheduler-input-top">
         <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
             name="diskType"
@@ -866,7 +866,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Service Account Dropdown */}
-      <div className="scheduler-form-element-container panel-margin footer-text">
+      <div className="scheduler-form-element-container footer-text scheduler-input-top">
         <FormInputDropdown
           name="serviceAccount"
           control={control}
@@ -911,18 +911,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
           }}
         />
-        <span className="sub-para tab-text-sub-cl">
-          Choose a shared VPC network from the project that is different from
-          the clusters project
-        </span>
-        <div className="learn-more-a-tag learn-more-url">
-          <LearnMore path={SHARED_NETWORK_DOC_URL} />
-        </div>
       </div>
 
       {/* Conditional Network Fields */}
       {currentNetworkOption === 'networkInThisProject' ? ( // 'networkInThisProject'
-        <div className="execution-history-main-wrapper">
+        <div className="horizontal-element-wrapper">
           <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
             <FormInputDropdown
               name="primaryNetwork"
@@ -1091,7 +1084,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               }}
             />
 
-            <div className="horizontal-element-wrapper">
+            <div className="horizontal-element-wrapper module-top">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <div className="cscheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
                   <Controller
@@ -1124,7 +1117,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     )}
                   />
                 </div>
-                <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+                <div className="create-scheduler-form-element-input-fl create-pr">
                   <Controller
                     name="endTime"
                     control={control}
@@ -1164,7 +1157,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         {currentScheduleMode === 'runSchedule' &&
           currentInternalScheduleMode === 'cronFormat' && (
             <>
-              <div className="scheduler-form-element-container schedule-input-field">
+              <div className="scheduler-form-element-container schedule-input-field scheduler-input-top">
                 <FormInputText
                   label="Schedule*"
                   control={control}
@@ -1186,7 +1179,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         {currentScheduleMode === 'runSchedule' &&
           currentInternalScheduleMode === 'userFriendly' && (
-            <div className="scheduler-form-element-container">
+            <div className="scheduler-input-top">
               <Controller
                 name="scheduleValueUserFriendly"
                 control={control}
@@ -1217,7 +1210,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         {currentScheduleMode === 'runSchedule' && (
           <>
-            <div className="scheduler-form-element-container">
+            <div className="scheduler-form-element-container scheduler-input-top">
               <FormInputDropdown
                 name="timeZone"
                 control={control}
@@ -1228,7 +1221,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               />
             </div>
 
-            <div className="scheduler-form-element-container">
+            <div className="scheduler-form-element-container scheduler-input-top">
               <FormInputText
                 label="Max runs"
                 control={control}

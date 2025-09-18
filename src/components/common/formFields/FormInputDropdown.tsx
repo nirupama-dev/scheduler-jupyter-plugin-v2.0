@@ -177,7 +177,13 @@ export const FormInputListingDropdown: React.FC<
           />
         )}
       />
-      <div>{error && <FormHelperText>{error.message}</FormHelperText>}</div>
+      <div>
+        {error && (
+          <FormHelperText sx={{ fontSize: '0.688rem' }}>
+            {error.message}
+          </FormHelperText>
+        )}
+      </div>
     </FormControl>
   );
 };
