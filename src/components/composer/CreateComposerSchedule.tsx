@@ -126,12 +126,6 @@ export const CreateComposerSchedule: React.FC<
           const options =
             await ComputeServices.regionAPIService(selectedProjectId);
           setRegionOptions(options);
-        } catch (error) {
-          // Handle error from the service call
-          const errorResponse = `Failed to fetch region list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
         } finally {
           setLoadingState(prev => ({ ...prev, region: false }));
         }
@@ -155,11 +149,6 @@ export const CreateComposerSchedule: React.FC<
             selectedRegion
           );
           setEnvOptions(options);
-        } catch (error) {
-          const errorResponse = `Failed to fetch composer environment list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
         } finally {
           setLoadingState(prev => ({ ...prev, environment: false }));
         }
