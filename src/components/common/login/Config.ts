@@ -15,10 +15,14 @@
  * limitations under the License.
  */
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
 import { requestAPI } from '../../../handler/Handler';
 import { IAuthCredentials } from '../../../interfaces/CommonInterface';
 import { AuthenticationService } from '../../../services/common/AuthenticationService';
-import { STATUS_SUCCESS } from '../../../utils/Constants';
+import {
+  OPEN_LOGIN_WIDGET_COMMAND,
+  STATUS_SUCCESS
+} from '../../../utils/Constants';
 
 /**
  * Authentication function
@@ -44,4 +48,8 @@ export const login = async () => {
       return true;
     }
   }
+};
+
+export const handleOpenLoginWidget = (app: JupyterFrontEnd) => {
+  app.commands.execute(OPEN_LOGIN_WIDGET_COMMAND);
 };
