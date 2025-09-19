@@ -36,7 +36,6 @@ import { PickersDayProps } from '@mui/x-date-pickers';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export interface ICreateVertexSchedulerProps {
-  app: JupyterFrontEnd;
   control: Control<CombinedCreateFormValues>;
   errors: FieldErrors<CombinedCreateFormValues>;
   watch: UseFormWatch<CombinedCreateFormValues>;
@@ -46,6 +45,7 @@ export interface ICreateVertexSchedulerProps {
   isValid: boolean;
   credentials: IAuthCredentials;
   editScheduleData: IEditScheduleData | null | undefined;
+  app: JupyterFrontEnd;
 }
 
 export interface IMachineType {
@@ -242,7 +242,6 @@ export interface IVertexListPayload {
   nextToken: string | null | undefined;
   scheduleListPageLength: number;
   abortControllers: any;
-  app: any;
 }
 
 export interface IVertexScheduleRun {
@@ -306,6 +305,7 @@ export interface IVertexExecutionHistoryActionsProps {
   };
   scheduleName: string;
   fileExists?: boolean;
+  app: JupyterFrontEnd;
 }
 
 export interface IScheduleRunFiltered {

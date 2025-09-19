@@ -48,6 +48,7 @@ import { PaginationView } from '../../common/table/PaginationView';
 import ImportErrorPopup from './ImportErrorPopup';
 import { useNavigate } from 'react-router-dom';
 import PollingTimer from '../../../utils/PollingTimer';
+import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const { control, setValue, watch } = useForm();
@@ -445,6 +446,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       } catch (error) {
         // Handle error from the service call
         const errorResponse = `Failed to fetch region list : ${error}`;
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         handleErrorToast({
           error: errorResponse
         });

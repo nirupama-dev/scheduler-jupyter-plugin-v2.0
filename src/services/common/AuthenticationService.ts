@@ -19,6 +19,7 @@ import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import { IAuthCredentials } from '../../interfaces/CommonInterface';
 import { LOGIN_STATE, STATUS_SUCCESS } from '../../utils/Constants';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 export class AuthenticationService {
   static readonly loginAPI = async (
@@ -43,6 +44,7 @@ export class AuthenticationService {
 
   /**
    * Authentication
+   * @param app To display login widget when unauthenticated
    * @param checkApiEnabled
    * @returns credentials
    */
@@ -64,6 +66,11 @@ export class AuthenticationService {
       }
     } catch (reason) {
       console.error(`Error on GET credentials.\n${reason}`);
+      // Check for AuthenticationError
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
+
       Notification.error('Error on GET credentials', {
         autoClose: false
       });

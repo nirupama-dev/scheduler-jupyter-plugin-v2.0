@@ -97,6 +97,7 @@ export class ComposerServices {
       if (error instanceof AuthenticationError) {
         throw error;
       }
+
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
       const errorResponse = `Failed to fetch clusters : ${error}`;
       handleErrorToast({

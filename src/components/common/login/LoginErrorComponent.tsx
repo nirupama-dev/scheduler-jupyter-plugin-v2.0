@@ -16,27 +16,13 @@
  */
 
 import React from 'react';
-// import { login } from './Config';
 import { IconsigninGoogle } from '../../../utils/Icons';
-// import { useLocation } from 'react-router-dom';
+import { login } from './Config';
 
 const LoginErrorComponent: React.FC = () => {
-  // const location = useLocation();
-  // const { loginError } = location.state;
-  // const [error, setError] = useState(loginError);
-
-  // useEffect(() => {
-  //   setError(loginError);
-  // }, [loginError]);
-
   const handleLogin = async () => {
-    // const result = await login();
-    // setError(!result);
+    await login();
   };
-
-  // console.log('login error component', error);
-
-  // if (error) {
   return (
     <>
       <div className="login-error">Please login to continue</div>
@@ -47,9 +33,6 @@ const LoginErrorComponent: React.FC = () => {
       </div>
     </>
   );
-  // }
-
-  // return null;
 };
 
 export default LoginErrorComponent;

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 import { requestAPI } from '../../handler/Handler';
 import { ILabelValue } from '../../interfaces/CommonInterface';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
@@ -39,6 +40,10 @@ export class IamServices {
       }
       return [];
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error listing service accounts : ${error}`,
         LOG_LEVEL.ERROR

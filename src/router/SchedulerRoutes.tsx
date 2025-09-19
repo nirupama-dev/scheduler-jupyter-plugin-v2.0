@@ -24,12 +24,10 @@ import { ISchedulerRoutesProps } from '../interfaces/CommonInterface';
 import { ScheduleListingView } from '../components/notebookScheduler/ScheduleListingView';
 import Loader from '../components/common/loader/LoadingSpinner';
 import {
-  DEFAULT_LOADING_TEXT,
   LOADER_CONTENT_COMPOSER_LISTING_SCREEN,
   LOADER_CONTENT_VERTEX_EXECUTION_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
-import LoginErrorComponent from '../components/common/login/LoginErrorComponent';
 import { SchedulerProvider } from '../context/vertex/SchedulerProvider';
 
 /**
@@ -129,23 +127,10 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                 />
               }
             >
-              <VertexExecutionHistory abortControllers={abortControllers} />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/login"
-          element={
-            <Suspense
-              fallback={
-                <Loader
-                  message={DEFAULT_LOADING_TEXT}
-                  iconClassName="spin-loader-custom-style"
-                  parentTagClassName='"spin-loader-main spin-loader-listing'
-                />
-              }
-            >
-              <LoginErrorComponent />
+              <VertexExecutionHistory
+                abortControllers={abortControllers}
+                app={app}
+              />
             </Suspense>
           }
         />

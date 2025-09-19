@@ -127,6 +127,7 @@ export class StorageServices {
       if (error instanceof AuthenticationError) {
         throw error;
       }
+
       SchedulerLoggingService.log(
         `Error listing cloud storage bucket: ${error}`,
         LOG_LEVEL.ERROR
@@ -168,6 +169,7 @@ export class StorageServices {
       if (error instanceof AuthenticationError) {
         throw error;
       }
+
       SchedulerLoggingService.log(
         `Error creating the cloud storage bucket ${error}`,
         LOG_LEVEL.ERROR

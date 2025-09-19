@@ -17,7 +17,6 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
-import { JupyterFrontEnd } from '@jupyterlab/application';
 import { AuthenticationError } from '../exceptions/AuthenticationException';
 
 /**
@@ -28,8 +27,7 @@ import { AuthenticationError } from '../exceptions/AuthenticationException';
  */
 export async function requestAPI<T>(
   endPoint = '',
-  init: RequestInit = {},
-  app?: JupyterFrontEnd
+  init: RequestInit = {}
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
@@ -42,7 +40,7 @@ export async function requestAPI<T>(
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
-    if (response.status === 401 && app) {
+    if (response.status === 401) {
       throw new AuthenticationError('Unauthorized', response);
     }
   } catch (error) {

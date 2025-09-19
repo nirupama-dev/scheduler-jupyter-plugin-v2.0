@@ -26,7 +26,17 @@ import {
 
 export const projectListAPI = async (prefix: string): Promise<string[]> => {
   const credentials = await authApi();
-  const { CLOUD_RESOURCE_MANAGER } = await gcpServiceUrls;
+  // let CLOUD_RESOURCE_MANAGER: any; // Initialize the variable
+  const resolvedUrls = await gcpServiceUrls;
+
+  // 2. Add a safety check for the undefined case
+  if (!resolvedUrls) {
+    console.error('GCP service URLs could not be loaded.');
+    return []; // Exit early if URLs are not available
+  }
+
+  // 3. Now, access the property from the resolved object
+  const { CLOUD_RESOURCE_MANAGER } = resolvedUrls;
   if (!credentials) {
     return [];
   }

@@ -83,13 +83,18 @@ class CredentialsHandler(APIHandler):
     # Jupyter server
     @tornado.web.authenticated
     async def get(self):
-        cached = await credentials.get_cached()
-        if cached["config_error"] == 1:
-            self.log.exception("Error fetching credentials from gcloud")
-        if cached["login_error"] == 1:
-            self.log.exception("Error fetching access token. User may not be logged in")
-            raise RuntimeError({"AUTHENTICATION_ERROR": "Access token unavailable for the user", "status": 401})
-        self.finish(json.dumps(cached))
+        try:
+            cached = await credentials.get_cached()
+            if cached["config_error"] == 1:
+                self.log.exception("Error fetching credentials from gcloud")
+            self.finish(json.dumps(cached))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+ 
+            self.log.exception(f"Error fetching credentials from gcloud: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
 
 
 class LoginHandler(APIHandler):

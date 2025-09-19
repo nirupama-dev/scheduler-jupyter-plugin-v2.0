@@ -25,7 +25,6 @@ import {
 } from '../../../utils/Icons';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import {
-  IActionButtonProps,
   IVertexListingLoadingState,
   IVertexSelectedActionProps
 } from '../../../interfaces/VertexInterface';

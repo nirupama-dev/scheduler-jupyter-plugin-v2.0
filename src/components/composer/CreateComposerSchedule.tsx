@@ -45,7 +45,7 @@ import { ILabelValue } from '../../interfaces/CommonInterface';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
-> = ({ app, control, errors, setValue, watch, setError }) => {
+> = ({ control, errors, setValue, watch, setError, app }) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
   const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
@@ -127,6 +127,8 @@ export const CreateComposerSchedule: React.FC<
           const options =
             await ComputeServices.regionAPIService(selectedProjectId);
           setRegionOptions(options);
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
         } finally {
           setLoadingState(prev => ({ ...prev, region: false }));
         }
