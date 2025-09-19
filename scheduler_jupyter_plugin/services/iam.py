@@ -41,7 +41,7 @@ class Client:
             request = types.ListServiceAccountsRequest()
             request.name = f"projects/{self.project_id}"
 
-            accounts = iam_client.list_service_accounts(request=request)
+            accounts = await iam_client.list_service_accounts(request=request)
             account_list = []
             async for account in accounts:
                 account_list.append(json.loads(proto.Message.to_json(account)))
