@@ -243,13 +243,14 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, update: dag_id }));
 
       try {
-        const updateResponse = await ComposerServices.handleUpdatComposerSchedulerAPIService(
-          selectedEnv,
-          dag_id,
-          is_status_paused,
-          selectedRegion,
-          selectedProjectId
-        );
+        const updateResponse =
+          await ComposerServices.handleUpdatComposerSchedulerAPIService(
+            selectedEnv,
+            dag_id,
+            is_status_paused,
+            selectedRegion,
+            selectedProjectId
+          );
 
         if (updateResponse?.status === 0) {
           await handleEnvChange(selectedEnv ?? '');
@@ -289,10 +290,11 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, editNotebook: dag_id }));
 
       try {
-        const editNotebookResponse = await ComposerServices.editComposerNotebookInScheduledJob(
-          bucketName,
-          dag_id
-        );
+        const editNotebookResponse =
+          await ComposerServices.editComposerNotebookInScheduledJob(
+            bucketName,
+            dag_id
+          );
 
         if (editNotebookResponse?.input_filename) {
           setInputNotebookFilePath(editNotebookResponse.input_filename);
