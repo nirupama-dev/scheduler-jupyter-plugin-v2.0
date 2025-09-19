@@ -33,8 +33,13 @@ export class ComputeServices {
   static async getParentProjectAPIService(): Promise<any | null> {
     // Adjusted return type
     try {
-      const parentProjectResponse: any = await requestAPI('api/compute/getXpnHost');
-      if (parentProjectResponse && Object.keys(parentProjectResponse).length !== 0) {
+      const parentProjectResponse: any = await requestAPI(
+        'api/compute/getXpnHost'
+      );
+      if (
+        parentProjectResponse &&
+        Object.keys(parentProjectResponse).length !== 0
+      ) {
         return parentProjectResponse; // Return the data
       }
       return null; // Return null if no data
@@ -58,12 +63,19 @@ export class ComputeServices {
   static async primaryNetworkAPIService(): Promise<ILabelValue<string>[]> {
     // Added async and return type
     try {
-      const primaryNetworkResponse: any = await requestAPI('api/compute/network');
-      if (Array.isArray(primaryNetworkResponse) && primaryNetworkResponse.length > 0) {
-        const primaryNetworkList = primaryNetworkResponse.map((network: any) => ({
-          label: network.name,
-          value: network.selfLink
-        }));
+      const primaryNetworkResponse: any = await requestAPI(
+        'api/compute/network'
+      );
+      if (
+        Array.isArray(primaryNetworkResponse) &&
+        primaryNetworkResponse.length > 0
+      ) {
+        const primaryNetworkList = primaryNetworkResponse.map(
+          (network: any) => ({
+            label: network.name,
+            value: network.selfLink
+          })
+        );
         primaryNetworkList.sort((a, b) => a.label.localeCompare(b.label)); // Sort alphabetically
         return primaryNetworkList; // Return the data
       } else if (primaryNetworkResponse?.error) {
@@ -145,7 +157,10 @@ export class ComputeServices {
       const sharedNetworkResponse: any = await requestAPI(
         `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
       );
-      if (Array.isArray(sharedNetworkResponse) && sharedNetworkResponse.length > 0) {
+      if (
+        Array.isArray(sharedNetworkResponse) &&
+        sharedNetworkResponse.length > 0
+      ) {
         const sharedNetworkList: ISharedNetwork[] = sharedNetworkResponse.map(
           (network: any) => ({
             name: network.subnetwork.split('/').pop(),

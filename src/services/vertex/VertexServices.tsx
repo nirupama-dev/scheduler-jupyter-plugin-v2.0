@@ -127,7 +127,10 @@ export class VertexServices {
           signal
         });
 
-      if (!listSchedulesResponse || Object.keys(listSchedulesResponse).length === 0) {
+      if (
+        !listSchedulesResponse ||
+        Object.keys(listSchedulesResponse).length === 0
+      ) {
         return {
           schedulesList: [],
           nextPageToken: null,

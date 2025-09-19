@@ -381,17 +381,19 @@ export class ComposerServices {
 
       let transformDagRunListDataCurrent = [];
       if (dagRunsList && dagRunsList?.dag_runs?.length > 0) {
-        transformDagRunListDataCurrent = dagRunsList.dag_runs.map((dagRun: any) => {
-          if (dagRun.start_date !== null) {
-            return {
-              dagRunId: dagRun.dag_run_id,
-              filteredDate: new Date(dagRun.start_date),
-              state: dagRun.state,
-              date: new Date(dagRun.start_date).toDateString(),
-              time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
-            };
+        transformDagRunListDataCurrent = dagRunsList.dag_runs.map(
+          (dagRun: any) => {
+            if (dagRun.start_date !== null) {
+              return {
+                dagRunId: dagRun.dag_run_id,
+                filteredDate: new Date(dagRun.start_date),
+                state: dagRun.state,
+                date: new Date(dagRun.start_date).toDateString(),
+                time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
+              };
+            }
           }
-        });
+        );
       }
       transformDagRunListDataCurrent = transformDagRunListDataCurrent.filter(
         (dagRunData: any) => {
@@ -407,7 +409,10 @@ export class ComposerServices {
         ...transformDagRunListDataCurrent
       ];
 
-      if (dagRunsList?.dag_runs?.length + offset !== dagRunsList.total_entries) {
+      if (
+        dagRunsList?.dag_runs?.length + offset !==
+        dagRunsList.total_entries
+      ) {
         this.listDagRunsListService(
           composerName,
           dagId,
@@ -798,7 +803,10 @@ export class ComposerServices {
       );
 
       // If a 'Bad Request' error is returned, perform the secondary API call
-      if (triggerResponse?.error && triggerResponse?.error.includes('Bad Request')) {
+      if (
+        triggerResponse?.error &&
+        triggerResponse?.error.includes('Bad Request')
+      ) {
         const jsonstr = triggerResponse?.error.slice(
           triggerResponse?.error.indexOf('{'),
           triggerResponse?.error.lastIndexOf('}') + 1
@@ -823,9 +831,12 @@ export class ComposerServices {
             { autoClose: false }
           );
         } else {
-          Notification.error(`Failed to trigger ${dagId} : ${triggerResponse?.error}`, {
-            autoClose: false
-          });
+          Notification.error(
+            `Failed to trigger ${dagId} : ${triggerResponse?.error}`,
+            {
+              autoClose: false
+            }
+          );
         }
       } else {
         // Success case

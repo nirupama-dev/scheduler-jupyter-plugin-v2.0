@@ -106,7 +106,9 @@ export class StorageServices {
    */
   static async cloudStorageAPIService(): Promise<ILabelValue<string>[]> {
     try {
-      const listBucketResponse: any = await requestAPI('api/storage/listBucket');
+      const listBucketResponse: any = await requestAPI(
+        'api/storage/listBucket'
+      );
 
       if (Array.isArray(listBucketResponse) && listBucketResponse.length > 0) {
         const cloudStorageBucketList: ILabelValue<string>[] =

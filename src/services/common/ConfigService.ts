@@ -21,7 +21,9 @@ import { IGcpUrlResponseData } from '../../interfaces/CommonInterface';
 
 export class ConfigService {
   static readonly gcpServiceUrlsAPI = async () => {
-    const gcpServiceUrls = (await requestAPI('getGcpServiceUrls')) as IGcpUrlResponseData;
+    const gcpServiceUrls = (await requestAPI(
+      'getGcpServiceUrls'
+    )) as IGcpUrlResponseData;
     const storage_url = new URL(gcpServiceUrls.storage_url);
     const storage_upload_url = new URL(gcpServiceUrls.storage_url);
 
@@ -40,7 +42,8 @@ export class ConfigService {
       COMPUTE: gcpServiceUrls.compute_url,
       METASTORE: gcpServiceUrls.metastore_url + 'v1',
       CLOUD_KMS: gcpServiceUrls.cloudkms_url + 'v1',
-      CLOUD_RESOURCE_MANAGER: gcpServiceUrls.cloudresourcemanager_url + 'v1/projects',
+      CLOUD_RESOURCE_MANAGER:
+        gcpServiceUrls.cloudresourcemanager_url + 'v1/projects',
       REGION_URL: gcpServiceUrls.compute_url + '/projects',
       CATALOG: gcpServiceUrls.datacatalog_url + 'v1/catalog:search',
       COLUMN: gcpServiceUrls.datacatalog_url + 'v1/',

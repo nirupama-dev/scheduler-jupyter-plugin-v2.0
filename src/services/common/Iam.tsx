@@ -22,14 +22,18 @@ import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 export class IamServices {
   static async serviceAccountAPIService(): Promise<ILabelValue<string>[]> {
     try {
-      const serviceAccountsResponse = await requestAPI('api/iam/listServiceAccount');
-      if (Array.isArray(serviceAccountsResponse) && serviceAccountsResponse.length > 0) {
-        const serviceAccountList: ILabelValue<string>[] = serviceAccountsResponse.map(
-          (account: any) => ({
+      const serviceAccountsResponse = await requestAPI(
+        'api/iam/listServiceAccount'
+      );
+      if (
+        Array.isArray(serviceAccountsResponse) &&
+        serviceAccountsResponse.length > 0
+      ) {
+        const serviceAccountList: ILabelValue<string>[] =
+          serviceAccountsResponse.map((account: any) => ({
             label: account.displayName,
             value: account.email
-          })
-        );
+          }));
         serviceAccountList.sort((a, b) => a.label.localeCompare(b.label));
         return serviceAccountList;
       }
