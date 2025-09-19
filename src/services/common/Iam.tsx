@@ -22,9 +22,9 @@ import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 export class IamServices {
   static async serviceAccountAPIService(): Promise<ILabelValue<string>[]> {
     try {
-      const formattedResponse = await requestAPI('api/iam/listServiceAccount');
-      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const serviceAccountList: ILabelValue<string>[] = formattedResponse.map(
+      const serviceAccountsResponse = await requestAPI('api/iam/listServiceAccount');
+      if (Array.isArray(serviceAccountsResponse) && serviceAccountsResponse.length > 0) {
+        const serviceAccountList: ILabelValue<string>[] = serviceAccountsResponse.map(
           (account: any) => ({
             label: account.displayName,
             value: account.email

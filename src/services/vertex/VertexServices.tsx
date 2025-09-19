@@ -53,20 +53,20 @@ export class VertexServices {
    */
   static async machineTypeAPIService(region: string): Promise<IMachineType[]> {
     try {
-      const formattedResponse: any = await requestAPI(
+      const uiConfigResponse: any = await requestAPI(
         `api/vertex/uiConfig?region_id=${region}`
       );
 
       if (
-        formattedResponse &&
-        Array.isArray(formattedResponse) &&
-        formattedResponse.length > 0
+        uiConfigResponse &&
+        Array.isArray(uiConfigResponse) &&
+        uiConfigResponse.length > 0
       ) {
-        const response: IMachineType[] = formattedResponse.map(
+        const response: IMachineType[] = uiConfigResponse.map(
           uiConfigAPIResponseTransform
         );
         return response; // Return the data
-      } else if (formattedResponse?.error) {
+      } else if (uiConfigResponse?.error) {
         // Check for `error` property in the response
         // try {
         //   if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
@@ -82,7 +82,7 @@ export class VertexServices {
 
         //   }
         // } catch (error: any) {
-        const errorResponse = `Error fetching machine type list: ${formattedResponse.error}`;
+        const errorResponse = `Error fetching machine type list: ${uiConfigResponse.error}`;
         toast.error(errorResponse, { autoClose: false }); // Throw toast from service
       }
       return [];
@@ -122,12 +122,12 @@ export class VertexServices {
       }
 
       // API call
-      const formattedResponse: aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse =
+      const listSchedulesResponse: aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse =
         await requestAPI(serviceURL + urlparam, {
           signal
         });
 
-      if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
+      if (!listSchedulesResponse || Object.keys(listSchedulesResponse).length === 0) {
         return {
           schedulesList: [],
           nextPageToken: null,
@@ -141,7 +141,7 @@ export class VertexServices {
         schedules,
         nextPageToken
         //error
-      } = formattedResponse as IFormattedResponse;
+      } = listSchedulesResponse as IFormattedResponse;
 
       //TODO error handling for API enablement error
 
@@ -224,14 +224,14 @@ export class VertexServices {
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/pauseSchedule';
-      const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
+      const pauseResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`,
         {
           method: 'POST',
           signal
         }
       );
-      if (Object.keys(formattedResponse).length === 0) {
+      if (Object.keys(pauseResponse).length === 0) {
         Notification.success(`Schedule ${displayName} updated successfully`, {
           autoClose: false
         });
@@ -271,14 +271,14 @@ export class VertexServices {
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/resumeSchedule';
-      const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
+      const resumeResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
         {
           method: 'POST',
           signal
         }
       );
-      if (Object.keys(formattedResponse).length === 0) {
+      if (Object.keys(resumeResponse).length === 0) {
         Notification.success(`Schedule ${displayName} updated successfully`, {
           autoClose: false
         });
@@ -321,14 +321,14 @@ export class VertexServices {
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/triggerSchedule';
-      const data: ITriggerSchedule = await requestAPI(
+      const triggerResponse: ITriggerSchedule = await requestAPI(
         serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
         {
           method: 'POST',
           signal
         }
       );
-      if (data.name) {
+      if (triggerResponse.name) {
         Notification.success(`${displayName} triggered successfully `, {
           autoClose: false
         });
@@ -460,11 +460,11 @@ export class VertexServices {
       const { bucketName, scheduleRunId, fileName, abortControllers } =
         outputFileExistsPayload;
       const signal = settingController(abortControllers);
-      const formattedResponse = await requestAPI(
+      const outputFileExists = await requestAPI(
         `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${scheduleRunId}&file_name=${fileName}`,
         { signal }
       );
-      if (formattedResponse === 'true') {
+      if (outputFileExists === 'true') {
         return true;
       } else {
         return true;
@@ -492,15 +492,15 @@ export class VertexServices {
     try {
       const { gcsUrl, fileName, scheduleRunId, scheduleName } = downloadPayload;
       const bucketName = gcsUrl?.split('//')[1];
-      const formattedResponse: any = await requestAPI(
+      const downloadOutputResponse: any = await requestAPI(
         `api/storage/downloadOutput?bucket_name=${bucketName}&job_run_id=${scheduleRunId}&file_name=${fileName}`,
         {
           method: 'POST'
         }
       );
-      if (formattedResponse.status === 0) {
+      if (downloadOutputResponse.status === 0) {
         const base_filename = path.basename(
-          formattedResponse.downloaded_filename
+          downloadOutputResponse.downloaded_filename
         );
         Notification.success(
           `${base_filename} has been successfully downloaded from the ${scheduleName} job history`,
@@ -595,16 +595,16 @@ export class VertexServices {
     region: string
   ) => {
     try {
-      const data: any = await requestAPI(
+      const createResponse: any = await requestAPI(
         `api/vertex/createJobScheduler?region_id=${region}`,
         {
           body: JSON.stringify(vertexSchedulePayload),
           method: 'POST'
         }
       );
-      if (data.error) {
+      if (createResponse.error) {
         handleErrorToast({
-          error: data.error
+          error: createResponse.error
         });
         return false;
       } else {
@@ -645,16 +645,16 @@ export class VertexServices {
     updatedVertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule
   ) => {
     try {
-      const data: any = await requestAPI(
+      const updateResponse: any = await requestAPI(
         `api/vertex/updateSchedule?region_id=${region}&schedule_id=${jobId}`,
         {
           body: JSON.stringify(updatedVertexScheduleData),
           method: 'POST'
         }
       );
-      if (data.error) {
+      if (updateResponse.error) {
         handleErrorToast({
-          error: data.error
+          error: updateResponse.error
         });
         return false;
       } else {

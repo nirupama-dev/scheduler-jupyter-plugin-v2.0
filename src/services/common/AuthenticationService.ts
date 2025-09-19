@@ -51,14 +51,14 @@ export class AuthenticationService {
     checkApiEnabled: boolean = true
   ): Promise<IAuthCredentials | undefined> => {
     try {
-      const data = await requestAPI('credentials');
-      if (typeof data === 'object' && data !== null) {
+      const creds = await requestAPI('credentials');
+      if (typeof creds === 'object' && creds !== null) {
         const credentials: IAuthCredentials = {
-          access_token: (data as { access_token: string }).access_token,
-          project_id: (data as { project_id: string }).project_id,
-          region_id: (data as { region_id: string }).region_id,
-          config_error: (data as { config_error: number }).config_error,
-          login_error: (data as { login_error: number }).login_error
+          access_token: (creds as { access_token: string }).access_token,
+          project_id: (creds as { project_id: string }).project_id,
+          region_id: (creds as { region_id: string }).region_id,
+          config_error: (creds as { config_error: number }).config_error,
+          login_error: (creds as { login_error: number }).login_error
         };
         return credentials;
       }

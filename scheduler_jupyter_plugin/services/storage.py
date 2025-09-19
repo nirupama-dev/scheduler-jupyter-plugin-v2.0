@@ -72,7 +72,7 @@ class Client:
             storage_client = storage.Client(
                 credentials=credentials, project=self.project_id
             )
-            buckets = await storage_client.list_buckets()
+            buckets = storage_client.list_buckets()
             for bucket in buckets:
                 cloud_storage_buckets.append(bucket.name)
             return cloud_storage_buckets
@@ -90,7 +90,7 @@ class Client:
                 credentials=credentials, project=self.project_id
             )
             blob_name = f"{job_run_id}/{file_name}"
-            bucket = await storage_client.bucket(bucket_name)
+            bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(blob_name)
             if blob.exists():
                 return "true"

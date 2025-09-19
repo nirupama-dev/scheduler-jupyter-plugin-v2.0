@@ -67,3 +67,52 @@
   cursor: pointer;
   padding-right: 5px;
 }
+
+.import-error-parent {
+  margin-top: 12px;
+}
+
+.import-error-accordion-button {
+  background-color: #f2dede;
+  color: #e43921;
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.accordion-content {
+  padding: 10px;
+  color: #e43921;
+}
+
+.accordion-section {
+  background: #f2dede;
+  margin: 10px 0;
+}
+
+.accordion-title {
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #e43921;
+}
+
+.filename {
+  flex: 1;
+}
+
+.timestamp {
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.logo-alignment-style-accordion {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
+}

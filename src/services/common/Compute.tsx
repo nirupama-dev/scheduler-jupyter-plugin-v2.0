@@ -33,9 +33,9 @@ export class ComputeServices {
   static async getParentProjectAPIService(): Promise<any | null> {
     // Adjusted return type
     try {
-      const formattedResponse: any = await requestAPI('api/compute/getXpnHost');
-      if (formattedResponse && Object.keys(formattedResponse).length !== 0) {
-        return formattedResponse; // Return the data
+      const parentProjectResponse: any = await requestAPI('api/compute/getXpnHost');
+      if (parentProjectResponse && Object.keys(parentProjectResponse).length !== 0) {
+        return parentProjectResponse; // Return the data
       }
       return null; // Return null if no data
     } catch (error: any) {
@@ -58,17 +58,17 @@ export class ComputeServices {
   static async primaryNetworkAPIService(): Promise<ILabelValue<string>[]> {
     // Added async and return type
     try {
-      const formattedResponse: any = await requestAPI('api/compute/network');
-      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const primaryNetworkList = formattedResponse.map((network: any) => ({
+      const primaryNetworkResponse: any = await requestAPI('api/compute/network');
+      if (Array.isArray(primaryNetworkResponse) && primaryNetworkResponse.length > 0) {
+        const primaryNetworkList = primaryNetworkResponse.map((network: any) => ({
           label: network.name,
           value: network.selfLink
         }));
         primaryNetworkList.sort((a, b) => a.label.localeCompare(b.label)); // Sort alphabetically
         return primaryNetworkList; // Return the data
-      } else if (formattedResponse?.error) {
+      } else if (primaryNetworkResponse?.error) {
         // Original error handling for specific API error structure
-        throw new Error(formattedResponse.error); // Throw to be caught in service's catch block
+        throw new Error(primaryNetworkResponse.error); // Throw to be caught in service's catch block
       }
       return []; // Return empty array if no data
     } catch (error: any) {
@@ -96,11 +96,11 @@ export class ComputeServices {
   ): Promise<ILabelValue<string>[]> {
     // Added async and return type
     try {
-      const formattedResponse: any = await requestAPI(
+      const subNetworkResponse: any = await requestAPI(
         `api/compute/subNetwork?region_id=${region}&network_id=${primaryNetworkLink}`
       );
-      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const subNetworkList = formattedResponse
+      if (Array.isArray(subNetworkResponse) && subNetworkResponse.length > 0) {
+        const subNetworkList = subNetworkResponse
           .filter((network: any) => network.privateIpGoogleAccess === true)
           .map((network: any) => ({
             label: network.name,
@@ -108,9 +108,9 @@ export class ComputeServices {
           }));
         subNetworkList.sort((a, b) => a.label.localeCompare(b.label));
         return subNetworkList; // Return the data
-      } else if (formattedResponse?.error) {
+      } else if (subNetworkResponse?.error) {
         // Original error handling for specific API error structure
-        throw new Error(formattedResponse.error); // Throw to be caught in service's catch block
+        throw new Error(subNetworkResponse.error); // Throw to be caught in service's catch block
       }
       return []; // Return empty array if no data
     } catch (error: any) {
@@ -142,11 +142,11 @@ export class ComputeServices {
     // Added return type
     // setSharedNetworkLoading(true); // Start loading here
     try {
-      const formattedResponse: any = await requestAPI(
+      const sharedNetworkResponse: any = await requestAPI(
         `api/compute/sharedNetwork?project_id=${hostProject}&region_id=${region}`
       );
-      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const sharedNetworkList: ISharedNetwork[] = formattedResponse.map(
+      if (Array.isArray(sharedNetworkResponse) && sharedNetworkResponse.length > 0) {
+        const sharedNetworkList: ISharedNetwork[] = sharedNetworkResponse.map(
           (network: any) => ({
             name: network.subnetwork.split('/').pop(),
             network: network.network,
@@ -182,15 +182,15 @@ export class ComputeServices {
     projectId: string
   ): Promise<IDropdownOption[]> => {
     try {
-      const formattedResponse: string[] = await requestAPI(
+      const regionResponse: string[] = await requestAPI(
         `api/compute/region?project_id=${projectId}`
       );
 
-      if (!Array.isArray(formattedResponse)) {
+      if (!Array.isArray(regionResponse)) {
         throw new Error('Invalid response format for regions');
       }
 
-      const regionOptions: IDropdownOption[] = formattedResponse.map(
+      const regionOptions: IDropdownOption[] = regionResponse.map(
         (region: string) => ({ value: region, label: region })
       );
       regionOptions.sort((a, b) => a.label.localeCompare(b.label));
