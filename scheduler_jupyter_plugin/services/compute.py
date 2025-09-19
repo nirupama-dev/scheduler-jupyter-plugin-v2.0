@@ -57,7 +57,7 @@ class Client:
             request = compute_v1.ListRegionsRequest(
                 project=project_id,
             )
-            response = await regions_client.list(request=request)
+            response = regions_client.list(request=request)
             for item in response:
                 regions.append(item.name)
             return regions
@@ -76,7 +76,7 @@ class Client:
             request = compute_v1.ListNetworksRequest(
                 project=self.project_id,
             )
-            response = await networks_client.list(request=request)
+            response = networks_client.list(request=request)
             for item in response.items:
                 networks.append(
                     proto.Message.to_dict(
@@ -102,7 +102,7 @@ class Client:
                 project=self.project_id,
                 region=region_id,
             )
-            response = await subnetworks_client.list(request=request)
+            response = subnetworks_client.list(request=request)
             for item in response.items:
                 if network_id in item.network:
                     sub_networks.append(
@@ -128,7 +128,7 @@ class Client:
             request = compute_v1.ListUsableSubnetworksRequest(
                 project=project_id,
             )
-            response = await subnetworks_client.list_usable(request=request)
+            response = subnetworks_client.list_usable(request=request)
             for item in response:
                 if region_id in item.subnetwork:
                     shared_networks.append(

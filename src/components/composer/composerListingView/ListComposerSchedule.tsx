@@ -33,7 +33,7 @@ import { Notification } from '@jupyterlab/apputils';
 import TableData from '../../common/table/TableData';
 import { usePagination, useTable } from 'react-table';
 import { ICellProps } from '../../common/table/Utils';
-import { renderActions } from './RenderActions';
+import { renderActions } from './ComposerScheduleActions';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import { Box, CircularProgress } from '@mui/material';
 import DeletePopup from '../../common/table/DeletePopup';
@@ -180,15 +180,15 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     setLoadingState(prev => ({ ...prev, importErrors: true }));
 
     try {
-      const result = await ComposerServices.handleImportErrordataService(
+      const importErrors = await ComposerServices.handleImportErrordataService(
         env ?? '',
         selectedProjectId,
         selectedRegion
       );
 
-      if (result) {
-        setImportErrorData(result.import_errors);
-        setImportErrorEntries(result.total_entries);
+      if (importErrors) {
+        setImportErrorData(importErrors.import_errors);
+        setImportErrorEntries(importErrors.total_entries);
       }
     } finally {
       setLoadingState(prev => ({ ...prev, importErrors: false }));
@@ -243,15 +243,16 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, update: dag_id }));
 
       try {
-        const response = await ComposerServices.handleUpdateSchedulerAPIService(
-          selectedEnv,
-          dag_id,
-          is_status_paused,
-          selectedRegion,
-          selectedProjectId
-        );
+        const updateResponse =
+          await ComposerServices.handleUpdatComposerSchedulerAPIService(
+            selectedEnv,
+            dag_id,
+            is_status_paused,
+            selectedRegion,
+            selectedProjectId
+          );
 
-        if (response?.status === 0) {
+        if (updateResponse?.status === 0) {
           await handleEnvChange(selectedEnv ?? '');
         }
       } finally {
@@ -272,7 +273,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, trigger: dag_id }));
 
       try {
-        await ComposerServices.triggerDagService(
+        await ComposerServices.triggerComposerDagService(
           dag_id,
           selectedEnv ?? '',
           selectedProjectId,
@@ -289,13 +290,14 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       setLoadingState(prev => ({ ...prev, editNotebook: dag_id }));
 
       try {
-        const response = await ComposerServices.editNotebookInScheduledJob(
-          bucketName,
-          dag_id
-        );
+        const editNotebookResponse =
+          await ComposerServices.editComposerNotebookInScheduledJob(
+            bucketName,
+            dag_id
+          );
 
-        if (response?.input_filename) {
-          setInputNotebookFilePath(response.input_filename);
+        if (editNotebookResponse?.input_filename) {
+          setInputNotebookFilePath(editNotebookResponse.input_filename);
         }
       } finally {
         // Always reset the loading state
@@ -596,7 +598,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         {importErrorEntries > 0 && selectedProjectId && selectedRegion && (
           <div className="import-error-parent">
             <div
-              className="accordion-button"
+              className="import-error-accordion-button"
               role="button"
               aria-label="Show Import Errors"
               title="Show Import Errors"

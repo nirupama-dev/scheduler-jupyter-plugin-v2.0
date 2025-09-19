@@ -38,7 +38,7 @@ class Client:
             logging_client = logging.Client(
                 project=self.project_id, credentials=credentials
             )
-            log_entries = await logging_client.list_entries(
+            log_entries = logging_client.list_entries(
                 filter_=filter_query, page_size=1000, order_by="timestamp desc"
             )
             for item in log_entries:

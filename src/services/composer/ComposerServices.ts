@@ -116,13 +116,13 @@ export class ComposerServices {
     try {
       const serviceURL = `runtimeList?pageSize=500&pageToken=${pageToken}`;
 
-      const formattedResponse: any = await requestAPI(serviceURL);
+      const runtimeListResponse: any = await requestAPI(serviceURL);
       let transformSessionTemplateListData = [];
       if (
-        formattedResponse &&
-        Object.hasOwn(formattedResponse, 'sessionTemplates')
+        runtimeListResponse &&
+        Object.hasOwn(runtimeListResponse, 'sessionTemplates')
       ) {
-        transformSessionTemplateListData = formattedResponse.sessionTemplates
+        transformSessionTemplateListData = runtimeListResponse.sessionTemplates
           .filter((item: any) => Object.hasOwn(item, 'jupyterSession'))
           .map((data: any) => {
             return {
@@ -138,11 +138,11 @@ export class ComposerServices {
         ...transformSessionTemplateListData
       ];
 
-      if (formattedResponse.nextPageToken) {
+      if (runtimeListResponse.nextPageToken) {
         this.listSessionTemplatesAPIService(
           // setServerlessDataList,
           // setServerlessOptions,
-          formattedResponse.nextPageToken,
+          runtimeListResponse.nextPageToken,
           allSessionTemplatesData
         );
       } else {
@@ -157,9 +157,9 @@ export class ComposerServices {
         // setServerlessDataList(transformSessionTemplateListData);
         return serverlessOptionList;
       }
-      if (formattedResponse?.error) {
+      if (runtimeListResponse?.error) {
         handleErrorToast({
-          error: formattedResponse?.error
+          error: runtimeListResponse?.error
         });
         return;
       }
@@ -188,16 +188,16 @@ export class ComposerServices {
     region: string
   ): Promise<IEnvDropDownOption[]> => {
     try {
-      const formattedResponse: IComposerEnvAPIResponse[] = await requestAPI(
+      const composerListResponse: IComposerEnvAPIResponse[] = await requestAPI(
         `composerList?project_id=${projectId}&region_id=${region}`
       );
 
-      if (!Array.isArray(formattedResponse)) {
+      if (!Array.isArray(composerListResponse)) {
         // This custom error will now be thrown and caught by the caller.
         throw new Error('Invalid response format for composer environments');
       }
 
-      const environmentOptions: IEnvDropDownOption[] = formattedResponse.map(
+      const environmentOptions: IEnvDropDownOption[] = composerListResponse.map(
         (env: IComposerEnvAPIResponse) => ({
           label: env.label,
           value: env.name,
@@ -287,22 +287,22 @@ export class ComposerServices {
    * @param dagId - The ID of the DAG.
    * @returns A promise that resolves to the response from the API.
    */
-  static readonly editNotebookInScheduledJob = async (
+  static readonly editComposerNotebookInScheduledJob = async (
     bucketName: string,
     dagId: string
   ): Promise<any> => {
     try {
       const serviceURL = `getInputFileName?&dag_id=${dagId}&bucket_name=${bucketName}`;
-      const formattedResponse: any = await requestAPI(serviceURL, {
+      const inputFilenameResponse: any = await requestAPI(serviceURL, {
         method: 'POST'
       });
 
-      if (!formattedResponse?.input_filename) {
+      if (!inputFilenameResponse?.input_filename) {
         handleErrorToast({
           error: `Error in fetching filename for ${dagId}`
         });
       }
-      return formattedResponse;
+      return inputFilenameResponse;
     } catch (reason) {
       const errorResponse = `Error on POST: ${reason}`;
       handleErrorToast({
@@ -375,23 +375,25 @@ export class ComposerServices {
     setGreenListDates([]);
     setDarkGreenListDates([]);
     try {
-      const data: any = await requestAPI(
+      const dagRunsList: any = await requestAPI(
         `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${start_date}&end_date=${end_date}&offset=${offset}&project_id=${projectId}&region_id=${region}`
       );
 
       let transformDagRunListDataCurrent = [];
-      if (data && data?.dag_runs?.length > 0) {
-        transformDagRunListDataCurrent = data.dag_runs.map((dagRun: any) => {
-          if (dagRun.start_date !== null) {
-            return {
-              dagRunId: dagRun.dag_run_id,
-              filteredDate: new Date(dagRun.start_date),
-              state: dagRun.state,
-              date: new Date(dagRun.start_date).toDateString(),
-              time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
-            };
+      if (dagRunsList && dagRunsList?.dag_runs?.length > 0) {
+        transformDagRunListDataCurrent = dagRunsList.dag_runs.map(
+          (dagRun: any) => {
+            if (dagRun.start_date !== null) {
+              return {
+                dagRunId: dagRun.dag_run_id,
+                filteredDate: new Date(dagRun.start_date),
+                state: dagRun.state,
+                date: new Date(dagRun.start_date).toDateString(),
+                time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
+              };
+            }
           }
-        });
+        );
       }
       transformDagRunListDataCurrent = transformDagRunListDataCurrent.filter(
         (dagRunData: any) => {
@@ -407,7 +409,10 @@ export class ComposerServices {
         ...transformDagRunListDataCurrent
       ];
 
-      if (data?.dag_runs?.length + offset !== data.total_entries) {
+      if (
+        dagRunsList?.dag_runs?.length + offset !==
+        dagRunsList.total_entries
+      ) {
         this.listDagRunsListService(
           composerName,
           dagId,
@@ -422,7 +427,7 @@ export class ComposerServices {
           setDarkGreenListDates,
           projectId,
           region,
-          data.dag_runs.length + offset,
+          dagRunsList.dag_runs.length + offset,
           allDagRunsListData
         );
       } else {
@@ -499,11 +504,11 @@ export class ComposerServices {
   ): Promise<IListDagInfoAPIServiceResponse> => {
     try {
       const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
-      const formattedResponse: any = await requestAPI(serviceURL);
+      const dagListResponse: any = await requestAPI(serviceURL);
 
       let transformDagListData: IDagList[] = [];
-      if (formattedResponse?.length > 0) {
-        transformDagListData = formattedResponse[0]?.dags?.map((dag: any) => ({
+      if (dagListResponse?.length > 0) {
+        transformDagListData = dagListResponse[0]?.dags?.map((dag: any) => ({
           jobid: dag.dag_id,
           notebookname: dag.dag_id,
           schedule: dag.timetable_description,
@@ -513,7 +518,7 @@ export class ComposerServices {
       }
       return {
         dagList: transformDagListData,
-        bucketName: formattedResponse[1]
+        bucketName: dagListResponse[1]
       };
     } catch (error) {
       if (!toast.isActive('dagListError')) {
@@ -539,10 +544,10 @@ export class ComposerServices {
   ) => {
     const serviceURL = `dagList?composer=${composerSelected}&project_id=${project}&region_id=${region}`;
     requestAPI(serviceURL)
-      .then((formattedResponse: any) => {
+      .then((dagListResponse: any) => {
         let transformDagListData = [];
-        if (formattedResponse?.[0].dags) {
-          transformDagListData = formattedResponse[0].dags.map(
+        if (dagListResponse?.[0].dags) {
+          transformDagListData = dagListResponse[0].dags.map(
             (dag: ISchedulerDagData) => {
               return {
                 jobid: dag.dag_id,
@@ -579,11 +584,11 @@ export class ComposerServices {
     try {
       dagRunId = encodeURIComponent(dagRunId);
       const serviceURL = `downloadOutput?composer=${composerName}&bucket_name=${bucketName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`;
-      const formattedResponse: any = await requestAPI(serviceURL, {
+      const downloadOutputReponse: any = await requestAPI(serviceURL, {
         method: 'POST'
       });
       dagRunId = decodeURIComponent(dagRunId);
-      if (formattedResponse.status === 0) {
+      if (downloadOutputReponse.status === 0) {
         Notification.success(`${dagId}_${dagRunId} downloaded successfully`, {
           autoClose: false
         });
@@ -640,7 +645,7 @@ export class ComposerServices {
     }
   };
 
-  static readonly handleUpdateSchedulerAPIService = async (
+  static readonly handleUpdatComposerSchedulerAPIService = async (
     composerSelected: string,
     dag_id: string,
     is_status_paused: boolean,
@@ -650,22 +655,22 @@ export class ComposerServices {
     try {
       const serviceURL = `dagUpdate?composer=${composerSelected}&dag_id=${dag_id}&status=${is_status_paused}&project_id=${project}&region_id=${region}`;
 
-      const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
+      const updateResponse: IUpdateSchedulerAPIResponse = await requestAPI(
         serviceURL,
         { method: 'POST' }
       );
-      if (formattedResponse?.status === 0) {
+      if (updateResponse?.status === 0) {
         Notification.success(`Scheduler ${dag_id} updated successfully`, {
           autoClose: false
         });
       } else {
-        const errorResponse = `Error in updating the schedule: ${formattedResponse?.error}`;
+        const errorResponse = `Error in updating the schedule: ${updateResponse?.error}`;
         handleErrorToast({
           error: errorResponse
         });
       }
 
-      return formattedResponse;
+      return updateResponse;
     } catch (error) {
       SchedulerLoggingService.log('Error in Update API', LOG_LEVEL.ERROR);
       const errorResponse = `Error in updating the schedule: ${error}`;
@@ -689,14 +694,14 @@ export class ComposerServices {
     setIsLoading(true);
     try {
       dagRunId = encodeURIComponent(dagRunId);
-      const data: any = await requestAPI(
+      const dagRunTask: any = await requestAPI(
         `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`
       );
-      data.task_instances?.sort(
+      dagRunTask.task_instances?.sort(
         (a: any, b: any) => new Date(a.start_date).getTime() - 12
       );
       let transformDagRunTaskInstanceListData = [];
-      transformDagRunTaskInstanceListData = data.task_instances?.map(
+      transformDagRunTaskInstanceListData = dagRunTask.task_instances?.map(
         (dagRunTask: any) => {
           return {
             tryNumber: dagRunTask.try_number,
@@ -732,10 +737,10 @@ export class ComposerServices {
     try {
       setIsLoadingLogs(true);
       dagRunId = encodeURIComponent(dagRunId);
-      const data: any = await requestAPI(
+      const dagRunTaskLogs: any = await requestAPI(
         `dagRunTaskLogs?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&task_id=${taskId}&task_try_number=${tryNumber}&project_id=${projectId}&region_id=${region}`
       );
-      setLogList(data?.content);
+      setLogList(dagRunTaskLogs?.content);
       setIsLoadingLogs(false);
     } catch (reason) {
       const errorResponse = `Error in listing task logs..\n${reason}`;
@@ -756,11 +761,11 @@ export class ComposerServices {
     const signal = controller.signal;
 
     try {
-      const data: any = await requestAPI(
+      const importErrors: any = await requestAPI(
         `importErrorsList?composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
         { signal }
       );
-      return data;
+      return importErrors;
     } catch (reason) {
       if (typeof reason === 'object' && reason !== null) {
         if (
@@ -785,23 +790,26 @@ export class ComposerServices {
     }
   };
 
-  static readonly triggerDagService = async (
+  static readonly triggerComposerDagService = async (
     dagId: string,
     composerSelectedList: string,
     project: string,
     region: string
   ): Promise<any> => {
     try {
-      const data: any = await requestAPI(
+      const triggerResponse: any = await requestAPI(
         `triggerDag?dag_id=${dagId}&composer=${composerSelectedList}&project_id=${project}&region_id=${region}`,
         { method: 'POST' }
       );
 
       // If a 'Bad Request' error is returned, perform the secondary API call
-      if (data?.error && data?.error.includes('Bad Request')) {
-        const jsonstr = data?.error.slice(
-          data?.error.indexOf('{'),
-          data?.error.lastIndexOf('}') + 1
+      if (
+        triggerResponse?.error &&
+        triggerResponse?.error.includes('Bad Request')
+      ) {
+        const jsonstr = triggerResponse?.error.slice(
+          triggerResponse?.error.indexOf('{'),
+          triggerResponse?.error.lastIndexOf('}') + 1
         );
         const errorObject = JSON.parse(jsonstr);
 
@@ -815,17 +823,20 @@ export class ComposerServices {
       }
 
       // Check for success or different types of errors
-      if (data?.error) {
-        if (data.length > 0) {
+      if (triggerResponse?.error) {
+        if (triggerResponse.length > 0) {
           // This condition checks the response from checkRequiredPackages
           Notification.error(
             `Failed to trigger ${dagId} : required packages are not installed`,
             { autoClose: false }
           );
         } else {
-          Notification.error(`Failed to trigger ${dagId} : ${data?.error}`, {
-            autoClose: false
-          });
+          Notification.error(
+            `Failed to trigger ${dagId} : ${triggerResponse?.error}`,
+            {
+              autoClose: false
+            }
+          );
         }
       } else {
         // Success case
@@ -835,7 +846,7 @@ export class ComposerServices {
       }
 
       // Otherwise, return the initial data
-      return data;
+      return triggerResponse;
     } catch (reason) {
       // Catch network or unexpected errors
       Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
@@ -846,8 +857,8 @@ export class ComposerServices {
 
   static readonly listComposersAPICheckService = async () => {
     try {
-      const formattedResponse: any = await requestAPI('composerList');
-      return formattedResponse;
+      const composerListResponse: any = await requestAPI('composerList');
+      return composerListResponse;
     } catch (error) {
       return error;
     }
@@ -857,10 +868,10 @@ export class ComposerServices {
     composerEnvName: string | undefined
   ) => {
     try {
-      const formattedResponse: any = await requestAPI(
+      const composerEnvResponse: any = await requestAPI(
         `getComposerEnvironment?env_name=${composerEnvName}`
       );
-      return formattedResponse;
+      return composerEnvResponse;
     } catch (error) {
       return error;
     }

@@ -229,7 +229,7 @@ class Client:
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
         else:
-            api_endpoint = f"https://us-central-1-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
         headers = self.create_headers()
         async with self.client_session.get(api_endpoint, headers=headers) as response:
