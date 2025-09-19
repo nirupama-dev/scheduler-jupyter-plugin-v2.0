@@ -284,14 +284,14 @@ async def test_list_dag_run_task(monkeypatch, jp_fetch):
     assert payload["headers"]["Authorization"] == f"Bearer mock-token"
 
 
-async def test_edit_jobs(monkeypatch, jp_fetch):
+async def test_get_job_schedule(monkeypatch, jp_fetch):
     mocks.patch_mocks(monkeypatch)
 
     mock_bucket_name = "mock-url"
     mock_dag_id = "mock_dag_id"
     response = await jp_fetch(
         "scheduler-plugin",
-        "editJobScheduler",
+        "getComposerJobSchedule",
         params={"bucket_name": mock_bucket_name, "dag_id": mock_dag_id},
     )
     assert response.code == 200

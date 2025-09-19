@@ -33,18 +33,6 @@
   padding-left: 15px;
 }
 
-.create-job-scheduler-title {
-  padding: 0 15px;
-  height: 48px;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 24px;
-  display: flex;
-  align-items: center;
-  color: var(--jp-ui-font-color0);
-}
-
 .dag-runs-list-table-parent {
   overflow: auto;
 }
@@ -146,13 +134,6 @@
   display: flex;
 }
 
-.logo-alignment-style-accordion {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  cursor: pointer;
-}
-
 .logs-content-style {
   overflow: auto;
   margin: 10px;
@@ -220,48 +201,6 @@
   height: 24px;
 }
 
-.accordion-section {
-  background: #f2dede;
-  margin: 10px 0;
-}
-
-.accordion-title {
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #e43921;
-}
-
-.accordion-button {
-  background-color: #f2dede;
-  color: #e43921;
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.accordion-content {
-  padding: 10px;
-  color: #e43921;
-}
-
-.import-error-parent {
-  margin-top: 12px;
-}
-
-.filename {
-  flex: 1;
-}
-
-.timestamp {
-  margin-left: 10px;
-  margin-right: 10px;
-}
-
 .tab-text-sub-cl .error-message {
   color: #b71c1c;
 }
@@ -280,10 +219,6 @@
   height: 48px;
   display: flex;
   border-bottom: 1px solid var(--jp-layout-color3);
-}
-
-.scheduler-region-top {
-  padding-top: 10px;
 }
 
 .enable-error-text-label a {

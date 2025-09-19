@@ -42,6 +42,13 @@ class DownloadOutputController(APIHandler):
                     }
                 )
             )
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error in downloading output file: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception({"Error in downloading output file": str(e)})
             self.finish({"Error in downloading output file": str(e)})
@@ -55,6 +62,13 @@ class CloudStorageController(APIHandler):
             storage_client = storage.Client(await credentials.get_cached(), self.log)
             csb = await storage_client.list_bucket()
             self.finish(json.dumps(csb))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching cloud storage bucket: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching cloud storage bucket: {str(e)}")
             self.finish({"error": str(e)})
@@ -71,6 +85,13 @@ class OutputFileExistsController(APIHandler):
             client = storage.Client(await credentials.get_cached(), self.log)
             result = await client.output_file_exists(bucket_name, file_name, job_run_id)
             self.finish(json.dumps(result))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error in checking output file: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception({"Error in checking output file": str(e)})
             self.finish({"Error in checking output file": str(e)})

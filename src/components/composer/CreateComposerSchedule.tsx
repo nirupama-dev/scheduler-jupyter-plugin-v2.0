@@ -22,6 +22,7 @@ import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import Cron from 'react-js-cron';
+import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
@@ -126,12 +127,6 @@ export const CreateComposerSchedule: React.FC<
           const options =
             await ComputeServices.regionAPIService(selectedProjectId);
           setRegionOptions(options);
-        } catch (error) {
-          // Handle error from the service call
-          const errorResponse = `Failed to fetch region list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
         } finally {
           setLoadingState(prev => ({ ...prev, region: false }));
         }
@@ -155,11 +150,6 @@ export const CreateComposerSchedule: React.FC<
             selectedRegion
           );
           setEnvOptions(options);
-        } catch (error) {
-          const errorResponse = `Failed to fetch composer environment list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
         } finally {
           setLoadingState(prev => ({ ...prev, environment: false }));
         }
@@ -282,7 +272,7 @@ export const CreateComposerSchedule: React.FC<
           disabled={true}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="composerRegion"
           label="Region"
@@ -295,7 +285,7 @@ export const CreateComposerSchedule: React.FC<
           error={errors.composerRegion}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="environment"
           label="Environment"
@@ -400,7 +390,7 @@ export const CreateComposerSchedule: React.FC<
           error={errors.retryCount}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputText
           label="Retry delay (minutes)"
           control={control}

@@ -34,6 +34,13 @@ class ClusterListController(APIHandler):
                 )
                 cluster_list = await client.list_clusters(page_size, page_token)
             self.finish(json.dumps(cluster_list))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching cluster list: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception("Error fetching cluster list")
             self.finish({"error": str(e)})
@@ -51,6 +58,13 @@ class RuntimeController(APIHandler):
                 )
                 runtime_list = await client.list_runtime(page_size, page_token)
             self.finish(json.dumps(runtime_list))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching runtime template list: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching runtime template list: {str(e)}")
             self.finish({"error": str(e)})

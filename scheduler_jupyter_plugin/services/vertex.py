@@ -23,13 +23,13 @@ from google.cloud import storage
 from scheduler_jupyter_plugin.commons.constants import (
     CONTENT_TYPE,
     CRON_EVERY_MINUTE,
+    HTTP_STATUS_NOT_FOUND,
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
     HTTP_STATUS_NO_CONTENT,
     HTTP_STATUS_UNAUTHORIZED,
 )
 from scheduler_jupyter_plugin.models.models import (
-    DescribeVertexJob,
     DescribeBucketName,
     DescribeUpdateVertexJob,
 )
@@ -63,8 +63,10 @@ class Client:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(token=self._access_token)
-            storage_client = storage.Client(credentials=credentials, project=self.project_id)
-            storage_client.create_bucket(bucket_name)
+            storage_client = storage.Client(
+                credentials=credentials, project=self.project_id
+            )
+            await storage_client.create_bucket(bucket_name)
         except Exception as error:
             self.log.exception(f"Error in creating Bucket: {error}")
             raise IOError(f"Error in creating Bucket: {error}")
@@ -72,8 +74,10 @@ class Client:
     async def upload_to_gcs(self, bucket_name, file_path, job_name):
         input_notebook = file_path.split("/")[-1]
         credentials = oauth2.Credentials(self._access_token)
-        storage_client = storage.Client(credentials=credentials, project=self.project_id)
-        bucket = storage_client.bucket(bucket_name)
+        storage_client = storage.Client(
+            credentials=credentials, project=self.project_id
+        )
+        bucket = await storage_client.bucket(bucket_name)
         blob_name = None
 
         if "gs:" not in file_path:
@@ -101,33 +105,44 @@ class Client:
         return blob_name if blob_name else file_path
 
     async def create_schedule(self, job, region_id):
-        try:
-            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules"
-            headers = self.create_headers()
-            payload = job
-            async with self.client_session.post(
-                api_endpoint, headers=headers, json=payload
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    return resp
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    self.log.exception("Error creating the schedule")
-                    raise RuntimeError(f"{response.reason} {await response.text()}")
-        except Exception as e:
-            self.log.exception(f"Error creating schedule: {str(e)}")
-            raise RuntimeError(f"Error creating schedule: {str(e)}")
+        api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules"
+        headers = self.create_headers()
+        payload = job
+        async with self.client_session.post(
+            api_endpoint, headers=headers, json=payload
+        ) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                return resp
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception("Error creating the schedule")
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def create_job_schedule(self, job, region_id):
-        print('job:', job)
+        print("job:", job)
         try:
-            storage_bucket = job['createNotebookExecutionJobRequest']['notebookExecutionJob']['gcsOutputUri'].split("//")[-1]
-            gcs_notebook_source = job['createNotebookExecutionJobRequest']['notebookExecutionJob']['gcsNotebookSource']['uri']
+            storage_bucket = job["createNotebookExecutionJobRequest"][
+                "notebookExecutionJob"
+            ]["gcsOutputUri"].split("//")[-1]
+            gcs_notebook_source = job["createNotebookExecutionJobRequest"][
+                "notebookExecutionJob"
+            ]["gcsNotebookSource"]["uri"]
             if "gs://" in gcs_notebook_source:
                 input_filename = gcs_notebook_source
             elif "gs:" in gcs_notebook_source:
@@ -135,13 +150,11 @@ class Client:
             else:
                 input_filename = gcs_notebook_source
 
-            await self.upload_to_gcs(
-                storage_bucket, input_filename, job['displayName']
-            )
+            await self.upload_to_gcs(storage_bucket, input_filename, job["displayName"])
             res = await self.create_schedule(job, region_id)
             return res
         except Exception as e:
-            print('error:', str(e))
+            print("error:", str(e))
             return {"error": str(e)}
 
     async def create_new_bucket(self, input_data):
@@ -153,438 +166,471 @@ class Client:
             return {"error": str(e)}
 
     async def list_uiconfig(self, region_id):
-        try:
-            uiconfig = []
-            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/ui/projects/{self.project_id}/locations/{region_id}/uiConfig"
+        uiconfig = []
+        api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/ui/projects/{self.project_id}/locations/{region_id}/uiConfig"
 
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    if not resp:
-                        return uiconfig
-                    else:
-                        if (
-                            "notebookRuntimeConfig" in resp
-                            and "machineConfigs" in resp["notebookRuntimeConfig"]
-                        ):
-                            for machineconfig in resp["notebookRuntimeConfig"][
-                                "machineConfigs"
-                            ]:
-                                rambytes_in_gb = round(
-                                    int(machineconfig.get("ramBytes")) / 1000000000, 2
-                                )
-                                formatted_config = {
-                                    "machineType": f"{machineconfig.get('machineType')} ({machineconfig.get('cpuCount')} CPUs, {rambytes_in_gb} GB RAM)",
-                                    "acceleratorConfigs": machineconfig.get(
-                                        "acceleratorConfigs"
-                                    ),
-                                }
-                                uiconfig.append(formatted_config)
-                        return uiconfig
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                elif response.status == HTTP_STATUS_FORBIDDEN:
-                    resp = await response.json()
-                    return resp
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                if not resp:
+                    return uiconfig
                 else:
-                    self.log.exception(
-                        f"Error getting vertex ui config: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error getting vertex ui config: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error fetching ui config: {str(e)}")
-            return {"Error fetching ui config": str(e)}
+                    if (
+                        "notebookRuntimeConfig" in resp
+                        and "machineConfigs" in resp["notebookRuntimeConfig"]
+                    ):
+                        for machineconfig in resp["notebookRuntimeConfig"][
+                            "machineConfigs"
+                        ]:
+                            rambytes_in_gb = round(
+                                int(machineconfig.get("ramBytes")) / 1000000000, 2
+                            )
+                            formatted_config = {
+                                "machineType": f"{machineconfig.get('machineType')} ({machineconfig.get('cpuCount')} CPUs, {rambytes_in_gb} GB RAM)",
+                                "acceleratorConfigs": machineconfig.get(
+                                    "acceleratorConfigs"
+                                ),
+                            }
+                            uiconfig.append(formatted_config)
+                    return uiconfig
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_FORBIDDEN:
+                resp = await response.json()
+                return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error getting vertex ui config: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     def parse_schedule(self, cron):
         return get_description(cron)
 
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
-        try:
-            result = {}
+        result = {}
 
-            if next_page_token:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
+        if next_page_token:
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageToken={next_page_token}&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
-            else:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
+        else:
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules?orderBy=createTime desc&pageSize={page_size}&filter=createNotebookExecutionJobRequest:*"
 
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    if not resp:
-                        return result
-                    else:
-                        schedule_list = []
-                        schedules = resp.get("schedules")
-                        for schedule in schedules:
-                            # filter for a workbench schedule 
-                            # ie atleast any one of the following is not available.
-                            # workbenchRuntime or kernel or customEnvironmentSpec
-                            if schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob") is None:
-                                continue
-                            notebook_execution_job = schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob")
-                            if (
-                                notebook_execution_job.get("workbenchRuntime") is None
-                                and notebook_execution_job.get("kernelName") is None
-                                and notebook_execution_job.get("customEnvironmentSpec") is None
-                            ):
-                                continue
-                            max_run_count = schedule.get("maxRunCount")
-                            cron = schedule.get("cron")
-                            cron_value = (
-                                cron.split(" ", 1)[1]
-                                if (cron and "TZ" in cron)
-                                else cron
-                            )
-                            if max_run_count == "1" and cron_value == CRON_EVERY_MINUTE:
-                                schedule_value = "run once"
-                            else:
-                                schedule_value = self.parse_schedule(cron)
-
-                            formatted_schedule = {
-                                "name": schedule.get("name"),
-                                "displayName": schedule.get("displayName"),
-                                "schedule": schedule_value,
-                                "status": schedule.get("state"),
-                                "createTime": schedule.get("createTime"),
-                                "nextRunTime": schedule.get("nextRunTime"),
-                                "gcsNotebookSourceUri": schedule.get(
-                                    "createNotebookExecutionJobRequest"
-                                )
-                                .get("notebookExecutionJob")
-                                .get("gcsNotebookSource"),
-                                "lastScheduledRunResponse": schedule.get(
-                                    "lastScheduledRunResponse"
-                                ),
-                            }
-                            schedule_list.append(formatted_schedule)
-                        resp["schedules"] = schedule_list
-                        result.update(resp)
-                        return result
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                elif response.status == HTTP_STATUS_FORBIDDEN:
-                    resp = await response.json()
-                    return resp
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                if not resp:
+                    return result
                 else:
-                    self.log.exception(
-                        f"Error listing schedules: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error listing schedules: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error fetching schedules: {str(e)}")
-            return {"Error fetching schedules": str(e)}
+                    schedule_list = []
+                    schedules = resp.get("schedules")
+                    for schedule in schedules:
+                        # filter for a workbench schedule
+                        # ie atleast any one of the following is not available.
+                        # workbenchRuntime or kernel or customEnvironmentSpec
+                        if (
+                            schedule.get("createNotebookExecutionJobRequest").get(
+                                "notebookExecutionJob"
+                            )
+                            is None
+                        ):
+                            continue
+                        notebook_execution_job = schedule.get(
+                            "createNotebookExecutionJobRequest"
+                        ).get("notebookExecutionJob")
+                        if (
+                            notebook_execution_job.get("workbenchRuntime") is None
+                            and notebook_execution_job.get("kernelName") is None
+                            and notebook_execution_job.get("customEnvironmentSpec")
+                            is None
+                        ):
+                            continue
+                        max_run_count = schedule.get("maxRunCount")
+                        cron = schedule.get("cron")
+                        cron_value = (
+                            cron.split(" ", 1)[1] if (cron and "TZ" in cron) else cron
+                        )
+                        if max_run_count == "1" and cron_value == CRON_EVERY_MINUTE:
+                            schedule_value = "run once"
+                        else:
+                            schedule_value = self.parse_schedule(cron)
+
+                        formatted_schedule = {
+                            "name": schedule.get("name"),
+                            "displayName": schedule.get("displayName"),
+                            "schedule": schedule_value,
+                            "status": schedule.get("state"),
+                            "createTime": schedule.get("createTime"),
+                            "nextRunTime": schedule.get("nextRunTime"),
+                            "gcsNotebookSourceUri": schedule.get(
+                                "createNotebookExecutionJobRequest"
+                            )
+                            .get("notebookExecutionJob")
+                            .get("gcsNotebookSource"),
+                            "lastScheduledRunResponse": schedule.get(
+                                "lastScheduledRunResponse"
+                            ),
+                        }
+                        schedule_list.append(formatted_schedule)
+                    resp["schedules"] = schedule_list
+                    result.update(resp)
+                    return result
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_FORBIDDEN:
+                resp = await response.json()
+                return resp
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error listing schedules: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def pause_schedule(self, region_id, schedule_id):
-        try:
-            api_endpoint = (
-                f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:pause"
-            )
+        api_endpoint = (
+            f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:pause"
+        )
 
-            headers = self.create_headers()
-            async with self.client_session.post(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    return await response.json()
-                elif response.status == HTTP_STATUS_NO_CONTENT:
-                    return {"message": "Schedule paused successfully"}
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    self.log.exception(
-                        f"Error pausing the schedule: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error pausing the schedule: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error pausing schedule: {str(e)}")
-            return {"Error pausing schedule": str(e)}
+        headers = self.create_headers()
+        async with self.client_session.post(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                return await response.json()
+            elif response.status == HTTP_STATUS_NO_CONTENT:
+                return {"message": "Schedule paused successfully"}
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error pausing the schedule: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def resume_schedule(self, region_id, schedule_id):
-        try:
-            api_endpoint = (
-                f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:resume"
-            )
+        api_endpoint = (
+            f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:resume"
+        )
 
-            headers = self.create_headers()
-            async with self.client_session.post(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    return await response.json()
-                elif response.status == HTTP_STATUS_NO_CONTENT:
-                    return {"message": "Schedule resumed successfully"}
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    self.log.exception(
-                        f"Error resuming the schedule: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error resuming the schedule: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error resuming schedule: {str(e)}")
-            return {"Error resuming schedule": str(e)}
+        headers = self.create_headers()
+        async with self.client_session.post(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                return await response.json()
+            elif response.status == HTTP_STATUS_NO_CONTENT:
+                return {"message": "Schedule resumed successfully"}
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error resuming the schedule: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def delete_schedule(self, region_id, schedule_id):
-        try:
-            api_endpoint = (
-                f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
-            )
+        api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
 
-            headers = self.create_headers()
-            async with self.client_session.delete(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    return await response.json()
-                elif response.status == HTTP_STATUS_NO_CONTENT:
-                    return {"message": "Schedule deleted successfully"}
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    self.log.exception(
-                        f"Error deleting the schedule: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error deleting the schedule: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error deleting schedule: {str(e)}")
-            return {"Error deleting schedule": str(e)}
+        headers = self.create_headers()
+        async with self.client_session.delete(
+            api_endpoint, headers=headers
+        ) as response:
+            if response.status == HTTP_STATUS_OK:
+                return await response.json()
+            elif response.status == HTTP_STATUS_NO_CONTENT:
+                return {"message": "Schedule deleted successfully"}
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error deleting the schedule: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def get_schedule(self, region_id, schedule_id):
-        try:
-            api_endpoint = (
-                f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
-            )
+        api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
 
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    return await response.json()
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    self.log.exception(
-                        f"Error getting the schedule: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error getting the schedule: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error getting schedule: {str(e)}")
-            return {"Error getting schedule": str(e)}
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                return await response.json()
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error getting the schedule: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def trigger_schedule(self, region_id, schedule_id):
-        try:
-            data = await self.get_schedule(region_id, schedule_id)
-            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs"
+        data = await self.get_schedule(region_id, schedule_id)
+        api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs"
 
-            headers = self.create_headers()
-            payload = data.get("createNotebookExecutionJobRequest").get(
-                "notebookExecutionJob"
-            )
-            payload["scheduleResourceName"] = data.get("name")
-            async with self.client_session.post(
-                api_endpoint, headers=headers, json=payload
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    return await response.json()
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    self.log.exception(
-                        f"Error triggering the schedule: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error triggering the schedule: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error triggering schedule: {str(e)}")
-            return {"Error triggering schedule": str(e)}
+        headers = self.create_headers()
+        payload = data.get("createNotebookExecutionJobRequest").get(
+            "notebookExecutionJob"
+        )
+        payload["scheduleResourceName"] = data.get("name")
+        async with self.client_session.post(
+            api_endpoint, headers=headers, json=payload
+        ) as response:
+            if response.status == HTTP_STATUS_OK:
+                return await response.json()
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error triggering the schedule: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def update_schedule(self, region_id, schedule_id, input_data):
-        try:
-            data = DescribeUpdateVertexJob(**input_data)
-            custom_environment_spec = {}
-            notebook_execution_job = {
-                "displayName": data.display_name,
-                "gcsNotebookSource": {"uri": data.gcs_notebook_source},
-                "customEnvironmentSpec": custom_environment_spec,
-                "labels": {
-                    "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench",
-                },
-                "workbenchRuntime": {},
-            }
-            schedule_value = (
-                CRON_EVERY_MINUTE if data.schedule_value == "" else data.schedule_value
-            )
-            cron = (
-                schedule_value
-                if data.time_zone == "UTC"
-                else f"TZ={data.time_zone} {schedule_value}"
-            )
-            # getting list of strings from UI, the api accepts dictionary, so converting it
-            parameters = {
-                param.split(":")[0]: param.split(":")[1] for param in data.parameters
-            }
+        data = DescribeUpdateVertexJob(**input_data)
+        custom_environment_spec = {}
+        notebook_execution_job = {
+            "displayName": data.display_name,
+            "gcsNotebookSource": {"uri": data.gcs_notebook_source},
+            "customEnvironmentSpec": custom_environment_spec,
+            "labels": {
+                "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench",
+            },
+            "workbenchRuntime": {},
+        }
+        schedule_value = (
+            CRON_EVERY_MINUTE if data.schedule_value == "" else data.schedule_value
+        )
+        cron = (
+            schedule_value
+            if data.time_zone == "UTC"
+            else f"TZ={data.time_zone} {schedule_value}"
+        )
+        # getting list of strings from UI, the api accepts dictionary, so converting it
+        parameters = {
+            param.split(":")[0]: param.split(":")[1] for param in data.parameters
+        }
 
-            if data.kernel_name:
-                notebook_execution_job["kernelName"] = data.kernel_name
-            if data.service_account:
-                notebook_execution_job["serviceAccount"] = data.service_account
-            if data.cloud_storage_bucket:
-                notebook_execution_job["gcsOutputUri"] = data.cloud_storage_bucket
-            if data.parameters:
-                notebook_execution_job["parameters"] = parameters
-            if data.machine_type:
-                custom_environment_spec["machineSpec"] = {
-                    "machineType": data.machine_type.split(" ", 1)[0],
-                    "acceleratorType": data.accelerator_type,
-                    "acceleratorCount": data.accelerator_count,
-                }
-            if data.network or data.subnetwork:
-                custom_environment_spec["networkSpec"] = {
-                    "network": data.network,
-                    "subnetwork": data.subnetwork,
-                }
-            if data.disk_size or data.disk_type:
-                custom_environment_spec["persistentDiskSpec"] = {
-                    "diskSizeGb": data.disk_size,
-                    "diskType": data.disk_type.split(" ", 1)[0],
-                }
-
-            payload = {
-                "displayName": data.display_name,
-                "maxConcurrentRunCount": "1",
-                "cron": cron,
-                "createNotebookExecutionJobRequest": {
-                    "parent": f"projects/{self.project_id}/locations/{region_id}",
-                    "notebookExecutionJob": notebook_execution_job,
-                },
+        if data.kernel_name:
+            notebook_execution_job["kernelName"] = data.kernel_name
+        if data.service_account:
+            notebook_execution_job["serviceAccount"] = data.service_account
+        if data.cloud_storage_bucket:
+            notebook_execution_job["gcsOutputUri"] = data.cloud_storage_bucket
+        if data.parameters:
+            notebook_execution_job["parameters"] = parameters
+        if data.machine_type:
+            custom_environment_spec["machineSpec"] = {
+                "machineType": data.machine_type.split(" ", 1)[0],
+                "acceleratorType": data.accelerator_type,
+                "acceleratorCount": data.accelerator_count,
+            }
+        if data.network or data.subnetwork:
+            custom_environment_spec["networkSpec"] = {
+                "network": data.network,
+                "subnetwork": data.subnetwork,
+            }
+        if data.disk_size or data.disk_type:
+            custom_environment_spec["persistentDiskSpec"] = {
+                "diskSizeGb": data.disk_size,
+                "diskType": data.disk_type.split(" ", 1)[0],
             }
 
-            if data.start_time:
-                payload["startTime"] = data.start_time
-            if data.end_time:
-                payload["endTime"] = data.end_time
+        payload = {
+            "displayName": data.display_name,
+            "maxConcurrentRunCount": "1",
+            "cron": cron,
+            "createNotebookExecutionJobRequest": {
+                "parent": f"projects/{self.project_id}/locations/{region_id}",
+                "notebookExecutionJob": notebook_execution_job,
+            },
+        }
 
-            if data.max_run_count:
-                payload["maxRunCount"] = data.max_run_count
+        if data.start_time:
+            payload["startTime"] = data.start_time
+        if data.end_time:
+            payload["endTime"] = data.end_time
 
-            keys = payload.keys()
-            keys_to_filter = ["displayName", "maxConcurrentRunCount"]
-            filtered_keys = [
-                item for item in keys if not any(key in item for key in keys_to_filter)
-            ]
-            update_mask = ",".join(filtered_keys)
-            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}?updateMask={update_mask}"
+        if data.max_run_count:
+            payload["maxRunCount"] = data.max_run_count
 
-            headers = self.create_headers()
-            async with self.client_session.patch(
-                api_endpoint, headers=headers, json=payload
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    return await response.json()
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
-                else:
-                    self.log.exception(
-                        f"Error updating the schedule: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error updating the schedule: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(f"Error updating schedule: {str(e)}")
-            return {"error": str(e)}
+        keys = payload.keys()
+        keys_to_filter = ["displayName", "maxConcurrentRunCount"]
+        filtered_keys = [
+            item for item in keys if not any(key in item for key in keys_to_filter)
+        ]
+        update_mask = ",".join(filtered_keys)
+        api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}?updateMask={update_mask}"
+
+        headers = self.create_headers()
+        async with self.client_session.patch(
+            api_endpoint, headers=headers, json=payload
+        ) as response:
+            if response.status == HTTP_STATUS_OK:
+                return await response.json()
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error updating the schedule: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )
 
     async def list_notebook_execution_jobs(
         self, region_id, schedule_id, order_by, page_size=None, start_date=None
     ):
-        try:
-            execution_jobs = []
-            if page_size:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&pageSize={page_size}&orderBy={order_by}"
-            else:
-                api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&orderBy={order_by}"
+        execution_jobs = []
+        if page_size:
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&pageSize={page_size}&orderBy={order_by}"
+        else:
+            api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&orderBy={order_by}"
 
-            headers = self.create_headers()
-            async with self.client_session.get(
-                api_endpoint, headers=headers
-            ) as response:
-                if response.status == HTTP_STATUS_OK:
-                    resp = await response.json()
-                    if not resp:
-                        return execution_jobs
-                    else:
-                        jobs = resp.get("notebookExecutionJobs")
-                        for job in jobs:
-                            if start_date:
-                                # getting only the jobs whose create time is equal to start date
-                                # splitting it in order to get only the date part from the values which is in zulu format (2011-08-12T20:17:46.384Z)
-                                if (
-                                    start_date.rsplit("-", 1)[0]
-                                    == job.get("createTime").rsplit("-", 1)[0]
-                                ):
-                                    execution_jobs.append(job)
-                            else:
-                                execution_jobs.append(job)
-                        return execution_jobs
-                elif response.status == HTTP_STATUS_UNAUTHORIZED:
-                    self.log.exception(
-                        f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
-                    )
-                    return {"AUTHENTICATION_ERROR": await response.json()}
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                if not resp:
+                    return execution_jobs
                 else:
-                    self.log.exception(
-                        f"Error fetching notebook execution jobs: {response.reason} {await response.text()}"
-                    )
-                    raise RuntimeError(
-                        f"Error fetching notebook execution jobs: {response.reason} {await response.text()}"
-                    )
-        except Exception as e:
-            self.log.exception(
-                f"Error fetching list of notebook execution jobs: {str(e)}"
-            )
-            return {"Error fetching list of notebook execution jobs": str(e)}
+                    jobs = resp.get("notebookExecutionJobs")
+                    for job in jobs:
+                        if start_date:
+                            # getting only the jobs whose create time is equal to start date
+                            # splitting it in order to get only the date part from the values which is in zulu format (2011-08-12T20:17:46.384Z)
+                            if (
+                                start_date.rsplit("-", 1)[0]
+                                == job.get("createTime").rsplit("-", 1)[0]
+                            ):
+                                execution_jobs.append(job)
+                        else:
+                            execution_jobs.append(job)
+                    return execution_jobs
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {"ERROR": response.reason, "status": response.status}
+                )
+            else:
+                self.log.exception(
+                    f"Error fetching notebook execution jobs: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {"ERROR": await response.json(), "status": response.status}
+                )

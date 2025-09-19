@@ -62,6 +62,9 @@ export const FormInputText = ({
             }
           }}
           disabled={disabled}
+          FormHelperTextProps={{
+            style: { fontSize: '0.688rem' } // You can adjust this value
+          }}
         />
       )}
     />

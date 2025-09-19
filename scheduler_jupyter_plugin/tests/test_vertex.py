@@ -186,7 +186,7 @@ async def test_list_notebook_execution_jobs(
                     {
                         "createTime": None,
                         "displayName": None,
-                        'gcsNotebookSourceUri': None,
+                        "gcsNotebookSourceUri": None,
                         "lastScheduledRunResponse": None,
                         "name": None,
                         "nextRunTime": None,
@@ -251,7 +251,6 @@ class TestCreateJobScheduleMethod(unittest.TestCase):
             "input_filename": "test_input_file",
         }
 
-    @patch("models.DescribeVertexJob")
     @patch("vertex.Client.upload_to_gcs")
     @patch("vertex.Client.create_schedule")
     async def test_create_job_schedule(
