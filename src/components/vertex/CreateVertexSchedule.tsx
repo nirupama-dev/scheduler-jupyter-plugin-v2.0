@@ -74,6 +74,8 @@ import {
   ISharedNetwork
 } from '../../interfaces/VertexInterface';
 import { RadioOption } from '../../types/CommonSchedulerTypes';
+import { handleOpenLoginWidget } from '../common/login/Config';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -84,7 +86,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   trigger,
   isValid,
   credentials,
-  editScheduleData
+  editScheduleData,
+  app
   // ... other props
 }) => {
   // Local state for dropdown options (fetched dynamically)
@@ -241,6 +244,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           setValue('acceleratorCount', '');
         }
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         // Handle all errors in one place.
         setMachineTypeList([]);
         setValue('machineType', '');
@@ -286,6 +293,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         }
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setCloudStorageList([]);
       if (isVertexForm) {
         setValue('cloudStorageBucket', '');
@@ -327,6 +338,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         }
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setServiceAccountList([]);
       setValue('serviceAccount', '');
     } finally {
@@ -350,6 +365,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setHostProject(null); // Set to null if response is falsy
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setHostProject(null); // Set to null on error
     } finally {
       setLoadingState(prev => ({ ...prev, hostProject: false }));
@@ -379,6 +398,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         );
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setPrimaryNetworkList([]);
       setValue('primaryNetwork', '');
       handleErrorToast({ error: 'Failed to fetch primary networks.' });
@@ -430,6 +453,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
         }
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         setSubNetworkList([]);
         setValue('subNetwork', '');
         handleErrorToast({ error: 'Failed to fetch subNetworks.' });
@@ -489,6 +516,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           }
         }
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         setSharedNetworkList([]);
         setValue('sharedNetwork', { network: '', subnetwork: '' });
         handleErrorToast({ error: 'Failed to fetch shared networks.' });
@@ -675,6 +706,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             setCloudStorageList(updatedBucketList);
             setValue('cloudStorageBucket', newBucketName);
           } catch (error) {
+            if (error instanceof AuthenticationError) {
+              handleOpenLoginWidget(app);
+            }
+
             setValue('cloudStorageBucket', ''); // Clear selection on failure
           } finally {
             setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));

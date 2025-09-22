@@ -72,8 +72,10 @@ import {
   IMachineType,
   ISharedNetwork
 } from '../../interfaces/VertexInterface';
+import { handleOpenLoginWidget } from '../common/login/Config';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
+  app,
   control,
   errors,
   watch,
@@ -542,6 +544,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             setCloudStorageList(updatedBucketList);
             setValue('cloudStorageBucket', newBucketName);
           } catch (error) {
+            handleOpenLoginWidget(app);
             setValue('cloudStorageBucket', '');
           } finally {
             setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));

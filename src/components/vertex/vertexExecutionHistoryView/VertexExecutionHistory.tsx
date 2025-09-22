@@ -25,11 +25,15 @@ import { VertexServices } from '../../../services/vertex/VertexServices';
 import { IScheduleRun } from '../../../interfaces/VertexInterface';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { abortApiCall } from '../../../utils/Config';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { handleOpenLoginWidget } from '../../common/login/Config';
 
 const VertexExecutionHistory = ({
-  abortControllers
+  abortControllers,
+  app
 }: {
   abortControllers: any;
+  app: JupyterFrontEnd;
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,7 +56,8 @@ const VertexExecutionHistory = ({
   }: any = useExecutionHistory(
     scheduleId ?? '',
     region ?? '',
-    abortControllers
+    abortControllers,
+    app
   );
 
   const calendarProps = {
@@ -75,7 +80,8 @@ const VertexExecutionHistory = ({
     selectedDate,
     dispatch,
     scheduleName,
-    fileExists
+    fileExists,
+    app
   };
 
   const checkFileExistence = useCallback(async (scheduleRun: IScheduleRun) => {
@@ -91,13 +97,17 @@ const VertexExecutionHistory = ({
         fileName: scheduleRun.fileName,
         abortControllers
       };
-      const result = await VertexServices.outputFileExists(
-        outputFileExistsPayload
-      );
-      setFileExists(prev => ({
-        ...prev,
-        [scheduleRun.scheduleRunId]: result
-      }));
+      try {
+        const result = await VertexServices.outputFileExists(
+          outputFileExistsPayload
+        );
+        setFileExists(prev => ({
+          ...prev,
+          [scheduleRun.scheduleRunId]: result
+        }));
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
+      }
     }
   }, []);
 

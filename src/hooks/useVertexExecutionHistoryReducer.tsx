@@ -18,6 +18,8 @@
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useReducer } from 'react';
 import { VertexServices } from '../services/vertex/VertexServices';
+import { handleOpenLoginWidget } from '../components/common/login/Config';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 const executionHistoryReducer = (state: any, action: any) => {
   switch (action.type) {
@@ -74,7 +76,8 @@ const initialState = {
 export const useExecutionHistory = (
   scheduleId: string,
   region: string,
-  abortControllers: any
+  abortControllers: any,
+  app: JupyterFrontEnd
 ) => {
   const [state, dispatch] = useReducer(executionHistoryReducer, initialState);
   const selectedMonth = state.selectedMonth;
@@ -87,20 +90,24 @@ export const useExecutionHistory = (
       abortControllers
     };
     dispatch({ type: 'SET_LOADING', payload: true });
-    const executionData =
-      await VertexServices.executionHistoryServiceList(executionPayload);
-    if (executionData) {
-      dispatch({ type: 'SET_LOADING', payload: false });
+    try {
+      const executionData =
+        await VertexServices.executionHistoryServiceList(executionPayload);
+      if (executionData) {
+        dispatch({ type: 'SET_LOADING', payload: false });
 
-      dispatch({
-        type: 'SET_CALENDAR_DATES',
-        payload: executionData.groupedDates
-      });
+        dispatch({
+          type: 'SET_CALENDAR_DATES',
+          payload: executionData.groupedDates
+        });
 
-      dispatch({
-        type: 'SET_VERTEX_RUNS',
-        payload: executionData.scheduleRuns
-      });
+        dispatch({
+          type: 'SET_VERTEX_RUNS',
+          payload: executionData.scheduleRuns
+        });
+      }
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
     }
   };
 

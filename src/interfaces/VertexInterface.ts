@@ -16,7 +16,7 @@
  */
 
 import { Dayjs } from 'dayjs';
-
+import { LabIcon } from '@jupyterlab/ui-components';
 import {
   Control,
   FieldErrors,
@@ -33,6 +33,7 @@ import {
 } from './CommonInterface';
 import { HeaderProps, Renderer } from 'react-table';
 import { PickersDayProps } from '@mui/x-date-pickers';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export interface ICreateVertexSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -44,6 +45,7 @@ export interface ICreateVertexSchedulerProps {
   isValid: boolean;
   credentials: IAuthCredentials;
   editScheduleData: IEditScheduleData | null | undefined;
+  app: JupyterFrontEnd;
 }
 
 export interface IMachineType {
@@ -303,6 +305,7 @@ export interface IVertexExecutionHistoryActionsProps {
   };
   scheduleName: string;
   fileExists?: boolean;
+  app: JupyterFrontEnd;
 }
 
 export interface IScheduleRunFiltered {
@@ -348,9 +351,17 @@ export interface IVertexListingInputProps {
   handleCurrentPageRefresh: () => void;
 }
 
-export interface IVertexListContext {
+export interface ISchedulerContext {
   activePaginationVariables: IActivePaginationVariables | null;
   setActivePaginationVariables: React.Dispatch<
     React.SetStateAction<IActivePaginationVariables | null>
   >;
+}
+
+export interface IActionButtonProps {
+  title: string;
+  icon: LabIcon;
+  onClick?: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+  className?: string;
 }

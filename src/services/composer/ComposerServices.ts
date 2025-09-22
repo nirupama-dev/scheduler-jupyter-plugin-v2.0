@@ -33,6 +33,7 @@ import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 import { IEnvDropDownOption } from '../../interfaces/FormInterface';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 /**
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
@@ -93,6 +94,10 @@ export class ComposerServices {
         return;
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
       const errorResponse = `Failed to fetch clusters : ${error}`;
       handleErrorToast({
@@ -164,6 +169,9 @@ export class ComposerServices {
         return;
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
@@ -208,11 +216,14 @@ export class ComposerServices {
 
       return environmentOptions;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       const errorResponse = `Failed to fetch composer environment list : ${error}`;
       handleErrorToast({
         error: errorResponse
       });
-      throw error;
+      return [];
     }
   };
 
@@ -275,6 +286,9 @@ export class ComposerServices {
         return true;
       }
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       handleErrorToast({
         error: reason
       });
@@ -304,6 +318,9 @@ export class ComposerServices {
       }
       return inputFilenameResponse;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error on POST: ${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -341,6 +358,9 @@ export class ComposerServices {
 
       return composerJobScheduleDetails;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error on getting schedule details.\n${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -490,6 +510,9 @@ export class ComposerServices {
         setIsLoading(false);
       }
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error in listing dag runs..\n${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -521,6 +544,9 @@ export class ComposerServices {
         bucketName: dagListResponse[1]
       };
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       if (!toast.isActive('dagListError')) {
         const errorMessage =
           typeof error === 'object' && error !== null && 'message' in error
@@ -563,6 +589,9 @@ export class ComposerServices {
         setJobNameUniquenessError(false);
       })
       .catch(error => {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
         SchedulerLoggingService.log(
           'Error listing dag Scheduler list',
           LOG_LEVEL.ERROR
@@ -599,6 +628,9 @@ export class ComposerServices {
       }
       setDownloadOutputDagRunId('');
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log('Error in Download api', LOG_LEVEL.ERROR);
       const errorResponse = `Error in Download api : ${error}`;
       handleErrorToast({
@@ -608,7 +640,7 @@ export class ComposerServices {
     }
   };
 
-  static readonly handleDeleteSchedulerAPIService = async (
+  static readonly handleDeleteComposerScheduleAPIService = async (
     composerSelected: string,
     dag_id: string,
     region: string,
@@ -636,6 +668,9 @@ export class ComposerServices {
       }
       return deleteResponse;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       // Handle network or unexpected errors
       SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
       Notification.error(`Failed to delete the ${dag_id} : ${error}`, {
@@ -672,6 +707,9 @@ export class ComposerServices {
 
       return updateResponse;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log('Error in Update API', LOG_LEVEL.ERROR);
       const errorResponse = `Error in updating the schedule: ${error}`;
       handleErrorToast({
@@ -716,6 +754,9 @@ export class ComposerServices {
       setDagTaskInstancesList(transformDagRunTaskInstanceListData);
       setIsLoading(false);
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error in dag task instances..\n${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -743,6 +784,9 @@ export class ComposerServices {
       setLogList(dagRunTaskLogs?.content);
       setIsLoadingLogs(false);
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error in listing task logs..\n${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -767,6 +811,9 @@ export class ComposerServices {
       );
       return importErrors;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&
@@ -848,6 +895,9 @@ export class ComposerServices {
       // Otherwise, return the initial data
       return triggerResponse;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       // Catch network or unexpected errors
       Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
         autoClose: false
@@ -873,6 +923,9 @@ export class ComposerServices {
       );
       return composerEnvResponse;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       return error;
     }
   };

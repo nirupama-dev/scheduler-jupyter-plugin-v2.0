@@ -13,21 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-// import './base.css';
-// import './authLogin.css';
-// import './cluster.css';
-// import './notebookScheduler.css';
-// import './submitJob.css';
-// import './job.css';
-import './commonSchedulerStyles.css';
-import './listScheduleStylesCommon.css';
-import './listVertexSchedule.css';
-import './createNotebookScheduler.css';
-import './createVertexScheduler.css';
-import './createComposerScheduler.css';
-import './common.css';
-import './listComposerSchedule.css';
-import './vertexExecutionHistory.css';
-import './login.css';
+export interface IAuthCredentials {
+  access_token?: string;
+  project_id?: string;
+  region_id?: string;
+  config_error?: number;
+  login_error?: number;
+}

@@ -15,21 +15,24 @@
  * limitations under the License.
  */
 
-import React, { ReactNode, useState } from 'react';
-import { IActivePaginationVariables } from '../../interfaces/VertexInterface';
-import { VertexListContext } from './VertexListContext';
+import React from 'react';
+import { IconsigninGoogle } from '../../../utils/Icons';
+import { login } from './Config';
 
-// Provider component
-export const VertexListProvider = ({ children }: { children: ReactNode }) => {
-  const [activePaginationVariables, setActivePaginationVariables] =
-    useState<IActivePaginationVariables | null>(null);
-  const value = {
-    activePaginationVariables,
-    setActivePaginationVariables
+const LoginErrorComponent: React.FC = () => {
+  const handleLogin = async () => {
+    await login();
   };
   return (
-    <VertexListContext.Provider value={value}>
-      {children}
-    </VertexListContext.Provider>
+    <>
+      <div className="login-error">Please login to continue</div>
+      <div style={{ alignItems: 'center' }}>
+        <div role="button" className="signin-google-icon" onClick={handleLogin}>
+          <IconsigninGoogle.react tag="div" className="logo-alignment-style" />
+        </div>
+      </div>
+    </>
   );
 };
+
+export default LoginErrorComponent;

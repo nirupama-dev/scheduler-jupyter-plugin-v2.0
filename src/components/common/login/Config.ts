@@ -15,8 +15,14 @@
  * limitations under the License.
  */
 
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { requestAPI } from '../../../handler/Handler';
 import { IAuthCredentials } from '../../../interfaces/CommonInterface';
 import { AuthenticationService } from '../../../services/common/AuthenticationService';
+import {
+  OPEN_LOGIN_WIDGET_COMMAND,
+  STATUS_SUCCESS
+} from '../../../utils/Constants';
 
 /**
  * Authentication function
@@ -28,4 +34,22 @@ export const authApi = async (
 ): Promise<IAuthCredentials | undefined> => {
   const authService = await AuthenticationService.authCredentialsAPI();
   return authService;
+};
+
+export const login = async () => {
+  const data = await requestAPI('login', {
+    method: 'POST'
+  });
+  if (typeof data === 'object' && data !== null) {
+    const loginStatus = (data as { login: string }).login;
+    if (loginStatus === STATUS_SUCCESS) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+};
+
+export const handleOpenLoginWidget = (app: JupyterFrontEnd) => {
+  app.commands.execute(OPEN_LOGIN_WIDGET_COMMAND);
 };

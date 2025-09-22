@@ -15,19 +15,19 @@
  * limitations under the License.
  */
 
-// import './base.css';
-// import './authLogin.css';
-// import './cluster.css';
-// import './notebookScheduler.css';
-// import './submitJob.css';
-// import './job.css';
-import './commonSchedulerStyles.css';
-import './listScheduleStylesCommon.css';
-import './listVertexSchedule.css';
-import './createNotebookScheduler.css';
-import './createVertexScheduler.css';
-import './createComposerScheduler.css';
-import './common.css';
-import './listComposerSchedule.css';
-import './vertexExecutionHistory.css';
-import './login.css';
+import { createContext, useContext } from 'react';
+import { ISchedulerContext } from '../../interfaces/VertexInterface';
+
+// Create the context
+export const SchedulerContext = createContext<ISchedulerContext | null>(null);
+
+// Create a custom hook to use the context
+export const useSchedulerContext = () => {
+  const context = useContext(SchedulerContext);
+  if (context === undefined) {
+    throw new Error(
+      'useSchedulerContext must be used within a SchedulerProvider'
+    );
+  }
+  return context;
+};
