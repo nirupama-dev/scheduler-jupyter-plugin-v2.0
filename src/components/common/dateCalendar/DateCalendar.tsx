@@ -21,6 +21,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateCalendar } from '@mui/x-date-pickers/DateCalendar';
 import dayjs from 'dayjs';
 import CustomDate from './CustomDate';
+import { SCHEDULE_LABEL_COMPOSER } from '../../../utils/Constants';
 
 const ExecutionCalendar = ({
   createTime,
@@ -32,12 +33,17 @@ const ExecutionCalendar = ({
   redListDates,
   greenListDates,
   darkGreenListDates,
-  isLoading
+  isLoading,
+  fromPage
 }: any) => (
   <div className="execution-history-left-wrapper calender-top execution-wrapper-border-none">
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DateCalendar
-        minDate={dayjs(createTime)}
+        minDate={
+          fromPage && fromPage !== SCHEDULE_LABEL_COMPOSER
+            ? dayjs(createTime)
+            : undefined
+        }
         maxDate={dayjs(currentDate)}
         referenceDate={dayjs(currentDate)}
         onChange={handleDateSelection}

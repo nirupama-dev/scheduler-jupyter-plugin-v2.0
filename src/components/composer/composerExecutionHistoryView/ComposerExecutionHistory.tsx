@@ -20,8 +20,10 @@ import { useComposerExecutionHistory } from '../../../hooks/useComposerExecution
 import ExecutionCalendar from '../../common/dateCalendar/DateCalendar';
 import { useNavigate, useParams } from 'react-router-dom';
 import ListDagRuns from './ListDagRuns';
-import { iconLeftArrow } from '../../../utils/Icons';
 import ListDagTaskInstances from './ListDagTaskInstances';
+import { SCHEDULE_LABEL_COMPOSER } from '../../../utils/Constants';
+import ExecutionHistoryHeader from '../../vertex/vertexExecutionHistoryView/VertexExecutionHistoryHeader';
+import { Box, LinearProgress } from '@mui/material';
 
 const ComposerExecutionHistory = (): JSX.Element => {
   const { dagId, projectId, region, composerName, bucketName } = useParams();
@@ -42,15 +44,14 @@ const ComposerExecutionHistory = (): JSX.Element => {
     handleLogs,
     height,
     handleDagRunClick,
-    dagRunId
+    dagRunId,
+    isLoading
   } = useComposerExecutionHistory(
     dagId ?? '',
     projectId ?? '',
     region ?? '',
     composerName ?? ''
   );
-
-  console.log('dagRunId', dagRunId);
 
   const calendarProps = {
     createTime,
@@ -62,35 +63,41 @@ const ComposerExecutionHistory = (): JSX.Element => {
     darkGreenListDates,
     handleDateSelection,
     handleMonthChange,
-    handleLogs
+    handleLogs,
+    fromPage: SCHEDULE_LABEL_COMPOSER
   };
 
   const handleBackButton = () => {
+    console.log('back composer');
     navigate('/list');
   };
 
   return (
     <>
-      <div className="execution-history-header">
-        <button
-          className="scheduler-back-arrow-icon"
-          onClick={handleBackButton}
-        >
-          <iconLeftArrow.react
-            tag="div"
-            className="icon-white logo-alignment-style cursor-icon"
-          />
-        </button>
-        <div className="create-job-scheduler-title">
-          Execution History: {dagId}
-        </div>
+      <div className="execution-history-main-wrapper">
+        <ExecutionHistoryHeader
+          scheduleName={dagId ?? ''}
+          handleBackButton={handleBackButton}
+          fromPage={SCHEDULE_LABEL_COMPOSER}
+        />
       </div>
-      <div
-        className="execution-history-main-wrapper"
-        style={{ height: height }}
-      >
+      <div className="horizontal-element-wrapper" style={{ height: height }}>
         <div className="execution-history-left-wrapper">
-          <ExecutionCalendar {...calendarProps} />
+          <div className="calendar-bottom">
+            {isLoading ? (
+              <div className="spin-loader-main-execution-history">
+                <Box sx={{ width: '100%' }}>
+                  <LinearProgress />
+                </Box>
+              </div>
+            ) : (
+              <div
+                className="spin-loader-main-execution-history"
+                style={{ height: '4px' }}
+              ></div>
+            )}
+            <ExecutionCalendar {...calendarProps} />
+          </div>
           {startDate !== '' && endDate !== '' && (
             <ListDagRuns
               composerName={composerName || ''}

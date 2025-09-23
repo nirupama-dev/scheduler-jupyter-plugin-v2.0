@@ -120,3 +120,7 @@
   margin: 10px;
   border-bottom: 1px solid var(--jp-layout-color3);
 }
+
+.calendar-bottom {
+  padding-bottom: 20px;
+}

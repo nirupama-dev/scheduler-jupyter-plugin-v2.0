@@ -219,8 +219,8 @@ const ListDagRuns = ({
             icon={iconDownload}
             className={
               data.state === 'success'
-                ? 'icon-buttons-style'
-                : 'icon-buttons-style-disable'
+                ? 'icon-buttons-style padding-zero '
+                : 'icon-buttons-style-disable padding-zero '
             }
           />
         )}
