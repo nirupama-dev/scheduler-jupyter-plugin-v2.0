@@ -25,7 +25,7 @@ export interface IFormInputProps {
   label?: string;
   setValue?: any;
   className?: string;
-  options?: Array<{ label: string; value: string }>;
+  options?: Array<{ label: string; value: string; disabled?: boolean }>;
   error?: FieldError;
   [key: string]: any; // Allow additional props
   type?: string;
@@ -48,6 +48,10 @@ export interface IDropdownOption {
   value: string;
 }
 
+export interface IEnvDropDownOption extends IDropdownOption {
+  state: string;
+}
+
 export interface IFormInputDropdownProps<OptionType = ILabelValue<string>> {
   name: Path<CombinedCreateFormValues>;
   control: Control<CombinedCreateFormValues>;
@@ -67,6 +71,8 @@ export interface IFormInputDropdownProps<OptionType = ILabelValue<string>> {
   ) => boolean;
   getOptionValue?: any;
   disabled?: boolean;
+  getOptionDisabled?: (option: OptionType) => boolean;
+  renderOption?: any;
 }
 
 export interface IFormInputListingDropdownProps<
@@ -74,7 +80,7 @@ export interface IFormInputListingDropdownProps<
 > {
   name: Path<any>;
   control: Control<any>;
-  options: Array<{ label: string; value: any }> | [];
+  options: Array<{ label: string; value: any; state?: string }> | [];
   label?: string;
   setValue?: any;
   className?: string;
@@ -87,6 +93,8 @@ export interface IFormInputListingDropdownProps<
   isOptionEqualToValue?: (option: OptionType, value: any) => boolean;
   getOptionValue?: any;
   disabled?: boolean;
+  getOptionDisabled?: (option: OptionType) => boolean;
+  renderOption?: any;
 }
 
 // Define the shape of a single option

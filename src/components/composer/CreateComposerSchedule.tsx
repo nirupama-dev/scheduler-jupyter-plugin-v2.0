@@ -22,11 +22,11 @@ import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import Cron from 'react-js-cron';
+import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
-import { authApi } from '../common/login/Config';
-import { IDropdownOption } from '../../interfaces/FormInterface';
+import { authApi, handleOpenLoginWidget } from '../common/login/Config';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import {
   IComposerEnvAPIResponse,
@@ -34,25 +34,29 @@ import {
   ILoadingStateComposer
 } from '../../interfaces/ComposerInterface';
 import {
+  composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
   SCHEDULE_MODE_OPTIONS
 } from '../../utils/Constants';
-import { FormGroup } from '@mui/material';
+import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
+import { ILabelValue } from '../../interfaces/CommonInterface';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
-> = ({ control, errors, setValue, watch, setError }) => {
-  const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
-  const [envOptions, setEnvOptions] = useState<IDropdownOption[]>([]);
+> = ({ control, errors, setValue, watch, setError, app }) => {
+  const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
+  const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
     IComposerEnvAPIResponse[]
   >([]);
-  const [clusterOptions, setClusterOptions] = useState<IDropdownOption[]>([]);
-  const [serverlessOptions, setServerlessOptions] = useState<IDropdownOption[]>(
+  const [clusterOptions, setClusterOptions] = useState<ILabelValue<string>[]>(
     []
   );
+  const [serverlessOptions, setServerlessOptions] = useState<
+    ILabelValue<string>[]
+  >([]);
   const [emailList, setEmailList] = useState<string[]>([]);
   const [loadingState, setLoadingState] = useState<ILoadingStateComposer>({
     projectId: false,
@@ -64,7 +68,7 @@ export const CreateComposerSchedule: React.FC<
   });
 
   const timezones = Object.keys(tzdata.zones).sort();
-  const timeZoneOptions: IDropdownOption[] = timezones.map(zone => ({
+  const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
     label: zone,
     value: zone
   }));
@@ -104,7 +108,7 @@ export const CreateComposerSchedule: React.FC<
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
     // if (selectedProjectId) {
-    //   const regionList: DropdownOption[] = ComputeServices.regionAPIService(
+    //   const regionList: ILabelValue<string>[] = ComputeServices.regionAPIService(
     //     selectedProjectId,
     //   );
 
@@ -123,12 +127,8 @@ export const CreateComposerSchedule: React.FC<
           const options =
             await ComputeServices.regionAPIService(selectedProjectId);
           setRegionOptions(options);
-        } catch (error) {
-          // Handle error from the service call
-          const errorResponse = `Failed to fetch region list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
         } finally {
           setLoadingState(prev => ({ ...prev, region: false }));
         }
@@ -152,11 +152,8 @@ export const CreateComposerSchedule: React.FC<
             selectedRegion
           );
           setEnvOptions(options);
-        } catch (error) {
-          const errorResponse = `Failed to fetch composer environment list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
         } finally {
           setLoadingState(prev => ({ ...prev, environment: false }));
         }
@@ -171,22 +168,28 @@ export const CreateComposerSchedule: React.FC<
   }, [selectedRegion, setValue]);
 
   useEffect(() => {
-    if (executionMode === 'cluster') {
-      setValue('serverless', '');
-      ComposerServices.listClustersAPIService(
-        setClusterOptions,
-        setLoadingState
-      );
-    } else if (executionMode === 'serverless') {
-      setValue('cluster', '');
-      ComposerServices.listSessionTemplatesAPIService(
-        setServerlessOptions,
-        setLoadingState
-      );
-    } else {
-      setClusterOptions([]);
-      setServerlessOptions([]);
-    }
+    const fetchData = async () => {
+      try {
+        if (executionMode === 'cluster') {
+          setValue('serverless', '');
+          const clusterOptionsFromAPI =
+            await ComposerServices.listClustersAPIService();
+          setClusterOptions(clusterOptionsFromAPI);
+        } else if (executionMode === 'serverless') {
+          setValue('cluster', '');
+          const serverlessOptionsFromAPI =
+            await ComposerServices.listSessionTemplatesAPIService();
+          setServerlessOptions(serverlessOptionsFromAPI);
+        } else {
+          setClusterOptions([]);
+          setServerlessOptions([]);
+        }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
+      }
+    };
+
+    fetchData();
   }, [executionMode, setValue]);
 
   // Handle Project ID change: Clear Region and Environment
@@ -277,7 +280,7 @@ export const CreateComposerSchedule: React.FC<
           disabled={true}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="composerRegion"
           label="Region"
@@ -290,7 +293,7 @@ export const CreateComposerSchedule: React.FC<
           error={errors.composerRegion}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="environment"
           label="Environment"
@@ -301,6 +304,24 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={errors.environment}
+          getOptionDisabled={option =>
+            composerEnvironmentStateListForCreate !== option.state
+          }
+          renderOption={(props: any, option: any) => {
+            const { key, ...optionProps } = props;
+            return (
+              <Box key={key} component="li" {...optionProps}>
+                {composerEnvironmentStateListForCreate === option.state ? (
+                  <div>{option.value}</div>
+                ) : (
+                  <div className="env-option-row">
+                    <div>{option.value}</div>
+                    <div>{option.state}</div>
+                  </div>
+                )}
+              </Box>
+            );
+          }}
         />
       </div>
       <div className="create-scheduler-label block-seperation">
@@ -377,7 +398,7 @@ export const CreateComposerSchedule: React.FC<
           error={errors.retryCount}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputText
           label="Retry delay (minutes)"
           control={control}

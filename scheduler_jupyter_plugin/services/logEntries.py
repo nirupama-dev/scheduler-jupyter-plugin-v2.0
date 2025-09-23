@@ -65,7 +65,7 @@ class Client:
             return logs
         except Unauthenticated as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
-            return {"AUTHENTICATION_ERROR": str(e)}
+            raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
         except Exception as e:
             self.log.exception(f"Error fetching log entries: {str(e)}")
             return {"Error fetching log entries": str(e)}

@@ -40,7 +40,9 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
   error,
   loading = false, // Default to false
   disabled = false, // Default to false
-  filterOptions
+  filterOptions,
+  getOptionDisabled,
+  renderOption
   // onSearchInputChange,
   // freeSolo = false, // Default to false
   // placeholder = '',
@@ -83,22 +85,26 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
                 }}
               />
             )}
-            renderOption={(props, option) => {
-              // Custom rendering for the "Create new bucket" option
-              if (
-                option.value === 'Create and Select' &&
-                name === 'cloudStorageBucket'
-              ) {
-                return (
-                  <li {...props} className="custom-add-bucket">
-                    {option.label}
-                  </li>
-                );
-              }
+            renderOption={
+              renderOption ||
+              ((props, option) => {
+                // Custom rendering for the "Create new bucket" option
+                if (
+                  option.value === 'Create and Select' &&
+                  name === 'cloudStorageBucket'
+                ) {
+                  return (
+                    <li {...props} className="custom-add-bucket">
+                      {option.label}
+                    </li>
+                  );
+                }
 
-              return <li {...props}>{option.label}</li>;
-            }}
+                return <li {...props}>{option.label}</li>;
+              })
+            }
             filterOptions={filterOptions}
+            getOptionDisabled={getOptionDisabled}
           />
         )}
       />
@@ -119,7 +125,9 @@ export const FormInputListingDropdown: React.FC<
   error,
   loading = false, // Default to false
   disabled = false, // Default to false
-  filterOptions
+  filterOptions,
+  getOptionDisabled,
+  renderOption
 }) => {
   return (
     <FormControl fullWidth error={!!error} className={customClass}>
@@ -158,14 +166,24 @@ export const FormInputListingDropdown: React.FC<
                 }}
               />
             )}
-            renderOption={(props, option) => {
-              return <li {...props}>{option.label}</li>;
-            }}
+            renderOption={
+              renderOption ||
+              ((props, option) => {
+                return <li {...props}>{option.label}</li>;
+              })
+            }
             filterOptions={filterOptions}
+            getOptionDisabled={getOptionDisabled}
           />
         )}
       />
-      <div>{error && <FormHelperText>{error.message}</FormHelperText>}</div>
+      <div>
+        {error && (
+          <FormHelperText sx={{ fontSize: '0.688rem' }}>
+            {error.message}
+          </FormHelperText>
+        )}
+      </div>
     </FormControl>
   );
 };

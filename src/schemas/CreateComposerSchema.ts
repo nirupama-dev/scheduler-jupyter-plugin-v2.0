@@ -34,7 +34,6 @@ const emailSchema = z
 
 export const createComposerSchema = createNotebookCommonSchema.extend({
   schedulerSelection: z.literal('composer'), // Discriminator property
-  dagId: z.string().optional(),
   projectId: z.string().min(1, 'Project ID is required'),
   composerRegion: z.string().min(1, 'Region is required'),
   environment: z.string().min(1, 'Environment is required'),
@@ -60,8 +59,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   emailOnFailure: z.boolean().default(false),
   emailOnRetry: z.boolean().default(false),
   emailOnSuccess: z.boolean().default(false),
-  // Email field is now just optional by default
-  email_recipients: emailSchema, // This field is optional by itself, the required logic is in the superRefine
+  emailRecipients: emailSchema, // This field is optional by itself, the required logic is in the emailSchema def
   runOption: z.enum(['runNow', 'runOnSchedule'], {
     errorMap: () => ({ message: 'Please select a run option' })
   }),

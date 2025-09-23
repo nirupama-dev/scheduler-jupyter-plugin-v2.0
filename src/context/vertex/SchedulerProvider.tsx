@@ -15,13 +15,23 @@
  * limitations under the License.
  */
 
-import { createContext, useContext } from 'react';
-import { IVertexListContext } from '../../interfaces/VertexInterface';
+import React, { ReactNode, useState } from 'react';
+import { IActivePaginationVariables } from '../../interfaces/VertexInterface';
+import { SchedulerContext } from './SchedulerContext';
 
-// Create the context
-export const VertexListContext = createContext<IVertexListContext | null>(null);
+// Provider component
+export const SchedulerProvider = ({ children }: { children: ReactNode }) => {
+  const [activePaginationVariables, setActivePaginationVariables] =
+    useState<IActivePaginationVariables | null>(null);
 
-// Create a custom hook to use the context
-export const useVertexContext = () => {
-  return useContext(VertexListContext);
+  const value = {
+    activePaginationVariables,
+    setActivePaginationVariables
+  };
+
+  return (
+    <SchedulerContext.Provider value={value}>
+      {children}
+    </SchedulerContext.Provider>
+  );
 };

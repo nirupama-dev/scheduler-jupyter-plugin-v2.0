@@ -28,10 +28,9 @@ import {
   LOADER_CONTENT_VERTEX_EXECUTION_SCREEN,
   LOADER_CONTENT_VERTEX_LISTING_SCREEN
 } from '../utils/Constants';
-import { VertexListProvider } from '../context/vertex/VertexListprovider';
+import { SchedulerProvider } from '../context/vertex/SchedulerProvider';
 
 /**
- *
  * @param schedulerRouteProps
  * @returns
  * This component defines the routes for the scheduler application.
@@ -66,7 +65,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
   );
 
   return (
-    <VertexListProvider>
+    <SchedulerProvider>
       <Routes>
         <Route path="/" element={<Navigate to="/list" replace />} />
         <Route
@@ -75,13 +74,14 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
             <CreateNotebookSchedule
               sessionContext={sessionContext}
               initialKernalScheduleDetails={initialKernalSchedulerDetails}
+              app={app}
             />
           }
         />
 
         <Route
           path="/edit/:schedulerType/:scheduleId/:region/:projectId?/:environment?"
-          element={<CreateNotebookSchedule />}
+          element={<CreateNotebookSchedule app={app} />}
         />
 
         <Route path="/list" element={<ScheduleListingView />}>
@@ -97,7 +97,10 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                   />
                 }
               >
-                <ListVertexSchedule abortControllers={abortControllers} />
+                <ListVertexSchedule
+                  abortControllers={abortControllers}
+                  app={app}
+                />
               </Suspense>
             }
           />
@@ -131,7 +134,10 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                 />
               }
             >
-              <VertexExecutionHistory abortControllers={abortControllers} />
+              <VertexExecutionHistory
+                abortControllers={abortControllers}
+                app={app}
+              />
             </Suspense>
           }
         />
@@ -168,6 +174,6 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
           }
         />
       </Routes>
-    </VertexListProvider>
+    </SchedulerProvider>
   );
 }

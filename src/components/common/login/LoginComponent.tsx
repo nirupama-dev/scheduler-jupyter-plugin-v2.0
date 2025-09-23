@@ -15,20 +15,22 @@
  * limitations under the License.
  */
 
-// import './base.css';
-// import './authLogin.css';
-// import './cluster.css';
-// import './notebookScheduler.css';
-// import './submitJob.css';
-// import './job.css';
-import './commonSchedulerStyles.css';
-import './listScheduleStylesCommon.css';
-import './listVertexSchedule.css';
-import './createNotebookScheduler.css';
-import './createVertexScheduler.css';
-import './createComposerScheduler.css';
-import './common.css';
-import './listComposerSchedule.css';
-import './vertexExecutionHistory.css';
-import './composerExecutionHistory.css';
-import './login.css';
+import React from 'react';
+import { IThemeManager } from '@jupyterlab/apputils';
+import { SchedulerWidget } from '../widget/SchedulerWidget';
+import LoginErrorComponent from './LoginErrorComponent';
+
+export class AuthenticationWidget extends SchedulerWidget {
+  isAuthenticated: number | undefined = 1;
+  constructor(themeManager: IThemeManager) {
+    super(themeManager);
+  }
+
+  protected renderInternal(): React.ReactElement {
+    return (
+      <>
+        <LoginErrorComponent />
+      </>
+    );
+  }
+}

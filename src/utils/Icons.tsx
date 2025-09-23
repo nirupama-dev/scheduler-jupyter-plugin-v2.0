@@ -46,6 +46,7 @@ import GreyCircle from '../../style/icons/grey_icon.svg';
 import downloadIcon from '../../style/icons/scheduler_download.svg';
 import dagTaskFailedIcon from '../../style/icons/dag_task_failed_icon.svg';
 import stopIcon from '../../style/icons/stop_icon.svg';
+import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -195,4 +196,9 @@ export const iconDagTaskFailed = new LabIcon({
 export const iconStop = new LabIcon({
   name: 'launcher:stop-icon',
   svgstr: stopIcon
+});
+
+export const IconsigninGoogle = new LabIcon({
+  name: 'launcher:signin_google_icon',
+  svgstr: signinGoogleIcon
 });

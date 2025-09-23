@@ -82,6 +82,13 @@ class DownloadOutputController(APIHandler):
                     region_id,
                 )
                 self.finish(json.dumps({"status": download_status}))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error download output file: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception("Error download output file")
             self.finish({"error": str(e)})

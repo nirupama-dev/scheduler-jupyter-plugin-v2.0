@@ -17,10 +17,10 @@
 
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
+import { AuthenticationError } from '../exceptions/AuthenticationException';
 
 /**
  * Call the API extension
- *
  * @param endPoint API REST end point for the extension
  * @param init Initial values for the request
  * @returns The response body interpreted as JSON
@@ -40,7 +40,14 @@ export async function requestAPI<T>(
   let response: Response;
   try {
     response = await ServerConnection.makeRequest(requestUrl, init, settings);
+    if (response.status === 401) {
+      throw new AuthenticationError('Unauthorized', response);
+    }
   } catch (error) {
+    // If a custom error was thrown above, re-throw it.
+    if (error instanceof AuthenticationError) {
+      throw error;
+    }
     throw new ServerConnection.NetworkError(error as Error);
   }
 

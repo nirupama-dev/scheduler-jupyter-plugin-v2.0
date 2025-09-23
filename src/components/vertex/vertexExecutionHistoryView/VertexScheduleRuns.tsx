@@ -37,7 +37,8 @@ const VertexJobRuns = ({
   selectedDate,
   dispatch,
   scheduleName,
-  fileExists
+  fileExists,
+  app
 }: any) => {
   const filteredData = useMemo(() => {
     if (selectedDate) {
@@ -81,6 +82,7 @@ const VertexJobRuns = ({
                 data={cell.row.original}
                 scheduleName={scheduleName}
                 fileExists={fileExists}
+                app={app}
               />
             </td>
           );
