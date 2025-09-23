@@ -356,6 +356,10 @@ export interface ISchedulerContext {
   setActivePaginationVariables: React.Dispatch<
     React.SetStateAction<IActivePaginationVariables | null>
   >;
+  vertexRouteState: any;
+  setVertexRouteState: React.Dispatch<React.SetStateAction<any>>;
+  composerRouteState: any;
+  setComposerRouteState: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export interface IActionButtonProps {

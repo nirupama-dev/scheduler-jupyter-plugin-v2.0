@@ -23,10 +23,15 @@ import { SchedulerContext } from './SchedulerContext';
 export const SchedulerProvider = ({ children }: { children: ReactNode }) => {
   const [activePaginationVariables, setActivePaginationVariables] =
     useState<IActivePaginationVariables | null>(null);
-
+  const [vertexRouteState, setVertexRouteState] = useState({});
+  const [composerRouteState, setComposerRouteState] = useState({});
   const value = {
     activePaginationVariables,
-    setActivePaginationVariables
+    setActivePaginationVariables,
+    vertexRouteState,
+    setVertexRouteState,
+    composerRouteState,
+    setComposerRouteState
   };
 
   return (
