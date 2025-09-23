@@ -35,6 +35,13 @@ class UIConfigController(APIHandler):
 
                 configs = await client.list_uiconfig(region_id)
                 self.finish(json.dumps(configs))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching ui config: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching ui config: {str(e)}")
             self.finish({"error": str(e)})
@@ -53,6 +60,13 @@ class VertexScheduleCreateController(APIHandler):
                 )
                 result = await client.create_job_schedule(input_data, region_id)
                 self.finish(json.dumps(result))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error creating job schedule: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error creating job schedule: {str(e)}")
             self.finish({"error": str(e)})
@@ -90,6 +104,13 @@ class ScheduleListController(APIHandler):
                     region_id, page_size, next_page_token
                 )
                 self.finish(json.dumps(schedules))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+ 
+            self.log.exception(f"Error fetching list of schedules: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching list of schedules: {str(e)}")
             self.finish({"error": str(e)})
@@ -108,6 +129,13 @@ class SchedulePauseController(APIHandler):
                 )
                 resp = await client.pause_schedule(region_id, schedule_id)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error pausing the schedule: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error pausing the schedule: {str(e)}")
             self.finish({"error": str(e)})
@@ -127,6 +155,13 @@ class ScheduleResumeController(APIHandler):
 
                 resp = await client.resume_schedule(region_id, schedule_id)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error resuming the schedule: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error resuming the schedule: {str(e)}")
             self.finish({"error": str(e)})
@@ -146,6 +181,13 @@ class ScheduleDeleteController(APIHandler):
 
                 resp = await client.delete_schedule(region_id, schedule_id)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error deleting the schedule: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error deleting the schedule: {str(e)}")
             self.finish({"error": str(e)})
@@ -165,6 +207,13 @@ class ScheduleTriggerController(APIHandler):
 
                 resp = await client.trigger_schedule(region_id, schedule_id)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error triggering the schedule: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error triggering the schedule: {str(e)}")
             self.finish({"error": str(e)})
@@ -184,6 +233,13 @@ class ScheduleUpdateController(APIHandler):
                 )
                 resp = await client.update_schedule(region_id, schedule_id, input_data)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error updating the schedule: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error updating the schedule: {str(e)}")
             self.finish({"error": str(e)})
@@ -202,6 +258,13 @@ class ScheduleGetController(APIHandler):
                 )
                 resp = await client.get_schedule(region_id, schedule_id)
                 self.finish(json.dumps(resp))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error getting the schedule: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error getting the schedule: {str(e)}")
             self.finish({"error": str(e)})
@@ -225,6 +288,13 @@ class NotebookExecutionJobListController(APIHandler):
                     region_id, schedule_id, order_by, page_size, start_date
                 )
                 self.finish(json.dumps(jobs))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching notebook execution jobs: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching notebook execution jobs: {str(e)}")
             self.finish({"error": str(e)})

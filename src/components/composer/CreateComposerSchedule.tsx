@@ -22,10 +22,11 @@ import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import Cron from 'react-js-cron';
+import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
-import { authApi } from '../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../common/login/Config';
 import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
 import {
   IComposerEnvAPIResponse,
@@ -44,7 +45,7 @@ import { ILabelValue } from '../../interfaces/CommonInterface';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
-> = ({ control, errors, setValue, watch, setError }) => {
+> = ({ control, errors, setValue, watch, setError, app }) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
   const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
@@ -126,12 +127,8 @@ export const CreateComposerSchedule: React.FC<
           const options =
             await ComputeServices.regionAPIService(selectedProjectId);
           setRegionOptions(options);
-        } catch (error) {
-          // Handle error from the service call
-          const errorResponse = `Failed to fetch region list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
         } finally {
           setLoadingState(prev => ({ ...prev, region: false }));
         }
@@ -155,11 +152,8 @@ export const CreateComposerSchedule: React.FC<
             selectedRegion
           );
           setEnvOptions(options);
-        } catch (error) {
-          const errorResponse = `Failed to fetch composer environment list : ${error}`;
-          handleErrorToast({
-            error: errorResponse
-          });
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
         } finally {
           setLoadingState(prev => ({ ...prev, environment: false }));
         }
@@ -175,19 +169,23 @@ export const CreateComposerSchedule: React.FC<
 
   useEffect(() => {
     const fetchData = async () => {
-      if (executionMode === 'cluster') {
-        setValue('serverless', '');
-        const clusterOptionsFromAPI =
-          await ComposerServices.listClustersAPIService();
-        setClusterOptions(clusterOptionsFromAPI);
-      } else if (executionMode === 'serverless') {
-        setValue('cluster', '');
-        const serverlessOptionsFromAPI =
-          await ComposerServices.listSessionTemplatesAPIService();
-        setServerlessOptions(serverlessOptionsFromAPI);
-      } else {
-        setClusterOptions([]);
-        setServerlessOptions([]);
+      try {
+        if (executionMode === 'cluster') {
+          setValue('serverless', '');
+          const clusterOptionsFromAPI =
+            await ComposerServices.listClustersAPIService();
+          setClusterOptions(clusterOptionsFromAPI);
+        } else if (executionMode === 'serverless') {
+          setValue('cluster', '');
+          const serverlessOptionsFromAPI =
+            await ComposerServices.listSessionTemplatesAPIService();
+          setServerlessOptions(serverlessOptionsFromAPI);
+        } else {
+          setClusterOptions([]);
+          setServerlessOptions([]);
+        }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
       }
     };
 
@@ -282,7 +280,7 @@ export const CreateComposerSchedule: React.FC<
           disabled={true}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="composerRegion"
           label="Region"
@@ -295,7 +293,7 @@ export const CreateComposerSchedule: React.FC<
           error={errors.composerRegion}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="environment"
           label="Environment"
@@ -400,7 +398,7 @@ export const CreateComposerSchedule: React.FC<
           error={errors.retryCount}
         />
       </div>
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputText
           label="Retry delay (minutes)"
           control={control}

@@ -37,23 +37,23 @@ class ComposerEnvironment(BaseModel):
 
 
 class DescribeJob(BaseModel):
-    input_filename: str = None
-    composer_environment_name: str = None
+    input_filename: str
+    composer_environment_name: str
     output_formats: Optional[List[str]] = None
     parameters: Optional[List[str]] = None
     serverless_name: object = None
-    cluster_name: str = None
-    mode_selected: str = None
-    schedule_value: str = None
+    cluster_name: str
+    mode_selected: str
+    schedule_value: str
     retry_count: int = 2
     retry_delay: int = 5
     email_failure: bool = False
     email_delay: bool = False
     email: Optional[List[str]] = None
-    name: str = None
-    dag_id: str = None
+    name: str
+    dag_id: str
     stop_cluster: bool = False
-    time_zone: str = None
+    time_zone: str
     local_kernel: bool = False
     email_success: bool = False
     packages_to_install: Optional[List[str]] = None
@@ -63,34 +63,8 @@ class DescribeJob(BaseModel):
         return cls(**data)
 
 
-class DescribeVertexJob(BaseModel):
-    input_filename: str = None
-    display_name: str = None
-    machine_type: str = None
-    accelerator_type: Optional[str] = None
-    accelerator_count: Optional[int] = None
-    kernel_name: str = None
-    schedule_value: str = None
-    time_zone: str = None
-    max_run_count: Optional[str] = None
-    region: str = None
-    cloud_storage_bucket: str = None
-    parameters: Optional[List[str]] = None
-    service_account: str = None
-    network: str = None
-    subnetwork: str = None
-    start_time: Optional[str] = None
-    end_time: Optional[str] = None
-    disk_type: str = None
-    disk_size: str = None
-
-    @classmethod
-    def from_dict(cls, data):
-        return cls(**data)
-
-
 class DescribeBucketName(BaseModel):
-    bucket_name: str = None
+    bucket_name: str
 
     @classmethod
     def from_dict(cls, data):
@@ -98,15 +72,15 @@ class DescribeBucketName(BaseModel):
 
 
 class DescribeUpdateVertexJob(BaseModel):
-    input_filename: str = None
-    display_name: str = None
+    input_filename: str
+    display_name: str
     machine_type: Optional[str] = None
     accelerator_type: Optional[str] = None
     accelerator_count: Optional[int] = None
     kernel_name: Optional[str] = None
-    schedule_value: str = None
-    time_zone: str = None
-    max_run_count: str = None
+    schedule_value: str
+    time_zone: str
+    max_run_count: str
     region: Optional[str] = None
     cloud_storage_bucket: Optional[str] = None
     parameters: Optional[List[str]] = None
@@ -115,7 +89,7 @@ class DescribeUpdateVertexJob(BaseModel):
     subnetwork: Optional[str] = None
     start_time: Optional[str] = None
     end_time: Optional[str] = None
-    gcs_notebook_source: str = None
+    gcs_notebook_source: str
     disk_type: Optional[str] = None
     disk_size: Optional[str] = None
 

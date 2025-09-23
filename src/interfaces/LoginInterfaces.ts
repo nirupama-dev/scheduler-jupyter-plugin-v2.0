@@ -13,21 +13,13 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-import { createContext, useContext } from 'react';
-import { ISchedulerContext } from '../../interfaces/VertexInterface';
-
-// Create the context
-export const SchedulerContext = createContext<ISchedulerContext | null>(null);
-
-// Create a custom hook to use the context
-export const useSchedulerContext = () => {
-  const context = useContext(SchedulerContext);
-  if (context === undefined) {
-    throw new Error(
-      'useSchedulerContext must be used within a SchedulerProvider'
-    );
-  }
-  return context;
-};
+export interface IAuthCredentials {
+  access_token?: string;
+  project_id?: string;
+  region_id?: string;
+  config_error?: number;
+  login_error?: number;
+}

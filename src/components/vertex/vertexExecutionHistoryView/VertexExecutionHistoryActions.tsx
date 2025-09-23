@@ -20,11 +20,13 @@ import { iconDownload } from '../../../utils/Icons';
 import { VertexServices } from '../../../services/vertex/VertexServices';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import { IVertexExecutionHistoryActionsProps } from '../../../interfaces/VertexInterface';
+import { handleOpenLoginWidget } from '../../common/login/Config';
 
 const VertexExecutionHistoryActions = ({
   data,
   scheduleName,
-  fileExists
+  fileExists,
+  app
 }: IVertexExecutionHistoryActionsProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
 
@@ -44,7 +46,12 @@ const VertexExecutionHistoryActions = ({
     };
 
     setIsDownloading(true);
-    await VertexServices.downloadJobAPIService(downloadPayload);
+    try {
+      await VertexServices.downloadScheduleExecutionAPIService(downloadPayload);
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
+    }
+
     setIsDownloading(false);
   }, [data, scheduleName]);
 

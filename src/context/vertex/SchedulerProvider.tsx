@@ -20,7 +20,7 @@ import { IActivePaginationVariables } from '../../interfaces/VertexInterface';
 import { SchedulerContext } from './SchedulerContext';
 
 // Provider component
-export const VertexListProvider = ({ children }: { children: ReactNode }) => {
+export const SchedulerProvider = ({ children }: { children: ReactNode }) => {
   const [activePaginationVariables, setActivePaginationVariables] =
     useState<IActivePaginationVariables | null>(null);
   const [vertexRouteState, setVertexRouteState] = useState({});
@@ -33,6 +33,7 @@ export const VertexListProvider = ({ children }: { children: ReactNode }) => {
     composerRouteState,
     setComposerRouteState
   };
+
   return (
     <SchedulerContext.Provider value={value}>
       {children}

@@ -15,6 +15,7 @@
  * limitations under the License.
  */
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 import { requestAPI } from '../../handler/Handler';
 import { ILabelValue } from '../../interfaces/CommonInterface';
 import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
@@ -22,19 +23,27 @@ import { LOG_LEVEL, SchedulerLoggingService } from './LoggingService';
 export class IamServices {
   static async serviceAccountAPIService(): Promise<ILabelValue<string>[]> {
     try {
-      const formattedResponse = await requestAPI('api/iam/listServiceAccount');
-      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
-        const serviceAccountList: ILabelValue<string>[] = formattedResponse.map(
-          (account: any) => ({
+      const serviceAccountsResponse = await requestAPI(
+        'api/iam/listServiceAccount'
+      );
+      if (
+        Array.isArray(serviceAccountsResponse) &&
+        serviceAccountsResponse.length > 0
+      ) {
+        const serviceAccountList: ILabelValue<string>[] =
+          serviceAccountsResponse.map((account: any) => ({
             label: account.displayName,
             value: account.email
-          })
-        );
+          }));
         serviceAccountList.sort((a, b) => a.label.localeCompare(b.label));
         return serviceAccountList;
       }
       return [];
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error listing service accounts : ${error}`,
         LOG_LEVEL.ERROR

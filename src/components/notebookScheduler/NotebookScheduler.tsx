@@ -24,10 +24,10 @@
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ISessionContext, IThemeManager } from '@jupyterlab/apputils';
-import { SchedulerRoutes } from '../../router/SchedulerRoutes';
-import { SchedulerWidget } from '../common/widget/SchedulerWidget';
 import { JupyterLab } from '@jupyterlab/application';
 import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface';
+import { SchedulerRoutes } from '../../router/SchedulerRoutes';
+import { SchedulerWidget } from '../common/widget/SchedulerWidget';
 
 export class NotebookScheduler extends SchedulerWidget {
   private app: JupyterLab;

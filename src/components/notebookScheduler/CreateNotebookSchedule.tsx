@@ -62,12 +62,13 @@ import {
   transformVertexScheduleResponseToZodSchema,
   transformZodSchemaToVertexSchedulePayload
 } from '../../utils/VertexDataTransform';
-import { authApi } from '../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../common/login/Config';
 import {
   transformComposerScheduleDataToZodSchema,
   transformZodSchemaToComposerSchedulePayload
 } from '../../utils/ComposerDataTransform';
 import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 /**
  * Create Notebook Schedule Parent component that renders common components
@@ -125,78 +126,85 @@ export const CreateNotebookSchedule = (
    */
   useEffect(() => {
     const fetchInitialSchedulerFormData = async () => {
-      // 1. Fetch credentials
-      const credentialsData = await authApi();
-      if (!credentialsData) {
-        // TO DO: Reroute Login
-        console.error('Invalid credentials');
-        return;
-      }
-
-      let kernelSchedulerData: INotebookKernalSchdulerDefaults | undefined;
-      let editScheduleData: IEditScheduleData | undefined;
-
-      // 2. Determine mode and fetch relevant data
-      const isEditMode = !!(scheduleId && region && schedulerTypeForEdit);
-
-      if (isEditMode) {
-        editScheduleData = {
-          editMode: true,
-          region,
-          projectId,
-          environment,
-          existingScheduleData: undefined // Will be filled below
-        };
-
-        if (schedulerTypeForEdit === 'vertex') {
-          const fetchedData = await VertexServices.getVertexJobScheduleDetails(
-            scheduleId,
-            region
-          );
-          if (fetchedData) {
-            editScheduleData.existingScheduleData =
-              transformVertexScheduleResponseToZodSchema(
-                fetchedData,
-                region,
-                projectId
-              );
-          } else {
-            //TODO: redirect back to listing as no data was fetched
-          }
-        } else if (
-          schedulerTypeForEdit === 'composer' &&
-          projectId &&
-          environment
-        ) {
-          const fetchedData =
-            await ComposerServices.getComposerJobScheduleDetails(
-              scheduleId,
-              region,
-              projectId,
-              environment
-            );
-          if (fetchedData) {
-            editScheduleData.existingScheduleData =
-              transformComposerScheduleDataToZodSchema(fetchedData);
-          } else {
-            //TODO: redirect to listing.
-          }
+      try {
+        // 1. Fetch credentials
+        const credentialsData = await authApi();
+        if (!credentialsData) {
+          // TO DO: Reroute Login
+          console.error('Invalid credentials');
+          return;
         }
-      } else {
-        // Create mode logic
-        kernelSchedulerData =
-          preFetchedInitialDetails ??
-          (await getDefaultSchedulerTypeOnLoad(sessionContext))
-            .kernalAndSchedulerDetails;
-      }
 
-      // 3. Update the single formState object
-      setInitialFormData({
-        credentials: credentialsData,
-        editModeData: editScheduleData,
-        initialDefaults: kernelSchedulerData
-      });
-      setIsDataLoaded(true);
+        let kernelSchedulerData: INotebookKernalSchdulerDefaults | undefined;
+        let editScheduleData: IEditScheduleData | undefined;
+
+        // 2. Determine mode and fetch relevant data
+        const isEditMode = !!(scheduleId && region && schedulerTypeForEdit);
+
+        if (isEditMode) {
+          editScheduleData = {
+            editMode: true,
+            region,
+            projectId,
+            environment,
+            existingScheduleData: undefined // Will be filled below
+          };
+
+          if (schedulerTypeForEdit === 'vertex') {
+            const fetchedData =
+              await VertexServices.getVertexJobScheduleDetails(
+                scheduleId,
+                region
+              );
+            if (fetchedData) {
+              editScheduleData.existingScheduleData =
+                transformVertexScheduleResponseToZodSchema(
+                  fetchedData,
+                  region,
+                  projectId
+                );
+            } else {
+              //TODO: redirect back to listing as no data was fetched
+            }
+          } else if (
+            schedulerTypeForEdit === 'composer' &&
+            projectId &&
+            environment
+          ) {
+            const fetchedData =
+              await ComposerServices.getComposerJobScheduleDetails(
+                scheduleId,
+                region,
+                projectId,
+                environment
+              );
+            if (fetchedData) {
+              editScheduleData.existingScheduleData =
+                transformComposerScheduleDataToZodSchema(fetchedData);
+            } else {
+              //TODO: redirect to listing.
+            }
+          }
+        } else {
+          // Create mode logic
+          kernelSchedulerData =
+            preFetchedInitialDetails ??
+            (await getDefaultSchedulerTypeOnLoad(sessionContext))
+              .kernalAndSchedulerDetails;
+        }
+
+        // 3. Update the single formState object
+        setInitialFormData({
+          credentials: credentialsData,
+          editModeData: editScheduleData,
+          initialDefaults: kernelSchedulerData
+        });
+        setIsDataLoaded(true);
+      } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+      }
     };
     fetchInitialSchedulerFormData();
   }, [
@@ -306,82 +314,91 @@ export const CreateNotebookSchedule = (
    * @param credentials The authentication credentials for the user.
    */
   const onSubmit = async (data: CombinedCreateFormValues) => {
-    if (!initialFormData.credentials) {
-      console.error('Credentials not available.');
-      //TODO: handle credentials
-      return;
-    }
-    let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
-    //vertex payload creation
-    if (
-      data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
-      initialFormData.credentials.project_id
-    ) {
-      const vertexData = data as VertexSchedulerFormValues;
-      const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
-        transformZodSchemaToVertexSchedulePayload(
-          vertexData,
-          initialFormData.credentials.project_id
-        );
-
-      if (initialFormData.editModeData?.editMode && scheduleId) {
-        isSaveSuccessfull =
-          await VertexServices.updateVertexNotebookJobSchedule(
-            scheduleId,
-            vertexData.vertexRegion,
-            vertexPayload
-          );
-      } else {
-        isSaveSuccessfull =
-          await VertexServices.createVertexNotebookJobSchedule(
-            vertexPayload,
-            vertexData.vertexRegion
-          );
+    try {
+      console.log('On Submit');
+      if (!initialFormData.credentials) {
+        console.error('Credentials not available.');
+        //TODO: handle credentials
+        return;
       }
-      if (isSaveSuccessfull) {
-        if (setVertexRouteState) {
-          setVertexRouteState({
-            schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
-            region: vertexData.vertexRegion
-          });
-        }
+      let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
+      let routingParamForListing = '';
+      //vertex payload creation
+      if (
+        data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
+        initialFormData.credentials.project_id
+      ) {
+        const vertexData = data as VertexSchedulerFormValues;
+        const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
+          transformZodSchemaToVertexSchedulePayload(
+            vertexData,
+            initialFormData.credentials.project_id
+          );
+        console.log('Vertex Payload:', vertexPayload);
 
-        //TODO: // redirect to list page or show success message
-        navigate('/list');
-      } else {
-        //TODO: Retain the form. probably remove this.
+        if (initialFormData.editModeData?.editMode && scheduleId) {
+          isSaveSuccessfull =
+            await VertexServices.updateVertexNotebookJobSchedule(
+              scheduleId,
+              vertexData.vertexRegion,
+              vertexPayload
+            );
+        } else {
+          isSaveSuccessfull =
+            await VertexServices.createVertexNotebookJobSchedule(
+              vertexPayload,
+              vertexData.vertexRegion
+            );
+        }
+        if (isSaveSuccessfull) {
+          if (setVertexRouteState) {
+            setVertexRouteState({
+              schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
+              region: vertexData.vertexRegion
+            });
+          }
+
+          //TODO: // redirect to list page or show success message
+          navigate('/list');
+        } else {
+          //TODO: Retain the form. probably remove this.
+        }
+        //composer payload creation
+      } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
+        const composerData = data as ComposerSchedulerFormValues;
+        const packagesToInstall: string[] = []; // TODO
+        const composerPayload: IComposerSchedulePayload =
+          transformZodSchemaToComposerSchedulePayload(
+            composerData,
+            packagesToInstall
+          );
+
+        isSaveSuccessfull =
+          await ComposerServices.saveComposerNotebookJobSchedule(
+            composerPayload,
+            composerPayload.project_id, // TODO: verify and optimize
+            composerPayload.region_id, // ToDO
+            initialFormData.editModeData?.editMode
+          );
+        if (isSaveSuccessfull) {
+          if (setComposerRouteState) {
+            setComposerRouteState({
+              schedulerName: COMPOSER_SCHEDULER_NAME,
+              region: composerData.composerRegion,
+              projectId: composerData.projectId,
+              environment: composerData.environment
+            });
+          }
+
+          //TODO: // redirect to list page or show success message
+          navigate('/list');
+        } else {
+          //TODO: Retain the form. probably remove this.
+        }
       }
-      //composer payload creation
-    } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
-      const composerData = data as ComposerSchedulerFormValues;
-      const packagesToInstall: string[] = []; // TODO
-      const composerPayload: IComposerSchedulePayload =
-        transformZodSchemaToComposerSchedulePayload(
-          composerData,
-          packagesToInstall
-        );
-
-      isSaveSuccessfull =
-        await ComposerServices.saveComposerNotebookJobSchedule(
-          composerPayload,
-          composerPayload.project_id, // TODO: verify and optimize
-          composerPayload.region_id, // ToDO
-          initialFormData.editModeData?.editMode
-        );
-      if (isSaveSuccessfull) {
-        if (setComposerRouteState) {
-          setComposerRouteState({
-            schedulerName: COMPOSER_SCHEDULER_NAME,
-            region: composerData.composerRegion,
-            projectId: composerData.projectId,
-            environment: composerData.environment
-          });
-        }
-
-        //TODO: // redirect to list page or show success message
-        navigate('/list');
-      } else {
-        //TODO: Retain the form. probably remove this.
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
       }
     }
   };
@@ -484,6 +501,7 @@ export const CreateNotebookSchedule = (
               isValid={isValid}
               credentials={initialFormData.credentials}
               editScheduleData={initialFormData.editModeData}
+              app={app}
             />
           )}
           {schedulerSelection === COMPOSER_SCHEDULER_NAME && (
@@ -497,6 +515,7 @@ export const CreateNotebookSchedule = (
               trigger={trigger}
               credentials={initialFormData.credentials}
               editScheduleData={initialFormData.editModeData}
+              app={app}
             />
           )}
 

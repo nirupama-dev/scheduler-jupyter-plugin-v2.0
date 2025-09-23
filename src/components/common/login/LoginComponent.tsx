@@ -15,19 +15,22 @@
  * limitations under the License.
  */
 
-import { createContext, useContext } from 'react';
-import { ISchedulerContext } from '../../interfaces/VertexInterface';
+import React from 'react';
+import { IThemeManager } from '@jupyterlab/apputils';
+import { SchedulerWidget } from '../widget/SchedulerWidget';
+import LoginErrorComponent from './LoginErrorComponent';
 
-// Create the context
-export const SchedulerContext = createContext<ISchedulerContext | null>(null);
+export class AuthenticationWidget extends SchedulerWidget {
+  isAuthenticated: number | undefined = 1;
+  constructor(themeManager: IThemeManager) {
+    super(themeManager);
+  }
 
-// Create a custom hook to use the context
-export const useSchedulerContext = () => {
-  const context = useContext(SchedulerContext);
-  if (context === undefined) {
-    throw new Error(
-      'useSchedulerContext must be used within a SchedulerProvider'
+  protected renderInternal(): React.ReactElement {
+    return (
+      <>
+        <LoginErrorComponent />
+      </>
     );
   }
-  return context;
-};
+}

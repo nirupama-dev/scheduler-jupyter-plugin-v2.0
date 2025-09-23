@@ -30,6 +30,8 @@ import {
 import { NotebookButtonExtension } from './components/notebookScheduler/NotebookButtonExtension';
 import { requestAPI } from './handler/Handler';
 import {
+  OPEN_LOGIN_WIDGET_COMMAND,
+  PLUGIN_ID,
   PLUGIN_NAME,
   TITLE_LAUNCHER_CATEGORY,
   VERSION_DETAIL
@@ -37,12 +39,13 @@ import {
 import { NotebookScheduler } from './components/notebookScheduler/NotebookScheduler';
 import { iconScheduledNotebooks } from './utils/Icons';
 import { ILauncher } from '@jupyterlab/launcher';
+import { AuthenticationWidget } from './components/common/login/LoginComponent';
 
 /**
  * Initialization data for the scheduler-jupyter-plugin extension.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'scheduler-jupyter-plugin:plugin',
+  id: `${PLUGIN_ID}:plugin`,
   description: 'A JupyterLab extension.',
   autoStart: true,
   optional: [ISettingRegistry, IThemeManager, ILauncher],
@@ -123,6 +126,35 @@ const plugin: JupyterFrontEndPlugin<void> = {
         widget.title.label = 'Scheduled Jobs';
         widget.title.icon = iconScheduledNotebooks;
         app.shell.add(widget, 'main');
+      }
+    });
+
+    // // Add a command that opens our custom page
+    commands.addCommand(OPEN_LOGIN_WIDGET_COMMAND, {
+      label: 'Login page',
+      execute: () => {
+        const widgetId = 'login-widget'; // Define the unique ID once
+        const allWidgets = [...app.shell.widgets('main')];
+
+        const existingWidget = allWidgets.find(
+          widget => widget.id === widgetId
+        );
+
+        if (existingWidget) {
+          // If the widget already exists, activate it
+          app.shell.activateById(existingWidget.id);
+        } else {
+          // If the widget does not exist, create and add it
+          const widget = new MainAreaWidget({
+            content: new AuthenticationWidget(themeManager)
+          });
+
+          widget.id = 'login-widget';
+          widget.title.label = 'Login Page';
+          widget.title.closable = true;
+          app.shell.add(widget, 'main');
+          app.shell.activateById(widget.id);
+        }
       }
     });
 

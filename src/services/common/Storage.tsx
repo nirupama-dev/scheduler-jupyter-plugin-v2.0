@@ -21,6 +21,7 @@ import path from 'path';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 // import { ILoadingStateVertex } from '../../interfaces/VertexInterface';
 import { ILabelValue } from '../../interfaces/CommonInterface';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 export class StorageServices {
   // static readonly cloudStorageAPIService = (
@@ -106,21 +107,27 @@ export class StorageServices {
    */
   static async cloudStorageAPIService(): Promise<ILabelValue<string>[]> {
     try {
-      const formattedResponse: any = await requestAPI('api/storage/listBucket');
+      const listBucketResponse: any = await requestAPI(
+        'api/storage/listBucket'
+      );
 
-      if (Array.isArray(formattedResponse) && formattedResponse.length > 0) {
+      if (Array.isArray(listBucketResponse) && listBucketResponse.length > 0) {
         const cloudStorageBucketList: ILabelValue<string>[] =
-          formattedResponse.map((bucket: string) => ({
+          listBucketResponse.map((bucket: string) => ({
             label: bucket,
             value: bucket // Using bucket name as value as per previous structure
           }));
         return cloudStorageBucketList;
-      } else if (formattedResponse?.error) {
+      } else if (listBucketResponse?.error) {
         // Original error handling for specific API error structure
-        throw new Error(formattedResponse.error); // Throw to be caught in service's catch block
+        throw new Error(listBucketResponse.error); // Throw to be caught in service's catch block
       }
       return []; // Return empty array if no data or unexpected format
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error listing cloud storage bucket: ${error}`,
         LOG_LEVEL.ERROR
@@ -142,30 +149,31 @@ export class StorageServices {
   static async newCloudStorageAPIService(bucketName: string): Promise<void> {
     const payload = { bucket_name: bucketName };
     try {
-      const formattedResponse: any = await requestAPI(
+      const createNewBucketResponse: any = await requestAPI(
         'api/storage/createNewBucket',
         {
           body: JSON.stringify(payload),
           method: 'POST'
         }
       );
-      console.log('Create bucket response:', formattedResponse);
-      if (formattedResponse === null) {
+      console.log('Create bucket response:', createNewBucketResponse);
+      if (createNewBucketResponse === null) {
         // Assuming null indicates success from backend
         Notification.success('Bucket created successfully', {
           autoClose: false
         });
-      } else if (formattedResponse?.error) {
-        throw new Error(formattedResponse.error); // Propagate API error message
+      } else if (createNewBucketResponse?.error) {
+        throw new Error(createNewBucketResponse.error); // Propagate API error message
       }
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error creating the cloud storage bucket ${error}`,
         LOG_LEVEL.ERROR
       );
-      // Original code did not have a handleErrorToast here for new bucket creation errors
-      // If you want one, add it like: handleErrorToast({ error: `Failed to create bucket: ${error}` });
-      throw error; // Re-throw so the calling component can still know if it failed (e.g., for loading states)
     }
   }
 
@@ -179,15 +187,15 @@ export class StorageServices {
     try {
       const bucketName = gcsUrl?.split('//')[1];
       setJobDownloadLoading(true);
-      const formattedResponse: any = await requestAPI(
+      const downloadOutputResponse: any = await requestAPI(
         `api/storage/downloadOutput?bucket_name=${bucketName}&job_run_id=${jobRunId}&file_name=${fileName}`,
         {
           method: 'POST'
         }
       );
-      if (formattedResponse.status === 0) {
+      if (downloadOutputResponse.status === 0) {
         const base_filename = path.basename(
-          formattedResponse.downloaded_filename
+          downloadOutputResponse.downloaded_filename
         );
         Notification.success(
           `${base_filename} has been successfully downloaded from the ${scheduleName} job history`,
@@ -206,6 +214,9 @@ export class StorageServices {
       }
       setJobDownloadLoading(false);
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       setJobDownloadLoading(false);
       SchedulerLoggingService.log(
         'Error in downloading the job history',

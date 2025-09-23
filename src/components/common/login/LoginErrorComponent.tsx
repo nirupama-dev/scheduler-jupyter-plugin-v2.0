@@ -15,19 +15,24 @@
  * limitations under the License.
  */
 
-import { createContext, useContext } from 'react';
-import { ISchedulerContext } from '../../interfaces/VertexInterface';
+import React from 'react';
+import { IconsigninGoogle } from '../../../utils/Icons';
+import { login } from './Config';
 
-// Create the context
-export const SchedulerContext = createContext<ISchedulerContext | null>(null);
-
-// Create a custom hook to use the context
-export const useSchedulerContext = () => {
-  const context = useContext(SchedulerContext);
-  if (context === undefined) {
-    throw new Error(
-      'useSchedulerContext must be used within a SchedulerProvider'
-    );
-  }
-  return context;
+const LoginErrorComponent: React.FC = () => {
+  const handleLogin = async () => {
+    await login();
+  };
+  return (
+    <>
+      <div className="login-error">Please login to continue</div>
+      <div style={{ alignItems: 'center' }}>
+        <div role="button" className="signin-google-icon" onClick={handleLogin}>
+          <IconsigninGoogle.react tag="div" className="logo-alignment-style" />
+        </div>
+      </div>
+    </>
+  );
 };
+
+export default LoginErrorComponent;

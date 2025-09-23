@@ -31,6 +31,13 @@ class LogEntiresListContoller(APIHandler):
             logging_client = logEntries.Client(await credentials.get_cached(), self.log)
             logs = await logging_client.list_log_entries(filter_query)
             self.finish(json.dumps(logs))
+        except RuntimeError as e:
+            error_data = e.args[0]
+            status_code = error_data.get("status", 500)
+
+            self.log.exception(f"Error fetching entries: {str(e)}")
+            self.set_status(status_code)
+            self.finish(json.dumps(error_data))
         except Exception as e:
             self.log.exception(f"Error fetching entries: {str(e)}")
             self.finish({"error": str(e)})

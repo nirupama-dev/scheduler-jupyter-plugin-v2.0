@@ -37,6 +37,7 @@ import { Controller, FieldErrors } from 'react-hook-form';
 import dayjs from 'dayjs';
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import Cron, { PeriodType } from 'react-js-cron';
+import 'react-js-cron/dist/styles.css';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import tzdata from 'tzdata';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
@@ -59,7 +60,6 @@ import {
   DEFAULT_CLOUD_STORAGE_BUCKET,
   DEFAULT_SERVICE_ACCOUNT,
   DEFAULT_DISK_SIZE,
-  SHARED_NETWORK_DOC_URL,
   EVERY_MINUTE_CRON,
   NETWORK_IN_THIS_PROJECT_VALUE,
   NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
@@ -74,6 +74,8 @@ import {
   ISharedNetwork
 } from '../../interfaces/VertexInterface';
 import { RadioOption } from '../../types/CommonSchedulerTypes';
+import { handleOpenLoginWidget } from '../common/login/Config';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -84,7 +86,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   trigger,
   isValid,
   credentials,
-  editScheduleData
+  editScheduleData,
+  app
   // ... other props
 }) => {
   // Local state for dropdown options (fetched dynamically)
@@ -241,6 +244,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           setValue('acceleratorCount', '');
         }
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         // Handle all errors in one place.
         setMachineTypeList([]);
         setValue('machineType', '');
@@ -286,6 +293,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         }
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setCloudStorageList([]);
       if (isVertexForm) {
         setValue('cloudStorageBucket', '');
@@ -327,6 +338,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         }
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setServiceAccountList([]);
       setValue('serviceAccount', '');
     } finally {
@@ -350,6 +365,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setHostProject(null); // Set to null if response is falsy
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setHostProject(null); // Set to null on error
     } finally {
       setLoadingState(prev => ({ ...prev, hostProject: false }));
@@ -379,6 +398,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         );
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+
       setPrimaryNetworkList([]);
       setValue('primaryNetwork', '');
       handleErrorToast({ error: 'Failed to fetch primary networks.' });
@@ -430,6 +453,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
         }
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         setSubNetworkList([]);
         setValue('subNetwork', '');
         handleErrorToast({ error: 'Failed to fetch subNetworks.' });
@@ -489,6 +516,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           }
         }
       } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         setSharedNetworkList([]);
         setValue('sharedNetwork', { network: '', subnetwork: '' });
         handleErrorToast({ error: 'Failed to fetch shared networks.' });
@@ -675,6 +706,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             setCloudStorageList(updatedBucketList);
             setValue('cloudStorageBucket', newBucketName);
           } catch (error) {
+            if (error instanceof AuthenticationError) {
+              handleOpenLoginWidget(app);
+            }
+
             setValue('cloudStorageBucket', ''); // Clear selection on failure
           } finally {
             setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));
@@ -731,7 +766,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Machine Type Dropdown */}
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="machineType"
           control={control}
@@ -804,7 +839,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         )}
 
       {/* Kernel Dropdown */}
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="kernelName"
           control={control}
@@ -816,7 +851,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Cloud Storage Bucket Dropdown */}
-      <div className="scheduler-form-element-container">
+      <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="cloudStorageBucket"
           control={control}
@@ -837,7 +872,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Disk Type and Size */}
-      <div className="horizontal-element-wrapper">
+      <div className="horizontal-element-wrapper scheduler-input-top">
         <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
             name="diskType"
@@ -866,7 +901,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Service Account Dropdown */}
-      <div className="scheduler-form-element-container panel-margin footer-text">
+      <div className="scheduler-form-element-container footer-text scheduler-input-top">
         <FormInputDropdown
           name="serviceAccount"
           control={control}
@@ -911,18 +946,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
           }}
         />
-        <span className="sub-para tab-text-sub-cl">
-          Choose a shared VPC network from the project that is different from
-          the clusters project
-        </span>
-        <div className="learn-more-a-tag learn-more-url">
-          <LearnMore path={SHARED_NETWORK_DOC_URL} />
-        </div>
       </div>
 
       {/* Conditional Network Fields */}
       {currentNetworkOption === 'networkInThisProject' ? ( // 'networkInThisProject'
-        <div className="execution-history-main-wrapper">
+        <div className="horizontal-element-wrapper">
           <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
             <FormInputDropdown
               name="primaryNetwork"
@@ -1091,7 +1119,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               }}
             />
 
-            <div className="horizontal-element-wrapper">
+            <div className="horizontal-element-wrapper module-top">
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <div className="cscheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
                   <Controller
@@ -1124,7 +1152,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     )}
                   />
                 </div>
-                <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+                <div className="create-scheduler-form-element-input-fl create-pr">
                   <Controller
                     name="endTime"
                     control={control}
@@ -1164,7 +1192,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         {currentScheduleMode === 'runSchedule' &&
           currentInternalScheduleMode === 'cronFormat' && (
             <>
-              <div className="scheduler-form-element-container schedule-input-field">
+              <div className="scheduler-form-element-container schedule-input-field scheduler-input-top">
                 <FormInputText
                   label="Schedule*"
                   control={control}
@@ -1186,7 +1214,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         {currentScheduleMode === 'runSchedule' &&
           currentInternalScheduleMode === 'userFriendly' && (
-            <div className="scheduler-form-element-container">
+            <div className="scheduler-input-top">
               <Controller
                 name="scheduleValueUserFriendly"
                 control={control}
@@ -1217,7 +1245,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         {currentScheduleMode === 'runSchedule' && (
           <>
-            <div className="scheduler-form-element-container">
+            <div className="scheduler-form-element-container scheduler-input-top">
               <FormInputDropdown
                 name="timeZone"
                 control={control}
@@ -1228,7 +1256,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               />
             </div>
 
-            <div className="scheduler-form-element-container">
+            <div className="scheduler-form-element-container scheduler-input-top">
               <FormInputText
                 label="Max runs"
                 control={control}

@@ -36,12 +36,14 @@ import {
   IAcceleratorConfig,
   IMachineType
 } from '../../interfaces/VertexInterface';
-import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
+import { handleErrorToast as handleError } from '../../components/common/notificationHandling/ErrorUtils';
 import { aiplatform_v1 } from 'googleapis';
 
 import { settingController } from '../../utils/Config';
 import { vertexScheduleRunResponseTransformation } from '../../utils/vertexExecutionHistoryTransformation';
 import path from 'path';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
+// import { error } from 'console';
 export class VertexServices {
   /**
    * Fetches machine types for a given region.
@@ -87,12 +89,16 @@ export class VertexServices {
       }
       return [];
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error listing machine type list: ${error}`,
         LOG_LEVEL.ERROR
       );
       const errorResponse = `Failed to fetch machine type list: ${error}`;
-      handleErrorToast({ error: errorResponse }); // Throw toast from service
+      handleError({ error: errorResponse }); // Throw toast from service
       return []; // Return empty array on caught exception
     }
   }
@@ -122,18 +128,20 @@ export class VertexServices {
       }
 
       // API call
-      const formattedResponse: aiplatform_v1.Schema$GoogleCloudAiplatformV1ListSchedulesResponse =
-        await requestAPI(serviceURL + urlparam, {
+      const vertexScheduleListResponse = await requestAPI(
+        serviceURL + urlparam,
+        {
           signal
-        });
+        }
+      );
 
-      if (!formattedResponse || Object.keys(formattedResponse).length === 0) {
+      if (
+        !vertexScheduleListResponse ||
+        Object.keys(vertexScheduleListResponse).length === 0
+      ) {
         return {
           schedulesList: [],
-          nextPageToken: null,
-          hasNextPageToken: false,
-          error: '',
-          isLoading: false
+          nextPageToken: null
         };
       }
 
@@ -141,26 +149,27 @@ export class VertexServices {
         schedules,
         nextPageToken
         //error
-      } = formattedResponse as IFormattedResponse;
+      } = vertexScheduleListResponse as IFormattedResponse;
 
       //TODO error handling for API enablement error
 
       if (schedules && schedules.length > 0) {
         return {
           schedulesList: schedules,
-          nextPageToken: nextPageToken ? nextPageToken : null,
-          error: '',
-          isLoading: false
+          nextPageToken: nextPageToken ? nextPageToken : null
         };
       } else {
         return {
           schedulesList: [],
-          nextPageToken: null,
-          hasNextPageToken: false,
-          error: 'No schedules found'
+          nextPageToken: null
         };
       }
     } catch (error: any) {
+      // Check for AuthenticationError
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -168,22 +177,17 @@ export class VertexServices {
         ) {
           return;
         }
-      } else {
-        SchedulerLoggingService.log(
-          `Error listing vertex schedules ${error}`,
-          LOG_LEVEL.ERROR
-        );
-        handleErrorToast({
-          error: error
-        });
-
-        return {
-          schedulesList: [],
-          nextPageToken: null,
-          hasNextPageToken: false,
-          error: 'An error occurred while fetching schedules: ' + error
-        };
       }
+
+      SchedulerLoggingService.log(
+        `Error listing vertex schedules ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      handleError({
+        error: error
+      });
+
+      return;
     }
   };
 
@@ -207,10 +211,16 @@ export class VertexServices {
         : [];
       return lastFiveRun;
     } catch (lastRunError: any) {
+      // Check for AuthenticationError
+      if (lastRunError instanceof AuthenticationError) {
+        throw lastRunError;
+      }
+
       SchedulerLoggingService.log(
         'Error fetching last five job executions',
         LOG_LEVEL.ERROR
       );
+
       return [];
     }
   };
@@ -224,14 +234,15 @@ export class VertexServices {
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/pauseSchedule';
-      const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`,
-        {
-          method: 'POST',
-          signal
-        }
-      );
-      if (Object.keys(formattedResponse).length === 0) {
+      const vertexListingPauseActionAPIResponse: IUpdateSchedulerAPIResponse =
+        await requestAPI(
+          serviceURL + `?region_id=${region}&&schedule_id=${scheduleId}`,
+          {
+            method: 'POST',
+            signal
+          }
+        );
+      if (Object.keys(vertexListingPauseActionAPIResponse).length === 0) {
         Notification.success(`Schedule ${displayName} updated successfully`, {
           autoClose: false
         });
@@ -242,6 +253,10 @@ export class VertexServices {
         });
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -249,16 +264,16 @@ export class VertexServices {
         ) {
           return;
         }
-      } else {
-        SchedulerLoggingService.log(
-          `Error in pause schedule ${error}`,
-          LOG_LEVEL.ERROR
-        );
-        const errorResponse = `Failed to pause schedule : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
       }
+
+      SchedulerLoggingService.log(
+        `Error in pause schedule ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to pause schedule : ${error}`;
+      handleError({
+        error: errorResponse
+      });
     }
   };
 
@@ -271,14 +286,15 @@ export class VertexServices {
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/resumeSchedule';
-      const formattedResponse: IUpdateSchedulerAPIResponse = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
-        {
-          method: 'POST',
-          signal
-        }
-      );
-      if (Object.keys(formattedResponse).length === 0) {
+      const vertexListingResumeActionAPIResponse: IUpdateSchedulerAPIResponse =
+        await requestAPI(
+          serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
+          {
+            method: 'POST',
+            signal
+          }
+        );
+      if (Object.keys(vertexListingResumeActionAPIResponse).length === 0) {
         Notification.success(`Schedule ${displayName} updated successfully`, {
           autoClose: false
         });
@@ -292,6 +308,10 @@ export class VertexServices {
         });
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       if (typeof error === 'object' && error !== null) {
         if (
           error instanceof TypeError &&
@@ -299,16 +319,16 @@ export class VertexServices {
         ) {
           return;
         }
-      } else {
-        SchedulerLoggingService.log(
-          `Error in resume schedule ${error}`,
-          LOG_LEVEL.ERROR
-        );
-        const errorResponse = `Failed to resume schedule : ${error}`;
-        handleErrorToast({
-          error: errorResponse
-        });
       }
+
+      SchedulerLoggingService.log(
+        `Error in resume schedule ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to resume schedule : ${error}`;
+      handleError({
+        error: errorResponse
+      });
     }
   };
 
@@ -321,14 +341,15 @@ export class VertexServices {
     try {
       const signal = settingController(abortControllers);
       const serviceURL = 'api/vertex/triggerSchedule';
-      const data: ITriggerSchedule = await requestAPI(
-        serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
-        {
-          method: 'POST',
-          signal
-        }
-      );
-      if (data.name) {
+      const vertexlistingTriggerAPIResponse: ITriggerSchedule =
+        await requestAPI(
+          serviceURL + `?region_id=${region}&schedule_id=${scheduleId}`,
+          {
+            method: 'POST',
+            signal
+          }
+        );
+      if (vertexlistingTriggerAPIResponse.name) {
         Notification.success(`${displayName} triggered successfully `, {
           autoClose: false
         });
@@ -338,6 +359,10 @@ export class VertexServices {
         });
       }
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
+
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&
@@ -345,16 +370,16 @@ export class VertexServices {
         ) {
           return;
         }
-      } else {
-        SchedulerLoggingService.log(
-          `Error in Trigger schedule ${reason}`,
-          LOG_LEVEL.ERROR
-        );
-        const errorResponse = `Failed to Trigger schedule : ${reason}`;
-        handleErrorToast({
-          error: errorResponse
-        });
       }
+
+      SchedulerLoggingService.log(
+        `Error in Trigger schedule ${reason}`,
+        LOG_LEVEL.ERROR
+      );
+      const errorResponse = `Failed to Trigger schedule : ${reason}`;
+      handleError({
+        error: errorResponse
+      });
     }
   };
 
@@ -392,12 +417,16 @@ export class VertexServices {
       }
       // return deleteResponse;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error in Delete api ${error}`,
         LOG_LEVEL.ERROR
       );
       const errorResponse = `Failed to delete the ${scheduleDisplayName} : ${error}`;
-      handleErrorToast({
+      handleError({
         error: errorResponse
       });
     }
@@ -429,6 +458,10 @@ export class VertexServices {
         );
       return executionHistoryScheduleData;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       if (
         typeof error === 'object' &&
         error !== null &&
@@ -436,19 +469,19 @@ export class VertexServices {
         error.toString().includes(ABORT_MESSAGE)
       ) {
         return null; // Return null on abort
-      } else {
-        SchedulerLoggingService.log(
-          `Error in execution history API: ${error}`,
-          LOG_LEVEL.ERROR
-        );
-        handleErrorToast({
-          error: `Error in fetching the execution history: ${error}`
-        });
-        return {
-          scheduleRuns: [],
-          groupedDates: { grey: [], red: [], green: [], darkGreen: [] }
-        };
       }
+
+      SchedulerLoggingService.log(
+        `Error in execution history API: ${error}`,
+        LOG_LEVEL.ERROR
+      );
+      handleError({
+        error: `Error in fetching the execution history: ${error}`
+      });
+      return {
+        scheduleRuns: [],
+        groupedDates: { grey: [], red: [], green: [], darkGreen: [] }
+      };
     }
   };
 
@@ -460,33 +493,37 @@ export class VertexServices {
       const { bucketName, scheduleRunId, fileName, abortControllers } =
         outputFileExistsPayload;
       const signal = settingController(abortControllers);
-      const formattedResponse = await requestAPI(
+      const outputFileExistsResponse = await requestAPI(
         `api/storage/outputFileExists?bucket_name=${bucketName}&job_run_id=${scheduleRunId}&file_name=${fileName}`,
         { signal }
       );
-      if (formattedResponse === 'true') {
+      if (outputFileExistsResponse === 'true') {
         return true;
       } else {
         return true;
       }
-    } catch (lastRunError: any) {
-      if (typeof lastRunError === 'object' && lastRunError !== null) {
+    } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
+      if (typeof error === 'object' && error !== null) {
         if (
-          lastRunError instanceof TypeError &&
-          lastRunError.toString().includes(ABORT_MESSAGE)
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
         ) {
           return;
         }
-      } else {
-        SchedulerLoggingService.log(
-          `Error checking output file ${lastRunError}`,
-          LOG_LEVEL.ERROR
-        );
       }
+
+      SchedulerLoggingService.log(
+        `Error checking output file ${error}`,
+        LOG_LEVEL.ERROR
+      );
     }
   };
 
-  static readonly downloadJobAPIService = async (
+  static readonly downloadScheduleExecutionAPIService = async (
     downloadPayload: IDownloadFile
   ) => {
     try {
@@ -518,6 +555,10 @@ export class VertexServices {
         });
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         'Error in downloading the job history',
         LOG_LEVEL.ERROR
@@ -549,6 +590,11 @@ export class VertexServices {
           return;
         }
       } catch (reason) {
+        // Check for AuthenticationError specifically
+        if (reason instanceof AuthenticationError) {
+          throw reason;
+        }
+
         if (typeof reason === 'object' && reason !== null) {
           if (
             reason instanceof TypeError &&
@@ -556,21 +602,21 @@ export class VertexServices {
           ) {
             return;
           }
-        } else {
-          SchedulerLoggingService.log(
-            `Error in update api ${reason}`,
-            LOG_LEVEL.ERROR
-          );
-          const errorResponse = `Error in updating notebook. ${reason}`;
-
-          Notification.error(
-            `Error fetching schedule details: ${errorResponse}`,
-            {
-              autoClose: false
-            }
-          );
-          return;
         }
+
+        SchedulerLoggingService.log(
+          `Error in update api ${reason}`,
+          LOG_LEVEL.ERROR
+        );
+        const errorResponse = `Error in updating notebook. ${reason}`;
+
+        Notification.error(
+          `Error fetching schedule details: ${errorResponse}`,
+          {
+            autoClose: false
+          }
+        );
+        return;
       }
     } else {
       Notification.error(
@@ -603,7 +649,7 @@ export class VertexServices {
         }
       );
       if (data.error) {
-        handleErrorToast({
+        handleError({
           error: data.error
         });
         return false;
@@ -617,13 +663,19 @@ export class VertexServices {
         return true;
       }
     } catch (reason: any) {
+      // Check for AuthenticationError
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
+
       SchedulerLoggingService.log(
         `Error creating schedule: ${reason}`,
         LOG_LEVEL.ERROR
       );
-      handleErrorToast({
+      handleError({
         error: reason
       });
+
       return false;
     }
   };
@@ -653,7 +705,7 @@ export class VertexServices {
         }
       );
       if (data.error) {
-        handleErrorToast({
+        handleError({
           error: data.error
         });
         return false;
@@ -667,14 +719,21 @@ export class VertexServices {
         return true;
       }
     } catch (reason: any) {
-      console.error(`Error updating schedule: ${reason}`);
+      // console.error(`Error updating schedule: ${reason}`);
+
+      // Check for AuthenticationError
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
+
       SchedulerLoggingService.log(
         `Error updating schedule: ${reason}`,
         LOG_LEVEL.ERROR
       );
-      handleErrorToast({
+      handleError({
         error: `Error updating schedule: ${reason}`
       });
+
       return false;
     }
   };

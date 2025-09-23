@@ -6,7 +6,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *   http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,19 +15,14 @@
  * limitations under the License.
  */
 
-import { createContext, useContext } from 'react';
-import { ISchedulerContext } from '../../interfaces/VertexInterface';
-
-// Create the context
-export const SchedulerContext = createContext<ISchedulerContext | null>(null);
-
-// Create a custom hook to use the context
-export const useSchedulerContext = () => {
-  const context = useContext(SchedulerContext);
-  if (context === undefined) {
-    throw new Error(
-      'useSchedulerContext must be used within a SchedulerProvider'
-    );
+export class AuthenticationError extends Error {
+  constructor(
+    message = 'Authentication failed.',
+    public response?: Response
+  ) {
+    super(message);
+    this.name = 'AuthenticationError';
+    // Set the prototype explicitly to ensure 'instanceof' works correctly
+    Object.setPrototypeOf(this, AuthenticationError.prototype);
   }
-  return context;
-};
+}
