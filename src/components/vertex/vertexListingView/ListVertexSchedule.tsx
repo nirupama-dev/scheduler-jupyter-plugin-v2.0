@@ -65,8 +65,6 @@ const ListVertexSchedule = ({
   // Consume the context value
   const schedulerContext = useSchedulerContext();
   const activePaginationVariables = schedulerContext?.activePaginationVariables;
-  const schedulerContext = useSchedulerContext();
-  const activePaginationVariables = schedulerContext?.activePaginationVariables;
   const setActivePaginationVariables =
     schedulerContext?.setActivePaginationVariables;
   const vertexRouteState = schedulerContext?.vertexRouteState;
@@ -168,7 +166,7 @@ const ListVertexSchedule = ({
       }));
       setRegionDisable(true);
       const listVertexPayload = {
-        region: 'us-central1',
+        region,
         nextToken,
         scheduleListPageLength,
         abortControllers
@@ -622,7 +620,7 @@ const ListVertexSchedule = ({
       }
     };
 
-    if (vertexRouteState) {
+    if ('region' in vertexRouteState) {
       setRegion(vertexRouteState.region);
       if (setVertexRouteState) {
         setVertexRouteState(null);

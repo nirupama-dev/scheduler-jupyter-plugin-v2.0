@@ -322,7 +322,6 @@ export const CreateNotebookSchedule = (
         return;
       }
       let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
-      let routingParamForListing = '';
       //vertex payload creation
       if (
         data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
@@ -357,11 +356,7 @@ export const CreateNotebookSchedule = (
               region: vertexData.vertexRegion
             });
           }
-
-          //TODO: // redirect to list page or show success message
           navigate('/list');
-        } else {
-          //TODO: Retain the form. probably remove this.
         }
         //composer payload creation
       } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
@@ -389,11 +384,7 @@ export const CreateNotebookSchedule = (
               environment: composerData.environment
             });
           }
-
-          //TODO: // redirect to list page or show success message
           navigate('/list');
-        } else {
-          //TODO: Retain the form. probably remove this.
         }
       }
     } catch (error) {
@@ -421,7 +412,7 @@ export const CreateNotebookSchedule = (
       }
       navigate('/list');
     } else {
-      app.shell.activeWidget?.close();
+      (app.shell as any).activeWidget?.close();
     }
   };
 

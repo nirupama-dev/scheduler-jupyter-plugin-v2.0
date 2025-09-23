@@ -19,7 +19,7 @@
 import { ISessionContext } from '@jupyterlab/apputils';
 import { IKernelDetails } from './ComposerInterface';
 import { SchedulerType } from '../types/CommonSchedulerTypes';
-import { JupyterFrontEnd, JupyterLab } from '@jupyterlab/application';
+import { JupyterLab } from '@jupyterlab/application';
 import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema';
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
 
@@ -84,7 +84,6 @@ export interface IEditScheduleData {
 
 //Remove this if same as ISchedulerRoutesProps
 export interface ICreateNotebookScheduleProps {
-  app: JupyterFrontEnd;
   sessionContext?: ISessionContext | null | undefined | null | undefined;
   initialKernalScheduleDetails?:
     | INotebookKernalSchdulerDefaults
