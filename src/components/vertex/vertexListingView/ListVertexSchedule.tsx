@@ -44,7 +44,7 @@ import Loader from '../../common/loader/LoadingSpinner';
 import TableData from '../../common/table/TableData';
 import { renderActions } from './VertexScheduleAction';
 import { rowDataList } from './VertexListRow';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import DeletePopup from '../../common/table/DeletePopup';
 import { abortApiCall } from '../../../utils/Config';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
@@ -59,8 +59,7 @@ const ListVertexSchedule = ({
   abortControllers: any;
   app: any;
 }) => {
-  const { region: regionParam } = useParams<{ region: string }>();
-  const [region, setRegion] = useState<string>(regionParam || ''); // assign from param if available
+  const [region, setRegion] = useState<string>(''); // assign from param if available
   const navigate = useNavigate();
 
   // Consume the context value
@@ -68,6 +67,8 @@ const ListVertexSchedule = ({
   const activePaginationVariables = schedulerContext?.activePaginationVariables;
   const setActivePaginationVariables =
     schedulerContext?.setActivePaginationVariables;
+  const vertexRouteState = schedulerContext?.vertexRouteState;
+  const setVertexRouteState = schedulerContext?.setVertexRouteState;
 
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
@@ -165,7 +166,7 @@ const ListVertexSchedule = ({
       }));
       setRegionDisable(true);
       const listVertexPayload = {
-        region: 'us-central1',
+        region,
         nextToken,
         scheduleListPageLength,
         abortControllers
@@ -619,7 +620,15 @@ const ListVertexSchedule = ({
       }
     };
 
-    fetchRegion();
+    if ('region' in vertexRouteState) {
+      setRegion(vertexRouteState.region);
+      if (setVertexRouteState) {
+        setVertexRouteState(null);
+      }
+      return;
+    } else {
+      fetchRegion();
+    }
   }, []);
 
   /**

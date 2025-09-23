@@ -31,6 +31,7 @@ import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import {
   COMPOSER_SCHEDULER_NAME,
+  SCHEDULE_LABEL_VERTEX,
   SCHEDULER_OPTIONS,
   VERTEX_SCHEDULER_NAME
 } from '../../utils/Constants';
@@ -66,6 +67,7 @@ import {
   transformComposerScheduleDataToZodSchema,
   transformZodSchemaToComposerSchedulePayload
 } from '../../utils/ComposerDataTransform';
+import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 /**
@@ -102,6 +104,10 @@ export const CreateNotebookSchedule = (
     projectId: string;
     environment: string;
   }>();
+
+  const schedulerContext = useSchedulerContext();
+  const setVertexRouteState = schedulerContext?.setVertexRouteState;
+  const setComposerRouteState = schedulerContext?.setComposerRouteState;
 
   /**
    * A unified state to manage all form-related data including edit mode,
@@ -316,7 +322,6 @@ export const CreateNotebookSchedule = (
         return;
       }
       let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
-      let routingParamForListing = '';
       //vertex payload creation
       if (
         data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
@@ -344,8 +349,15 @@ export const CreateNotebookSchedule = (
               vertexData.vertexRegion
             );
         }
-        routingParamForListing =
-          '${VERTEX_SCHEDULER_NAME}/${vertexData.vertexRegion}';
+        if (isSaveSuccessfull) {
+          if (setVertexRouteState) {
+            setVertexRouteState({
+              schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
+              region: vertexData.vertexRegion
+            });
+          }
+          navigate('/list');
+        }
         //composer payload creation
       } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
         const composerData = data as ComposerSchedulerFormValues;
@@ -363,14 +375,17 @@ export const CreateNotebookSchedule = (
             composerPayload.region_id, // ToDO
             initialFormData.editModeData?.editMode
           );
-        routingParamForListing = `${COMPOSER_SCHEDULER_NAME}/${composerData.composerRegion}/${composerData.projectId}/${composerData.environment}`;
-      }
-      console.log('is save successful', isSaveSuccessfull);
-      if (isSaveSuccessfull) {
-        //TODO: // redirect to list page or show success message
-        navigate(`/list/${routingParamForListing}`);
-      } else {
-        //TODO: Retain the form. probably remove this.
+        if (isSaveSuccessfull) {
+          if (setComposerRouteState) {
+            setComposerRouteState({
+              schedulerName: COMPOSER_SCHEDULER_NAME,
+              region: composerData.composerRegion,
+              projectId: composerData.projectId,
+              environment: composerData.environment
+            });
+          }
+          navigate('/list');
+        }
       }
     } catch (error) {
       if (error instanceof AuthenticationError) {
@@ -381,11 +396,26 @@ export const CreateNotebookSchedule = (
 
   // Function to handle cancel action
   const handleCancel = () => {
-    console.log('Cancelled');
-    reset(); // Reset form to default values
-    // TODO: Add navigation logic
+    if (initialFormData.editModeData?.editMode) {
+      if (setVertexRouteState && schedulerTypeForEdit === 'vertex') {
+        setVertexRouteState({
+          schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
+          region: initialFormData.editModeData.region
+        });
+      } else if (setComposerRouteState && schedulerTypeForEdit === 'composer') {
+        setComposerRouteState({
+          schedulerName: COMPOSER_SCHEDULER_NAME,
+          region: initialFormData.editModeData.region,
+          projectId: initialFormData.editModeData.projectId,
+          environment: initialFormData.editModeData.environment
+        });
+      }
+      navigate('/list');
+    } else {
+      (app.shell as any).activeWidget?.close();
+    }
   };
-  console.log(' Scheduler:', schedulerSelection);
+
   //return if form is not valid
   if (
     !initialFormData.credentials ||
@@ -395,6 +425,7 @@ export const CreateNotebookSchedule = (
   ) {
     return <div>Loading...</div>;
   }
+
   return (
     <div className="component-level">
       <div className="create-form-header">
