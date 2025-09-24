@@ -28,19 +28,24 @@ import {
 } from '../../../utils/Icons';
 import { ActionButton } from '../../common/button/ActionButton';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { handleOpenLoginWidget } from '../../common/login/Config';
+import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 
 const ListDagTaskInstances = ({
   composerName,
   dagId,
   dagRunId,
   projectId,
-  region
+  region,
+  app
 }: {
   composerName: string;
   dagId: string;
   dagRunId: string;
   projectId: string;
   region: string;
+  app: JupyterFrontEnd;
 }): JSX.Element => {
   const [dagTaskInstancesList, setDagTaskInstancesList] = useState<any>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -69,15 +74,21 @@ const ListDagTaskInstances = ({
   }, []);
 
   const listDagTaskInstancesRunsList = async () => {
-    await ComposerServices.listDagTaskInstancesListService(
-      composerName,
-      dagId,
-      dagRunId,
-      setDagTaskInstancesList,
-      setIsLoading,
-      projectId,
-      region
-    );
+    try {
+      await ComposerServices.listDagTaskInstancesListService(
+        composerName,
+        dagId,
+        dagRunId,
+        setDagTaskInstancesList,
+        setIsLoading,
+        projectId,
+        region
+      );
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+    }
   };
 
   useEffect(() => {
@@ -106,17 +117,23 @@ const ListDagTaskInstances = ({
   };
 
   const listDagTaskLogList = async (index: string, iconIndex: number) => {
-    await ComposerServices.listDagTaskLogsListService(
-      composerName,
-      dagId,
-      dagRunId,
-      dagTaskInstancesList[index].taskId,
-      iconIndex,
-      setLogList,
-      setIsLoadingLogs,
-      projectId,
-      region
-    );
+    try {
+      await ComposerServices.listDagTaskLogsListService(
+        composerName,
+        dagId,
+        dagRunId,
+        dagTaskInstancesList[index].taskId,
+        iconIndex,
+        setLogList,
+        setIsLoadingLogs,
+        projectId,
+        region
+      );
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+    }
   };
   return (
     <div>

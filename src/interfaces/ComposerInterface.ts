@@ -167,3 +167,11 @@ export interface ILoadingStateComposer {
   cluster: boolean;
   serverless: boolean;
 }
+
+export interface IDagRunList {
+  dagRunId: string;
+  filteredDate: Date;
+  state: string;
+  date: Date;
+  time: string;
+}

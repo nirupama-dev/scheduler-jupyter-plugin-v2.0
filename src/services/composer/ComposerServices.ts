@@ -23,7 +23,6 @@ import {
   IComposerEnvAPIResponse,
   IComposerSchedulePayload,
   IDagList,
-  ILoadingStateComposer,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse,
   IListDagInfoAPIServiceResponse
@@ -394,6 +393,11 @@ export class ComposerServices {
       const data: any = await requestAPI(serviceURL);
       return data;
     } catch (error) {
+      // Check for AuthenticationError
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       const errorResponse = `Error in listing dag runs..\n${error}`;
       handleErrorToast({
         error: errorResponse

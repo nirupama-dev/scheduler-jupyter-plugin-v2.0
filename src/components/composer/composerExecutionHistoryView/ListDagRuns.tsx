@@ -17,7 +17,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useTable, useGlobalFilter, usePagination } from 'react-table';
-import { Dayjs } from 'dayjs';
 import TableData from '../../common/table/TableData';
 import { PaginationView } from '../../common/table/PaginationView';
 import { handleDebounce } from '../../../utils/Config';
@@ -26,33 +25,30 @@ import { ComposerServices } from '../../../services/composer/ComposerServices';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import { ActionButton } from '../../common/button/ActionButton';
 import { iconDownload } from '../../../utils/Icons';
-
-interface IDagRunList {
-  dagRunId: string;
-  filteredDate: Date;
-  state: string;
-  date: Date;
-  time: string;
-}
+import { IDagRunList } from '../../../interfaces/ComposerInterface';
+import { COMPOSER_EXECUTION_HISTORY_DAG_HEADER } from '../../../utils/Constants';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { handleOpenLoginWidget } from '../../common/login/Config';
+import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 
 const ListDagRuns = ({
   composerName,
   dagId,
   handleDagRunClick,
-  selectedDate,
   bucketName,
   projectId,
   region,
-  dagRunsList
+  dagRunsList,
+  app
 }: {
   composerName: string;
   dagId: string;
   handleDagRunClick: (value: string) => void;
-  selectedDate: Dayjs | null;
   bucketName: string;
   projectId: string;
   region: string;
   dagRunsList: IDagRunList[];
+  app: JupyterFrontEnd;
 }): JSX.Element => {
   const [downloadOutputDagRunId, setDownloadOutputDagRunId] = useState('');
   const [listDagRunHeight, setListDagRunHeight] = useState(
@@ -79,24 +75,7 @@ const ListDagRuns = ({
 
   const data = dagRunsList;
   const columns = React.useMemo(
-    () => [
-      {
-        Header: 'State',
-        accessor: 'state'
-      },
-      {
-        Header: 'Date',
-        accessor: 'date'
-      },
-      {
-        Header: 'Time',
-        accessor: 'time'
-      },
-      {
-        Header: 'Actions',
-        accessor: 'actions'
-      }
-    ],
+    () => COMPOSER_EXECUTION_HISTORY_DAG_HEADER,
     []
   );
 
@@ -192,15 +171,21 @@ const ListDagRuns = ({
 
   const handleDownloadOutput = async (event: React.MouseEvent) => {
     const dagRunId = event.currentTarget.getAttribute('data-dag-run-id')!;
-    await ComposerServices.handleDownloadOutputNotebookAPIService(
-      composerName,
-      dagRunId,
-      bucketName,
-      dagId,
-      setDownloadOutputDagRunId,
-      projectId,
-      region
-    );
+    try {
+      await ComposerServices.handleDownloadOutputNotebookAPIService(
+        composerName,
+        dagRunId,
+        bucketName,
+        dagId,
+        setDownloadOutputDagRunId,
+        projectId,
+        region
+      );
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+    }
   };
 
   const renderActions = (data: any) => {

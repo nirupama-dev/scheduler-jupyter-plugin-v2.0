@@ -18,16 +18,26 @@
 import React from 'react';
 import { useComposerExecutionHistory } from '../../../hooks/useComposerExecutionHistoryReducer';
 import ExecutionCalendar from '../../common/dateCalendar/DateCalendar';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ListDagRuns from './ListDagRuns';
 import ListDagTaskInstances from './ListDagTaskInstances';
 import { SCHEDULE_LABEL_COMPOSER } from '../../../utils/Constants';
 import ExecutionHistoryHeader from '../../vertex/vertexExecutionHistoryView/VertexExecutionHistoryHeader';
 import { Box, LinearProgress } from '@mui/material';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { abortApiCall } from '../../../utils/Config';
 
-const ComposerExecutionHistory = (): JSX.Element => {
-  const { dagId, projectId, region, composerName, bucketName } = useParams();
+const ComposerExecutionHistory = ({
+  abortControllers,
+  app
+}: {
+  abortControllers: any;
+  app: JupyterFrontEnd;
+}): JSX.Element => {
+  const location = useLocation();
   const navigate = useNavigate();
+  const { dagId, projectId, region, composerName, bucketName } = location.state;
+
   const {
     startDate,
     endDate,
@@ -41,7 +51,6 @@ const ComposerExecutionHistory = (): JSX.Element => {
     filteredDagRunsList,
     handleDateSelection,
     handleMonthChange,
-    handleLogs,
     height,
     handleDagRunClick,
     dagRunId,
@@ -50,7 +59,8 @@ const ComposerExecutionHistory = (): JSX.Element => {
     dagId ?? '',
     projectId ?? '',
     region ?? '',
-    composerName ?? ''
+    composerName ?? '',
+    app
   );
 
   const calendarProps = {
@@ -63,13 +73,12 @@ const ComposerExecutionHistory = (): JSX.Element => {
     darkGreenListDates,
     handleDateSelection,
     handleMonthChange,
-    handleLogs,
     fromPage: SCHEDULE_LABEL_COMPOSER
   };
 
   const handleBackButton = () => {
-    console.log('back composer');
-    navigate('/list');
+    abortApiCall(abortControllers);
+    navigate('/list/composer');
   };
 
   return (
@@ -103,11 +112,11 @@ const ComposerExecutionHistory = (): JSX.Element => {
               composerName={composerName || ''}
               dagId={dagId || ''}
               handleDagRunClick={handleDagRunClick}
-              selectedDate={selectedDate}
               bucketName={bucketName || ''}
               projectId={projectId || ''}
               region={region || ''}
               dagRunsList={filteredDagRunsList}
+              app={app}
             />
           )}
         </div>
@@ -119,6 +128,7 @@ const ComposerExecutionHistory = (): JSX.Element => {
               dagRunId={dagRunId}
               projectId={projectId || ''}
               region={region || ''}
+              app={app}
             />
           )}
         </div>

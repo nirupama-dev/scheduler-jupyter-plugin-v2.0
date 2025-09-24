@@ -142,7 +142,7 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
           }
         />
         <Route
-          path="/execution-vertex-history/:scheduleId/:region/:scheduleName"
+          path="/execution-composer-history"
           element={
             <Suspense
               fallback={
@@ -153,23 +153,10 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
                 />
               }
             >
-              <VertexExecutionHistory abortControllers={abortControllers} />
-            </Suspense>
-          }
-        />
-        <Route
-          path="/execution-composer-history/:dagId/:projectId/:region/:composerName/:bucketName"
-          element={
-            <Suspense
-              fallback={
-                <Loader
-                  message={LOADER_CONTENT_VERTEX_EXECUTION_SCREEN}
-                  iconClassName="spin-loader-custom-style"
-                  parentTagClassName='"spin-loader-main spin-loader-listing'
-                />
-              }
-            >
-              <ComposerExecutionHistory />
+              <ComposerExecutionHistory
+                abortControllers={abortControllers}
+                app={app}
+              />
             </Suspense>
           }
         />

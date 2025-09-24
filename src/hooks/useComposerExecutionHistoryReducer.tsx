@@ -19,6 +19,9 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { ComposerServices } from '../services/composer/ComposerServices';
 import { handleDebounce } from '../utils/Config';
+import { JupyterFrontEnd } from '@jupyterlab/application';
+import { AuthenticationError } from '../exceptions/AuthenticationException';
+import { handleOpenLoginWidget } from '../components/common/login/Config';
 
 const executionHistoryReducer = (state: any, action: any) => {
   switch (action.type) {
@@ -69,26 +72,26 @@ export const useComposerExecutionHistory = (
   scheduleId: string,
   projectId: string,
   region: string,
-  composerEnv: string
+  composerEnv: string,
+  app: JupyterFrontEnd
 ) => {
   const [state, dispatch] = useReducer(executionHistoryReducer, initialState);
   const { startDate, endDate, dagRunsList, selectedDate } = state;
   const previousDagRunIdRef = useRef<string>('');
 
-  const handleUpdateHeight = useCallback(() => {
+  const handleUpdateHeight = () => {
     const updateHeight = window.innerHeight - 145;
     dispatch({ type: 'SET_HEIGHT', payload: updateHeight });
-  }, [dispatch]);
+  };
 
   const debouncedHandleUpdateHeight = handleDebounce(handleUpdateHeight, 500);
 
   useEffect(() => {
-    handleUpdateHeight();
     window.addEventListener('resize', debouncedHandleUpdateHeight);
     return () => {
       window.removeEventListener('resize', debouncedHandleUpdateHeight);
     };
-  }, [debouncedHandleUpdateHeight, handleUpdateHeight]);
+  }, []);
 
   const fetchDagRuns = useCallback(
     async (
@@ -169,6 +172,10 @@ export const useComposerExecutionHistory = (
           }
         });
         dispatch({ type: 'SET_DAG_RUNS_LIST', payload: transformedList });
+      } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
       } finally {
         dispatch({ type: 'SET_LOADING', payload: false });
       }
@@ -233,24 +240,6 @@ export const useComposerExecutionHistory = (
     [dispatch]
   );
 
-  const handleLogs = useCallback(() => {
-    if (!state.scheduleId) {
-      return;
-    }
-    const logExplorerUrl = new URL(
-      'https://console.cloud.google.com/logs/query'
-    );
-    logExplorerUrl.searchParams.set('query', `SEARCH("${state.scheduleId}")`);
-    if (state.scheduleRunsData?.startDate) {
-      logExplorerUrl.searchParams.set(
-        'cursorTimestamp',
-        state.scheduleRunsData.startDate
-      );
-    }
-    logExplorerUrl.searchParams.set('project', state.projectId);
-    window.open(logExplorerUrl.toString(), '_blank');
-  }, [state.scheduleId, state.scheduleRunsData, state.projectId]);
-
   const handleDagRunClick = useCallback(
     (id: string) => {
       dispatch({ type: 'SET_DAG_RUN_ID', payload: id });
@@ -263,7 +252,6 @@ export const useComposerExecutionHistory = (
     filteredDagRunsList,
     handleDateSelection,
     handleMonthChange,
-    handleLogs,
     handleDagRunClick
   };
 };

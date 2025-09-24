@@ -42,7 +42,7 @@ const ExecutionCalendar = ({
         minDate={
           fromPage && fromPage !== SCHEDULE_LABEL_COMPOSER
             ? dayjs(createTime)
-            : undefined
+            : dayjs().year(2024).startOf('year')
         }
         maxDate={dayjs(currentDate)}
         referenceDate={dayjs(currentDate)}

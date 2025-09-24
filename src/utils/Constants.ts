@@ -313,4 +313,43 @@ export const DEFAULT_LOADING_TEXT = 'Loading...';
 export const OPEN_LOGIN_WIDGET_COMMAND = `${PLUGIN_ID}:route-to-login-page`;
 
 export const composerEnvironmentStateList = ['RUNNING', 'UPDATING'];
+
 export const composerEnvironmentStateListForCreate = 'RUNNING';
+
+export const LIST_COMPOSER_TABLE_HEADER = [
+  {
+    Header: 'Job Name',
+    accessor: 'jobid'
+  },
+  {
+    Header: 'Schedule',
+    accessor: 'schedule'
+  },
+  {
+    Header: 'Status',
+    accessor: 'status'
+  },
+  {
+    Header: 'Actions',
+    accessor: 'actions'
+  }
+];
+
+export const COMPOSER_EXECUTION_HISTORY_DAG_HEADER = [
+  {
+    Header: 'State',
+    accessor: 'state'
+  },
+  {
+    Header: 'Date',
+    accessor: 'date'
+  },
+  {
+    Header: 'Time',
+    accessor: 'time'
+  },
+  {
+    Header: 'Actions',
+    accessor: 'actions'
+  }
+];
