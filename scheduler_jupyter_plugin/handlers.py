@@ -85,6 +85,7 @@ class CredentialsHandler(APIHandler):
     async def get(self):
         try:
             cached = await credentials.get_cached()
+            cached.pop("access_token", None)
             if cached["config_error"] == 1:
                 self.log.exception("Error fetching credentials from gcloud")
             self.finish(json.dumps(cached))
