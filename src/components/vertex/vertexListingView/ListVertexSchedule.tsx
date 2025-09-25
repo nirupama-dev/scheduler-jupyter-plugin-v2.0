@@ -485,6 +485,10 @@ const ListVertexSchedule = ({
     abortApiCall(abortControllers);
     setLoaderState(prevState => ({ ...prevState, editScheduleLoader: true }));
     const encodedScheduleId = encodeURIComponent(scheduleId);
+    if (setActivePaginationVariables) {
+      setActivePaginationVariables(saveActivePaginationVariables());
+    }
+
     navigate(
       `/edit/${SCHEDULE_LABEL_VERTEX.toLocaleLowerCase()}/${encodedScheduleId}/${region}`
     );
@@ -679,10 +683,6 @@ const ListVertexSchedule = ({
       );
     }
   }, [region]);
-
-  useEffect(() => {
-    handleCurrentPageRefresh(null, null);
-  }, []);
 
   return (
     <>
