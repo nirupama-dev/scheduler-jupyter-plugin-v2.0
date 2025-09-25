@@ -207,6 +207,7 @@ const ListDagRuns = ({
                 ? 'icon-buttons-style padding-zero '
                 : 'icon-buttons-style-disable padding-zero '
             }
+            data-dag-run-id={data.dagRunId}
           />
         )}
       </div>
