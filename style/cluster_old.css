@@ -49,11 +49,6 @@
   text-transform: capitalize;
 }
 
-.actions-icon {
-  display: flex;
-  justify-content: center;
-}
-
 .cluster-status-parent {
   display: flex;
   align-items: center;

@@ -27,6 +27,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { abortApiCall } from '../../../utils/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { handleOpenLoginWidget } from '../../common/login/Config';
+import { SCHEDULE_LABEL_VERTEX } from '../../../utils/Constants';
 
 const VertexExecutionHistory = ({
   abortControllers,
@@ -71,7 +72,8 @@ const VertexExecutionHistory = ({
     handleDateSelection,
     handleMonthChange,
     handleLogs,
-    isLoading
+    isLoading,
+    fromPage: SCHEDULE_LABEL_VERTEX
   };
 
   const vertexScheduleRunProps = {

@@ -33,10 +33,6 @@
   padding-left: 15px;
 }
 
-.dag-runs-list-table-parent {
-  overflow: auto;
-}
-
 .dag-runs-table-body {
   overflow-y: auto;
   max-height: 55vh;
@@ -67,29 +63,6 @@
   display: flex;
 }
 
-.accordion-row-parent {
-  display: flex;
-  width: 100%;
-  height: 30px;
-  justify-content: center;
-  align-items: center;
-  border-bottom: 1px solid var(--jp-layout-color3);
-}
-
-.accordion-row-parent-header {
-  background-color: rgba(0 0 0 / 4%);
-  font-style: normal;
-  font-weight: 500;
-  font-size: 13px;
-  height: 29px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  line-height: 18px;
-  color: var(--jp-ui-font-color0);
-  border-bottom: 1px solid var(--jp-layout-color3);
-}
-
 .accordion-vertex-row-parent {
   display: flex;
   width: 100%;
@@ -111,11 +84,6 @@
   border-bottom: 1px solid var(--jp-layout-color3);
 }
 
-.accordion-row-data {
-  padding-left: 15px;
-  width: 33%;
-}
-
 .accordion-vertex-row-data {
   padding-left: 15px;
   width: 10%;
@@ -130,89 +98,12 @@
   width: 70%;
 }
 
-.logo-row-container {
-  display: flex;
-}
-
-.logs-content-style {
-  overflow: auto;
-  margin: 10px;
-  border-bottom: 1px solid var(--jp-layout-color3);
-}
-
-.accordion-row-data-expand-logo {
-  width: 30px;
-}
-
-.dag-runs-table-data-state-success {
-  background-color: #34a853;
-  color: var(--jp-border-color3);
-  border-radius: 22px;
-  margin: 5px 15px;
-  display: flex;
-  width: 71px;
-  text-transform: capitalize;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.dag-runs-table-data-state-failure {
-  background-color: #ea3323;
-  color: var(--jp-border-color3);
-  border-radius: 22px;
-  margin: 5px 15px;
-  display: flex;
-  width: 71px;
-  text-transform: capitalize;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.dag-runs-table-data-state-queued {
-  background-color: #aeaeae;
-  color: var(--jp-border-color3);
-  border-radius: 22px;
-  margin: 5px 15px;
-  display: flex;
-  width: 71px;
-  text-transform: capitalize;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.dag-runs-table-data-state-running {
-  background-color: #00bfa5;
-  color: var(--jp-border-color3);
-  border-radius: 22px;
-  margin: 5px 15px;
-  display: flex;
-  width: 71px;
-  text-transform: capitalize;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-}
-
-.dag-run-state-parent {
-  border-bottom: 1px solid var(--jp-layout-color3);
-  height: 24px;
-}
-
 .tab-text-sub-cl .error-message {
   color: #b71c1c;
 }
 
 .table-cell-width {
   width: 512px !important;
-}
-
-/* Optional: Adjustments for other elements */
-.notebook-template-table-data {
-  padding-left: 15px;
-  border-bottom: 1px solid var(--jp-layout-color3);
 }
 
 .cluster-details-header {

@@ -41,6 +41,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   composerEnvironmentStateList,
   GCS_PLUGIN_ID,
+  LIST_COMPOSER_TABLE_HEADER,
   POLLING_DAG_LIST_INTERVAL,
   POLLING_IMPORT_ERROR_INTERVAL
 } from '../../../utils/Constants';
@@ -94,27 +95,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const selectedRegion = watch('composerRegion');
   const selectedEnv = watch('environment');
 
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: 'Job Name',
-        accessor: 'jobid'
-      },
-      {
-        Header: 'Schedule',
-        accessor: 'schedule'
-      },
-      {
-        Header: 'Status',
-        accessor: 'status'
-      },
-      {
-        Header: 'Actions',
-        accessor: 'actions'
-      }
-    ],
-    []
-  );
+  const columns = React.useMemo(() => LIST_COMPOSER_TABLE_HEADER, []);
 
   const {
     getTableProps,
@@ -155,6 +136,18 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     } finally {
       setLoadingState(prev => ({ ...prev, dags: false }));
     }
+  };
+
+  const handleDagIdSelection = (composerName: string, dagId: string) => {
+    navigate('/execution-composer-history', {
+      state: {
+        dagId,
+        projectId: selectedProjectId,
+        region: selectedRegion,
+        composerName,
+        bucketName
+      }
+    });
   };
 
   /**
@@ -542,11 +535,11 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         return (
           <td {...cell.getCellProps()} className="scheduler-table-data">
             <span
-            // onClick={() => {
-            //   if (composerEnvSelected) {
-            //     handleDagIdSelection(composerEnvSelected, cell.value);
-            //   }
-            // }}
+              onClick={() => {
+                if (selectedEnv) {
+                  handleDagIdSelection(selectedEnv, cell.value);
+                }
+              }}
             >
               {cell.value}
             </span>
@@ -587,7 +580,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               options={[{ label: selectedProjectId, value: selectedProjectId }]}
               setValue={setValue}
               loading={loadingState.projectId}
-              //   onChangeCallback={handleProjectIdChange}
               disabled={true}
             />
           </div>
@@ -599,7 +591,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               options={regionOptions}
               setValue={setValue}
               loading={loadingState.region}
-              //   onChangeCallback={handleRegionChange}
               //   error={errors.composerRegion}
             />
           </div>

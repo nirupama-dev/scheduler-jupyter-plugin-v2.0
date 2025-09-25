@@ -19,6 +19,7 @@ import React from 'react';
 import { Select } from './MuiWrappedSelect';
 import { ActionButton } from '../button/ActionButton';
 import { iconNext, iconPrevious } from '../../../utils/Icons';
+import { IDagRunList } from '../../../interfaces/ComposerInterface';
 
 interface ITemplate {
   title: string;
@@ -43,7 +44,7 @@ interface IPaginationViewProps {
   pageSize: number;
   setPageSize: (value: number) => void;
   pageIndex: number;
-  allData: ITemplate[] | IDagList[] | IVertexDagList[];
+  allData: ITemplate[] | IDagList[] | IVertexDagList[] | IDagRunList[];
   previousPage: () => void;
   nextPage: () => void;
   canPreviousPage: boolean;

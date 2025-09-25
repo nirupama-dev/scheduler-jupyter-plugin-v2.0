@@ -139,3 +139,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .module-top {
   padding-top: 10px;
 }
+
+.padding-zero {
+  padding: 0 !important;
+}

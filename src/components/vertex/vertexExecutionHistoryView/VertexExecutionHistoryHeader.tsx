@@ -17,17 +17,22 @@
 
 import React from 'react';
 import { iconLeftArrow, iconCreateCluster } from '../../../utils/Icons';
-import { VIEW_CLOUD_LOGS } from '../../../utils/Constants';
+import {
+  SCHEDULE_LABEL_VERTEX,
+  VIEW_CLOUD_LOGS
+} from '../../../utils/Constants';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 
 const ExecutionHistoryHeader = ({
   scheduleName,
   handleBackButton,
-  handleLogs
+  handleLogs,
+  fromPage
 }: {
   scheduleName: string;
   handleBackButton: () => void;
-  handleLogs: () => void;
+  handleLogs?: () => void;
+  fromPage?: string;
 }) => (
   <div className="execution-history-header">
     <button className="scheduler-back-arrow-icon" onClick={handleBackButton}>
@@ -44,17 +49,22 @@ const ExecutionHistoryHeader = ({
         scheduleName
       )}
     </div>
-    <div className="log-btn right-panel-wrapper">
-      <button
-        className="horizontal-element-wrapper log-btn-element"
-        onClick={handleLogs}
-      >
-        <div className="create-icon log-icon cursor-icon">
-          <iconCreateCluster.react tag="div" className="logo-alignment-style" />
-        </div>
-        <div className="create-text cursor-icon">{VIEW_CLOUD_LOGS}</div>
-      </button>
-    </div>
+    {fromPage === SCHEDULE_LABEL_VERTEX && (
+      <div className="log-btn right-panel-wrapper">
+        <button
+          className="horizontal-element-wrapper log-btn-element"
+          onClick={handleLogs}
+        >
+          <div className="create-icon log-icon cursor-icon">
+            <iconCreateCluster.react
+              tag="div"
+              className="logo-alignment-style"
+            />
+          </div>
+          <div className="create-text cursor-icon">{VIEW_CLOUD_LOGS}</div>
+        </button>
+      </div>
+    )}
   </div>
 );
 
