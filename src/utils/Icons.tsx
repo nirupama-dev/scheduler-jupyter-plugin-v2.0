@@ -22,9 +22,9 @@ import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.s
 import PlayIcon from '../../style/icons/scheduler_play.svg';
 import PauseIcon from '../../style/icons/scheduler_pause.svg';
 import TriggerIcon from '../../style/icons/scheduler_trigger.svg';
-import EditIconDisable from '../../style/icons/scheduler_edit_dag.svg';
+import EditIconDisable from '../../style/icons/scheduler_edit_calendar.svg';
+import EditNotebookIcon from '../../style/icons/scheduler_edit_dag.svg';
 import DeleteIconLarge from '../../style/icons/scheduler_delete.svg';
-import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
 import DashIcon from '../../style/icons/dash_icon_jupyter.svg';
 import CompletedIcon from '../../style/icons/dag_task_success_icon.svg';
