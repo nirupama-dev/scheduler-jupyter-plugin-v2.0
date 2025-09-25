@@ -72,7 +72,11 @@ const ListDagTaskInstances = ({
   useEffect(() => {
     if (dagRunTaskInstancesList?.length > 0) {
       setExpanded('0');
-      fetchDagRunTaskLogs(dagRunTaskInstancesList, '0', dagRunTaskInstancesList[0].tryNumber);
+      fetchDagRunTaskLogs(
+        dagRunTaskInstancesList,
+        '0',
+        dagRunTaskInstancesList[0].tryNumber
+      );
     }
   }, [dagRunTaskInstancesList]);
 
