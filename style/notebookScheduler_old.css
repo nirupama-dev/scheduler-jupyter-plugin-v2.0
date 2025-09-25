@@ -33,18 +33,6 @@
   padding-left: 15px;
 }
 
-.create-job-scheduler-title {
-  padding: 0 15px;
-  height: 48px;
-  font-style: normal;
-  font-weight: 400;
-  font-size: 18px;
-  line-height: 24px;
-  display: flex;
-  align-items: center;
-  color: var(--jp-ui-font-color0);
-}
-
 .dag-runs-table-body {
   overflow-y: auto;
   max-height: 55vh;
@@ -108,48 +96,6 @@
 
 .accordion-vertex-row-data:nth-child(3) {
   width: 70%;
-}
-
-.accordion-section {
-  background: #f2dede;
-  margin: 10px 0;
-}
-
-.accordion-title {
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #e43921;
-}
-
-.accordion-button {
-  background-color: #f2dede;
-  color: #e43921;
-  cursor: pointer;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.accordion-content {
-  padding: 10px;
-  color: #e43921;
-}
-
-.import-error-parent {
-  margin-top: 12px;
-}
-
-.filename {
-  flex: 1;
-}
-
-.timestamp {
-  margin-left: 10px;
-  margin-right: 10px;
 }
 
 .tab-text-sub-cl .error-message {
