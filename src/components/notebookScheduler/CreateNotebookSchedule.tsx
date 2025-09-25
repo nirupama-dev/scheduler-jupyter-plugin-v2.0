@@ -109,6 +109,7 @@ export const CreateNotebookSchedule = (
     useState<IInitialScheduleFormData>({});
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  console.log(isDataLoaded, 'isDataLoaded');
 
   const navigate = useNavigate();
 
@@ -208,17 +209,22 @@ export const CreateNotebookSchedule = (
    * when the underlying data has been fetched and is available.
    */
   const initialFormValues = useMemo(() => {
-    if (
-      initialFormData.editModeData?.editMode &&
-      initialFormData.editModeData.existingScheduleData
-    ) {
-      return initialFormData.editModeData.existingScheduleData;
+    if (isDataLoaded) {
+      if (
+        initialFormData.editModeData?.editMode &&
+        initialFormData.editModeData.existingScheduleData
+      ) {
+        //   setValue('schedulerSelection', initialFormData.editModeData.existingScheduleData.schedulerSelection);
+        return initialFormData.editModeData.existingScheduleData;
+      }
+      if (initialFormData.initialDefaults) {
+        //   setValue('schedulerSelection', initialFormData.initialDefaults.schedulerType);
+        return getInitialFormValues(initialFormData, sessionContext);
+      }
     }
-    if (initialFormData.initialDefaults) {
-      return getInitialFormValues(initialFormData, sessionContext);
-    }
-    return {} as CombinedCreateFormValues; // Return null or some default value if data isn't ready
-  }, [isDataLoaded, initialFormData, schedulerTypeForEdit, sessionContext]);
+    //  return {} as CombinedCreateFormValues; // Return null or some default value if data isn't ready
+  }, [isDataLoaded]);
+  console.log('Initial Form Values:', initialFormValues);
 
   const {
     handleSubmit,
@@ -236,7 +242,9 @@ export const CreateNotebookSchedule = (
     mode: 'all'
   });
 
-  const schedulerSelection = watch('schedulerSelection');
+  const schedulerSelectionSelected = watch('schedulerSelection');
+  console.log('Scheduler Selection:', getValues('schedulerSelection'));
+
   // Watch for changes in schedulerSelection to reset form values accordingly
   useEffect(() => {
     const isEditMode = initialFormData.editModeData?.editMode;
@@ -246,7 +254,7 @@ export const CreateNotebookSchedule = (
         inputFile: getValues('inputFile')
       };
 
-      if (schedulerSelection === VERTEX_SCHEDULER_NAME) {
+      if (schedulerSelectionSelected === VERTEX_SCHEDULER_NAME) {
         // Get a new set of default Vertex-specific values
         const vertexDefaults = getInitialFormValues(
           {
@@ -265,7 +273,7 @@ export const CreateNotebookSchedule = (
           ...vertexDefaults,
           schedulerSelection: VERTEX_SCHEDULER_NAME
         });
-      } else if (schedulerSelection === COMPOSER_SCHEDULER_NAME) {
+      } else if (schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME) {
         // Get a new set of default Composer-specific values
         const composerDefaults = getInitialFormValues(
           {
@@ -286,13 +294,15 @@ export const CreateNotebookSchedule = (
         });
       }
     }
-  }, [schedulerSelection, initialFormData, sessionContext, reset, getValues]);
+  }, [
+    schedulerSelectionSelected,
+    initialFormData,
+    sessionContext,
+    reset,
+    getValues
+  ]);
 
-  // Show loading state while fetching initial data
-  if (!isDataLoaded) {
-    return <div>Loading...</div>;
-  }
-
+  console.log('GetValues:', getValues());
   /**
    *
    * @param data The form data submitted from the Create Notebook Schedule form.
@@ -370,13 +380,15 @@ export const CreateNotebookSchedule = (
     reset(); // Reset form to default values
     // TODO: Add navigation logic
   };
-  console.log(' Scheduler:', schedulerSelection);
+  console.log(' Scheduler:', schedulerSelectionSelected);
   //return if form is not valid
   if (
-    !initialFormData.credentials ||
-    (!initialFormData.initialDefaults && !initialFormData.editModeData) ||
+    !initialFormData.credentials || //missing credentials
+    (!initialFormData.initialDefaults && !initialFormData.editModeData) || //missing initial data on create
     (initialFormData.editModeData?.editMode &&
-      !initialFormData.editModeData.existingScheduleData)
+      !initialFormData.editModeData.existingScheduleData) || // missing existing data on edit
+    !isDataLoaded || // initial values not loaded
+    !getValues('schedulerSelection') //
   ) {
     return <div>Loading...</div>;
   }
@@ -435,7 +447,7 @@ export const CreateNotebookSchedule = (
             />
           </div>
           {/* Conditionally render specific scheduler components */}
-          {schedulerSelection === VERTEX_SCHEDULER_NAME && (
+          {schedulerSelectionSelected === VERTEX_SCHEDULER_NAME && (
             <CreateVertexSchedule
               control={control}
               errors={errors as Record<keyof VertexSchedulerFormValues, any>}
@@ -448,7 +460,7 @@ export const CreateNotebookSchedule = (
               editScheduleData={initialFormData.editModeData}
             />
           )}
-          {schedulerSelection === COMPOSER_SCHEDULER_NAME && (
+          {schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME && (
             <CreateComposerSchedule
               control={control}
               errors={errors as Record<keyof ComposerSchedulerFormValues, any>}
@@ -457,6 +469,7 @@ export const CreateNotebookSchedule = (
               setError={setError}
               getValues={getValues}
               trigger={trigger}
+              isValid={isValid}
               credentials={initialFormData.credentials}
               editScheduleData={initialFormData.editModeData}
             />

@@ -262,11 +262,9 @@ export const getDefaultSchedulerTypeOnLoad = async (
   let availableKernelSpecs: any = null;
   let fetchedServerlessNamesList: string[] = [];
   let fetchedClusterList: string[] = [];
-  console.log('getDefaultSchedulerTypeOnLoad called');
 
   try {
     availableKernelSpecs = await KernelSpecAPI.getSpecs();
-    console.log('Available Kernel Specs fetched.');
   } catch (error) {
     console.error(
       'Error fetching Kernel Specs. Cannot determine full scheduler details.',

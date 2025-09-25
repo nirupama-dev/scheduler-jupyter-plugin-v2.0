@@ -29,13 +29,14 @@ import {
   DISK_TYPE_VALUE,
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
-  COMPOSER_SCHEDULER_NAME
+  COMPOSER_SCHEDULER_NAME,
+  SCHEDULE_MODE_OPTIONS
 } from './Constants';
 import {
-  INotebookKernalSchdulerDefaults,
   IInitialScheduleFormData
 } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
+import { ScheduleMode } from '../types/CommonSchedulerTypes';
 
 /**
  * Formats a timestamp into a specific string format.
@@ -97,7 +98,7 @@ const getDefaultVertexValues = (
     subNetwork: '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'
     diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
     diskSize: DEFAULT_DISK_SIZE,
-    scheduleMode: 'runNow',
+    scheduleMode: SCHEDULE_MODE_OPTIONS[0].value as ScheduleMode, // Default to first option which is 'One-time'
     internalScheduleMode: undefined,
     scheduleFieldCronFormat: '',
     scheduleValueUserFriendly: '',
@@ -117,15 +118,15 @@ const getDefaultVertexValues = (
  * It provides a set of initial values that can be used when creating a new Composer schedule.
  */
 const getDefaultComposerValues = (
-  initialKernelDetails: INotebookKernalSchdulerDefaults,
+  initialSchedulerStateData: IInitialScheduleFormData,
   inputFilePath: string
 ): ComposerSchedulerFormValues => ({
   schedulerSelection: COMPOSER_SCHEDULER_NAME,
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
-  projectId: '',
+  projectId: initialSchedulerStateData?.credentials?.project_id ?? '',
   composerRegion: '',
-  executionMode: initialKernelDetails?.kernelDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
+  executionMode: initialSchedulerStateData.initialDefaults?.kernelDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
   retryDelay: 5, // Matches Zod's default
@@ -134,8 +135,8 @@ const getDefaultComposerValues = (
   emailOnSuccess: false,
   emailRecipients: [], // Default for array of emails
   runOption: 'runNow',
-  cluster: initialKernelDetails?.kernelDetails?.selectedClusterName ?? '',
-  serverless: initialKernelDetails.kernelDetails?.selectedServerlessName ?? '',
+  cluster: initialSchedulerStateData.initialDefaults?.kernelDetails?.selectedClusterName ?? '',
+  serverless: initialSchedulerStateData.initialDefaults?.kernelDetails?.selectedServerlessName ?? '',
   timeZone: ''
 });
 
@@ -153,7 +154,7 @@ export const getInitialFormValues = (
   }
   if (formState.initialDefaults?.schedulerType === 'composer') {
     return getDefaultComposerValues(
-      formState.initialDefaults,
+      formState,
       sessionContext?.path
     );
   }

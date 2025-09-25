@@ -39,6 +39,7 @@ export interface ICreateComposerSchedulerProps {
   getValues: UseFormGetValues<CombinedCreateFormValues>;
   trigger: UseFormTrigger<CombinedCreateFormValues>;
   credentials: IAuthCredentials;
+  isValid?: boolean;
   editScheduleData?: IEditScheduleData | null;
 }
 
