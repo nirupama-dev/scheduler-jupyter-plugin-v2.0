@@ -98,7 +98,7 @@ const ComposerExecutionHistory = ({
       </div>
       <div className="horizontal-element-wrapper" style={{ height: height }}>
         <div className="execution-history-left-wrapper">
-          <div className="calendar-bottom">
+          <div className="element-bottom">
             {isLoading ? (
               <div className="spin-loader-main-execution-history">
                 <Box sx={{ width: '100%' }}>

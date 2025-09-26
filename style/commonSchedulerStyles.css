@@ -143,3 +143,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .padding-zero {
   padding: 0 !important;
 }
+
+.element-bottom {
+  padding-bottom: 20px;
+}

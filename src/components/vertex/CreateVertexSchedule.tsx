@@ -793,7 +793,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       {currentMachineType &&
         selectedMachineType?.acceleratorConfigs &&
         selectedMachineType.acceleratorConfigs.length > 0 && (
-          <div className="horizontal-element-wrapper">
+          <div
+            className={
+              vertexErrors.acceleratorCount
+                ? 'horizontal-element-wrapper scheduler-input-top element-bottom'
+                : 'horizontal-element-wrapper scheduler-input-top'
+            }
+          >
             <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
               <FormInputDropdown
                 name="acceleratorType"
