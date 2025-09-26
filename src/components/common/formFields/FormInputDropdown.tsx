@@ -57,7 +57,7 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
             {...fieldProps}
             options={options}
             disabled={disabled}
-            getOptionLabel={option => option.label} // How to get the label from an option object
+            getOptionLabel={option => option.label ?? ''} // How to get the label from an option object
             // isOptionEqualToValue={(option, val) => option.value === val} // Essential for matching selected value
             value={options.find(option => option.value === value) || null} // Set value based on full option object
             onChange={(_, newValue) => {
