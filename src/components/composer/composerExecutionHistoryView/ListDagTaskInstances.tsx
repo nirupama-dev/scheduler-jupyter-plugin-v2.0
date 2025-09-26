@@ -17,7 +17,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { Typography, IconButton } from '@mui/material';
-import { ComposerServices } from '../../../services/composer/ComposerServices';
 import { handleDebounce } from '../../../utils/Config';
 import {
   iconDagTaskFailed,
@@ -28,30 +27,23 @@ import {
 } from '../../../utils/Icons';
 import { ActionButton } from '../../common/button/ActionButton';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
-import { JupyterFrontEnd } from '@jupyterlab/application';
-import { handleOpenLoginWidget } from '../../common/login/Config';
-import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 
 const ListDagTaskInstances = ({
-  composerName,
-  dagId,
   dagRunId,
-  projectId,
-  region,
-  app
+  dagRunTaskInstancesList,
+  isLoading,
+  fetchDagRunTaskLogs,
+  dagRunTaskLogs,
+  isLogLoading
 }: {
-  composerName: string;
-  dagId: string;
   dagRunId: string;
-  projectId: string;
-  region: string;
-  app: JupyterFrontEnd;
+  dagRunTaskInstancesList: any;
+  isLoading: boolean;
+  fetchDagRunTaskLogs: any;
+  dagRunTaskLogs: string;
+  isLogLoading: boolean;
 }): JSX.Element => {
-  const [dagTaskInstancesList, setDagTaskInstancesList] = useState<any>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingLogs, setIsLoadingLogs] = useState(false);
   const [expanded, setExpanded] = useState<string | false>(false);
-  const [logList, setLogList] = useState('');
 
   const [height, setHeight] = useState(window.innerHeight - 320);
 
@@ -73,35 +65,20 @@ const ListDagTaskInstances = ({
     };
   }, []);
 
-  const listDagTaskInstancesRunsList = async () => {
-    try {
-      await ComposerServices.listDagTaskInstancesListService(
-        composerName,
-        dagId,
-        dagRunId,
-        setDagTaskInstancesList,
-        setIsLoading,
-        projectId,
-        region
-      );
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        handleOpenLoginWidget(app);
-      }
-    }
-  };
-
   useEffect(() => {
-    listDagTaskInstancesRunsList();
     setExpanded(false);
   }, [dagRunId]);
 
   useEffect(() => {
-    if (dagTaskInstancesList.length > 0) {
+    if (dagRunTaskInstancesList?.length > 0) {
       setExpanded('0');
-      listDagTaskLogList('0', dagTaskInstancesList[0].tryNumber);
+      fetchDagRunTaskLogs(
+        dagRunTaskInstancesList,
+        '0',
+        dagRunTaskInstancesList[0].tryNumber
+      );
     }
-  }, [dagTaskInstancesList]);
+  }, [dagRunTaskInstancesList]);
 
   const handleChange = (
     index: string,
@@ -112,32 +89,13 @@ const ListDagTaskInstances = ({
       setExpanded(false);
     } else {
       setExpanded(`${index}`);
-      listDagTaskLogList(index, iconIndex);
+      fetchDagRunTaskLogs(dagRunTaskInstancesList, index, iconIndex);
     }
   };
 
-  const listDagTaskLogList = async (index: string, iconIndex: number) => {
-    try {
-      await ComposerServices.listDagTaskLogsListService(
-        composerName,
-        dagId,
-        dagRunId,
-        dagTaskInstancesList[index].taskId,
-        iconIndex,
-        setLogList,
-        setIsLoadingLogs,
-        projectId,
-        region
-      );
-    } catch (error) {
-      if (error instanceof AuthenticationError) {
-        handleOpenLoginWidget(app);
-      }
-    }
-  };
   return (
     <div>
-      {dagTaskInstancesList.length > 0 ? (
+      {dagRunTaskInstancesList.length > 0 ? (
         <div>
           <div className="accordion-row-parent-header">
             <div className="accordion-row-data">Task Id</div>
@@ -145,8 +103,8 @@ const ListDagTaskInstances = ({
             <div className="accordion-row-data">Duration (in seconds)</div>
             <div className="accordion-row-data-expand-logo"></div>
           </div>
-          {dagTaskInstancesList.length > 0 &&
-            dagTaskInstancesList.map((taskInstance: any, index: string) => (
+          {dagRunTaskInstancesList.length > 0 &&
+            dagRunTaskInstancesList?.map((taskInstance: any, index: string) => (
               <div key={taskInstance.taskId}>
                 <div className="accordion-row-parent">
                   <div className="accordion-row-data">
@@ -209,7 +167,7 @@ const ListDagTaskInstances = ({
                   )}
                 </div>
 
-                {isLoadingLogs && expanded === `${index}` ? (
+                {isLogLoading && expanded === `${index}` ? (
                   <div className="spin-loader-main">
                     <LoadingSpinner iconClassName="spin-loader-custom-style" />
                     Loading Dag Runs Task Logs
@@ -223,7 +181,7 @@ const ListDagTaskInstances = ({
                           className="logs-content-style"
                           style={{ maxHeight: height }}
                         >
-                          {logList}
+                          {dagRunTaskLogs}
                         </pre>
                       </Typography>{' '}
                     </div>

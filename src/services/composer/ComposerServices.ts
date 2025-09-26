@@ -33,6 +33,7 @@ import { handleErrorToast } from '../../components/common/notificationHandling/E
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 import { IEnvDropDownOption } from '../../interfaces/FormInterface';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
+import { settingController } from '../../utils/Config';
 
 /**
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
@@ -375,6 +376,7 @@ export class ComposerServices {
     endDate: string;
     projectId: string;
     region: string;
+    abortControllers: any;
     offset?: number;
   }): Promise<any> => {
     const {
@@ -384,13 +386,15 @@ export class ComposerServices {
       endDate,
       projectId,
       region,
+      abortControllers,
       offset = 0
     } = payload;
 
+    const signal = settingController(abortControllers);
     const serviceURL = `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${startDate}&end_date=${endDate}&offset=${offset}&project_id=${projectId}&region_id=${region}`;
 
     try {
-      const data: any = await requestAPI(serviceURL);
+      const data: any = await requestAPI(serviceURL, { signal });
       return data;
     } catch (error) {
       // Check for AuthenticationError
@@ -608,17 +612,16 @@ export class ComposerServices {
     composerName: string,
     dagId: string,
     dagRunId: string,
-    setDagTaskInstancesList: (value: any) => void,
-    setIsLoading: (value: boolean) => void,
     projectId: string,
-    region: string
+    region: string,
+    abortControllers: any
   ) => {
-    setDagTaskInstancesList([]);
-    setIsLoading(true);
     try {
+      const signal = settingController(abortControllers);
       dagRunId = encodeURIComponent(dagRunId);
       const dagRunTask: any = await requestAPI(
-        `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`
+        `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`,
+        { signal }
       );
       dagRunTask.task_instances?.sort(
         (a: any, b: any) => new Date(a.start_date).getTime() - 12
@@ -636,8 +639,7 @@ export class ComposerServices {
           };
         }
       );
-      setDagTaskInstancesList(transformDagRunTaskInstanceListData);
-      setIsLoading(false);
+      return transformDagRunTaskInstanceListData;
     } catch (reason) {
       if (reason instanceof AuthenticationError) {
         throw reason;
@@ -655,19 +657,18 @@ export class ComposerServices {
     dagRunId: string,
     taskId: string,
     tryNumber: number,
-    setLogList: (value: string) => void,
-    setIsLoadingLogs: (value: boolean) => void,
     projectId: string,
-    region: string
+    region: string,
+    abortControllers: any
   ) => {
     try {
-      setIsLoadingLogs(true);
+      const signal = settingController(abortControllers);
       dagRunId = encodeURIComponent(dagRunId);
       const dagRunTaskLogs: any = await requestAPI(
-        `dagRunTaskLogs?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&task_id=${taskId}&task_try_number=${tryNumber}&project_id=${projectId}&region_id=${region}`
+        `dagRunTaskLogs?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&task_id=${taskId}&task_try_number=${tryNumber}&project_id=${projectId}&region_id=${region}`,
+        { signal }
       );
-      setLogList(dagRunTaskLogs?.content);
-      setIsLoadingLogs(false);
+      return dagRunTaskLogs?.content;
     } catch (reason) {
       if (reason instanceof AuthenticationError) {
         throw reason;

@@ -54,13 +54,19 @@ const ComposerExecutionHistory = ({
     height,
     handleDagRunClick,
     dagRunId,
-    isLoading
+    isLoading,
+    dagRunTaskInstancesList,
+    isTaskInstanceLoading,
+    fetchDagRunTaskLogs,
+    dagRunTaskLogs,
+    isLogLoading
   } = useComposerExecutionHistory(
     dagId ?? '',
     projectId ?? '',
     region ?? '',
     composerName ?? '',
-    app
+    app,
+    abortControllers
   );
 
   const calendarProps = {
@@ -123,12 +129,12 @@ const ComposerExecutionHistory = ({
         <div className="execution-history-right-wrapper">
           {dagRunId !== '' && (
             <ListDagTaskInstances
-              composerName={composerName || ''}
-              dagId={dagId || ''}
               dagRunId={dagRunId}
-              projectId={projectId || ''}
-              region={region || ''}
-              app={app}
+              dagRunTaskInstancesList={dagRunTaskInstancesList}
+              isLoading={isTaskInstanceLoading}
+              fetchDagRunTaskLogs={fetchDagRunTaskLogs}
+              dagRunTaskLogs={dagRunTaskLogs}
+              isLogLoading={isLogLoading}
             />
           )}
         </div>

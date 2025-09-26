@@ -47,6 +47,14 @@ const executionHistoryReducer = (state: any, action: any) => {
       return { ...state, height: action.payload };
     case 'SET_DAG_RUN_ID':
       return { ...state, dagRunId: action.payload };
+    case 'SET_TASK_INSTANCE_LOADING':
+      return { ...state, isTaskInstanceLoading: action.payload };
+    case 'SET_DAG_TASK_INSTANCES':
+      return { ...state, dagRunTaskInstancesList: action.payload };
+    case 'SET_DAG_TASK_LOGS':
+      return { ...state, dagRunTaskLogs: action.payload };
+    case 'SET_TASK_LOGS_LOADING':
+      return { ...state, isTaskLogsLoading: action.payload };
     default:
       return state;
   }
@@ -65,18 +73,23 @@ const initialState = {
   projectId: '',
   dagRunsList: [],
   dagRunId: '',
-  height: window.innerHeight - 145
+  height: window.innerHeight - 145,
+  dagRunTaskInstancesList: [],
+  isTaskInstanceLoading: false,
+  dagRunTaskLogs: '',
+  isTaskLogsLoading: false
 };
 
 export const useComposerExecutionHistory = (
-  scheduleId: string,
+  dagId: string,
   projectId: string,
   region: string,
   composerEnv: string,
-  app: JupyterFrontEnd
+  app: JupyterFrontEnd,
+  abortControllers: any
 ) => {
   const [state, dispatch] = useReducer(executionHistoryReducer, initialState);
-  const { startDate, endDate, dagRunsList, selectedDate } = state;
+  const { startDate, endDate, dagRunsList, selectedDate, dagRunId } = state;
   const previousDagRunIdRef = useRef<string>('');
 
   const handleUpdateHeight = () => {
@@ -105,12 +118,13 @@ export const useComposerExecutionHistory = (
       try {
         const data = await ComposerServices.listDagRunsListService({
           composerName: composerEnv,
-          dagId: scheduleId,
+          dagId,
           startDate,
           endDate,
           projectId,
           region,
-          offset: currentOffset
+          offset: currentOffset,
+          abortControllers
         });
 
         const allData = [...allDagRunsData, ...(data?.dag_runs ?? [])];
@@ -180,14 +194,71 @@ export const useComposerExecutionHistory = (
         dispatch({ type: 'SET_LOADING', payload: false });
       }
     },
-    [composerEnv, scheduleId, startDate, endDate, projectId, region]
+    [composerEnv, dagId, startDate, endDate, projectId, region]
+  );
+
+  const fetchDagRunTaskInstances = useCallback(async () => {
+    try {
+      dispatch({ type: 'SET_TASK_INSTANCE_LOADING', payload: true });
+      const listDagTaskInstances =
+        await ComposerServices.listDagTaskInstancesListService(
+          composerEnv,
+          dagId,
+          dagRunId,
+          projectId,
+          region,
+          abortControllers
+        );
+      dispatch({
+        type: 'SET_DAG_TASK_INSTANCES',
+        payload: listDagTaskInstances
+      });
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        handleOpenLoginWidget(app);
+      }
+    } finally {
+      dispatch({ type: 'SET_TASK_INSTANCE_LOADING', payload: false });
+    }
+  }, [dagRunId]);
+
+  const fetchDagRunTaskLogs = useCallback(
+    async (dagTaskInstancesList: any, index: string, tryNumber: number) => {
+      try {
+        dispatch({ type: 'SET_TASK_LOGS_LOADING', payload: true });
+        const logs = await ComposerServices.listDagTaskLogsListService(
+          composerEnv,
+          dagId,
+          dagRunId,
+          dagTaskInstancesList[index].taskId,
+          tryNumber,
+          projectId,
+          region,
+          abortControllers
+        );
+        dispatch({ type: 'SET_DAG_TASK_LOGS', payload: logs });
+      } catch (error) {
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+      } finally {
+        dispatch({ type: 'SET_TASK_LOGS_LOADING', payload: false });
+      }
+    },
+    [dagRunId]
   );
 
   useEffect(() => {
-    if (region && scheduleId && startDate && endDate) {
+    if (region && dagId && startDate && endDate) {
       fetchDagRuns();
     }
-  }, [region, scheduleId, startDate, endDate, fetchDagRuns]);
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    if (region && dagId && dagRunId) {
+      fetchDagRunTaskInstances();
+    }
+  }, [dagRunId]);
 
   useEffect(() => {
     dispatch({
@@ -250,6 +321,7 @@ export const useComposerExecutionHistory = (
   return {
     ...state,
     filteredDagRunsList,
+    fetchDagRunTaskLogs,
     handleDateSelection,
     handleMonthChange,
     handleDagRunClick
