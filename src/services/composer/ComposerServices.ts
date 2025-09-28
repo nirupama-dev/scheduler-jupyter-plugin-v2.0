@@ -23,7 +23,6 @@ import {
   IComposerEnvAPIResponse,
   IComposerSchedulePayload,
   IDagList,
-  IDagRunList,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse,
   IListDagInfoAPIServiceResponse
@@ -33,6 +32,8 @@ import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
 import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
 import { IEnvDropDownOption } from '../../interfaces/FormInterface';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
+import { settingController } from '../../utils/Config';
 
 /**
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.
@@ -93,6 +94,10 @@ export class ComposerServices {
         return;
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log('Error listing clusters', LOG_LEVEL.ERROR);
       const errorResponse = `Failed to fetch clusters : ${error}`;
       handleErrorToast({
@@ -164,6 +169,9 @@ export class ComposerServices {
         return;
       }
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log(
         'Error listing session templates',
         LOG_LEVEL.ERROR
@@ -208,11 +216,14 @@ export class ComposerServices {
 
       return environmentOptions;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       const errorResponse = `Failed to fetch composer environment list : ${error}`;
       handleErrorToast({
         error: errorResponse
       });
-      throw error;
+      return [];
     }
   };
 
@@ -275,6 +286,9 @@ export class ComposerServices {
         return true;
       }
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       handleErrorToast({
         error: reason
       });
@@ -304,6 +318,9 @@ export class ComposerServices {
       }
       return inputFilenameResponse;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error on POST: ${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -341,6 +358,9 @@ export class ComposerServices {
 
       return composerJobScheduleDetails;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error on getting schedule details.\n${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -349,148 +369,40 @@ export class ComposerServices {
     }
   };
 
-  static readonly listDagRunsListService = async (
-    composerName: string,
-    dagId: string,
-    startDate: string,
-    endDate: string,
-    setDagRunsList: (value: IDagRunList[]) => void,
-    setDagRunId: (value: string) => void,
-    setIsLoading: (value: boolean) => void,
-    setGreyListDates: (value: string[]) => void,
-    setRedListDates: (value: string[]) => void,
-    setGreenListDates: (value: string[]) => void,
-    setDarkGreenListDates: (value: string[]) => void,
-    projectId: string,
-    region: string,
-    currentOffsetValue?: number,
-    previousDagRunDataList?: object
-  ) => {
-    const offset = currentOffsetValue ?? 0;
-    setIsLoading(true);
-    const start_date = startDate;
-    const end_date = endDate;
-    setGreyListDates([]);
-    setRedListDates([]);
-    setGreenListDates([]);
-    setDarkGreenListDates([]);
+  static readonly listDagRunsListService = async (payload: {
+    composerName: string;
+    dagId: string;
+    startDate: string;
+    endDate: string;
+    projectId: string;
+    region: string;
+    abortControllers: any;
+    offset?: number;
+  }): Promise<any> => {
+    const {
+      composerName,
+      dagId,
+      startDate,
+      endDate,
+      projectId,
+      region,
+      abortControllers,
+      offset = 0
+    } = payload;
+
+    const signal = settingController(abortControllers);
+    const serviceURL = `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${startDate}&end_date=${endDate}&offset=${offset}&project_id=${projectId}&region_id=${region}`;
+
     try {
-      const dagRunsList: any = await requestAPI(
-        `dagRun?composer=${composerName}&dag_id=${dagId}&start_date=${start_date}&end_date=${end_date}&offset=${offset}&project_id=${projectId}&region_id=${region}`
-      );
-
-      let transformDagRunListDataCurrent = [];
-      if (dagRunsList && dagRunsList?.dag_runs?.length > 0) {
-        transformDagRunListDataCurrent = dagRunsList.dag_runs.map(
-          (dagRun: any) => {
-            if (dagRun.start_date !== null) {
-              return {
-                dagRunId: dagRun.dag_run_id,
-                filteredDate: new Date(dagRun.start_date),
-                state: dagRun.state,
-                date: new Date(dagRun.start_date).toDateString(),
-                time: new Date(dagRun.start_date).toTimeString().split(' ')[0]
-              };
-            }
-          }
-        );
+      const data: any = await requestAPI(serviceURL, { signal });
+      return data;
+    } catch (error) {
+      // Check for AuthenticationError
+      if (error instanceof AuthenticationError) {
+        throw error;
       }
-      transformDagRunListDataCurrent = transformDagRunListDataCurrent.filter(
-        (dagRunData: any) => {
-          if (dagRunData) {
-            return dagRunData;
-          }
-        }
-      );
-      const existingDagRunsListData = previousDagRunDataList ?? [];
-      //setStateAction never type issue
-      const allDagRunsListData: any = [
-        ...(existingDagRunsListData as []),
-        ...transformDagRunListDataCurrent
-      ];
 
-      if (
-        dagRunsList?.dag_runs?.length + offset !==
-        dagRunsList.total_entries
-      ) {
-        this.listDagRunsListService(
-          composerName,
-          dagId,
-          startDate,
-          endDate,
-          setDagRunsList,
-          setDagRunId,
-          setIsLoading,
-          setGreyListDates,
-          setRedListDates,
-          setGreenListDates,
-          setDarkGreenListDates,
-          projectId,
-          region,
-          dagRunsList.dag_runs.length + offset,
-          allDagRunsListData
-        );
-      } else {
-        const transformDagRunListData = allDagRunsListData;
-
-        if (transformDagRunListData?.length > 0) {
-          // Group by date first, then by status
-          const groupedDataByDateStatus = transformDagRunListData.reduce(
-            (result: any, item: any) => {
-              const date = item.filteredDate;
-              const status = item.state;
-
-              result[date] ??= {};
-
-              result[date][status] ??= [];
-
-              result[date][status].push(item);
-
-              return result;
-            },
-            {}
-          );
-
-          const greyList: string[] = [];
-          const redList: string[] = [];
-          const greenList: string[] = [];
-          const darkGreenList: string[] = [];
-
-          Object.keys(groupedDataByDateStatus).forEach(dateValue => {
-            if (
-              groupedDataByDateStatus[dateValue].running ||
-              groupedDataByDateStatus[dateValue].queued
-            ) {
-              greyList.push(dateValue);
-            } else if (groupedDataByDateStatus[dateValue].failed) {
-              redList.push(dateValue);
-            } else if (
-              groupedDataByDateStatus[dateValue].success &&
-              groupedDataByDateStatus[dateValue].success.length === 1
-            ) {
-              greenList.push(dateValue);
-            } else {
-              darkGreenList.push(dateValue);
-            }
-          });
-
-          setGreyListDates(greyList);
-          setRedListDates(redList);
-          setGreenListDates(greenList);
-          setDarkGreenListDates(darkGreenList);
-
-          setDagRunsList(transformDagRunListData);
-        } else {
-          setDagRunsList([]);
-          setGreyListDates([]);
-          setRedListDates([]);
-          setGreenListDates([]);
-          setDarkGreenListDates([]);
-        }
-        setIsLoading(false);
-      }
-    } catch (reason) {
-      const errorResponse = `Error in listing dag runs..\n${reason}`;
+      const errorResponse = `Error in listing dag runs..\n${error}`;
       handleErrorToast({
         error: errorResponse
       });
@@ -521,6 +433,9 @@ export class ComposerServices {
         bucketName: dagListResponse[1]
       };
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       if (!toast.isActive('dagListError')) {
         const errorMessage =
           typeof error === 'object' && error !== null && 'message' in error
@@ -563,6 +478,9 @@ export class ComposerServices {
         setJobNameUniquenessError(false);
       })
       .catch(error => {
+        if (error instanceof AuthenticationError) {
+          throw error;
+        }
         SchedulerLoggingService.log(
           'Error listing dag Scheduler list',
           LOG_LEVEL.ERROR
@@ -599,6 +517,9 @@ export class ComposerServices {
       }
       setDownloadOutputDagRunId('');
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log('Error in Download api', LOG_LEVEL.ERROR);
       const errorResponse = `Error in Download api : ${error}`;
       handleErrorToast({
@@ -608,7 +529,7 @@ export class ComposerServices {
     }
   };
 
-  static readonly handleDeleteSchedulerAPIService = async (
+  static readonly handleDeleteComposerScheduleAPIService = async (
     composerSelected: string,
     dag_id: string,
     region: string,
@@ -636,6 +557,9 @@ export class ComposerServices {
       }
       return deleteResponse;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       // Handle network or unexpected errors
       SchedulerLoggingService.log('Error in Delete api', LOG_LEVEL.ERROR);
       Notification.error(`Failed to delete the ${dag_id} : ${error}`, {
@@ -672,6 +596,9 @@ export class ComposerServices {
 
       return updateResponse;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log('Error in Update API', LOG_LEVEL.ERROR);
       const errorResponse = `Error in updating the schedule: ${error}`;
       handleErrorToast({
@@ -685,17 +612,16 @@ export class ComposerServices {
     composerName: string,
     dagId: string,
     dagRunId: string,
-    setDagTaskInstancesList: (value: any) => void,
-    setIsLoading: (value: boolean) => void,
     projectId: string,
-    region: string
+    region: string,
+    abortControllers: any
   ) => {
-    setDagTaskInstancesList([]);
-    setIsLoading(true);
     try {
+      const signal = settingController(abortControllers);
       dagRunId = encodeURIComponent(dagRunId);
       const dagRunTask: any = await requestAPI(
-        `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`
+        `dagRunTask?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&project_id=${projectId}&region_id=${region}`,
+        { signal }
       );
       dagRunTask.task_instances?.sort(
         (a: any, b: any) => new Date(a.start_date).getTime() - 12
@@ -713,9 +639,11 @@ export class ComposerServices {
           };
         }
       );
-      setDagTaskInstancesList(transformDagRunTaskInstanceListData);
-      setIsLoading(false);
+      return transformDagRunTaskInstanceListData;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error in dag task instances..\n${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -729,20 +657,22 @@ export class ComposerServices {
     dagRunId: string,
     taskId: string,
     tryNumber: number,
-    setLogList: (value: string) => void,
-    setIsLoadingLogs: (value: boolean) => void,
     projectId: string,
-    region: string
+    region: string,
+    abortControllers: any
   ) => {
     try {
-      setIsLoadingLogs(true);
+      const signal = settingController(abortControllers);
       dagRunId = encodeURIComponent(dagRunId);
       const dagRunTaskLogs: any = await requestAPI(
-        `dagRunTaskLogs?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&task_id=${taskId}&task_try_number=${tryNumber}&project_id=${projectId}&region_id=${region}`
+        `dagRunTaskLogs?composer=${composerName}&dag_id=${dagId}&dag_run_id=${dagRunId}&task_id=${taskId}&task_try_number=${tryNumber}&project_id=${projectId}&region_id=${region}`,
+        { signal }
       );
-      setLogList(dagRunTaskLogs?.content);
-      setIsLoadingLogs(false);
+      return dagRunTaskLogs?.content;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       const errorResponse = `Error in listing task logs..\n${reason}`;
       handleErrorToast({
         error: errorResponse
@@ -767,6 +697,9 @@ export class ComposerServices {
       );
       return importErrors;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       if (typeof reason === 'object' && reason !== null) {
         if (
           reason instanceof TypeError &&
@@ -848,6 +781,9 @@ export class ComposerServices {
       // Otherwise, return the initial data
       return triggerResponse;
     } catch (reason) {
+      if (reason instanceof AuthenticationError) {
+        throw reason;
+      }
       // Catch network or unexpected errors
       Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
         autoClose: false
@@ -873,6 +809,9 @@ export class ComposerServices {
       );
       return composerEnvResponse;
     } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       return error;
     }
   };

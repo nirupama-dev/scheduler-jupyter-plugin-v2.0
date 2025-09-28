@@ -49,11 +49,6 @@
   text-transform: capitalize;
 }
 
-.actions-icon {
-  display: flex;
-  justify-content: center;
-}
-
 .cluster-status-parent {
   display: flex;
   align-items: center;
@@ -213,15 +208,6 @@
 .scroll-comp-cluster {
   overflow-y: auto;
   max-height: 90vh;
-}
-
-.login-error {
-  align-items: center;
-  justify-content: center;
-  display: grid;
-  font-size: 20px;
-  font-weight: 600;
-  padding: 50px;
 }
 
 .login-error-main {

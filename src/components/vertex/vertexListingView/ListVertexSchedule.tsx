@@ -28,7 +28,7 @@ import {
   SCHEDULE_LABEL_VERTEX
 } from '../../../utils/Constants';
 import { ILabelValue } from '../../../interfaces/CommonInterface';
-import { authApi } from '../../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../../common/login/Config';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import { usePagination, useTable } from 'react-table';
 import { VertexServices } from '../../../services/vertex/VertexServices';
@@ -44,27 +44,31 @@ import Loader from '../../common/loader/LoadingSpinner';
 import TableData from '../../common/table/TableData';
 import { renderActions } from './VertexScheduleAction';
 import { rowDataList } from './VertexListRow';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import DeletePopup from '../../common/table/DeletePopup';
 import { abortApiCall } from '../../../utils/Config';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
 import VertexListingInputLayout from './VertexListingInput';
-import { useVertexContext } from '../../../context/vertex/VertexListContext';
+import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
+import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 
 const ListVertexSchedule = ({
-  abortControllers
+  abortControllers,
+  app
 }: {
   abortControllers: any;
+  app: any;
 }) => {
-  const { region: regionParam } = useParams<{ region: string }>();
-  const [region, setRegion] = useState<string>(regionParam || ''); // assign from param if available
+  const [region, setRegion] = useState<string>(''); // assign from param if available
   const navigate = useNavigate();
 
   // Consume the context value
-  const vertexContext = useVertexContext();
-  const activePaginationVariables = vertexContext?.activePaginationVariables;
+  const schedulerContext = useSchedulerContext();
+  const activePaginationVariables = schedulerContext?.activePaginationVariables;
   const setActivePaginationVariables =
-    vertexContext?.setActivePaginationVariables;
+    schedulerContext?.setActivePaginationVariables;
+  const vertexRouteState = schedulerContext?.vertexRouteState;
+  const setVertexRouteState = schedulerContext?.setVertexRouteState;
 
   const [regionDisable, setRegionDisable] = useState<boolean>(false);
   const [vertexScheduleList, setVertexScheduleList] = useState<
@@ -167,39 +171,51 @@ const ListVertexSchedule = ({
         scheduleListPageLength,
         abortControllers
       };
-      const scheduleApiData =
-        await VertexServices.listVertexSchedules(listVertexPayload);
-      if (scheduleApiData && Array.isArray(scheduleApiData.schedulesList)) {
-        setVertexScheduleList(scheduleApiData.schedulesList);
-        setLoaderState(prevState => ({
-          ...prevState,
-          initialLoading: false,
-          isLoading: false,
-          isLoadingTableContent: false
-        }));
+      try {
+        const scheduleApiData =
+          await VertexServices.listVertexSchedules(listVertexPayload);
+        if (scheduleApiData && Array.isArray(scheduleApiData.schedulesList)) {
+          setVertexScheduleList(scheduleApiData.schedulesList);
+          setLoaderState(prevState => ({
+            ...prevState,
+            initialLoading: false,
+            isLoading: false,
+            isLoadingTableContent: false
+          }));
 
-        setNextPageToken(scheduleApiData.nextPageToken);
+          setNextPageToken(scheduleApiData.nextPageToken);
 
-        setRegionDisable(false);
-        // Fetch last five run status for all schedules in parallel
-        scheduleApiData.schedulesList.forEach(schedule => {
-          VertexServices.fetchLastFiveRunStatus(
-            schedule,
-            region,
-            abortControllers
-          ).then(lastFiveRun => {
-            setVertexScheduleList(prevList =>
-              prevList.map(item =>
-                item.displayName === schedule.displayName
-                  ? {
-                      ...item,
-                      jobState: Array.isArray(lastFiveRun) ? lastFiveRun : []
-                    }
-                  : item
-              )
-            );
+          setRegionDisable(false);
+          // Fetch last five run status for all schedules in parallel
+          scheduleApiData.schedulesList.forEach(schedule => {
+            VertexServices.fetchLastFiveRunStatus(
+              schedule,
+              region,
+              abortControllers
+            )
+              .then(lastFiveRun => {
+                setVertexScheduleList(prevList =>
+                  prevList.map(item =>
+                    item.displayName === schedule.displayName
+                      ? {
+                          ...item,
+                          jobState: Array.isArray(lastFiveRun)
+                            ? lastFiveRun
+                            : []
+                        }
+                      : item
+                  )
+                );
+              })
+              .catch(authenticationError => {
+                if (authenticationError instanceof AuthenticationError) {
+                  handleOpenLoginWidget(app);
+                }
+              });
           });
-        });
+        }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
       }
     },
     [region, scheduleListPageLength, abortControllers]
@@ -404,14 +420,18 @@ const ListVertexSchedule = ({
       displayName,
       abortControllers
     };
-    if (is_status_paused === 'ACTIVE') {
-      await VertexServices.handleUpdateSchedulerPauseAPIService(
-        activatePayload
-      );
-    } else {
-      await VertexServices.handleUpdateSchedulerResumeAPIService(
-        activatePayload
-      );
+    try {
+      if (is_status_paused === 'ACTIVE') {
+        await VertexServices.handleUpdateSchedulerPauseAPIService(
+          activatePayload
+        );
+      } else {
+        await VertexServices.handleUpdateSchedulerResumeAPIService(
+          activatePayload
+        );
+      }
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
     }
     setActionPerformedScheduleName(prevState => ({
       ...prevState,
@@ -443,12 +463,16 @@ const ListVertexSchedule = ({
         abortControllers
       };
 
-      await VertexServices.triggerSchedule(triggerPayload);
+      try {
+        await VertexServices.triggerSchedule(triggerPayload);
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
+      }
+      handleCurrentPageRefresh(null, null);
       setActionPerformedScheduleName(prevState => ({
         ...prevState,
         triggerLoading: ''
       }));
-      handleCurrentPageRefresh(null, null);
     }
   };
 
@@ -461,6 +485,10 @@ const ListVertexSchedule = ({
     abortApiCall(abortControllers);
     setLoaderState(prevState => ({ ...prevState, editScheduleLoader: true }));
     const encodedScheduleId = encodeURIComponent(scheduleId);
+    if (setActivePaginationVariables) {
+      setActivePaginationVariables(saveActivePaginationVariables());
+    }
+
     navigate(
       `/edit/${SCHEDULE_LABEL_VERTEX.toLocaleLowerCase()}/${encodedScheduleId}/${region}`
     );
@@ -512,8 +540,12 @@ const ListVertexSchedule = ({
       scheduleDisplayName: deletingScheduleDetails.displayName,
       listVertexScheduleInfoAPI: listVertexScheduleInfoAPI
     };
-    // const deleteResponse =
-    await VertexServices.handleDeleteSchedulerAPIService(deletePayload);
+
+    try {
+      await VertexServices.handleDeleteSchedulerAPIService(deletePayload);
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
+    }
 
     setDeletingScheduleDetails(prevState => ({
       ...prevState,
@@ -577,18 +609,30 @@ const ListVertexSchedule = ({
       setLoaderState(prevState => ({ ...prevState, regionLoader: true }));
 
       try {
-        const credentials = await authApi();
+        const credentials = await authApi(app);
         if (credentials?.region_id) {
           setRegion(credentials.region_id);
         }
       } catch (error) {
-        handleErrorToast({ error });
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        } else {
+          handleErrorToast({ error });
+        }
       } finally {
         setLoaderState(prevState => ({ ...prevState, regionLoader: false }));
       }
     };
 
-    fetchRegion();
+    if ('region' in vertexRouteState) {
+      setRegion(vertexRouteState.region);
+      if (setVertexRouteState) {
+        setVertexRouteState(null);
+      }
+      return;
+    } else {
+      fetchRegion();
+    }
   }, []);
 
   /**

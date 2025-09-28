@@ -1,13 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto');
 
-.signin-google-icon {
-  align-items: center;
-  display: flex;
-  justify-content: center;
-  margin-top: -20px;
-  cursor: pointer;
-}
-
 .signin-google-icon:disabled {
   opacity: 0.5;
 }

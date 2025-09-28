@@ -13,8 +13,10 @@ import {
 } from '@mui/material';
 // import { ListVertexSchedule } from '../vertex/scheduleListingView/ListVertexSchedule';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 
 export const ScheduleListingView = () => {
+  const schedulerContext = useSchedulerContext();
   const [schedulerSelected, setSchedulerSelected] = useState<
     string | undefined
   >('');
@@ -28,15 +30,24 @@ export const ScheduleListingView = () => {
   // Effect to redirect to a default sub-route if /list is accessed directly
   useEffect(() => {
     if (location.pathname === '/list' || location.pathname === '/list/') {
-      navigate(SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(), { replace: true }); // Default to /list/vertex
+      if (
+        schedulerContext?.vertexRouteState?.schedulerName ===
+        SCHEDULE_LABEL_VERTEX.toLocaleLowerCase()
+      ) {
+        navigate(SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(), { replace: true }); // Default to /list/vertex
+      } else if (
+        schedulerContext?.vertexRouteState?.schedulerName ===
+        SCHEDULE_LABEL_COMPOSER.toLocaleLowerCase()
+      ) {
+        navigate(SCHEDULE_LABEL_COMPOSER.toLocaleLowerCase(), {
+          replace: true
+        }); // Default to /list/composer
+      } else {
+        navigate(SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(), { replace: true });
+      }
     }
     setSchedulerSelected(currentSubPath);
   }, [location.pathname, navigate]);
-
-  // useEffect(() => {
-  //   console.log('inside effect')
-  //   setSchedulerSelected(SCHEDULE_LABEL_VERTEX);
-  // }, []);
 
   /**
    * Handle he change  of the scheduler selection

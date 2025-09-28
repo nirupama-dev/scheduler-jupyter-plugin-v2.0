@@ -18,6 +18,8 @@ from unittest.mock import MagicMock, patch
 import aiohttp
 
 import pytest
+from scheduler_jupyter_plugin.tests import mocks
+from scheduler_jupyter_plugin import credentials
 
 from scheduler_jupyter_plugin.services import vertex
 from scheduler_jupyter_plugin.tests.mocks import (
@@ -28,6 +30,7 @@ from scheduler_jupyter_plugin.tests.mocks import (
     MockListUIConfigClientSession,
     MockPostClientSession,
     MockTriggerSchedulesClientSession,
+    mock_credentials,
 )
 
 
@@ -36,6 +39,8 @@ from scheduler_jupyter_plugin.tests.mocks import (
     [(0, {"createNotebookExecutionJobRequest": {"notebookExecutionJob": {}}})],
 )
 async def test_get_schedule(monkeypatch, returncode, expected_result, jp_fetch):
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(aiohttp, "ClientSession", MockGetScheduleClientSession)
 
     mock_region_id = "mock-region-id"
@@ -53,6 +58,8 @@ async def test_get_schedule(monkeypatch, returncode, expected_result, jp_fetch):
 
 @pytest.mark.parametrize("returncode, expected_result", [(0, {})])
 async def test_resume_schedule(monkeypatch, returncode, expected_result, jp_fetch):
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(aiohttp, "ClientSession", MockPostClientSession)
 
     mock_region_id = "mock-region-id"
@@ -72,6 +79,8 @@ async def test_resume_schedule(monkeypatch, returncode, expected_result, jp_fetc
 
 @pytest.mark.parametrize("returncode, expected_result", [(0, {})])
 async def test_pause_schedule(monkeypatch, returncode, expected_result, jp_fetch):
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(aiohttp, "ClientSession", MockPostClientSession)
 
     mock_region_id = "mock-region-id"
@@ -93,6 +102,8 @@ async def test_pause_schedule(monkeypatch, returncode, expected_result, jp_fetch
     "returncode, expected_result", [(0, {"name": "mock-name", "done": True})]
 )
 async def test_delete_schedule(monkeypatch, returncode, expected_result, jp_fetch):
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(aiohttp, "ClientSession", MockDeleteSchedulesClientSession)
 
     mock_region_id = "mock-region-id"
@@ -128,6 +139,8 @@ async def test_delete_schedule(monkeypatch, returncode, expected_result, jp_fetc
     ],
 )
 async def test_list_uiconfig(monkeypatch, returncode, expected_result, jp_fetch):
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(aiohttp, "ClientSession", MockListUIConfigClientSession)
 
     mock_region_id = "mock-region-id"
@@ -154,6 +167,8 @@ async def test_list_uiconfig(monkeypatch, returncode, expected_result, jp_fetch)
 async def test_list_notebook_execution_jobs(
     monkeypatch, returncode, expected_result, jp_fetch
 ):
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(
         aiohttp, "ClientSession", MockListNotebookExecutionJobsClientSession
     )
@@ -202,6 +217,8 @@ async def test_list_schedules(monkeypatch, returncode, expected_result, jp_fetch
     def mock_get_description(*args, **kwargs):
         return "Every 5 minutes"
 
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(vertex.Client, "parse_schedule", mock_get_description)
     monkeypatch.setattr(aiohttp, "ClientSession", MockListSchedulesClientSession)
 
@@ -223,6 +240,8 @@ async def test_trigger_schedule(monkeypatch, returncode, expected_result, jp_fet
     async def mock_get_schedule(*args, **kwargs):
         return {"createNotebookExecutionJobRequest": {"notebookExecutionJob": {}}}
 
+    mocks.patch_mocks(monkeypatch)
+    monkeypatch.setattr(credentials, "get_cached", mock_credentials)
     monkeypatch.setattr(vertex.Client, "get_schedule", mock_get_schedule)
 
     monkeypatch.setattr(aiohttp, "ClientSession", MockTriggerSchedulesClientSession)

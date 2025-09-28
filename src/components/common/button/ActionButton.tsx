@@ -53,7 +53,8 @@ export const ActionButton: FC<IActionButtonProps> = ({
   onClick,
   icon,
   disabled = false,
-  className = 'icon-buttons-style'
+  className = 'icon-buttons-style',
+  ...rest
 }) => {
   return (
     <IconButton
@@ -62,6 +63,7 @@ export const ActionButton: FC<IActionButtonProps> = ({
       disabled={disabled}
       className={disabled ? 'icon-buttons-style-disable' : className}
       size="small"
+      {...rest}
     >
       <LabIconComponent
         icon={icon}

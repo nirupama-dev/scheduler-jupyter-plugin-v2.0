@@ -17,7 +17,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputListingDropdown } from '../../common/formFields/FormInputDropdown';
-import { authApi } from '../../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../../common/login/Config';
 import { useForm } from 'react-hook-form';
 import {
   IDropdownOption,
@@ -41,6 +41,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   composerEnvironmentStateList,
   GCS_PLUGIN_ID,
+  LIST_COMPOSER_TABLE_HEADER,
   POLLING_DAG_LIST_INTERVAL,
   POLLING_IMPORT_ERROR_INTERVAL
 } from '../../../utils/Constants';
@@ -48,8 +49,13 @@ import { PaginationView } from '../../common/table/PaginationView';
 import ImportErrorPopup from './ImportErrorPopup';
 import { useNavigate } from 'react-router-dom';
 import PollingTimer from '../../../utils/PollingTimer';
+import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
+import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
+  const schedulerContext = useSchedulerContext();
+  const composerRouteState = schedulerContext?.composerRouteState;
+  const setComposerRouteState = schedulerContext?.setComposerRouteState;
   const { control, setValue, watch } = useForm();
   const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<IEnvDropDownOption[]>([]);
@@ -89,27 +95,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const selectedRegion = watch('composerRegion');
   const selectedEnv = watch('environment');
 
-  const columns = React.useMemo(
-    () => [
-      {
-        Header: 'Job Name',
-        accessor: 'jobid'
-      },
-      {
-        Header: 'Schedule',
-        accessor: 'schedule'
-      },
-      {
-        Header: 'Status',
-        accessor: 'status'
-      },
-      {
-        Header: 'Actions',
-        accessor: 'actions'
-      }
-    ],
-    []
-  );
+  const columns = React.useMemo(() => LIST_COMPOSER_TABLE_HEADER, []);
 
   const {
     getTableProps,
@@ -145,9 +131,23 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         );
       setDagList(dagList);
       setBucketName(bucketName);
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
     } finally {
       setLoadingState(prev => ({ ...prev, dags: false }));
     }
+  };
+
+  const handleDagIdSelection = (composerName: string, dagId: string) => {
+    navigate('/execution-composer-history', {
+      state: {
+        dagId,
+        projectId: selectedProjectId,
+        region: selectedRegion,
+        composerName,
+        bucketName
+      }
+    });
   };
 
   /**
@@ -190,20 +190,26 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         setImportErrorData(importErrors.import_errors);
         setImportErrorEntries(importErrors.total_entries);
       }
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
     } finally {
       setLoadingState(prev => ({ ...prev, importErrors: false }));
     }
   };
 
   const handleDeleteImportError = async (dagId: string) => {
-    const fromPage = 'importErrorPage';
-    await ComposerServices.handleDeleteSchedulerAPIService(
-      selectedEnv ?? '',
-      selectedDagId,
-      selectedRegion,
-      selectedProjectId,
-      fromPage
-    );
+    try {
+      const fromPage = 'importErrorPage';
+      await ComposerServices.handleDeleteComposerScheduleAPIService(
+        selectedEnv ?? '',
+        selectedDagId,
+        selectedRegion,
+        selectedProjectId,
+        fromPage
+      );
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
+    }
   };
 
   const handleCancelDelete = () => {
@@ -255,6 +261,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         if (updateResponse?.status === 0) {
           await handleEnvChange(selectedEnv ?? '');
         }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
       } finally {
         setLoadingState(prev => ({ ...prev, update: '' }));
       }
@@ -279,6 +287,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           selectedProjectId,
           selectedRegion
         );
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
       } finally {
         setLoadingState(prev => ({ ...prev, trigger: '' }));
       }
@@ -299,6 +309,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         if (editNotebookResponse?.input_filename) {
           setInputNotebookFilePath(editNotebookResponse.input_filename);
         }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
       } finally {
         // Always reset the loading state
         setLoadingState(prev => ({ ...prev, editNotebook: '' }));
@@ -316,7 +328,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
 
     try {
       const deleteResponse =
-        await ComposerServices.handleDeleteSchedulerAPIService(
+        await ComposerServices.handleDeleteComposerScheduleAPIService(
           selectedEnv ?? '',
           selectedDagId,
           selectedRegion,
@@ -326,6 +338,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       if (deleteResponse.status === 0) {
         await handleEnvChange(selectedEnv ?? ''); // Call the function to refresh the list
       }
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
     } finally {
       setDeletePopupOpen(false); // Close the popup
       setLoadingState(prev => ({ ...prev, delete: false }));
@@ -400,7 +414,21 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         console.error('Failed to load initial auth credentials:', error);
       }
     };
-    loadInitialCredentials();
+
+    if (
+      composerRouteState.region &&
+      composerRouteState.environment &&
+      composerRouteState.projectId
+    ) {
+      setValue('projectId', composerRouteState.projectId);
+      setValue('composerRegion', composerRouteState.region);
+      setValue('environment', composerRouteState.environment);
+      if (setComposerRouteState) {
+        setComposerRouteState(null);
+      }
+    } else {
+      loadInitialCredentials();
+    }
   }, [setValue]);
 
   // --- Fetch Regions based on selected Project ID ---
@@ -429,6 +457,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       } catch (error) {
         // Handle error from the service call
         const errorResponse = `Failed to fetch region list : ${error}`;
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        }
+
         handleErrorToast({
           error: errorResponse
         });
@@ -463,6 +495,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           setValue('environment', '');
           setDagList([]);
         }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
       } finally {
         setLoadingState(prev => ({ ...prev, environment: false }));
       }
@@ -501,11 +535,11 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         return (
           <td {...cell.getCellProps()} className="scheduler-table-data">
             <span
-            // onClick={() => {
-            //   if (composerEnvSelected) {
-            //     handleDagIdSelection(composerEnvSelected, cell.value);
-            //   }
-            // }}
+              onClick={() => {
+                if (selectedEnv) {
+                  handleDagIdSelection(selectedEnv, cell.value);
+                }
+              }}
             >
               {cell.value}
             </span>
@@ -546,7 +580,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               options={[{ label: selectedProjectId, value: selectedProjectId }]}
               setValue={setValue}
               loading={loadingState.projectId}
-              //   onChangeCallback={handleProjectIdChange}
               disabled={true}
             />
           </div>
@@ -558,7 +591,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               options={regionOptions}
               setValue={setValue}
               loading={loadingState.region}
-              //   onChangeCallback={handleRegionChange}
               //   error={errors.composerRegion}
             />
           </div>

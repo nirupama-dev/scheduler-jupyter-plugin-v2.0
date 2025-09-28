@@ -140,7 +140,7 @@ class Client:
         try:
             credentials = oauth2.Credentials(self._access_token)
             storage_client = storage.Client(credentials=credentials, project=project_id)
-            bucket = await storage_client.bucket(gcs_dag_bucket)
+            bucket = storage_client.bucket(gcs_dag_bucket)
             if template_name:
                 env = Environment(
                     loader=PackageLoader(PACKAGE_NAME, TEMPLATES_FOLDER_PATH),

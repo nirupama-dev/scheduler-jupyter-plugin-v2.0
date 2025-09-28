@@ -22,6 +22,7 @@ import { handleErrorToast } from '../../components/common/notificationHandling/E
 import { ILabelValue } from '../../interfaces/CommonInterface';
 import { ISharedNetwork } from '../../interfaces/VertexInterface';
 import { IDropdownOption } from '../../interfaces/FormInterface';
+import { AuthenticationError } from '../../exceptions/AuthenticationException';
 
 export class ComputeServices {
   /**
@@ -44,6 +45,10 @@ export class ComputeServices {
       }
       return null; // Return null if no data
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         'Error fetching host project',
         LOG_LEVEL.ERROR
@@ -84,6 +89,9 @@ export class ComputeServices {
       }
       return []; // Return empty array if no data
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
       SchedulerLoggingService.log(
         `Error listing primary network ${error}`,
         LOG_LEVEL.ERROR
@@ -126,6 +134,10 @@ export class ComputeServices {
       }
       return []; // Return empty array if no data
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error listing sub networks ${error}`,
         LOG_LEVEL.ERROR
@@ -173,6 +185,10 @@ export class ComputeServices {
       }
       return []; // Return empty array if no data
     } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       SchedulerLoggingService.log(
         `Error listing shared networks ${error}`,
         LOG_LEVEL.ERROR
@@ -213,6 +229,11 @@ export class ComputeServices {
       return regionOptions;
     } catch (error) {
       const errorResponse = `Failed to fetch region list : ${error}`;
+
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
       handleErrorToast({
         error: errorResponse
       });

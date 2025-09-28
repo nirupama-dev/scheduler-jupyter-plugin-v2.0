@@ -90,6 +90,7 @@ export interface ICreateNotebookScheduleProps {
     | null
     | undefined;
   editModeData?: IEditScheduleData | null | undefined;
+  app: JupyterLab;
 }
 
 export interface IParameter {

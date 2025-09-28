@@ -22,9 +22,9 @@ import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.s
 import PlayIcon from '../../style/icons/scheduler_play.svg';
 import PauseIcon from '../../style/icons/scheduler_pause.svg';
 import TriggerIcon from '../../style/icons/scheduler_trigger.svg';
-import EditIconDisable from '../../style/icons/scheduler_edit_dag.svg';
+import EditIconDisable from '../../style/icons/scheduler_edit_calendar.svg';
+import EditNotebookIcon from '../../style/icons/scheduler_edit_dag.svg';
 import DeleteIconLarge from '../../style/icons/scheduler_delete.svg';
-import EditNotebookIcon from '../../style/icons/scheduler_edit_calendar.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
 import DashIcon from '../../style/icons/dash_icon_jupyter.svg';
 import CompletedIcon from '../../style/icons/dag_task_success_icon.svg';
@@ -44,6 +44,9 @@ import FailedCircleIcon from '../../style/icons/failed-circle-icon.svg';
 import OrangeCircle from '../../style/icons/orange_icon.svg';
 import GreyCircle from '../../style/icons/grey_icon.svg';
 import downloadIcon from '../../style/icons/scheduler_download.svg';
+import dagTaskFailedIcon from '../../style/icons/dag_task_failed_icon.svg';
+import stopIcon from '../../style/icons/stop_icon.svg';
+import signinGoogleIcon from '../../style/icons/signin_google_icon.svg';
 
 export const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -183,4 +186,19 @@ export const IconGreyCircle = new LabIcon({
 export const iconDownload = new LabIcon({
   name: 'launcher:download-icon',
   svgstr: downloadIcon
+});
+
+export const iconDagTaskFailed = new LabIcon({
+  name: 'launcher:dag-task-failed-icon',
+  svgstr: dagTaskFailedIcon
+});
+
+export const iconStop = new LabIcon({
+  name: 'launcher:stop-icon',
+  svgstr: stopIcon
+});
+
+export const IconsigninGoogle = new LabIcon({
+  name: 'launcher:signin_google_icon',
+  svgstr: signinGoogleIcon
 });

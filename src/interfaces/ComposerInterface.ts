@@ -29,6 +29,7 @@ import {
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
 import { ExecutionMode } from '../types/CommonSchedulerTypes';
 import { IAuthCredentials, IEditScheduleData } from './CommonInterface';
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export interface ICreateComposerSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -41,6 +42,7 @@ export interface ICreateComposerSchedulerProps {
   credentials: IAuthCredentials;
   isValid?: boolean;
   editScheduleData?: IEditScheduleData | null;
+  app: JupyterFrontEnd;
 }
 
 export interface IComposerSchedulePayload {

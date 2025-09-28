@@ -15,20 +15,24 @@
  * limitations under the License.
  */
 
-// import './base.css';
-// import './authLogin.css';
-// import './cluster.css';
-// import './notebookScheduler.css';
-// import './submitJob.css';
-// import './job.css';
-import './commonSchedulerStyles.css';
-import './listScheduleStylesCommon.css';
-import './listVertexSchedule.css';
-import './createNotebookScheduler.css';
-import './createVertexScheduler.css';
-import './createComposerScheduler.css';
-import './common.css';
-import './listComposerSchedule.css';
-import './vertexExecutionHistory.css';
-import './composerExecutionHistory.css';
-import './login.css';
+import React from 'react';
+import { IconsigninGoogle } from '../../../utils/Icons';
+import { login } from './Config';
+
+const LoginErrorComponent: React.FC = () => {
+  const handleLogin = async () => {
+    await login();
+  };
+  return (
+    <>
+      <div className="login-error">Please login to continue</div>
+      <div style={{ alignItems: 'center' }}>
+        <div role="button" className="signin-google-icon" onClick={handleLogin}>
+          <IconsigninGoogle.react tag="div" className="logo-alignment-style" />
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default LoginErrorComponent;
