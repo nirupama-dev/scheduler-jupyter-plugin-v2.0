@@ -353,3 +353,5 @@ export const COMPOSER_EXECUTION_HISTORY_DAG_HEADER = [
     accessor: 'actions'
   }
 ];
+
+export const NO_ROWS_TO_DISPLAY = 'No rows to display';
