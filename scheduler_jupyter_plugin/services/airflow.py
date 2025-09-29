@@ -30,7 +30,6 @@ from scheduler_jupyter_plugin.commons.constants import (
     HTTP_STATUS_NETWORK_CONNECT_TIMEOUT as HTTP_STATUS_SERVER_ERROR_END,
     HTTP_STATUS_OK,
 )
-import scheduler_jupyter_plugin.services.executor as executor
 
 
 class Client:
@@ -301,13 +300,48 @@ class Client:
                         "status": response.status,
                     }
                 )
+            
+    async def get_bucket(self, runtime_env, project_id, region_id):
+        composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
+        if project_id and region_id:
+            api_endpoint = f"{composer_url}v1/projects/{project_id}/locations/{region_id}/environments/{runtime_env}"
+        headers = self.create_headers()
+        async with self.client_session.get(api_endpoint, headers=headers) as response:
+            if response.status == HTTP_STATUS_OK:
+                resp = await response.json()
+                gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
+                return gcs_dag_path
+            elif response.status == HTTP_STATUS_UNAUTHORIZED:
+                self.log.exception(
+                    f"AUTHENTICATION_ERROR: {response.reason} {await response.text()}"
+                )
+                raise RuntimeError(
+                    {
+                        "AUTHENTICATION_ERROR": await response.json(),
+                        "status": response.status,
+                    }
+                )
+            elif response.status == HTTP_STATUS_NOT_FOUND:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer bucket: {response.reason}",
+                        "status": response.status,
+                    }
+                )
+            else:
+                raise RuntimeError(
+                    {
+                        "ERROR": f"Error getting composer bucket: {await response.json()}",
+                        "status": response.status,
+                    }
+                )
 
     async def get_job_schedule(
         self, dag_id, project_id, region_id, composer_environment
     ):
         try:
             # Step 1: Get the bucket name using the existing service function
-            bucket_name = await self.executor_client.get_bucket(
+            bucket_name = await self.get_bucket(
                 composer_environment, project_id, region_id
             )
 

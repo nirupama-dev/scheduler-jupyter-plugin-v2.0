@@ -353,7 +353,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       editSchedule: id
     }));
     navigate(
-      `/edit/composer/${selectedProjectId}/${selectedRegion}/${selectedEnv}/${id}`
+      `/edit/composer/${id}/${selectedRegion}/${selectedProjectId}/${selectedEnv}`
     );
   };
 

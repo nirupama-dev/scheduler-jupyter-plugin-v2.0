@@ -78,6 +78,11 @@ async def get_cached():
         # As such, we treat them being missing as a signal that there is
         # a problem with how the user is logged in to gcloud.
         credentials["login_error"] = 1
-        raise RuntimeError({"AUTHENTICATION_ERROR": "Access token unavailable for the user", "status": 401})
+        raise RuntimeError(
+            {
+                "AUTHENTICATION_ERROR": "Access token unavailable for the user",
+                "status": 401,
+            }
+        )
 
     return credentials
