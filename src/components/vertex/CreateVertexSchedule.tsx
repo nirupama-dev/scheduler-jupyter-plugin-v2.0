@@ -745,6 +745,20 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     loadingState.sharedNetwork,
     loadingState.hostProject
   ]);
+
+  /**
+   * Handles changes to the cron expression field, updating both the cron format and user-friendly fields.
+   * @param value The new cron expression value.
+   */
+  const handleCronExpression = useCallback(
+    (value: string) => {
+      console.log('value cron handler', value);
+      setValue('scheduleFieldCronFormat', value);
+      setValue('scheduleValueUserFriendly', value);
+      trigger(['scheduleFieldCronFormat', 'scheduleValueUserFriendly']);
+    },
+    [setValue, trigger]
+  );
   console.log('Isvalid:', isValid);
   console.log('Errors:', errors);
   // --- Render Component UI ---
@@ -1141,13 +1155,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               options={RUN_ON_SCHEDULE_OPTIONS}
               error={vertexErrors.internalScheduleMode}
               onChange={() => {
-                if (watch('internalScheduleMode') === 'cronFormat') {
-                  setValue('scheduleValue', EVERY_MINUTE_CRON);
-                  setValue('scheduleFieldCronFormat', '');
-                } else {
-                  setValue('scheduleFieldCronFormat', '');
-                  setValue('scheduleValue', EVERY_MINUTE_CRON);
-                }
+                // if (watch('internalScheduleMode') === 'cronFormat') {
+                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
+                //   setValue('scheduleFieldCronFormat', '');
+                // } else {
+                //   setValue('scheduleFieldCronFormat', '');
+                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
+                // }
                 trigger([
                   'scheduleFieldCronFormat',
                   'scheduleValueUserFriendly'
@@ -1241,7 +1255,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   control={control}
                   name="scheduleFieldCronFormat"
                   error={vertexErrors.scheduleFieldCronFormat}
-                  onChangeCallback={() => trigger('scheduleFieldCronFormat')}
+                  onChangeCallback={handleCronExpression}
                 />
               </div>
               <div>
@@ -1266,7 +1280,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     value={field.value || ''}
                     setValue={(newValue: string) => {
                       field.onChange(newValue);
-                      trigger('scheduleValueUserFriendly');
+                      handleCronExpression(newValue);
                     }}
                     allowedPeriods={
                       allowedPeriodsCron as PeriodType[] | undefined
