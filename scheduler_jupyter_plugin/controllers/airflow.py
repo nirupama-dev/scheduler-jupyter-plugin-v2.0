@@ -237,17 +237,23 @@ class GetInputFileNameController(AirflowHandler):
     def description(self):
         return "notebook file"
 
-    async def _handle_post(self, client):
-        return await client.get_input_file_name(self.dag_id, self.bucket_name)
+    async def _handle_get(self, client):
+        return await client.get_input_file_name(
+            self.dag_id,
+            self.bucket_name,
+        )
 
 
 class GetComposerJobScheduleController(AirflowHandler):
     def description(self):
         return "job"
 
-    async def _handle_post(self, client):
+    async def _handle_get(self, client):
         return await client.get_job_schedule(
-            self.dag_id, self.project_id, self.region_id, self.composer_environment
+            self.dag_id,
+            self.project_id,
+            self.region_id,
+            self.composer_environment,
         )
 
 
