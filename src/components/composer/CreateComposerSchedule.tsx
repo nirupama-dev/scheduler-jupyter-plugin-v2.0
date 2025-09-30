@@ -293,7 +293,13 @@ export const CreateComposerSchedule: React.FC<
           error={errors.composerRegion}
         />
       </div>
-      <div className="scheduler-form-element-container scheduler-input-top">
+      <div
+        className={
+          errors.composerRegion
+            ? 'scheduler-form-element-container scheduler-input-top error-input'
+            : 'scheduler-form-element-container scheduler-input-top'
+        }
+      >
         <FormInputDropdown
           name="environment"
           label="Environment"
