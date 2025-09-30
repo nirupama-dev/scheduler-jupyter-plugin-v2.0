@@ -66,6 +66,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
 
   const notebookSourceUri = getGcsUri(VertexScheduleData.inputFile, bucketName);
 
+  console.log(VertexScheduleData.machineType);
   const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule = {
     displayName: VertexScheduleData.jobName,
     cron: combinedCronSchedule,

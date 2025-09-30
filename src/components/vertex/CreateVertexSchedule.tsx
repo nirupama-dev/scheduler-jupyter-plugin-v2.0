@@ -781,7 +781,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             machineTypeList.length === 0
           }
           onChangeCallback={selectedMachineType => {
-            setValue('machineType', selectedMachineType);
+            setValue('machineType', selectedMachineType.value);
+            console.log('Machine type changed to:', selectedMachineType.value);
             setValue('acceleratorType', '');
             setValue('acceleratorCount', '');
             trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
