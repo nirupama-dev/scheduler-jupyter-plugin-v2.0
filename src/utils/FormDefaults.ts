@@ -33,7 +33,7 @@ import {
   SCHEDULE_MODE_OPTIONS
 } from './Constants';
 import {
-  IInitialScheduleFormData
+  IInitialSchedulerContextData
 } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
 import { ScheduleMode } from '../types/CommonSchedulerTypes';
@@ -73,7 +73,7 @@ const generateDefaultJobName = () => {
  * It provides a set of initial values that can be used when creating a new Vertex schedule.
  */
 const getDefaultVertexValues = (
-  initialSchedulerStateData: IInitialScheduleFormData,
+  initialSchedulerStateData: IInitialSchedulerContextData,
   sessionContext: ISessionContext
 ): VertexSchedulerFormValues => {
   const inputFilePath = sessionContext?.path;
@@ -118,7 +118,7 @@ const getDefaultVertexValues = (
  * It provides a set of initial values that can be used when creating a new Composer schedule.
  */
 const getDefaultComposerValues = (
-  initialSchedulerStateData: IInitialScheduleFormData,
+  initialSchedulerStateData: IInitialSchedulerContextData,
   inputFilePath: string
 ): ComposerSchedulerFormValues => ({
   schedulerSelection: COMPOSER_SCHEDULER_NAME,
@@ -135,8 +135,8 @@ const getDefaultComposerValues = (
   emailOnSuccess: false,
   emailRecipients: [], // Default for array of emails
   runOption: 'runNow',
-  cluster: initialSchedulerStateData.initialDefaults?.kernelDetails?.selectedClusterName ?? '',
-  serverless: initialSchedulerStateData.initialDefaults?.kernelDetails?.selectedServerlessName ?? '',
+  cluster: '',
+  serverless: '',
   timeZone: ''
 });
 
@@ -146,7 +146,7 @@ const getDefaultComposerValues = (
  * @returns CombinedCreateFormValues that match one of the discriminated union branches.
  */
 export const getInitialFormValues = (
-  formState: IInitialScheduleFormData,
+  formState: IInitialSchedulerContextData,
   sessionContext: ISessionContext | null | undefined
 ): CombinedCreateFormValues => {
   if (!sessionContext?.path) {

@@ -45,7 +45,7 @@ import {
   ICreateNotebookScheduleProps,
   INotebookKernalSchdulerDefaults,
   IEditScheduleData,
-  IInitialScheduleFormData
+  IInitialSchedulerContextData
 } from '../../interfaces/CommonInterface';
 import { VertexSchedulerFormValues } from '../../schemas/CreateVertexSchema';
 import { ComposerSchedulerFormValues } from '../../schemas/CreateComposerSchema';
@@ -113,8 +113,8 @@ export const CreateNotebookSchedule = (
    * A unified state to manage all form-related data including edit mode,
    * authentication, and scheduler details.
    */
-  const [initialFormData, setInitialFormData] =
-    useState<IInitialScheduleFormData>({});
+  const [initialSchedulerDataContext, setInitialSchedulerContext] =
+    useState<IInitialSchedulerContextData>({});
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   console.log(isDataLoaded, 'isDataLoaded');
@@ -165,7 +165,7 @@ export const CreateNotebookSchedule = (
                   projectId
                 );
             } else {
-              //TODO: redirect back to listing as no data was fetched
+               navigate('/list/vertex', { state: { region: region } });//TODO: redirect back to listing as no data was fetched
             }
           } else if (
             schedulerTypeForEdit === 'composer' &&
@@ -183,7 +183,7 @@ export const CreateNotebookSchedule = (
               editScheduleData.existingScheduleData =
                 transformComposerScheduleDataToZodSchema(fetchedData);
             } else {
-              //TODO: redirect to listing.
+               navigate('/list/composer', { state: { region: region, projectId: projectId, environment: environment } });//TODO: redirect to listing.
             }
           }
         } else {
@@ -195,7 +195,7 @@ export const CreateNotebookSchedule = (
         }
 
         // 3. Update the single formState object
-        setInitialFormData({
+        setInitialSchedulerContext({
           credentials: credentialsData,
           editModeData: editScheduleData,
           initialDefaults: kernelSchedulerData
@@ -226,15 +226,15 @@ export const CreateNotebookSchedule = (
   const initialFormValues = useMemo(() => {
     if (isDataLoaded) {
       if (
-        initialFormData.editModeData?.editMode &&
-        initialFormData.editModeData.existingScheduleData
+        initialSchedulerDataContext.editModeData?.editMode &&
+        initialSchedulerDataContext.editModeData.existingScheduleData
       ) {
         //   setValue('schedulerSelection', initialFormData.editModeData.existingScheduleData.schedulerSelection);
-        return initialFormData.editModeData.existingScheduleData;
+        return initialSchedulerDataContext.editModeData.existingScheduleData;
       }
-      if (initialFormData.initialDefaults) {
+      if (initialSchedulerDataContext.initialDefaults) {
         //   setValue('schedulerSelection', initialFormData.initialDefaults.schedulerType);
-        return getInitialFormValues(initialFormData, sessionContext);
+        return getInitialFormValues(initialSchedulerDataContext, sessionContext);
       }
     }
     //  return {} as CombinedCreateFormValues; // Return null or some default value if data isn't ready
@@ -262,8 +262,8 @@ export const CreateNotebookSchedule = (
 
   // Watch for changes in schedulerSelection to reset form values accordingly
   useEffect(() => {
-    const isEditMode = initialFormData.editModeData?.editMode;
-    if (!isEditMode && initialFormData.initialDefaults) {
+    const isEditMode = initialSchedulerDataContext.editModeData?.editMode;
+    if (!isEditMode && initialSchedulerDataContext.initialDefaults) {
       const commonFields = {
         jobName: getValues('jobName'),
         inputFile: getValues('inputFile')
@@ -273,9 +273,9 @@ export const CreateNotebookSchedule = (
         // Get a new set of default Vertex-specific values
         const vertexDefaults = getInitialFormValues(
           {
-            ...initialFormData,
+            ...initialSchedulerDataContext,
             initialDefaults: {
-              ...initialFormData.initialDefaults,
+              ...initialSchedulerDataContext.initialDefaults,
               schedulerType: VERTEX_SCHEDULER_NAME
             }
           },
@@ -292,9 +292,9 @@ export const CreateNotebookSchedule = (
         // Get a new set of default Composer-specific values
         const composerDefaults = getInitialFormValues(
           {
-            ...initialFormData,
+            ...initialSchedulerDataContext,
             initialDefaults: {
-              ...initialFormData.initialDefaults,
+              ...initialSchedulerDataContext.initialDefaults,
               schedulerType: COMPOSER_SCHEDULER_NAME
             }
           },
@@ -311,7 +311,7 @@ export const CreateNotebookSchedule = (
     }
   }, [
     schedulerSelectionSelected,
-    initialFormData,
+    initialSchedulerDataContext,
     sessionContext,
     reset,
     getValues
@@ -326,26 +326,25 @@ export const CreateNotebookSchedule = (
   const onSubmit = async (data: CombinedCreateFormValues) => {
     try {
       console.log('On Submit');
-      if (!initialFormData.credentials) {
+      if (!initialSchedulerDataContext.credentials) {
         console.error('Credentials not available.');
-        //TODO: handle credentials
-        return;
+        throw new AuthenticationError('Unauthenticated');
       }
       let isSaveSuccessfull = false; // flag for successfull schedule creation/ update
       //vertex payload creation
       if (
         data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
-        initialFormData.credentials.project_id
+        initialSchedulerDataContext.credentials.project_id
       ) {
         const vertexData = data as VertexSchedulerFormValues;
         const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
           transformZodSchemaToVertexSchedulePayload(
             vertexData,
-            initialFormData.credentials.project_id
+            initialSchedulerDataContext.credentials.project_id
           );
         console.log('Vertex Payload:', vertexPayload);
 
-        if (initialFormData.editModeData?.editMode && scheduleId) {
+        if (initialSchedulerDataContext.editModeData?.editMode && scheduleId) {
           isSaveSuccessfull =
             await VertexServices.updateVertexNotebookJobSchedule(
               scheduleId,
@@ -383,7 +382,7 @@ export const CreateNotebookSchedule = (
             composerPayload,
             composerPayload.project_id, // TODO: verify and optimize
             composerPayload.region_id, // ToDO
-            initialFormData.editModeData?.editMode
+            initialSchedulerDataContext.editModeData?.editMode
           );
         if (isSaveSuccessfull) {
           if (setComposerRouteState) {
@@ -406,18 +405,18 @@ export const CreateNotebookSchedule = (
 
   // Function to handle cancel action
   const handleCancel = () => {
-    if (initialFormData.editModeData?.editMode) {
+    if (initialSchedulerDataContext.editModeData?.editMode) {
       if (setVertexRouteState && schedulerTypeForEdit === 'vertex') {
         setVertexRouteState({
           schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
-          region: initialFormData.editModeData.region
+          region: initialSchedulerDataContext.editModeData.region
         });
       } else if (setComposerRouteState && schedulerTypeForEdit === 'composer') {
         setComposerRouteState({
           schedulerName: COMPOSER_SCHEDULER_NAME,
-          region: initialFormData.editModeData.region,
-          projectId: initialFormData.editModeData.projectId,
-          environment: initialFormData.editModeData.environment
+          region: initialSchedulerDataContext.editModeData.region,
+          projectId: initialSchedulerDataContext.editModeData.projectId,
+          environment: initialSchedulerDataContext.editModeData.environment
         });
       }
       navigate('/list');
@@ -428,10 +427,10 @@ export const CreateNotebookSchedule = (
 
   //return if form is not valid
   if (
-    !initialFormData.credentials || //missing credentials
-    (!initialFormData.initialDefaults && !initialFormData.editModeData) || //missing initial data on create
-    (initialFormData.editModeData?.editMode &&
-      !initialFormData.editModeData.existingScheduleData) || // missing existing data on edit
+    !initialSchedulerDataContext.credentials || //missing credentials
+    (!initialSchedulerDataContext.initialDefaults && !initialSchedulerDataContext.editModeData) || //missing initial data on create
+    (initialSchedulerDataContext.editModeData?.editMode &&
+      !initialSchedulerDataContext.editModeData.existingScheduleData) || // missing existing data on edit
     !isDataLoaded || // initial values not loaded
     !getValues('schedulerSelection') //
   ) {
@@ -448,7 +447,7 @@ export const CreateNotebookSchedule = (
           />
         </div>
         <div className="create-job-scheduler-title">
-          {initialFormData.editModeData?.editMode
+          {initialSchedulerDataContext.editModeData?.editMode
             ? 'Update Scheduled Notebook Job'
             : 'Create Scheduled Notebook Job'}
         </div>
@@ -484,8 +483,8 @@ export const CreateNotebookSchedule = (
               options={SCHEDULER_OPTIONS.map(option => ({
                 ...option,
                 disabled:
-                  initialFormData.editModeData?.editMode ||
-                  (initialFormData.initialDefaults?.kernelDetails
+                  initialSchedulerDataContext.editModeData?.editMode ||
+                  (initialSchedulerDataContext.initialDefaults?.kernelDetails
                     ?.executionMode !== 'local' &&
                     option.value === 'vertex')
               }))}
@@ -502,8 +501,8 @@ export const CreateNotebookSchedule = (
               getValues={getValues}
               trigger={trigger}
               isValid={isValid}
-              credentials={initialFormData.credentials}
-              editScheduleData={initialFormData.editModeData}
+              credentials={initialSchedulerDataContext.credentials}
+              editScheduleData={initialSchedulerDataContext.editModeData}
               app={app}
             />
           )}
@@ -517,8 +516,8 @@ export const CreateNotebookSchedule = (
               getValues={getValues}
               trigger={trigger}
               isValid={isValid}
-              credentials={initialFormData.credentials}
-              editScheduleData={initialFormData.editModeData}
+              credentials={initialSchedulerDataContext.credentials}
+              initialSchedulerDataContext={initialSchedulerDataContext}
               app={app}
             />
           )}

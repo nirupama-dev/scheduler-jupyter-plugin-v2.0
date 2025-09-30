@@ -26,8 +26,7 @@ import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
-import { authApi, handleOpenLoginWidget } from '../common/login/Config';
-import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
+import { handleOpenLoginWidget } from '../common/login/Config';
 import {
   IComposerEnvAPIResponse,
   ICreateComposerSchedulerProps,
@@ -58,7 +57,7 @@ export const CreateComposerSchedule: React.FC<
   trigger,
   isValid,
   credentials,
-  editScheduleData
+  initialSchedulerDataContext
 }) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
   const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
@@ -101,7 +100,6 @@ export const CreateComposerSchedule: React.FC<
     ? (errors as FieldErrors<z.infer<typeof createComposerSchema>>)
     : {};
   console.log('is valid', isValid);
-  
   console.log('composerErrors', composerErrors);
   console.log('getValues', getValues());
 
@@ -133,9 +131,40 @@ export const CreateComposerSchedule: React.FC<
     }
   }, [selectedProjectId, selectedRegion]);
 
+  const fetchRemoteKernelData = useCallback(async () => {
+      try {
+        if (executionMode === 'cluster') {
+          setValue('serverless', '');
+          const clusterOptionsFromAPI =
+            await ComposerServices.listClustersAPIService();
+          setClusterOptions(clusterOptionsFromAPI);
+          const selectedClusterName = clusterOptionsFromAPI.find((clusterOption: ILabelValue<string>) =>
+            initialSchedulerDataContext?.initialDefaults?.kernelDetails?.kernelDisplayName.includes(clusterOption.value)
+          );
+          setValue('cluster', selectedClusterName? selectedClusterName.value : '');
+        } else if (executionMode === 'serverless') {
+          setValue('cluster', '');
+          const serverlessOptionsFromAPI =
+            await ComposerServices.listSessionTemplatesAPIService();
+          setServerlessOptions(serverlessOptionsFromAPI);
+          const selectedServerlessName = serverlessOptionsFromAPI.find((serverlessOption: ILabelValue<string>) =>
+            initialSchedulerDataContext?.initialDefaults?.kernelDetails?.kernelDisplayName.includes(serverlessOption.value)
+          );
+          setValue('serverless', selectedServerlessName ? selectedServerlessName.value : '');
+        } else {
+          setClusterOptions([]);
+          setServerlessOptions([]);
+        }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
+      }finally {
+        trigger(['cluster', 'serverless']);
+      }
+    },[executionMode, setValue, initialSchedulerDataContext]);
 
   /**
-   * Effect to fetch the project ID and region from the auth API
+   * Effect to fetch the project ID auth API, Remote kernel data if applicable
+   * This effect runs once on component mount.
    */
   useEffect(() => {
     setLoadingState(prev => ({ ...prev, projectId: true }));
@@ -146,10 +175,16 @@ export const CreateComposerSchedule: React.FC<
     console.log('project Id:', selectedProjectId, getValues('projectId'));
     console.log('Credentials:', credentials);
     setLoadingState(prev => ({ ...prev, projectId: false }));
+
+    if(initialSchedulerDataContext && initialSchedulerDataContext?.initialDefaults?.kernelDetails?.executionMode!= 'local'){
+      fetchRemoteKernelData();
+    }
   }, []);
 
   
-
+  /**
+   * Effect to fetch regions when project ID changes, and  reset environments when region changes.
+   */
   useEffect(() => {
     if (selectedProjectId) {
       fetchRegions();
@@ -164,6 +199,9 @@ export const CreateComposerSchedule: React.FC<
     // Clear subsequent fields when project_id changes
   }, [selectedProjectId, setValue]);
 
+  /**
+   * Effect to fetch environments when region changes.
+   */
   useEffect(() => {
     if (selectedRegion) {
       fetchEnvironments();
@@ -174,29 +212,13 @@ export const CreateComposerSchedule: React.FC<
     }
   }, [selectedRegion, setValue]);
 
+  /**
+   * Effect to fetch Cluster/ Serverless data when execution mode changes.
+   */
   useEffect(() => {
-    const fetchRemoteKernelData = async () => {
-      try {
-        if (executionMode === 'cluster') {
-          setValue('serverless', '');
-          const clusterOptionsFromAPI =
-            await ComposerServices.listClustersAPIService();
-          setClusterOptions(clusterOptionsFromAPI);
-        } else if (executionMode === 'serverless') {
-          setValue('cluster', '');
-          const serverlessOptionsFromAPI =
-            await ComposerServices.listSessionTemplatesAPIService();
-          setServerlessOptions(serverlessOptionsFromAPI);
-        } else {
-          setClusterOptions([]);
-          setServerlessOptions([]);
-        }
-      } catch (authenticationError) {
-        handleOpenLoginWidget(app);
-      }
-    };
-
-    fetchRemoteKernelData();
+    if (executionMode !== 'local') {
+      fetchRemoteKernelData();
+    }
   }, [executionMode, setValue]);
 
   // Handle Project ID change: Clear Region and Environment
