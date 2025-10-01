@@ -307,6 +307,7 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           loading={loadingState.environment}
+          disabled={!selectedRegion}
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={errors.environment}
