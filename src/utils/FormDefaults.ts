@@ -29,7 +29,8 @@ import {
   DISK_TYPE_VALUE,
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
-  COMPOSER_SCHEDULER_NAME
+  COMPOSER_SCHEDULER_NAME,
+  SCHEDULE_VALUE_EXPRESSION
 } from './Constants';
 import {
   INotebookKernalSchdulerDefaults,
@@ -137,7 +138,8 @@ const getDefaultComposerValues = (
   runOption: 'runNow',
   cluster: initialKernelDetails?.kernelDetails?.selectedClusterName ?? '',
   serverless: initialKernelDetails.kernelDetails?.selectedServerlessName ?? '',
-  timeZone: DEFAULT_TIME_ZONE // Browser's local time zone
+  timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone,
+  scheduleValue: SCHEDULE_VALUE_EXPRESSION,
 });
 
 /**

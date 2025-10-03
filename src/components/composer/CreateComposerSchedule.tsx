@@ -21,7 +21,7 @@ import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
-import Cron from 'react-js-cron';
+import Cron, { PeriodType } from 'react-js-cron';
 import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
@@ -33,15 +33,16 @@ import {
   ILoadingStateComposer
 } from '../../interfaces/ComposerInterface';
 import {
+  allowedPeriodsCron,
   composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
-  SCHEDULE_MODE_OPTIONS,
-  SCHEDULE_VALUE_EXPRESSION
+  SCHEDULE_MODE_OPTIONS
 } from '../../utils/Constants';
 import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
 import { ILabelValue } from '../../interfaces/CommonInterface';
+import { Controller } from 'react-hook-form';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
@@ -75,7 +76,6 @@ export const CreateComposerSchedule: React.FC<
     serverless: false
     // ... initialize other mandatory properties
   });
-  const [scheduleValue, setScheduleValue] = useState(SCHEDULE_VALUE_EXPRESSION);
 
   const timezones = Object.keys(tzdata.zones).sort();
   const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
@@ -256,6 +256,13 @@ export const CreateComposerSchedule: React.FC<
       }
     },
     [setValue, composerEnvData]
+  );
+
+  const handleCronExpression = useCallback(
+    (value: string) => {
+      setValue('scheduleValue', value);
+    },
+    [setValue]
   );
 
   return (
@@ -456,7 +463,22 @@ export const CreateComposerSchedule: React.FC<
       {scheduleMode === 'runSchedule' && (
         <div>
           <div className="scheduler-input-top">
-            <Cron value={scheduleValue} setValue={setScheduleValue} />
+            <Controller
+              name="scheduleValue"
+              control={control}
+              render={({ field }) => (
+                <Cron
+                  value={field.value || ''}
+                  setValue={(newValue: string) => {
+                    field.onChange(newValue);
+                    handleCronExpression(newValue);
+                  }}
+                  allowedPeriods={
+                    allowedPeriodsCron as PeriodType[] | undefined
+                  }
+                />
+              )}
+            />
           </div>
           <div className="scheduler-form-element-container">
             <FormInputDropdown
