@@ -508,6 +508,10 @@ class Client:
 
             if data.kernel_name:
                 notebook_execution_job["kernelName"] = data.kernel_name
+            if data.kms_key_name:
+                notebook_execution_job["encryptionSpec"] = {
+                    "kmsKeyName": data.kms_key_name
+                }
             if data.service_account:
                 notebook_execution_job["serviceAccount"] = data.service_account
             if data.cloud_storage_bucket:

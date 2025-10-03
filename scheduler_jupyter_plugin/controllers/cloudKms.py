@@ -19,6 +19,7 @@ from jupyter_server.base.handlers import APIHandler
 from scheduler_jupyter_plugin import credentials
 from scheduler_jupyter_plugin.services import cloudKms
 
+
 class KeyRingsController(APIHandler):
     @tornado.web.authenticated
     async def get(self):
@@ -47,7 +48,9 @@ class CryptoKeysController(APIHandler):
             cloud_kms_client = cloudKms.Client(
                 await credentials.get_cached(), self.log, None
             )
-            crypto_keys = await cloud_kms_client.list_crypto_keys(project_id, region_id, key_ring)
+            crypto_keys = await cloud_kms_client.list_crypto_keys(
+                project_id, region_id, key_ring
+            )
             self.finish(json.dumps(crypto_keys))
         except Exception as e:
             self.log.exception(f"Error fetching crypto keys: {str(e)}")

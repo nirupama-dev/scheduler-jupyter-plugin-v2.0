@@ -14,9 +14,8 @@
 
 from google.cloud import kms_v1
 
-from scheduler_jupyter_plugin.commons.constants import (
-    CONTENT_TYPE
-)
+from scheduler_jupyter_plugin.commons.constants import CONTENT_TYPE
+
 
 class Client:
     def __init__(self, credentials, log, client_session):
@@ -38,7 +37,7 @@ class Client:
             "Content-Type": CONTENT_TYPE,
             "Authorization": f"Bearer {self._access_token}",
         }
-    
+
     async def list_key_rings(self, project_id, region_id):
         try:
             key_rings = []
@@ -55,7 +54,6 @@ class Client:
         except Exception as e:
             self.log.exception(f"Error fetching key rings: {str(e)}")
             return {"Error fetching key rings": str(e)}
-        
 
     async def list_crypto_keys(self, project_id, region_id, key_ring):
         try:
