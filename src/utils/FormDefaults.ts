@@ -139,7 +139,7 @@ const getDefaultComposerValues = (
   cluster: initialKernelDetails?.kernelDetails?.selectedClusterName ?? '',
   serverless: initialKernelDetails.kernelDetails?.selectedServerlessName ?? '',
   timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone,
-  scheduleValue: SCHEDULE_VALUE_EXPRESSION,
+  scheduleValue: SCHEDULE_VALUE_EXPRESSION
 });
 
 /**
