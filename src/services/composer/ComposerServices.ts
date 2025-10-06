@@ -308,7 +308,7 @@ export class ComposerServices {
     try {
       const serviceURL = `getInputFileName?&dag_id=${dagId}&bucket_name=${bucketName}`;
       const inputFilenameResponse: any = await requestAPI(serviceURL, {
-        method: 'POST'
+        method: 'GET'
       });
 
       if (!inputFilenameResponse?.input_filename) {
@@ -340,10 +340,10 @@ export class ComposerServices {
     environment: string | undefined
   ) => {
     try {
-      const serviceURL = `getComposerJobSchedule?dag_id=${dagId}&project_id=${projectId}&region_id=${region}&composer_environment=${environment}`;
+      const serviceURL = `getComposerJobSchedule?dag_id=${dagId}&project_id=${projectId}&region_id=${region}&composer=${environment}`;
       const composerJobScheduleDetails: IComposerSchedulePayload =
         await requestAPI(serviceURL, {
-          method: 'POST'
+          method: 'GET'
         });
       if (composerJobScheduleDetails.error) {
         handleErrorToast({

@@ -147,3 +147,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .element-bottom {
   padding-bottom: 20px;
 }
+
+.error-input {
+  padding-top: 22px;
+}
