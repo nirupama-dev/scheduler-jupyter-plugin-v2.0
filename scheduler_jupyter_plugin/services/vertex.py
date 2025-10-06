@@ -154,11 +154,6 @@ class Client:
                         "gcsOutputUri": job.cloud_storage_bucket,
                         "serviceAccount": job.service_account,
                         "kernelName": job.kernel_name,
-                        "encryptionSpec": (
-                            {
-                                "kmsKeyName": job.kms_key_name,
-                            }
-                        ),
                         "workbenchRuntime": {},
                     },
                 },
@@ -180,6 +175,11 @@ class Client:
                 payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
                     "customEnvironmentSpec"
                 ]["networkSpec"]["subnetwork"] = job.subnetwork
+
+            if job.kms_key_name:
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "encryptionSpec"
+                ] = {"kmsKeyName": job.kms_key_name}
 
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
