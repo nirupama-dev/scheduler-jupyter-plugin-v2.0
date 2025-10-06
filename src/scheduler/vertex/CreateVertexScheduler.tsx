@@ -249,6 +249,10 @@ const CreateVertexScheduler = ({
     setMachineTypeList([]);
     setAcceleratedCount(null);
     setAcceleratorType(null);
+    setKeyRingList([]);
+    setKeyRingSelected('');
+    setCryptoKeyList([]);
+    setCryptoKeySelected('');
   };
 
   /**
