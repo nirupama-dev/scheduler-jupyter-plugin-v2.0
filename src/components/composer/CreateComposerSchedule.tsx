@@ -21,19 +21,19 @@ import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
-import Cron from 'react-js-cron';
+import Cron, { PeriodType } from 'react-js-cron';
 import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
-import { authApi, handleOpenLoginWidget } from '../common/login/Config';
-import { handleErrorToast } from '../common/notificationHandling/ErrorUtils';
+import { handleOpenLoginWidget } from '../common/login/Config';
 import {
   IComposerEnvAPIResponse,
   ICreateComposerSchedulerProps,
   ILoadingStateComposer
 } from '../../interfaces/ComposerInterface';
 import {
+  allowedPeriodsCron,
   composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
@@ -42,10 +42,20 @@ import {
 import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
 import { ILabelValue } from '../../interfaces/CommonInterface';
+import { Controller } from 'react-hook-form';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
-> = ({ control, errors, setValue, watch, setError, app }) => {
+> = ({
+  control,
+  errors,
+  setValue,
+  watch,
+  setError,
+  getValues,
+  app,
+  credentials
+}) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
   const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
@@ -82,42 +92,8 @@ export const CreateComposerSchedule: React.FC<
   const emailOnSuccess = watch('emailOnSuccess');
   const executionMode = watch('executionMode');
 
-  /**
-   * Effect to fetch the project ID and region from the auth API
-   */
-  useEffect(() => {
-    const loadInitialCredentials = async () => {
-      try {
-        setLoadingState(prev => ({ ...prev, projectId: true }));
-        const credentials = await authApi();
-        if (credentials?.project_id) {
-          setValue('projectId', credentials.project_id);
-          // Region will be handled by the subsequent useEffect and state updates.
-        }
-        setLoadingState(prev => ({ ...prev, projectId: false }));
-      } catch (error) {
-        console.error('Failed to load initial auth credentials:', error);
-        handleErrorToast({
-          error: `Failed to load initial credentials: ${error}`
-        });
-      }
-    };
-    loadInitialCredentials();
-  }, [setValue]);
-
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
-    // if (selectedProjectId) {
-    //   const regionList: ILabelValue<string>[] = ComputeServices.regionAPIService(
-    //     selectedProjectId,
-    //   );
-
-    //   if (regionList) {
-    //     setRegionOptions(regionList);
-    //   }
-    // } else {
-    //   setRegionOptions([]); // Clear regions if no project is selected
-    // }
     const fetchRegions = async () => {
       if (selectedProjectId) {
         setValue('composerRegion', '');
@@ -127,6 +103,23 @@ export const CreateComposerSchedule: React.FC<
           const options =
             await ComputeServices.regionAPIService(selectedProjectId);
           setRegionOptions(options);
+          let currentRegionValue = getValues('composerRegion');
+
+          // If no value is currently set, try to use the default from credentials.
+          if (!currentRegionValue && credentials?.region_id) {
+            currentRegionValue = credentials.region_id;
+          }
+
+          // Validate the determined regionToSet against the list of valid regions.
+          const isRegionValid = options.some(
+            region => region.value === currentRegionValue
+          );
+          // If the region is valid, set it; otherwise, clear the field.
+          if (!isRegionValid) {
+            setValue('composerRegion', '');
+          } else {
+            setValue('composerRegion', currentRegionValue);
+          }
         } catch (authenticationError) {
           handleOpenLoginWidget(app);
         } finally {
@@ -265,6 +258,13 @@ export const CreateComposerSchedule: React.FC<
     [setValue, composerEnvData]
   );
 
+  const handleCronExpression = useCallback(
+    (value: string) => {
+      setValue('scheduleValue', value);
+    },
+    [setValue]
+  );
+
   return (
     <div>
       <div className="scheduler-form-element-container">
@@ -307,6 +307,7 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           loading={loadingState.environment}
+          disabled={!selectedRegion}
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={errors.environment}
@@ -461,8 +462,23 @@ export const CreateComposerSchedule: React.FC<
       </div>
       {scheduleMode === 'runSchedule' && (
         <div>
-          <div className="scheduler-form-element-container">
-            <Cron value={''} setValue={() => {}} />
+          <div className="scheduler-input-top">
+            <Controller
+              name="scheduleValue"
+              control={control}
+              render={({ field }) => (
+                <Cron
+                  value={field.value || ''}
+                  setValue={(newValue: string) => {
+                    field.onChange(newValue);
+                    handleCronExpression(newValue);
+                  }}
+                  allowedPeriods={
+                    allowedPeriodsCron as PeriodType[] | undefined
+                  }
+                />
+              )}
+            />
           </div>
           <div className="scheduler-form-element-container">
             <FormInputDropdown
