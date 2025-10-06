@@ -35,6 +35,7 @@ dependencies = [
     "google-cloud-iam",
     "cron-descriptor>=1.4.5",
     "gcs-jupyter-plugin",
+    "google-cloud-kms",
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 

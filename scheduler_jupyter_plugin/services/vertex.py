@@ -61,7 +61,9 @@ class Client:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(token=self._access_token)
-            storage_client = storage.Client(credentials=credentials, project=self.project_id)
+            storage_client = storage.Client(
+                credentials=credentials, project=self.project_id
+            )
             storage_client.create_bucket(bucket_name)
         except Exception as error:
             self.log.exception(f"Error in creating Bucket: {error}")
@@ -70,7 +72,9 @@ class Client:
     async def upload_to_gcs(self, bucket_name, file_path, job_name):
         input_notebook = file_path.split("/")[-1]
         credentials = oauth2.Credentials(self._access_token)
-        storage_client = storage.Client(credentials=credentials, project=self.project_id)
+        storage_client = storage.Client(
+            credentials=credentials, project=self.project_id
+        )
         bucket = storage_client.bucket(bucket_name)
         blob_name = None
 
@@ -144,12 +148,17 @@ class Client:
                                 "diskType": disk_type,
                                 "diskSizeGb": job.disk_size,
                             },
-                            "networkSpec": {}
+                            "networkSpec": {},
                         },
                         "gcsNotebookSource": {"uri": notebook_source},
                         "gcsOutputUri": job.cloud_storage_bucket,
                         "serviceAccount": job.service_account,
                         "kernelName": job.kernel_name,
+                        "encryptionSpec": (
+                            {
+                                "kmsKeyName": job.kms_key_name,
+                            }
+                        ),
                         "workbenchRuntime": {},
                     },
                 },
@@ -284,16 +293,24 @@ class Client:
                         schedule_list = []
                         schedules = resp.get("schedules")
                         for schedule in schedules:
-                            # filter for a workbench schedule 
+                            # filter for a workbench schedule
                             # ie atleast any one of the following is not available.
                             # workbenchRuntime or kernel or customEnvironmentSpec
-                            if schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob") is None:
+                            if (
+                                schedule.get("createNotebookExecutionJobRequest").get(
+                                    "notebookExecutionJob"
+                                )
+                                is None
+                            ):
                                 continue
-                            notebook_execution_job = schedule.get("createNotebookExecutionJobRequest").get("notebookExecutionJob")
+                            notebook_execution_job = schedule.get(
+                                "createNotebookExecutionJobRequest"
+                            ).get("notebookExecutionJob")
                             if (
                                 notebook_execution_job.get("workbenchRuntime") is None
                                 and notebook_execution_job.get("kernelName") is None
-                                and notebook_execution_job.get("customEnvironmentSpec") is None
+                                and notebook_execution_job.get("customEnvironmentSpec")
+                                is None
                             ):
                                 continue
                             max_run_count = schedule.get("maxRunCount")
@@ -442,9 +459,10 @@ class Client:
 
             headers = self.create_headers()
 
-            payload = data.get("createNotebookExecutionJobRequest", {}) \
-                .get("notebookExecutionJob", {})
-            
+            payload = data.get("createNotebookExecutionJobRequest", {}).get(
+                "notebookExecutionJob", {}
+            )
+
             payload["scheduleResourceName"] = data.get("name")
             async with self.client_session.post(
                 api_endpoint, headers=headers, json=payload
@@ -490,6 +508,10 @@ class Client:
 
             if data.kernel_name:
                 notebook_execution_job["kernelName"] = data.kernel_name
+            if data.kms_key_name:
+                notebook_execution_job["encryptionSpec"] = {
+                    "kmsKeyName": data.kms_key_name
+                }
             if data.service_account:
                 notebook_execution_job["serviceAccount"] = data.service_account
             if data.cloud_storage_bucket:
