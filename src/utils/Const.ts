@@ -154,3 +154,13 @@ export const composerEnvironmentStateListForCreate = 'RUNNING';
 
 export const SUBNETWORK_VERTEX_ERROR =
   'No Subnetworks found with Google Private Access - ON';
+
+export const DEFAULT_ENCRYPTION_SELECTED = 'googleManagedEncryption';
+
+export const SECURITY_KEY =
+  'https://console.cloud.google.com/security/kms/keyrings';
+
+export const DEFAULT_CUSTOMER_MANAGED_SELECTION = 'key';
+
+export const KEY_MESSAGE =
+  'Example format:projects/<project-name>/locations/<location-name>/keyRings/<keyring-name>/cryptoKeys/<key-name>';

@@ -44,9 +44,11 @@ import {
   allowedPeriodsCron,
   CORN_EXP_DOC_URL,
   DEFAULT_CLOUD_STORAGE_BUCKET,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
   DEFAULT_DISK_MAX_SIZE,
   DEFAULT_DISK_MIN_SIZE,
   DEFAULT_DISK_SIZE,
+  DEFAULT_ENCRYPTION_SELECTED,
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_SERVICE_ACCOUNT,
@@ -54,8 +56,10 @@ import {
   everyMinuteCron,
   internalScheduleMode,
   KERNEL_VALUE,
+  KEY_MESSAGE,
   scheduleMode,
   scheduleValueExpression,
+  SECURITY_KEY,
   SHARED_NETWORK_DOC_URL,
   SUBNETWORK_VERTEX_ERROR,
   VERTEX_REGIONS,
@@ -220,6 +224,20 @@ const CreateVertexScheduler = ({
     useState<string>('');
   const [diskSizeFlag, setDiskSizeFlag] = useState<boolean>(false);
   const [createMode, setCreateMode] = useState<boolean>(false);
+  const [selectedEncryption, setSelectedEncryption] = useState<string>(
+    DEFAULT_ENCRYPTION_SELECTED
+  );
+  const [customerEncryptionRadioValue, setCustomerEncryptionRadioValue] =
+    useState<string>(DEFAULT_CUSTOMER_MANAGED_SELECTION);
+  const [accessToken, setAccessToken] = useState<string>('');
+  const [keyRingList, setKeyRingList] = useState<string[]>([]);
+  const [keyRingSelected, setKeyRingSelected] = useState<string>('');
+  const [cryptoKeyList, setCryptoKeyList] = useState<string[]>([]);
+  const [cryptoKeySelected, setCryptoKeySelected] = useState<string>('');
+  const [manualKeySelected, setManualKeySelected] = useState<string>('');
+  const [manualValidation, setManualValidation] = useState<boolean>(true);
+  const [cryptoKeyLoading, setCryptoKeyLoading] = useState<boolean>(false);
+  const [keyRingListLoading, setKeyRingListLoading] = useState<boolean>(false);
 
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
@@ -679,6 +697,108 @@ const CreateVertexScheduler = ({
   const selectedMachineType = machineTypeList?.find(
     item => item.machineType === machineTypeSelected
   );
+
+  /**
+   * Handle customer managed encryption radio selection for key ris and key
+   */
+  const handlekeyRingRadio = () => {
+    setCustomerEncryptionRadioValue('key');
+    setManualKeySelected('');
+    setManualValidation(true);
+  };
+
+  /**
+   * Handle manual key entry radio selection
+   */
+  const handlekeyManuallyRadio = () => {
+    setCustomerEncryptionRadioValue('manually');
+    setKeyRingSelected('');
+    setCryptoKeySelected('');
+    setManualKeySelected('');
+    setCryptoKeyList([]);
+  };
+
+  /**
+   * Handles key ring selection
+   * @param {string | null} keyRingValueSelected - selected key ring
+   */
+  const handleKeyRingChange = (keyRingValueSelected: string | null) => {
+    if (keyRingValueSelected !== null) {
+      setKeyRingSelected(keyRingValueSelected!.toString());
+      setCryptoKeyLoading(true);
+    } else {
+      setCryptoKeyList([]);
+      setKeyRingSelected('');
+      setCryptoKeySelected('');
+    }
+  };
+
+  /**
+   * Handle key selection
+   * @param {string| null} keyValueSelected  - selected key
+   */
+  const handleKeyChange = (keyValueSelected: string | null) => {
+    if (keyValueSelected !== null) {
+      setCryptoKeySelected(keyValueSelected!.toString());
+    }
+  };
+
+  /**
+   * List Customer managed encryption key rings
+   */
+  const listKeyRings = async () => {
+    const listKeyRingsPayload = { region, projectId, accessToken };
+    setKeyRingListLoading(true);
+    const keyRingList = await VertexServices.listKeyRings(listKeyRingsPayload);
+    if (Array.isArray(keyRingList) && keyRingList.length > 0) {
+      setKeyRingList(keyRingList);
+    }
+    setKeyRingListLoading(false);
+  };
+
+  /**
+   * List crypto keys from KmS key ring
+   * @param keyRing selected key ring to list down the keys
+   */
+  const listCryptoKeysAPI = async (keyRing: string) => {
+    const listKeysPayload = {
+      credentials: { region, projectId, accessToken },
+      keyRing
+    };
+    const cryptoKeyListResponse =
+      await VertexServices.listCryptoKeysAPIService(listKeysPayload);
+    if (
+      Array.isArray(cryptoKeyListResponse) &&
+      cryptoKeyListResponse.length > 0
+    ) {
+      setCryptoKeyList(cryptoKeyListResponse);
+      if (!editMode) {
+        setCryptoKeySelected(cryptoKeyListResponse[0]);
+      }
+    }
+    setCryptoKeyLoading(false);
+  };
+
+  /**
+   * Handles manual key entry
+   * @param event - The change event triggered by the input field.
+   */
+  const handleManualKeySelected = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const inputValue = event.target.value;
+    const numericRegex =
+      /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
+
+    if (numericRegex.test(inputValue) || inputValue === '') {
+      setManualValidation(true);
+    } else {
+      setManualValidation(false);
+    }
+
+    setManualKeySelected(inputValue);
+  };
+
   /**
    * Disable the create button when the mandatory fields are not filled and the validations is not proper.
    */
@@ -708,7 +828,13 @@ const CreateVertexScheduler = ({
       isPastEndDate ||
       isPastStartDate ||
       diskSizeFlag ||
-      !diskTypeSelected
+      !diskTypeSelected ||
+      (selectedEncryption === 'customerManagedEncryption' &&
+        (keyRingSelected === '' ||
+          cryptoKeySelected === '' ||
+          cryptoKeyLoading) &&
+        manualKeySelected === '') ||
+      !manualValidation
     );
   };
 
@@ -771,6 +897,14 @@ const CreateVertexScheduler = ({
       payload.accelerator_type = acceleratorType;
       payload.accelerator_count = acceleratedCount;
     }
+
+    if (selectedEncryption === 'customerManagedEncryption') {
+      payload.kms_key_name =
+        customerEncryptionRadioValue === 'key'
+          ? `projects/${projectId}/locations/${region}/keyRings/${keyRingSelected}/cryptoKeys/${cryptoKeySelected}`
+          : manualKeySelected;
+    }
+
     if (editMode) {
       await VertexServices.editVertexJobSchedulerService(
         jobId,
@@ -807,6 +941,24 @@ const CreateVertexScheduler = ({
     setVertexSchedulerDetails(null); // reset the values once loaded so as to accept new values.
   };
 
+  /**
+   *Handle encryption selected
+   *@param {object} eventValue - The event object containing the selected encryption value.
+   */
+  const handleEncryptionSelection = (eventValue: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    if (eventValue.target.value === DEFAULT_ENCRYPTION_SELECTED) {
+      setSelectedEncryption(eventValue.target.value);
+      setCustomerEncryptionRadioValue('');
+      setKeyRingSelected('');
+      setCryptoKeySelected('');
+    } else {
+      setSelectedEncryption(eventValue.target.value);
+      setCustomerEncryptionRadioValue(DEFAULT_CUSTOMER_MANAGED_SELECTION);
+    }
+  };
+
   useEffect(() => {
     if (!editMode) {
       const defaultServiceAccount = serviceAccountList?.find(option => {
@@ -840,6 +992,9 @@ const CreateVertexScheduler = ({
             setLoaderRegion(false);
             setRegion(credentials.region_id);
             setProjectId(credentials.project_id);
+            if (credentials.access_token) {
+              setAccessToken(credentials.access_token);
+            }
           }
         })
         .catch(error => {
@@ -868,9 +1023,13 @@ const CreateVertexScheduler = ({
             error: error
           });
         });
+      cloudStorageAPI();
+      serviceAccountAPI();
     }
 
     if (editMode && vertexSchedulerDetails) {
+      setSelectedEncryption('');
+      setManualKeySelected('');
       setJobId(vertexSchedulerDetails.job_id ?? '');
       setInputFileSelected(vertexSchedulerDetails.input_filename);
       setJobNameSelected(vertexSchedulerDetails.display_name);
@@ -904,6 +1063,27 @@ const CreateVertexScheduler = ({
       setDiskTypeSelected(vertexSchedulerDetails.disk_type);
       setDiskSize(vertexSchedulerDetails.disk_size);
       setGcsPath(vertexSchedulerDetails.gcs_notebook_source ?? '');
+
+      if ('kms_key_name' in vertexSchedulerDetails) {
+        if (vertexSchedulerDetails.kms_key_name) {
+          setSelectedEncryption('customerManagedEncryption');
+          // Define the regular expression pattern with capturing groups
+          const pattern = /keyRings\/(.*?)\/cryptoKeys\/(.*?)$/;
+
+          // Use the `exec` method to find matches
+          const match = pattern.exec(vertexSchedulerDetails.kms_key_name);
+          console.log('match', match);
+          if (match && match.length > 0) {
+            const keyRing = match[1]; // The first captured group
+            const cryptoKey = match[2];
+            setKeyRingSelected(keyRing);
+            setCryptoKeySelected(cryptoKey);
+            setCustomerEncryptionRadioValue('key');
+          }
+        }
+      } else {
+        setSelectedEncryption(DEFAULT_ENCRYPTION_SELECTED);
+      }
     }
   }, [editMode]);
 
@@ -927,6 +1107,10 @@ const CreateVertexScheduler = ({
     if (!region) {
       setMachineTypeList([]);
       setMachineTypeSelected(null);
+      setCryptoKeySelected('');
+      setKeyRingSelected('');
+      setCryptoKeyList([]);
+      setKeyRingList([]);
     } else {
       machineTypeAPI();
       if (!createCompleted) {
@@ -971,6 +1155,16 @@ const CreateVertexScheduler = ({
       setDiskSizeFlag(true);
     }
   }, [diskSize]);
+
+  useEffect(() => {
+    listCryptoKeysAPI(keyRingSelected);
+  }, [keyRingSelected]);
+
+  useEffect(() => {
+    if (projectId && region) {
+      listKeyRings();
+    }
+  }, [region, projectId]);
 
   return (
     <>
@@ -1242,7 +1436,201 @@ const CreateVertexScheduler = ({
             </div>
           </div>
 
-          <div className="create-scheduler-form-element panel-margin footer-text">
+          <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+            Encryption
+          </div>
+
+          <div className="create-scheduler-form-element panel-margin">
+            <FormControl>
+              <RadioGroup
+                aria-labelledby="demo-controlled-radio-buttons-group"
+                name="controlled-radio-buttons-group"
+                value={selectedEncryption}
+                onChange={handleEncryptionSelection}
+                data-testid={
+                  networkSelected === 'customerManagedEncryption'
+                    ? 'customerManagedEncryption-selected'
+                    : 'googleManagedEncryption-selected'
+                }
+              >
+                <FormControlLabel
+                  value="googleManagedEncryption"
+                  className="create-scheduler-label-style"
+                  control={<Radio size="small" />}
+                  label={
+                    <Typography sx={{ fontSize: 13 }}>
+                      Google-managed encryption key
+                    </Typography>
+                  }
+                />
+                <span className="sub-para tab-text-sub-cl encryption-radio">
+                  No configuration required
+                </span>
+                <FormControlLabel
+                  value="customerManagedEncryption"
+                  className="create-scheduler-label-style"
+                  control={<Radio size="small" />}
+                  label={
+                    <Typography sx={{ fontSize: 13 }}>
+                      Customer managed encryption key(CMEK)
+                    </Typography>
+                  }
+                />
+                <div className="create-batch-sub-message">
+                  Manage via{' '}
+                  <div
+                    className="submit-job-learn-more"
+                    onClick={() => {
+                      window.open(
+                        `${SECURITY_KEY}?project=${projectId}`,
+                        '_blank'
+                      );
+                    }}
+                  >
+                    Google Cloud Key Management Service
+                  </div>
+                </div>
+              </RadioGroup>
+            </FormControl>
+          </div>
+
+          {selectedEncryption !== DEFAULT_ENCRYPTION_SELECTED && (
+            <>
+              <div className="execution-history-main-wrapper success-message-top encryption-containeer">
+                <Radio
+                  size="small"
+                  className="select-batch-encrypt-radio-style"
+                  value="mainClass"
+                  checked={
+                    customerEncryptionRadioValue ===
+                    DEFAULT_CUSTOMER_MANAGED_SELECTION
+                  }
+                  onChange={handlekeyRingRadio}
+                />
+                <div className="encryption-form-element-input-fl create-pr">
+                  <Autocomplete
+                    disabled={
+                      customerEncryptionRadioValue !==
+                        DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                      !region ||
+                      keyRingListLoading
+                        ? true
+                        : false
+                    }
+                    options={keyRingList}
+                    value={keyRingSelected}
+                    onChange={(_event, keyRingValueSelected) =>
+                      handleKeyRingChange(keyRingValueSelected)
+                    }
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        label="Key rings"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {keyRingListLoading &&
+                              customerEncryptionRadioValue ===
+                                DEFAULT_CUSTOMER_MANAGED_SELECTION ? (
+                                <CircularProgress
+                                  aria-label="Loading Spinner"
+                                  data-testid="loader"
+                                  size={18}
+                                />
+                              ) : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          )
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="encryption-form-element-input-fl create-pr">
+                  <Autocomplete
+                    disabled={
+                      customerEncryptionRadioValue !==
+                        DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                      !region ||
+                      cryptoKeyLoading ||
+                      keyRingListLoading
+                        ? true
+                        : false
+                    }
+                    options={cryptoKeyList}
+                    value={cryptoKeySelected}
+                    onChange={(_event, keyValueSelected) =>
+                      handleKeyChange(keyValueSelected)
+                    }
+                    renderInput={params => (
+                      <TextField
+                        {...params}
+                        label="Keys"
+                        InputProps={{
+                          ...params.InputProps,
+                          endAdornment: (
+                            <>
+                              {cryptoKeyLoading ? (
+                                <CircularProgress
+                                  aria-label="Loading Spinner"
+                                  data-testid="loader"
+                                  size={18}
+                                />
+                              ) : null}
+                              {params.InputProps.endAdornment}
+                            </>
+                          )
+                        }}
+                      />
+                    )}
+                    sx={{
+                      '& .MuiAutocomplete-hasPopupIcon': {
+                        // Your styles here
+                        paddingRight: 0
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="execution-history-main-wrapper">
+                <div className="encryption-radio-list">
+                  <Radio
+                    size="small"
+                    className="select-batch-encrypt-radio-style "
+                    value="mainClass"
+                    checked={
+                      customerEncryptionRadioValue !==
+                      DEFAULT_CUSTOMER_MANAGED_SELECTION
+                    }
+                    onChange={handlekeyManuallyRadio}
+                  />
+                </div>
+                <div>
+                  <div className="create-scheduler-form-element">
+                    <Input
+                      className="encryption-input"
+                      value={manualKeySelected}
+                      type="text"
+                      disabled={
+                        customerEncryptionRadioValue ===
+                        DEFAULT_CUSTOMER_MANAGED_SELECTION
+                      }
+                      onChange={handleManualKeySelected}
+                      Label="Enter key manually"
+                    />
+                  </div>
+                  {!manualValidation && (
+                    <div className="error-key-parent-manual">
+                      <div className="error-key-missing">{KEY_MESSAGE}</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="create-scheduler-form-element panel-margin block-seperation">
             <Autocomplete
               className="create-scheduler-style-trigger"
               options={serviceAccountList}

@@ -53,6 +53,7 @@ export interface ICreatePayload {
   disk_type: string | null;
   disk_size: string;
   gcs_notebook_source?: string;
+  kms_key_name?: string;
 }
 export interface IVertexScheduleList {
   displayName: string;
@@ -122,4 +123,30 @@ export interface IFormattedResponse {
   schedules?: IVertexScheduleList[];
   nextPageToken?: string;
   error?: { code: number; message: string };
+}
+
+export interface IKeyRingPayload {
+  region: string;
+  projectId: string;
+  accessToken: string;
+}
+
+export interface ICryptoListKeys {
+  credentials: IKeyRingPayload;
+  keyRing: string;
+}
+
+export interface IKey {
+  primary: {
+    state: string;
+  };
+  name: string;
+}
+
+export interface IKeyListResponse {
+  cryptoKeys: IKey[];
+  error: {
+    message: string;
+    code: number;
+  };
 }
