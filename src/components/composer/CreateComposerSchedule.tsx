@@ -21,7 +21,7 @@ import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
-import Cron from 'react-js-cron';
+import Cron, { PeriodType } from 'react-js-cron';
 import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
@@ -33,6 +33,7 @@ import {
   ILoadingStateComposer
 } from '../../interfaces/ComposerInterface';
 import {
+  allowedPeriodsCron,
   composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
@@ -41,6 +42,7 @@ import {
 import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
 import { ILabelValue } from '../../interfaces/CommonInterface';
+import { Controller } from 'react-hook-form';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import { FieldErrors } from 'react-hook-form';
 import z from 'zod';
@@ -104,11 +106,33 @@ export const CreateComposerSchedule: React.FC<
   console.log('getValues', getValues());
 
   // --- Fetch Regions based on selected Project ID ---
-  const fetchRegions = useCallback(async () => {
-    try {
-      setLoadingState(prev => ({ ...prev, region: true }));
-      const options = await ComputeServices.regionAPIService(selectedProjectId);
-      setRegionOptions(options);
+  useEffect(() => {
+    const fetchRegions = async () => {
+      if (selectedProjectId) {
+        setValue('composerRegion', '');
+
+        try {
+          setLoadingState(prev => ({ ...prev, region: true }));
+          const options =
+            await ComputeServices.regionAPIService(selectedProjectId);
+          setRegionOptions(options);
+          let currentRegionValue = getValues('composerRegion');
+
+          // If no value is currently set, try to use the default from credentials.
+          if (!currentRegionValue && credentials?.region_id) {
+            currentRegionValue = credentials.region_id;
+          }
+
+          // Validate the determined regionToSet against the list of valid regions.
+          const isRegionValid = options.some(
+            region => region.value === currentRegionValue
+          );
+          // If the region is valid, set it; otherwise, clear the field.
+          if (!isRegionValid) {
+            setValue('composerRegion', '');
+          } else {
+            setValue('composerRegion', currentRegionValue);
+          }
         } catch (authenticationError) {
           handleOpenLoginWidget(app);
     } finally {
@@ -297,6 +321,13 @@ export const CreateComposerSchedule: React.FC<
     [setValue, composerEnvData]
   );
 
+  const handleCronExpression = useCallback(
+    (value: string) => {
+      setValue('scheduleValue', value);
+    },
+    [setValue]
+  );
+
   return (
     <div>
       <div className="scheduler-form-element-container">
@@ -340,6 +371,7 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           loading={loadingState.environment}
+          disabled={!selectedRegion}
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={composerErrors.environment}
@@ -494,8 +526,23 @@ export const CreateComposerSchedule: React.FC<
       </div>
       {scheduleMode === 'runSchedule' && (
         <div>
-          <div className="scheduler-form-element-container">
-            <Cron value={''} setValue={() => {}} />
+          <div className="scheduler-input-top">
+            <Controller
+              name="scheduleValue"
+              control={control}
+              render={({ field }) => (
+                <Cron
+                  value={field.value || ''}
+                  setValue={(newValue: string) => {
+                    field.onChange(newValue);
+                    handleCronExpression(newValue);
+                  }}
+                  allowedPeriods={
+                    allowedPeriodsCron as PeriodType[] | undefined
+                  }
+                />
+              )}
+            />
           </div>
           <div className="scheduler-form-element-container">
             <FormInputDropdown

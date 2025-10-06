@@ -30,7 +30,8 @@ import {
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME,
-  SCHEDULE_MODE_OPTIONS
+  SCHEDULE_MODE_OPTIONS,
+  SCHEDULE_VALUE_EXPRESSION
 } from './Constants';
 import {
   IInitialSchedulerContextData
@@ -119,13 +120,14 @@ const getDefaultVertexValues = (
  */
 const getDefaultComposerValues = (
   initialSchedulerStateData: IInitialSchedulerContextData,
-  inputFilePath: string
+  inputFilePath: string,
+  credentials: IInitialScheduleFormData['credentials']
 ): ComposerSchedulerFormValues => ({
   schedulerSelection: COMPOSER_SCHEDULER_NAME,
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
-  projectId: initialSchedulerStateData?.credentials?.project_id ?? '',
-  composerRegion: '',
+  projectId: initialSchedulerStateData?.credentials?.project_id ?? credentials?.project_id ?? '',
+  composerRegion:  initialSchedulerStateData?.credentials?.region_id ?? '',
   executionMode: initialSchedulerStateData.initialDefaults?.kernelDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
@@ -137,7 +139,8 @@ const getDefaultComposerValues = (
   runOption: 'runNow',
   cluster: '',
   serverless: '',
-  timeZone: ''
+  timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone,
+  scheduleValue: SCHEDULE_VALUE_EXPRESSION
 });
 
 /**

@@ -44,7 +44,12 @@ export const FormInputText = ({
           size="small"
           error={!!fieldError}
           onChange={event => {
-            onChange(event); // Update react-hook-form state
+            let newValue = event.target.value;
+            if (type === 'number' && newValue === '') {
+              // If it's a number field and the user clears it, set the value to '0'
+              newValue = '0';
+            }
+            onChange(newValue);
             if (onChangeCallback) {
               onChangeCallback(event.target.value); // Trigger parent's sync logic
             }
