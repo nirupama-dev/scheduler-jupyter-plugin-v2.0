@@ -830,13 +830,11 @@ const CreateVertexScheduler = ({
       diskSizeFlag ||
       !diskTypeSelected ||
       (selectedEncryption === 'customerManagedEncryption' &&
-        customerEncryptionRadioValue === 'key' &&
         (keyRingSelected === '' ||
           cryptoKeySelected === '' ||
-          cryptoKeyLoading)) ||
-      (selectedEncryption === 'customerManagedEncryption' &&
-        customerEncryptionRadioValue === 'manually' &&
-        manualKeySelected === '')
+          cryptoKeyLoading) &&
+        manualKeySelected === '') ||
+      !manualValidation
     );
   };
 
@@ -1532,7 +1530,9 @@ const CreateVertexScheduler = ({
                           ...params.InputProps,
                           endAdornment: (
                             <>
-                              {keyRingListLoading ? (
+                              {keyRingListLoading &&
+                              customerEncryptionRadioValue ===
+                                DEFAULT_CUSTOMER_MANAGED_SELECTION ? (
                                 <CircularProgress
                                   aria-label="Loading Spinner"
                                   data-testid="loader"
