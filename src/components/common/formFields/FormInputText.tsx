@@ -27,7 +27,8 @@ export const FormInputText = ({
   error,
   type,
   onBlurCallback,
-  disabled
+  disabled,
+  onChangeCallback
 }: IFormInputProps) => {
   return (
     <Controller
@@ -42,7 +43,17 @@ export const FormInputText = ({
           helperText={fieldError ? fieldError.message : null}
           size="small"
           error={!!fieldError}
-          onChange={onChange}
+          onChange={event => {
+            let newValue = event.target.value;
+            if (type === 'number' && newValue === '') {
+              // If it's a number field and the user clears it, set the value to '0'
+              newValue = '0';
+            }
+            onChange(newValue);
+            if (onChangeCallback) {
+              onChangeCallback(event.target.value); // Trigger parent's sync logic
+            }
+          }}
           value={value ?? ''}
           fullWidth
           label={label}

@@ -29,7 +29,8 @@ import {
   DISK_TYPE_VALUE,
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
-  COMPOSER_SCHEDULER_NAME
+  COMPOSER_SCHEDULER_NAME,
+  SCHEDULE_VALUE_EXPRESSION
 } from './Constants';
 import {
   INotebookKernalSchdulerDefaults,
@@ -98,7 +99,7 @@ const getDefaultVertexValues = (
     diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
     diskSize: DEFAULT_DISK_SIZE,
     scheduleMode: 'runNow',
-    internalScheduleMode: undefined,
+    internalScheduleMode: 'cronFormat',
     scheduleFieldCronFormat: '',
     scheduleValueUserFriendly: '',
     startTime: undefined,
@@ -118,13 +119,14 @@ const getDefaultVertexValues = (
  */
 const getDefaultComposerValues = (
   initialKernelDetails: INotebookKernalSchdulerDefaults,
-  inputFilePath: string
+  inputFilePath: string,
+  credentials: IInitialScheduleFormData['credentials']
 ): ComposerSchedulerFormValues => ({
   schedulerSelection: COMPOSER_SCHEDULER_NAME,
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
-  projectId: '',
-  composerRegion: '',
+  projectId: credentials?.project_id ?? '',
+  composerRegion: credentials?.region_id ?? '',
   executionMode: initialKernelDetails?.kernelDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
@@ -136,7 +138,8 @@ const getDefaultComposerValues = (
   runOption: 'runNow',
   cluster: initialKernelDetails?.kernelDetails?.selectedClusterName ?? '',
   serverless: initialKernelDetails.kernelDetails?.selectedServerlessName ?? '',
-  timeZone: ''
+  timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone,
+  scheduleValue: SCHEDULE_VALUE_EXPRESSION
 });
 
 /**
@@ -154,7 +157,8 @@ export const getInitialFormValues = (
   if (formState.initialDefaults?.schedulerType === 'composer') {
     return getDefaultComposerValues(
       formState.initialDefaults,
-      sessionContext?.path
+      sessionContext?.path,
+      formState.credentials
     );
   }
   // Default to Vertex if no criteria or criteria is 'vertex' and load default vertex values.

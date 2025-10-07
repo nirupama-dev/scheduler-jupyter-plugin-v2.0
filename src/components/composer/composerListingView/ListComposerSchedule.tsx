@@ -42,6 +42,7 @@ import {
   composerEnvironmentStateList,
   GCS_PLUGIN_ID,
   LIST_COMPOSER_TABLE_HEADER,
+  NO_ROWS_TO_DISPLAY,
   POLLING_DAG_LIST_INTERVAL,
   POLLING_IMPORT_ERROR_INTERVAL
 } from '../../../utils/Constants';
@@ -699,7 +700,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
             </div>
           )}
           {!loadingState.dags && (
-            <div className="no-data-style">No rows to display</div>
+            <div className="no-data-style">{NO_ROWS_TO_DISPLAY}</div>
           )}
         </div>
       )}

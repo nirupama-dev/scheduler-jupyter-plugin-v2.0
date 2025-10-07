@@ -452,7 +452,13 @@ export const CreateNotebookSchedule = (
             />
           </div>
 
-          <div className="create-scheduler-form-element-input-file">
+          <div
+            className={
+              errors.jobName
+                ? 'create-scheduler-form-element-input-file footer-text'
+                : 'create-scheduler-form-element-input-file'
+            }
+          >
             <div className="scheduler-tag-style">
               <FormInputText
                 label="Input File"

@@ -745,6 +745,20 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     loadingState.sharedNetwork,
     loadingState.hostProject
   ]);
+
+  /**
+   * Handles changes to the cron expression field, updating both the cron format and user-friendly fields.
+   * @param value The new cron expression value.
+   */
+  const handleCronExpression = useCallback(
+    (value: string) => {
+      console.log('value cron handler', value);
+      setValue('scheduleFieldCronFormat', value);
+      setValue('scheduleValueUserFriendly', value);
+      trigger(['scheduleFieldCronFormat', 'scheduleValueUserFriendly']);
+    },
+    [setValue, trigger]
+  );
   console.log('Isvalid:', isValid);
   console.log('Errors:', errors);
   // --- Render Component UI ---
@@ -766,7 +780,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Machine Type Dropdown */}
-      <div className="scheduler-form-element-container scheduler-input-top">
+      <div
+        className={
+          vertexErrors.vertexRegion
+            ? 'scheduler-form-element-container scheduler-input-top error-input'
+            : 'scheduler-form-element-container scheduler-input-top'
+        }
+      >
         <FormInputDropdown
           name="machineType"
           control={control}
@@ -846,7 +866,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         )}
 
       {/* Kernel Dropdown */}
-      <div className="scheduler-form-element-container scheduler-input-top">
+      <div
+        className={
+          vertexErrors.machineType
+            ? 'scheduler-form-element-container scheduler-input-top error-input'
+            : 'scheduler-form-element-container scheduler-input-top'
+        }
+      >
         <FormInputDropdown
           name="kernelName"
           control={control}
@@ -858,7 +884,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Cloud Storage Bucket Dropdown */}
-      <div className="scheduler-form-element-container scheduler-input-top">
+      <div
+        className={
+          vertexErrors.kernelName
+            ? 'scheduler-form-element-container scheduler-input-top error-input'
+            : 'scheduler-form-element-container scheduler-input-top'
+        }
+      >
         <FormInputDropdown
           name="cloudStorageBucket"
           control={control}
@@ -879,7 +911,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Disk Type and Size */}
-      <div className="horizontal-element-wrapper scheduler-input-top">
+      <div
+        className={
+          vertexErrors.cloudStorageBucket
+            ? 'horizontal-element-wrapper scheduler-input-top error-input'
+            : 'horizontal-element-wrapper scheduler-input-top'
+        }
+      >
         <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
           <FormInputDropdown
             name="diskType"
@@ -908,7 +946,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       </div>
 
       {/* Service Account Dropdown */}
-      <div className="scheduler-form-element-container footer-text scheduler-input-top">
+      <div
+        className={
+          vertexErrors.diskSize || vertexErrors.diskType
+            ? 'scheduler-form-element-container'
+            : 'scheduler-form-element-container footer-text scheduler-input-top'
+        }
+      >
         <FormInputDropdown
           name="serviceAccount"
           control={control}
@@ -1112,13 +1156,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               options={RUN_ON_SCHEDULE_OPTIONS}
               error={vertexErrors.internalScheduleMode}
               onChange={() => {
-                if (watch('internalScheduleMode') === 'cronFormat') {
-                  setValue('scheduleValue', EVERY_MINUTE_CRON);
-                  setValue('scheduleFieldCronFormat', '');
-                } else {
-                  setValue('scheduleFieldCronFormat', '');
-                  setValue('scheduleValue', EVERY_MINUTE_CRON);
-                }
+                // if (watch('internalScheduleMode') === 'cronFormat') {
+                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
+                //   setValue('scheduleFieldCronFormat', '');
+                // } else {
+                //   setValue('scheduleFieldCronFormat', '');
+                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
+                // }
                 trigger([
                   'scheduleFieldCronFormat',
                   'scheduleValueUserFriendly'
@@ -1199,13 +1243,20 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         {currentScheduleMode === 'runSchedule' &&
           currentInternalScheduleMode === 'cronFormat' && (
             <>
-              <div className="scheduler-form-element-container schedule-input-field scheduler-input-top">
+              <div
+                className={
+                  vertexErrors.endTime?.message ||
+                  vertexErrors.startTime?.message
+                    ? 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input'
+                    : 'scheduler-form-element-container schedule-input-field scheduler-input-top'
+                }
+              >
                 <FormInputText
                   label="Schedule*"
                   control={control}
                   name="scheduleFieldCronFormat"
                   error={vertexErrors.scheduleFieldCronFormat}
-                  onChangeCallback={() => trigger('scheduleFieldCronFormat')}
+                  onChangeCallback={handleCronExpression}
                 />
               </div>
               <div>
@@ -1230,7 +1281,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     value={field.value || ''}
                     setValue={(newValue: string) => {
                       field.onChange(newValue);
-                      trigger('scheduleValueUserFriendly');
+                      handleCronExpression(newValue);
                     }}
                     allowedPeriods={
                       allowedPeriodsCron as PeriodType[] | undefined
