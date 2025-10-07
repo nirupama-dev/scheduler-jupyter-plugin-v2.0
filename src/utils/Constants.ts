@@ -356,3 +356,19 @@ export const COMPOSER_EXECUTION_HISTORY_DAG_HEADER = [
 ];
 
 export const NO_ROWS_TO_DISPLAY = 'No rows to display';
+
+export const ENCRYPTION_TEXT = 'Encryption';
+
+export const DEFAULT_ENCRYPTION_SELECTED = 'googleManagedEncryption';
+export const CUSTOMER_ENCRYPTION = 'customerManagedEncryption';
+
+export const ENCRYPTION_OPTIONS = [
+  {
+    label: 'Google-managed encryption key',
+    value: DEFAULT_ENCRYPTION_SELECTED
+  },
+  {
+    label: 'Customer managed encryption key(CMEK)',
+    value: CUSTOMER_ENCRYPTION
+  }
+];

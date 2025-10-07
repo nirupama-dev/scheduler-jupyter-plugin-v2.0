@@ -19,7 +19,12 @@
  * It extends the common notebook schema and includes Vertex-specific fields.
  */
 import { z } from 'zod';
-import { DISK_MIN_SIZE, DISK_MAX_SIZE } from '../utils/Constants';
+import {
+  DISK_MIN_SIZE,
+  DISK_MAX_SIZE,
+  DEFAULT_ENCRYPTION_SELECTED,
+  CUSTOMER_ENCRYPTION
+} from '../utils/Constants';
 import {
   createNotebookCommonSchema,
   parameterSchema,
@@ -39,6 +44,7 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   kernelName: z.string().min(1, 'Kernel is required.'),
   cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
   serviceAccount: z.string().min(1, 'Service account is required.'),
+  encryptionOption: z.enum([DEFAULT_ENCRYPTION_SELECTED, CUSTOMER_ENCRYPTION]),
   networkOption: z
     .enum(['networkInThisProject', 'networkSharedFromHostProject'])
     .optional(),

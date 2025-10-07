@@ -62,7 +62,10 @@ import {
   DEFAULT_DISK_SIZE,
   EVERY_MINUTE_CRON,
   NETWORK_IN_THIS_PROJECT_VALUE,
-  NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
+  NETWORK_SHARED_FROM_HOST_PROJECT_VALUE,
+  ENCRYPTION_TEXT,
+  ENCRYPTION_OPTIONS,
+  CUSTOMER_ENCRYPTION
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -143,6 +146,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const currentInternalScheduleMode = watch('internalScheduleMode');
   const currentPrimaryNetwork = watch('primaryNetwork');
   const currentSchedulerSelection = watch('schedulerSelection');
+  const encryptionSelected = watch('encryptionOption');
+
+  // 
   const isVertexForm = currentSchedulerSelection === 'vertex';
   const vertexErrors = isVertexForm
     ? (errors as FieldErrors<z.infer<typeof createVertexSchema>>)
@@ -961,6 +967,46 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           error={vertexErrors.serviceAccount}
         />
       </div>
+
+      {/* Encryption */}
+      <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+        {ENCRYPTION_TEXT}
+      </div>
+
+      <div className="scheduler-form-element-container panel-margin">
+        <FormInputRadio
+          name="encryptionOption"
+          control={control}
+          className="network-layout"
+          options={ENCRYPTION_OPTIONS.map(option => {
+            const newOption: RadioOption = { ...option };
+            // Check if the current option is the "host project" option
+            // if (option.value === 'networkSharedFromHostProject') {
+            //   // If there's no hostProject, disable this option
+            //   if (!hostProject?.name) {
+            //     newOption.disabled = true;
+            //   } // Add the host project name to the label if it exists
+            //   if (hostProject?.name) {
+            //     newOption.label = `${option.label} "${hostProject.name}"`;
+            //   }
+            // }
+            return newOption;
+          })}
+          error={vertexErrors.networkOption}
+          onChange={() => {
+            // // Clear all network-related fields when network option changes
+            // setValue('primaryNetwork', '');
+            // setValue('subNetwork', '');
+            // setValue('sharedNetwork', { network: '', subnetwork: '' });
+            // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
+          }}
+        />
+      </div>
+
+      {
+        encryptionSelected === CUSTOMER_ENCRYPTION && 
+        
+      }
 
       {/* Network Configuration Section */}
       <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">

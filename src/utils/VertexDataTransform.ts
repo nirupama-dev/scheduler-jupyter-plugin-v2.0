@@ -115,7 +115,8 @@ export const transformZodSchemaToVertexSchedulePayload = (
         gcsOutputUri: outputBucketUri,
         serviceAccount: VertexScheduleData.serviceAccount,
         kernelName: VertexScheduleData.kernelName,
-        workbenchRuntime: {}
+        workbenchRuntime: {},
+        encryptionSpec: {}
       }
     }
   };
@@ -239,6 +240,13 @@ export const transformVertexScheduleResponseToZodSchema = (
         : undefined,
     scheduleMode: scheduleMode
   };
+
+  if (
+    vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
+      ?.encryptionSpec?.kmsKeyName
+  ) {
+    //TODO : Add encryption fields to form
+  }
 
   console.log(
     'Transformed Vertex Schedule Data for UI: Input: ',

@@ -30,7 +30,8 @@ import {
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME,
-  SCHEDULE_VALUE_EXPRESSION
+  SCHEDULE_VALUE_EXPRESSION,
+  DEFAULT_ENCRYPTION_SELECTED
 } from './Constants';
 import {
   INotebookKernalSchdulerDefaults,
@@ -93,6 +94,7 @@ const getDefaultVertexValues = (
     vertexRegion: initialSchedulerStateData?.credentials?.region_id ?? '', //set from credentials.
     cloudStorageBucket: DEFAULT_CLOUD_STORAGE_BUCKET.value, // Assumes DEFAULT_CLOUD_STORAGE_BUCKET will be found by useEffect
     serviceAccount: DEFAULT_SERVICE_ACCOUNT, // Assumes DEFAULT_SERVICE_ACCOUNT will be found by useEffect
+    encryptionOption: DEFAULT_ENCRYPTION_SELECTED,
     networkOption: DEFAULT_NETWORK_SELECTED,
     primaryNetwork: '', // Will be dynamically set by primaryNetworkSelected if 'networkInThisProject'
     subNetwork: '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'
