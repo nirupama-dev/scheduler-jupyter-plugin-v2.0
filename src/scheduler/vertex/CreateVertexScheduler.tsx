@@ -1440,6 +1440,53 @@ const CreateVertexScheduler = ({
             </div>
           </div>
 
+          <div className="create-scheduler-form-element panel-margin block-seperation">
+            <Autocomplete
+              className="create-scheduler-style-trigger"
+              options={serviceAccountList}
+              getOptionLabel={option => option.displayName}
+              value={
+                serviceAccountList.find(
+                  option => option.email === serviceAccountSelected?.email
+                ) || null
+              }
+              clearIcon={false}
+              loading={serviceAccountLoading}
+              onChange={(_event, val) => handleServiceAccountChange(val)}
+              renderInput={params => (
+                <TextField {...params} label="Service account*" />
+              )}
+              renderOption={(props, option) => (
+                <Box
+                  component="li"
+                  {...props}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start'
+                  }}
+                >
+                  <Typography variant="body1">{option.displayName}</Typography>
+                  <Typography variant="body2" color="textSecondary">
+                    {option.email}
+                  </Typography>
+                </Box>
+              )}
+            />
+          </div>
+          {!serviceAccountSelected && !errorMessageServiceAccount && (
+            <ErrorMessage
+              message="Service account is required"
+              showIcon={false}
+            />
+          )}
+
+          {errorMessageServiceAccount && (
+            <span className="error-message-warn error-key-missing">
+              {errorMessageServiceAccount}
+            </span>
+          )}
+
           <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
             Encryption
           </div>
@@ -1632,53 +1679,6 @@ const CreateVertexScheduler = ({
                 </div>
               </div>
             </>
-          )}
-
-          <div className="create-scheduler-form-element panel-margin block-seperation">
-            <Autocomplete
-              className="create-scheduler-style-trigger"
-              options={serviceAccountList}
-              getOptionLabel={option => option.displayName}
-              value={
-                serviceAccountList.find(
-                  option => option.email === serviceAccountSelected?.email
-                ) || null
-              }
-              clearIcon={false}
-              loading={serviceAccountLoading}
-              onChange={(_event, val) => handleServiceAccountChange(val)}
-              renderInput={params => (
-                <TextField {...params} label="Service account*" />
-              )}
-              renderOption={(props, option) => (
-                <Box
-                  component="li"
-                  {...props}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start'
-                  }}
-                >
-                  <Typography variant="body1">{option.displayName}</Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {option.email}
-                  </Typography>
-                </Box>
-              )}
-            />
-          </div>
-          {!serviceAccountSelected && !errorMessageServiceAccount && (
-            <ErrorMessage
-              message="Service account is required"
-              showIcon={false}
-            />
-          )}
-
-          {errorMessageServiceAccount && (
-            <span className="error-message-warn error-key-missing">
-              {errorMessageServiceAccount}
-            </span>
           )}
 
           <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
