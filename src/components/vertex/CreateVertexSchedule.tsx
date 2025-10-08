@@ -66,7 +66,9 @@ import {
   ENCRYPTION_TEXT,
   ENCRYPTION_OPTIONS,
   CUSTOMER_ENCRYPTION,
-  DEFAULT_ENCRYPTION_SELECTED
+  DEFAULT_ENCRYPTION_SELECTED,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  CUSTOMER_MAANGED_ENCRYPTION
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -124,8 +126,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     primaryNetwork: false,
     subNetwork: false,
     sharedNetwork: false,
-    hostProject: false // Initialized
+    hostProject: false,
+    keyRings: false,
+    cryptoKeys: false
   });
+
+  //Encryption states
+  const [keyRingList, setKeyRingList] = useState<ILabelValue<string>[]>([]);
+  const [cryptoKeyList, setCryptoKeyList] = useState<ILabelValue<string>[]>([]);
 
   // Timezones for dropdown
   const timezones: ILabelValue<string>[] = useMemo(
@@ -148,6 +156,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const currentPrimaryNetwork = watch('primaryNetwork');
   const currentSchedulerSelection = watch('schedulerSelection');
   const encryptionSelected = watch('encryptionOption');
+  const customerEncryptionType = watch('customerEncryptionType');
+  const keyRingSelected = watch('keyRing');
+  // const cryptoKeySelected = watch('cryptoKey');
 
   //
   const isVertexForm = currentSchedulerSelection === 'vertex';
@@ -567,6 +578,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     );
     fetchMachineTypes(getValues('vertexRegion'));
     trigger('machineType');
+    listKeyRings();
   }, [currentRegion, fetchMachineTypes, trigger]);
 
   // Effect for Subnetworks dependent on Primary Network and Region
@@ -787,6 +799,67 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       // setCustomerEncryptionRadioValue(DEFAULT_CUSTOMER_MANAGED_SELECTION);
     }
   };
+
+  /**
+   * List Customer managed encryption key rings
+   */
+  const listKeyRings = async () => {
+    const listKeyRingsPayload = {
+      region: credentials?.region_id,
+      projectId: credentials?.project_id,
+      accessToken: credentials?.access_token
+    };
+    setLoadingState(prev => ({ ...prev, keyRings: true }));
+    const keyRingList = await VertexServices.listKeyRings(listKeyRingsPayload);
+    if (Array.isArray(keyRingList) && keyRingList.length > 0) {
+      setKeyRingList(keyRingList);
+    }
+    setLoadingState(prev => ({ ...prev, keyRings: false }));
+  };
+
+  /**
+   * List crypto keys from KmS key ring
+   * @param keyRing selected key ring to list down the keys
+   */
+  const listCryptoKeysAPI = async (keyRing: string) => {
+    const listKeysPayload = {
+      credentials: {
+        region: credentials?.region_id,
+        projectId: credentials?.project_id,
+        accessToken: credentials?.access_token
+      },
+      keyRing
+    };
+    setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
+    const cryptoKeyListResponse =
+      await VertexServices.listCryptoKeysAPIService(listKeysPayload);
+    if (
+      Array.isArray(cryptoKeyListResponse) &&
+      cryptoKeyListResponse.length > 0
+    ) {
+      setCryptoKeyList(cryptoKeyListResponse);
+      if (!editScheduleData?.editMode) {
+        setValue('cryptoKey', cryptoKeyListResponse[0]);
+      }
+    }
+    setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
+  };
+
+  /**
+   * Handle key ring change
+   */
+
+  const handleKeyRingChange = (selectedKeyRing: string | null) => {
+    if (selectedKeyRing) {
+      setValue('keyRing', selectedKeyRing);
+      setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
+      trigger('cryptoKey');
+    }
+  };
+
+  useEffect(() => {
+    listCryptoKeysAPI(keyRingSelected);
+  }, [keyRingSelected]);
 
   // --- Render Component UI ---
   return (
@@ -1022,13 +1095,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             control={control}
             className="schedule-radio-btn"
             options={[
-              { label: '', value: 'select' },
-              { label: '', value: 'manual' }
+              { label: '', value: DEFAULT_CUSTOMER_MANAGED_SELECTION },
+              { label: '', value: CUSTOMER_MAANGED_ENCRYPTION }
             ]}
           />
 
           {/* Option 1: Select Key Ring and Key */}
-          {customerEncryptionType === 'select' && (
+          {customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION && (
             <div className="horizontal-element-wrapper scheduler-input-top">
               <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
                 <FormInputDropdown
@@ -1039,6 +1112,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   loading={loadingState.keyRings}
                   disabled={!currentRegion}
                   error={vertexErrors.keyRing}
+                  onChangeCallback={event =>
+                    handleKeyRingChange(event.target.value)
+                  }
                   // Add onChange to fetch keys for the selected ring
                 />
               </div>
@@ -1047,8 +1123,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   name="cryptoKey"
                   control={control}
                   label="Keys*"
-                  options={keyList}
-                  loading={loadingState.keys}
+                  options={cryptoKeyList}
+                  loading={loadingState.cryptoKeys}
                   disabled={!watch('keyRing')}
                   error={vertexErrors.cryptoKey}
                 />
@@ -1057,7 +1133,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           )}
 
           {/* Option 2: Enter Key Manually */}
-          {customerEncryptionType === 'manual' && (
+          {customerEncryptionType === CUSTOMER_MAANGED_ENCRYPTION && (
             <div className="scheduler-form-element-container scheduler-input-top">
               <FormInputText
                 name="manualKey"

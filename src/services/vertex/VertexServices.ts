@@ -18,10 +18,12 @@
 import { Notification } from '@jupyterlab/apputils';
 import { requestAPI } from '../../handler/Handler';
 import {
+  ICryptoListKeys,
   IDeleteSchedulerAPIResponse,
   IDownloadFile,
   IExecutionPayload,
   IFormattedResponse,
+  IKeyRingPayload,
   IOutputFileExistsPayload,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
@@ -29,7 +31,11 @@ import {
   IVertexDeleteAPIArgs,
   IVertexListPayload
 } from '../../interfaces/VertexInterface';
-import { ABORT_MESSAGE } from '../../utils/Constants';
+import {
+  ABORT_MESSAGE,
+  API_HEADER_BEARER,
+  API_HEADER_CONTENT_TYPE
+} from '../../utils/Constants';
 import { LOG_LEVEL, SchedulerLoggingService } from '../common/LoggingService';
 import { toast } from 'react-toastify';
 import {
@@ -632,9 +638,7 @@ export class VertexServices {
   /**
    * Create a Vertex Scheduler
    * @param vertexSchedulePayload - The payload containing the scheduler details
-   * @param setCreateCompleted - Callback to set the create completed state
-   * @param setCreatingVertexScheduler - Callback to set the creating vertex scheduler state
-   * @param setCreateMode - Callback to set the create mode state
+   * @param region - region to create the schedule
    */
   static readonly createVertexNotebookJobSchedule = async (
     vertexSchedulePayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule,
@@ -685,11 +689,6 @@ export class VertexServices {
    * @param jobId - The ID of the job to edit
    * @param region - The region of the job
    * @param updatedVertexScheduleData - The updated job details
-   * @param setCreateCompleted - Callback to set the create completed state
-   * @param setCreatingVertexScheduler - Callback to set the creating vertex scheduler state
-   * @param gcsPath - The GCS path for the notebook
-   * @param setEditMode - Callback to set the edit mode state
-   * @param setCreateMode - Callback to set the create mode state
    */
   static readonly updateVertexNotebookJobSchedule = async (
     jobId: string,
@@ -736,6 +735,61 @@ export class VertexServices {
 
       return false;
     }
+  };
+
+  /**
+   *
+   */
+  static readonly listKeyRings = async (
+    listKeyRingsPayload: IKeyRingPayload
+  ) => {
+    try {
+      const { region, projectId, accessToken } = listKeyRingsPayload;
+      const keyRingList = await requestAPI(
+        `api/cloudKms/listKeyRings?region_id=${region}&project_id=${projectId}`,
+        {
+          headers: {
+            'Content-Type': API_HEADER_CONTENT_TYPE,
+            Authorization: API_HEADER_BEARER + accessToken
+          }
+        }
+      );
+      return keyRingList;
+    } catch (error: any) {
+      const errorResponse = `Error in Key Rings : ${error}`;
+      handleError({
+        error: errorResponse
+      });
+      SchedulerLoggingService.log('Error Key Rings', LOG_LEVEL.ERROR);
+    }
+  };
+
+  // Function to list crypto keys from KmS key ring
+  static listCryptoKeysAPIService = async (
+    listKeysPayload: ICryptoListKeys
+  ) => {
+    const { credentials, keyRing } = listKeysPayload;
+    const listKeys = requestAPI(
+      `api/cloudKms/listCryptoKeys?region_id=${credentials.region}&project_id=${credentials.projectId}&key_ring=${keyRing}`,
+      {
+        headers: {
+          'Content-Type': API_HEADER_CONTENT_TYPE,
+          Authorization: API_HEADER_BEARER + credentials.accessToken
+        }
+      }
+    )
+      .then((response: any) => {
+        return response;
+      })
+      .catch((error: Error) => {
+        const errorResponse = `Error listing Keys : ${error}`;
+        handleError({
+          error: errorResponse
+        });
+        SchedulerLoggingService.log('Error listing Keys', LOG_LEVEL.ERROR);
+      });
+
+    return listKeys;
   };
 }
 

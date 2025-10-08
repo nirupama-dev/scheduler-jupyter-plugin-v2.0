@@ -46,11 +46,15 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   kernelName: z.string().min(1, 'Kernel is required.'),
   cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
   serviceAccount: z.string().min(1, 'Service account is required.'),
+  // Encryption fields
   encryptionOption: z.enum([DEFAULT_ENCRYPTION_SELECTED, CUSTOMER_ENCRYPTION]),
   customerEncryptionType: z.enum([
     DEFAULT_CUSTOMER_MANAGED_SELECTION,
     CUSTOMER_MAANGED_ENCRYPTION
   ]),
+  keyRing: z.string(),
+  cryptoKey: z.string(),
+  manualKey: z.string(),
   networkOption: z
     .enum(['networkInThisProject', 'networkSharedFromHostProject'])
     .optional(),
