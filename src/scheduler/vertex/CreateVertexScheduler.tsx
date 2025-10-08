@@ -1527,10 +1527,10 @@ const CreateVertexScheduler = ({
                     </Typography>
                   }
                 />
-                <div className="create-batch-sub-message">
+                <div className="create-encryption-sub-message">
                   Manage via{' '}
                   <div
-                    className="submit-job-learn-more"
+                    className="encryption-link"
                     onClick={() => {
                       window.open(
                         `${SECURITY_KEY}?project=${projectId}`,
@@ -1550,7 +1550,6 @@ const CreateVertexScheduler = ({
               <div className="execution-history-main-wrapper success-message-top encryption-containeer">
                 <Radio
                   size="small"
-                  className="select-batch-encrypt-radio-style"
                   value="mainClass"
                   checked={
                     customerEncryptionRadioValue ===
@@ -1648,7 +1647,6 @@ const CreateVertexScheduler = ({
                 <div className="encryption-radio-list">
                   <Radio
                     size="small"
-                    className="select-batch-encrypt-radio-style "
                     value="mainClass"
                     checked={
                       customerEncryptionRadioValue !==
