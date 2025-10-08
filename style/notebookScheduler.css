@@ -804,7 +804,7 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   width: 473px;
 }
 
-.create-batch-sub-message {
+.create-encryption-sub-message {
   font-style: normal;
   font-weight: 400;
   font-size: 11px;
@@ -829,4 +829,11 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .error-key-parent-manual {
   padding-top: 10px;
   width: 90%;
+}
+
+.encryption-link {
+  color: #3367d6;
+  text-decoration: underline;
+  cursor: pointer;
+  padding-left: 3px;
 }
