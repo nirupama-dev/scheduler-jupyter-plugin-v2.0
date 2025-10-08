@@ -372,3 +372,18 @@ export const ENCRYPTION_OPTIONS = [
     value: CUSTOMER_ENCRYPTION
   }
 ];
+
+export const GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT =
+  'No configuration required';
+
+export const CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT = 'Manage via';
+
+export const DEFAULT_CUSTOMER_MANAGED_SELECTION = 'key';
+
+export const CUSTOMER_MAANGED_ENCRYPTION = 'manual';
+
+export const SECURITY_KEY =
+  'https://console.cloud.google.com/security/kms/keyrings';
+
+export const CUSTOMER_MANAGED_ENCRYPTION_LINK =
+  'Google Cloud Key Management Service';

@@ -19,7 +19,11 @@
  */
 import { aiplatform_v1 } from 'googleapis';
 import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema';
-import { CRON_FOR_SCHEDULE_EVERY_MIN, DEFAULT_TIME_ZONE } from './Constants';
+import {
+  CRON_FOR_SCHEDULE_EVERY_MIN,
+  DEFAULT_ENCRYPTION_SELECTED,
+  DEFAULT_TIME_ZONE
+} from './Constants';
 import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
 
 /**
@@ -222,6 +226,7 @@ export const transformVertexScheduleResponseToZodSchema = (
     serviceAccount:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.serviceAccount ?? '',
+    encryptionOption: DEFAULT_ENCRYPTION_SELECTED,
     networkOption: networkOption,
     primaryNetwork: primaryNetwork,
     subNetwork: subnetwork,

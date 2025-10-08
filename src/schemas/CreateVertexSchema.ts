@@ -23,7 +23,9 @@ import {
   DISK_MIN_SIZE,
   DISK_MAX_SIZE,
   DEFAULT_ENCRYPTION_SELECTED,
-  CUSTOMER_ENCRYPTION
+  CUSTOMER_ENCRYPTION,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  CUSTOMER_MAANGED_ENCRYPTION
 } from '../utils/Constants';
 import {
   createNotebookCommonSchema,
@@ -45,6 +47,10 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
   serviceAccount: z.string().min(1, 'Service account is required.'),
   encryptionOption: z.enum([DEFAULT_ENCRYPTION_SELECTED, CUSTOMER_ENCRYPTION]),
+  customerEncryptionType: z.enum([
+    DEFAULT_CUSTOMER_MANAGED_SELECTION,
+    CUSTOMER_MAANGED_ENCRYPTION
+  ]),
   networkOption: z
     .enum(['networkInThisProject', 'networkSharedFromHostProject'])
     .optional(),

@@ -65,7 +65,8 @@ import {
   NETWORK_SHARED_FROM_HOST_PROJECT_VALUE,
   ENCRYPTION_TEXT,
   ENCRYPTION_OPTIONS,
-  CUSTOMER_ENCRYPTION
+  CUSTOMER_ENCRYPTION,
+  DEFAULT_ENCRYPTION_SELECTED
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -148,7 +149,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const currentSchedulerSelection = watch('schedulerSelection');
   const encryptionSelected = watch('encryptionOption');
 
-  // 
+  //
   const isVertexForm = currentSchedulerSelection === 'vertex';
   const vertexErrors = isVertexForm
     ? (errors as FieldErrors<z.infer<typeof createVertexSchema>>)
@@ -767,6 +768,26 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   );
   console.log('Isvalid:', isValid);
   console.log('Errors:', errors);
+
+  /**
+   *Handle encryption selection
+   *@param {object} eventValue - The event object containing the selected encryption value.
+   */
+  const handleEncryptionChange = (eventValue: {
+    target: { value: React.SetStateAction<string> };
+  }) => {
+    if (eventValue.target.value === DEFAULT_ENCRYPTION_SELECTED) {
+      setValue('encryptionOption', eventValue.target.value);
+      // setSelectedEncryption(eventValue.target.value);
+      // setCustomerEncryptionRadioValue('');
+      // setKeyRingSelected('');
+      // setCryptoKeySelected('');
+    } else {
+      // setSelectedEncryption(eventValue.target.value);
+      // setCustomerEncryptionRadioValue(DEFAULT_CUSTOMER_MANAGED_SELECTION);
+    }
+  };
+
   // --- Render Component UI ---
   return (
     <div>
@@ -980,33 +1001,75 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           className="network-layout"
           options={ENCRYPTION_OPTIONS.map(option => {
             const newOption: RadioOption = { ...option };
-            // Check if the current option is the "host project" option
-            // if (option.value === 'networkSharedFromHostProject') {
-            //   // If there's no hostProject, disable this option
-            //   if (!hostProject?.name) {
-            //     newOption.disabled = true;
-            //   } // Add the host project name to the label if it exists
-            //   if (hostProject?.name) {
-            //     newOption.label = `${option.label} "${hostProject.name}"`;
-            //   }
-            // }
             return newOption;
           })}
           error={vertexErrors.networkOption}
-          onChange={() => {
-            // // Clear all network-related fields when network option changes
-            // setValue('primaryNetwork', '');
-            // setValue('subNetwork', '');
-            // setValue('sharedNetwork', { network: '', subnetwork: '' });
-            // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
-          }}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            handleEncryptionChange(e)
+          }
+          projectId={credentials?.project_id}
         />
       </div>
 
-      {
-        encryptionSelected === CUSTOMER_ENCRYPTION && 
-        
-      }
+      {encryptionSelected === CUSTOMER_ENCRYPTION && <></>}
+
+      {/* --- Customer-Managed Encryption (CMEK) Section --- */}
+      {encryptionSelected === CUSTOMER_ENCRYPTION && (
+        <div className="schedule-child-section">
+          {/* Nested Radio Group: Select vs. Manual Entry */}
+          <FormInputRadio
+            name="customerEncryptionType" // New form field for this choice
+            control={control}
+            className="schedule-radio-btn"
+            options={[
+              { label: '', value: 'select' },
+              { label: '', value: 'manual' }
+            ]}
+          />
+
+          {/* Option 1: Select Key Ring and Key */}
+          {customerEncryptionType === 'select' && (
+            <div className="horizontal-element-wrapper scheduler-input-top">
+              <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+                <FormInputDropdown
+                  name="keyRing"
+                  control={control}
+                  label="Key rings*"
+                  options={keyRingList}
+                  loading={loadingState.keyRings}
+                  disabled={!currentRegion}
+                  error={vertexErrors.keyRing}
+                  // Add onChange to fetch keys for the selected ring
+                />
+              </div>
+              <div className="scheduler-form-element-container create-scheduler-form-element-input-fl">
+                <FormInputDropdown
+                  name="cryptoKey"
+                  control={control}
+                  label="Keys*"
+                  options={keyList}
+                  loading={loadingState.keys}
+                  disabled={!watch('keyRing')}
+                  error={vertexErrors.cryptoKey}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Option 2: Enter Key Manually */}
+          {customerEncryptionType === 'manual' && (
+            <div className="scheduler-form-element-container scheduler-input-top">
+              <FormInputText
+                name="manualKey"
+                control={control}
+                label="Enter key manually*"
+                error={vertexErrors.manualKey}
+                placeholder="projects/PROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/KEY"
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Network Configuration Section */}
       <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">

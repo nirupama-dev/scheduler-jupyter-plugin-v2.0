@@ -30,7 +30,12 @@ import {
   NETWORK_SHARED_FROM_HOST_PROJECT_VALUE,
   NETWORK_OPTIONS,
   SHARED_NETWORK_DESCRIPTION,
-  SHARED_NETWORK_DOC_URL
+  SHARED_NETWORK_DOC_URL,
+  GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT,
+  CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT,
+  SECURITY_KEY,
+  CUSTOMER_MANAGED_ENCRYPTION_LINK,
+  ENCRYPTION_OPTIONS
 } from '../../../utils/Constants';
 import LearnMore from '../links/LearnMore';
 
@@ -40,7 +45,8 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
   className = '',
   options = [],
   error,
-  hostProject
+  hostProject,
+  projectId = ''
 }) => {
   const safeOptions = Array.isArray(options) ? options : [];
   const hasHostProject =
@@ -68,6 +74,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
           className="scheduler-label-font"
           disabled={singleOption.disabled}
         />
+
         {singleOption.label === NETWORK_OPTIONS[1].label && (
           <>
             <span className="sub-para tab-text-sub-cl">
@@ -77,6 +84,33 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
               <LearnMore path={SHARED_NETWORK_DOC_URL} />
             </div>
           </>
+        )}
+
+        {/* Encryption  */}
+
+        {singleOption.label === ENCRYPTION_OPTIONS[0].label && (
+          <>
+            <span className="sub-para tab-text-sub-cl">
+              {GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT}
+            </span>
+          </>
+        )}
+
+        {singleOption.label === ENCRYPTION_OPTIONS[1].label && (
+          <div>
+            <span className="sub-para tab-text-sub-cl">
+              {CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT}{' '}
+            </span>
+
+            <span
+              className="submit-job-learn-more"
+              onClick={() => {
+                window.open(`${SECURITY_KEY}?project=${projectId}`, '_blank');
+              }}
+            >
+              {CUSTOMER_MANAGED_ENCRYPTION_LINK}
+            </span>
+          </div>
         )}
       </>
     ));
