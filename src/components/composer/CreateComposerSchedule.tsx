@@ -55,7 +55,8 @@ export const CreateComposerSchedule: React.FC<
   setValue,
   getValues,
   watch,
-  setError, app,
+  setError,
+  app,
   trigger,
   isValid,
   credentials,
@@ -107,39 +108,39 @@ export const CreateComposerSchedule: React.FC<
 
   // --- Fetch Regions based on selected Project ID ---
 
-    const fetchRegions = async () => {
-      if (selectedProjectId) {
-        setValue('composerRegion', '');
+  const fetchRegions = async () => {
+    if (selectedProjectId) {
+      setValue('composerRegion', '');
 
-        try {
-          setLoadingState(prev => ({ ...prev, region: true }));
-          const options =
-            await ComputeServices.regionAPIService(selectedProjectId);
-          setRegionOptions(options);
-          let currentRegionValue = getValues('composerRegion');
+      try {
+        setLoadingState(prev => ({ ...prev, region: true }));
+        const options =
+          await ComputeServices.regionAPIService(selectedProjectId);
+        setRegionOptions(options);
+        let currentRegionValue = getValues('composerRegion');
 
-          // If no value is currently set, try to use the default from credentials.
-          if (!currentRegionValue && credentials?.region_id) {
-            currentRegionValue = credentials.region_id;
-          }
-
-          // Validate the determined regionToSet against the list of valid regions.
-          const isRegionValid = options.some(
-            region => region.value === currentRegionValue
-          );
-          // If the region is valid, set it; otherwise, clear the field.
-          if (!isRegionValid) {
-            setValue('composerRegion', '');
-          } else {
-            setValue('composerRegion', currentRegionValue);
-          }
-        } catch (authenticationError) {
-          handleOpenLoginWidget(app);
-        } finally {
-          setLoadingState(prev => ({ ...prev, region: false }));
+        // If no value is currently set, try to use the default from credentials.
+        if (!currentRegionValue && credentials?.region_id) {
+          currentRegionValue = credentials.region_id;
         }
+
+        // Validate the determined regionToSet against the list of valid regions.
+        const isRegionValid = options.some(
+          region => region.value === currentRegionValue
+        );
+        // If the region is valid, set it; otherwise, clear the field.
+        if (!isRegionValid) {
+          setValue('composerRegion', '');
+        } else {
+          setValue('composerRegion', currentRegionValue);
+        }
+      } catch (authenticationError) {
+        handleOpenLoginWidget(app);
+      } finally {
+        setLoadingState(prev => ({ ...prev, region: false }));
       }
-    };
+    }
+  };
 
   const fetchEnvironments = useCallback(async () => {
     try {
@@ -149,43 +150,55 @@ export const CreateComposerSchedule: React.FC<
         selectedRegion
       );
       setEnvOptions(options);
-        } catch (authenticationError) {
-          handleOpenLoginWidget(app);
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
     } finally {
       setLoadingState(prev => ({ ...prev, environment: false }));
     }
   }, [selectedProjectId, selectedRegion]);
 
   const fetchRemoteKernelData = useCallback(async () => {
-      try {
-        if (executionMode === 'cluster') {
-          setValue('serverless', '');
-          const clusterOptionsFromAPI =
-            await ComposerServices.listClustersAPIService();
-          setClusterOptions(clusterOptionsFromAPI);
-          const selectedClusterName = clusterOptionsFromAPI.find((clusterOption: ILabelValue<string>) =>
-            initialSchedulerDataContext?.initialDefaults?.kernelDetails?.kernelDisplayName.includes(clusterOption.value)
-          );
-          setValue('cluster', selectedClusterName? selectedClusterName.value : '');
-        } else if (executionMode === 'serverless') {
-          setValue('cluster', '');
-          const serverlessOptionsFromAPI =
-            await ComposerServices.listSessionTemplatesAPIService();
-          setServerlessOptions(serverlessOptionsFromAPI);
-          const selectedServerlessName = serverlessOptionsFromAPI.find((serverlessOption: ILabelValue<string>) =>
-            initialSchedulerDataContext?.initialDefaults?.kernelDetails?.kernelDisplayName.includes(serverlessOption.value)
-          );
-          setValue('serverless', selectedServerlessName ? selectedServerlessName.value : '');
-        } else {
-          setClusterOptions([]);
-          setServerlessOptions([]);
-        }
-      } catch (authenticationError) {
-        handleOpenLoginWidget(app);
-      }finally {
-        trigger(['cluster', 'serverless']);
+    try {
+      if (executionMode === 'cluster') {
+        setValue('serverless', '');
+        const clusterOptionsFromAPI =
+          await ComposerServices.listClustersAPIService();
+        setClusterOptions(clusterOptionsFromAPI);
+        const selectedClusterName = clusterOptionsFromAPI.find(
+          (clusterOption: ILabelValue<string>) =>
+            initialSchedulerDataContext?.initialDefaults?.kernelDetails?.kernelDisplayName.includes(
+              clusterOption.value
+            )
+        );
+        setValue(
+          'cluster',
+          selectedClusterName ? selectedClusterName.value : ''
+        );
+      } else if (executionMode === 'serverless') {
+        setValue('cluster', '');
+        const serverlessOptionsFromAPI =
+          await ComposerServices.listSessionTemplatesAPIService();
+        setServerlessOptions(serverlessOptionsFromAPI);
+        const selectedServerlessName = serverlessOptionsFromAPI.find(
+          (serverlessOption: ILabelValue<string>) =>
+            initialSchedulerDataContext?.initialDefaults?.kernelDetails?.kernelDisplayName.includes(
+              serverlessOption.value
+            )
+        );
+        setValue(
+          'serverless',
+          selectedServerlessName ? selectedServerlessName.value : ''
+        );
+      } else {
+        setClusterOptions([]);
+        setServerlessOptions([]);
       }
-    },[executionMode, setValue, initialSchedulerDataContext]);
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
+    } finally {
+      trigger(['cluster', 'serverless']);
+    }
+  }, [executionMode, setValue, initialSchedulerDataContext]);
 
   /**
    * Effect to fetch the project ID auth API, Remote kernel data if applicable
@@ -194,19 +207,22 @@ export const CreateComposerSchedule: React.FC<
   useEffect(() => {
     setLoadingState(prev => ({ ...prev, projectId: true }));
     if (!selectedProjectId && credentials?.project_id) {
-      console.log("settingValue");
+      console.log('settingValue');
       setValue('projectId', credentials.project_id);
     }
     console.log('project Id:', selectedProjectId, getValues('projectId'));
     console.log('Credentials:', credentials);
     setLoadingState(prev => ({ ...prev, projectId: false }));
 
-    if(initialSchedulerDataContext && initialSchedulerDataContext?.initialDefaults?.kernelDetails?.executionMode!= 'local'){
+    if (
+      initialSchedulerDataContext &&
+      initialSchedulerDataContext?.initialDefaults?.kernelDetails
+        ?.executionMode != 'local'
+    ) {
       fetchRemoteKernelData();
     }
   }, []);
 
-  
   /**
    * Effect to fetch regions when project ID changes, and  reset environments when region changes.
    */

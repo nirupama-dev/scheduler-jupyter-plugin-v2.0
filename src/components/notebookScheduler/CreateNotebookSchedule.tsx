@@ -165,7 +165,7 @@ export const CreateNotebookSchedule = (
                   projectId
                 );
             } else {
-               navigate('/list/vertex', { state: { region: region } });//TODO: redirect back to listing as no data was fetched
+              navigate('/list/vertex', { state: { region: region } }); //TODO: redirect back to listing as no data was fetched
             }
           } else if (
             schedulerTypeForEdit === 'composer' &&
@@ -183,7 +183,13 @@ export const CreateNotebookSchedule = (
               editScheduleData.existingScheduleData =
                 transformComposerScheduleDataToZodSchema(fetchedData);
             } else {
-               navigate('/list/composer', { state: { region: region, projectId: projectId, environment: environment } });//TODO: redirect to listing.
+              navigate('/list/composer', {
+                state: {
+                  region: region,
+                  projectId: projectId,
+                  environment: environment
+                }
+              }); //TODO: redirect to listing.
             }
           }
         } else {
@@ -234,7 +240,10 @@ export const CreateNotebookSchedule = (
       }
       if (initialSchedulerDataContext.initialDefaults) {
         //   setValue('schedulerSelection', initialFormData.initialDefaults.schedulerType);
-        return getInitialFormValues(initialSchedulerDataContext, sessionContext);
+        return getInitialFormValues(
+          initialSchedulerDataContext,
+          sessionContext
+        );
       }
     }
     //  return {} as CombinedCreateFormValues; // Return null or some default value if data isn't ready
@@ -428,7 +437,8 @@ export const CreateNotebookSchedule = (
   //return if form is not valid
   if (
     !initialSchedulerDataContext.credentials || //missing credentials
-    (!initialSchedulerDataContext.initialDefaults && !initialSchedulerDataContext.editModeData) || //missing initial data on create
+    (!initialSchedulerDataContext.initialDefaults &&
+      !initialSchedulerDataContext.editModeData) || //missing initial data on create
     (initialSchedulerDataContext.editModeData?.editMode &&
       !initialSchedulerDataContext.editModeData.existingScheduleData) || // missing existing data on edit
     !isDataLoaded || // initial values not loaded

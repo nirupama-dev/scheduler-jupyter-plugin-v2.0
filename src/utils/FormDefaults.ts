@@ -33,9 +33,7 @@ import {
   SCHEDULE_MODE_OPTIONS,
   SCHEDULE_VALUE_EXPRESSION
 } from './Constants';
-import {
-  IInitialSchedulerContextData
-} from '../interfaces/CommonInterface';
+import { IInitialSchedulerContextData } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
 import { ScheduleMode } from '../types/CommonSchedulerTypes';
 
@@ -126,8 +124,10 @@ const getDefaultComposerValues = (
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
   projectId: initialSchedulerStateData?.credentials?.project_id ?? '',
-  composerRegion:  initialSchedulerStateData?.credentials?.region_id ?? '',
-  executionMode: initialSchedulerStateData.initialDefaults?.kernelDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
+  composerRegion: initialSchedulerStateData?.credentials?.region_id ?? '',
+  executionMode:
+    initialSchedulerStateData.initialDefaults?.kernelDetails?.executionMode ??
+    'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
   retryDelay: 5, // Matches Zod's default
@@ -155,10 +155,7 @@ export const getInitialFormValues = (
     throw new Error('Notebook path not found in this session');
   }
   if (formState.initialDefaults?.schedulerType === 'composer') {
-    return getDefaultComposerValues(
-      formState,
-      sessionContext?.path
-    );
+    return getDefaultComposerValues(formState, sessionContext?.path);
   }
   // Default to Vertex if no criteria or criteria is 'vertex' and load default vertex values.
   return getDefaultVertexValues(formState, sessionContext);

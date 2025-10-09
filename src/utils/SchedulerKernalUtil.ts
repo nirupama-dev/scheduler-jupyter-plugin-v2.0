@@ -7,9 +7,7 @@ import { ISessionContext } from '@jupyterlab/apputils';
 import { IKernelDetails } from '../interfaces/ComposerInterface';
 import { SchedulerType } from '../types/CommonSchedulerTypes';
 import { Kernel, KernelAPI, KernelSpecAPI } from '@jupyterlab/services';
-import {
-  INotebookKernalSchdulerDefaults
-} from '../interfaces/CommonInterface';
+import { INotebookKernalSchdulerDefaults } from '../interfaces/CommonInterface';
 
 /**
  * caching KernelAPI.listRunning() to improve preformance.
@@ -92,17 +90,15 @@ const extractKernelDetails = async (
     if (parentResource.includes('/sessions')) {
       kernelDetails.executionMode = 'serverless';
       kernelDetails.isDataprocKernel = true;
-     
     } else if (parentResource.includes('/clusters')) {
       kernelDetails.executionMode = 'cluster';
       kernelDetails.isDataprocKernel = true;
-   
     }
   }
   return kernelDetails;
 };
 
- /**
+/**
  * The primary entry point to get scheduler-related kernel details.
  * This function handles fetching necessary API data using MyApiServices
  * and then processes it.
@@ -132,7 +128,7 @@ export const getDefaultSchedulerTypeOnLoad = async (
     return { kernalAndSchedulerDetails };
   }
   let availableKernelSpecs: any = null;
-  
+
   try {
     availableKernelSpecs = await KernelSpecAPI.getSpecs();
   } catch (error) {
@@ -143,7 +139,7 @@ export const getDefaultSchedulerTypeOnLoad = async (
     return { kernalAndSchedulerDetails }; // Return default values if specs cannot be fetched
   }
 
-   try {
+  try {
     const kernelDetails = await extractKernelDetails(
       availableKernelSpecs,
       sessionContext
@@ -166,7 +162,7 @@ export const getDefaultSchedulerTypeOnLoad = async (
     };
   } catch (error) {
     console.error('Error extracting scheduler type and kernel details:', error);
-    
+
     // Return safe defaults on error
     return {
       kernalAndSchedulerDetails: {
