@@ -42,7 +42,9 @@ import {
 import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
 import { ILabelValue } from '../../interfaces/CommonInterface';
-import { Controller } from 'react-hook-form';
+import { Controller, FieldErrors } from 'react-hook-form';
+import { createComposerSchema } from '../../schemas/CreateComposerSchema';
+import z from 'zod';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
@@ -67,7 +69,6 @@ export const CreateComposerSchedule: React.FC<
   const [serverlessOptions, setServerlessOptions] = useState<
     ILabelValue<string>[]
   >([]);
-  const [emailList, setEmailList] = useState<string[]>([]);
   const [loadingState, setLoadingState] = useState<ILoadingStateComposer>({
     projectId: false,
     region: false,
@@ -91,6 +92,11 @@ export const CreateComposerSchedule: React.FC<
   const emailOnRetry = watch('emailOnRetry');
   const emailOnSuccess = watch('emailOnSuccess');
   const executionMode = watch('executionMode');
+  const currentSchedulerSelection = watch('schedulerSelection');
+  const isComposerForm = currentSchedulerSelection === 'composer';
+  const composerErrors = isComposerForm
+    ? (errors as FieldErrors<z.infer<typeof createComposerSchema>>)
+    : {};
 
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
@@ -290,12 +296,12 @@ export const CreateComposerSchedule: React.FC<
           loading={loadingState.region}
           customClass="scheduler-tag-style "
           onChangeCallback={handleRegionChange}
-          error={errors.composerRegion}
+          error={composerErrors.composerRegion}
         />
       </div>
       <div
         className={
-          errors.composerRegion
+          composerErrors.composerRegion
             ? 'scheduler-form-element-container scheduler-input-top error-input'
             : 'scheduler-form-element-container scheduler-input-top'
         }
@@ -310,7 +316,7 @@ export const CreateComposerSchedule: React.FC<
           disabled={!selectedRegion}
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
-          error={errors.environment}
+          error={composerErrors.environment}
           getOptionDisabled={option =>
             composerEnvironmentStateListForCreate !== option.state
           }
@@ -340,7 +346,6 @@ export const CreateComposerSchedule: React.FC<
           label="Notebook"
           control={control}
           isChecked={true}
-          disabled={true}
         />
       </div>
       <AddParameters control={control} errors={errors} />
@@ -352,7 +357,7 @@ export const CreateComposerSchedule: React.FC<
               control={control}
               className="schedule-radio-btn"
               options={EXECUTION_MODE_OPTIONS}
-              error={errors.executionMode}
+              error={composerErrors.executionMode}
             />
           </div>
           {executionMode === 'cluster' && (
@@ -365,7 +370,7 @@ export const CreateComposerSchedule: React.FC<
                 options={clusterOptions}
                 loading={loadingState.cluster}
                 customClass="scheduler-tag-style "
-                error={errors.cluster}
+                error={composerErrors.cluster}
               />
             </div>
           )}
@@ -379,7 +384,7 @@ export const CreateComposerSchedule: React.FC<
                 options={serverlessOptions}
                 loading={loadingState.serverless}
                 customClass="scheduler-tag-style "
-                error={errors.serverless}
+                error={composerErrors.serverless}
               />
             </div>
           )}
@@ -402,7 +407,7 @@ export const CreateComposerSchedule: React.FC<
           name="retryCount"
           type="number"
           className="scheduler-tag-style "
-          error={errors.retryCount}
+          error={composerErrors.retryCount}
         />
       </div>
       <div className="scheduler-form-element-container scheduler-input-top">
@@ -412,7 +417,7 @@ export const CreateComposerSchedule: React.FC<
           name="retryDelay"
           type="number"
           className="scheduler-tag-style "
-          error={errors.retryDelay}
+          error={composerErrors.retryDelay}
         />
       </div>
       <div className="scheduler-form-element-container">
@@ -439,15 +444,20 @@ export const CreateComposerSchedule: React.FC<
       </div>
       {(emailOnFailure || emailOnRetry || emailOnSuccess) && (
         <div className="scheduler-form-element-container">
-          <MuiChipsInput
+          <Controller
             name="emailRecipients"
-            className="select-job-style"
-            onChange={e => setEmailList(e)}
-            addOnBlur={true}
-            value={emailList}
-            inputProps={{ placeholder: '' }}
-            label="Email recipients"
-            // error={errors.email_recipients}
+            control={control}
+            render={({ field, fieldState }) => (
+              <MuiChipsInput
+                {...field} // Spreads value, onChange, onBlur from RHF
+                className="select-job-style"
+                addOnBlur={true}
+                inputProps={{ placeholder: '' }}
+                label="Email recipients"
+                error={!!fieldState.error}
+                helperText={fieldState.error ? fieldState.error.message : null}
+              />
+            )}
           />
         </div>
       )}
@@ -488,7 +498,7 @@ export const CreateComposerSchedule: React.FC<
               setValue={setValue}
               options={timeZoneOptions}
               customClass="scheduler-tag-style "
-              error={errors.timeZone}
+              error={composerErrors.timeZone}
             />
           </div>
         </div>

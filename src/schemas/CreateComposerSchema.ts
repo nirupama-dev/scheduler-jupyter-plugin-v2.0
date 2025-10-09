@@ -24,12 +24,18 @@ import {
   parameterSchema
 } from './CreateNotebookCommonSchema';
 
+// Custom Regex Refine
+const customEmailSchema = z
+  .string()
+  .regex(
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+    'Please enter a valid email address. E.g username@domain.com'
+  );
+
 // Helper schema for email validation (can remain as is)
 const emailSchema = z
-  .string()
-  .email('Invalid email address')
-  .array()
-  .min(1, 'Email is required')
+  .array(customEmailSchema)
+  .min(1, 'Email recipients is required field')
   .optional(); // Removed the specific message here as it will be handled by superRefine
 
 export const createComposerSchema = createNotebookCommonSchema.extend({
