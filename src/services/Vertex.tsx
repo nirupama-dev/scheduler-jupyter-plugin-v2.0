@@ -28,11 +28,15 @@ import {
   ISchedulerData,
   ITriggerSchedule,
   IUpdateSchedulerAPIResponse,
-  IFormattedResponse
+  IFormattedResponse,
+  IKeyRingPayload,
+  ICryptoListKeys
 } from '../scheduler/vertex/VertexInterfaces';
 import dayjs, { Dayjs } from 'dayjs';
 import {
   ABORT_MESSAGE,
+  API_HEADER_BEARER,
+  API_HEADER_CONTENT_TYPE,
   DEFAULT_TIME_ZONE,
   HTTP_STATUS_FORBIDDEN,
   pattern
@@ -569,7 +573,12 @@ export class VertexServices {
         if (
           Object.hasOwn(
             formattedResponse.createNotebookExecutionJobRequest
-              .notebookExecutionJob.customEnvironmentSpec.networkSpec,
+              .notebookExecutionJob.customEnvironmentSpec,
+            'networkSpec'
+          ) &&
+          Object.hasOwn(
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec?.networkSpec,
             'network'
           )
         ) {
@@ -583,7 +592,12 @@ export class VertexServices {
         if (
           Object.hasOwn(
             formattedResponse.createNotebookExecutionJobRequest
-              .notebookExecutionJob.customEnvironmentSpec.networkSpec,
+              .notebookExecutionJob.customEnvironmentSpec,
+            'networkSpec'
+          ) &&
+          Object.hasOwn(
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.customEnvironmentSpec?.networkSpec,
             'subnetwork'
           )
         ) {
@@ -665,7 +679,18 @@ export class VertexServices {
         setCreateCompleted(false);
         setRegion(region);
 
-        // Parameters for future scope
+        if (
+          'encryptionSpec' in
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob &&
+          'kmsKeyName' in
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.encryptionSpec
+        ) {
+          scheduleDetails.kms_key_name =
+            formattedResponse.createNotebookExecutionJobRequest.notebookExecutionJob.encryptionSpec.kmsKeyName;
+        }
+
         if (
           Object.prototype.hasOwnProperty.call(
             formattedResponse.createNotebookExecutionJobRequest
@@ -673,6 +698,7 @@ export class VertexServices {
             'parameters'
           )
         ) {
+          // Parameters for future scope
           const parameterList = Object.keys(
             formattedResponse.createNotebookExecutionJobRequest
               .notebookExecutionJob.parameters
@@ -976,5 +1002,58 @@ export class VertexServices {
           LOG_LEVEL.ERROR
         );
       });
+  };
+
+  //Funtion to key rings from KMS
+  static readonly listKeyRings = async (
+    listKeyRingsPayload: IKeyRingPayload
+  ) => {
+    try {
+      const { region, projectId, accessToken } = listKeyRingsPayload;
+      const keyRingList = await requestAPI(
+        `api/cloudKms/listKeyRings?region_id=${region}&project_id=${projectId}`,
+        {
+          headers: {
+            'Content-Type': API_HEADER_CONTENT_TYPE,
+            Authorization: API_HEADER_BEARER + accessToken
+          }
+        }
+      );
+      return keyRingList;
+    } catch (error: any) {
+      const errorResponse = `Error in Key Rings : ${error}`;
+      handleErrorToast({
+        error: errorResponse
+      });
+      SchedulerLoggingService.log('Error Key Rings', LOG_LEVEL.ERROR);
+    }
+  };
+
+  // Function to list crypto keys from KmS key ring
+  static listCryptoKeysAPIService = async (
+    listKeysPayload: ICryptoListKeys
+  ) => {
+    const { credentials, keyRing } = listKeysPayload;
+    const listKeys = requestAPI(
+      `api/cloudKms/listCryptoKeys?region_id=${credentials.region}&project_id=${credentials.projectId}&key_ring=${keyRing}`,
+      {
+        headers: {
+          'Content-Type': API_HEADER_CONTENT_TYPE,
+          Authorization: API_HEADER_BEARER + credentials.accessToken
+        }
+      }
+    )
+      .then((response: any) => {
+        return response;
+      })
+      .catch((error: Error) => {
+        const errorResponse = `Error listing Keys : ${error}`;
+        handleErrorToast({
+          error: errorResponse
+        });
+        SchedulerLoggingService.log('Error listing Keys', LOG_LEVEL.ERROR);
+      });
+
+    return listKeys;
   };
 }

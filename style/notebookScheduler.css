@@ -45,6 +45,10 @@
   width: 247px !important;
 }
 
+.encryption-form-element-input-fl {
+  width: 227px !important;
+}
+
 .schedule-child-section {
   width: 512px;
   margin-left: 30px;
@@ -794,4 +798,42 @@ body[data-jp-theme-light='true'].scroll-fix-header {
 .network-option-helper-text {
   font-size: 12px;
   font-weight: 500;
+}
+
+.encryption-input {
+  width: 473px;
+}
+
+.create-encryption-sub-message {
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 15px;
+  padding: 4px 0 10px 28px;
+  color: var(--jp-ui-font-color2);
+  overflow: hidden;
+  word-wrap: break-word;
+  margin-top: -5px;
+  display: flex;
+}
+
+.encryption-radio {
+  padding-bottom: 10px;
+  padding-top: 0;
+}
+
+.encryption-radio-list {
+  line-height: 6;
+}
+
+.error-key-parent-manual {
+  padding-top: 10px;
+  width: 90%;
+}
+
+.encryption-link {
+  color: #3367d6;
+  text-decoration: underline;
+  cursor: pointer;
+  padding-left: 3px;
 }

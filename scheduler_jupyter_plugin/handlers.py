@@ -31,6 +31,7 @@ from traitlets.config import SingletonConfigurable
 from scheduler_jupyter_plugin import credentials, urls
 from scheduler_jupyter_plugin.controllers import (
     airflow,
+    cloudKms,
     composer,
     compute,
     dataproc,
@@ -194,6 +195,8 @@ def setup_handlers(web_app):
         "api/storage/outputFileExists": storage.OutputFileExistsController,
         "jupyterlabVersion": version.LatestVersionController,
         "updatePlugin": version.UpdatePackageController,
+        "api/cloudKms/listKeyRings": cloudKms.KeyRingsController,
+        "api/cloudKms/listCryptoKeys": cloudKms.CryptoKeysController,
     }
     handlers = [(full_path(name), handler) for name, handler in handlersMap.items()]
     web_app.add_handlers(host_pattern, handlers)
