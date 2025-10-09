@@ -217,7 +217,7 @@ export const CreateComposerSchedule: React.FC<
     if (
       initialSchedulerDataContext &&
       initialSchedulerDataContext?.initialDefaults?.kernelDetails
-        ?.executionMode != 'local'
+        ?.executionMode !== 'local'
     ) {
       fetchRemoteKernelData();
     }
