@@ -89,7 +89,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
         },
         customEnvironmentSpec: {
           machineSpec: {
-            machineType: VertexScheduleData.machineType,
+            machineType: VertexScheduleData.machineType.split('(')[0].trim(),
             ...(VertexScheduleData.acceleratorType !== ''
               ? {
                   acceleratorType: VertexScheduleData.acceleratorType
