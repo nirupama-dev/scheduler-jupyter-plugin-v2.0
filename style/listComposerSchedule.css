@@ -2,7 +2,7 @@
 
 .select-text-overlay-scheduler {
   width: 95%;
-  margin: 20px;
+  padding: 0 5px 15px;
   display: flex;
   justify-content: space-between;
 }
@@ -60,7 +60,7 @@
 }
 
 .no-data-style {
-  margin: 10px 15px;
+  margin: 15px;
 }
 
 .icon-buttons-style {

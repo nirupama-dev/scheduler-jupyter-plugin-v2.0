@@ -28,7 +28,10 @@ import {
 } from 'react-hook-form';
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
 import { ExecutionMode } from '../types/CommonSchedulerTypes';
-import { IAuthCredentials, IEditScheduleData } from './CommonInterface';
+import {
+  IAuthCredentials,
+  IInitialSchedulerContextData
+} from './CommonInterface';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 
 export interface ICreateComposerSchedulerProps {
@@ -40,7 +43,8 @@ export interface ICreateComposerSchedulerProps {
   getValues: UseFormGetValues<CombinedCreateFormValues>;
   trigger: UseFormTrigger<CombinedCreateFormValues>;
   credentials: IAuthCredentials;
-  editScheduleData?: IEditScheduleData | null;
+  isValid?: boolean;
+  initialSchedulerDataContext?: IInitialSchedulerContextData | null;
   app: JupyterFrontEnd;
 }
 
@@ -82,9 +86,6 @@ export interface IKernelDetails {
   executionMode: ExecutionMode; //local or remote kernels
   isDataprocKernel: boolean; // Indicates if it's a Dataproc-related kernel (serverless or cluster)
   kernelDisplayName: string;
-  kernelParentResource?: string; // Optional parent resource for remote kernels
-  selectedServerlessName?: string; // Name of the matched serverless instance
-  selectedClusterName?: string; // Name of the matched cluster
 }
 
 export interface ISchedulerDagData {
