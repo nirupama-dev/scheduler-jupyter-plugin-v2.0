@@ -120,13 +120,12 @@ const getDefaultVertexValues = (
  */
 const getDefaultComposerValues = (
   initialSchedulerStateData: IInitialSchedulerContextData,
-  inputFilePath: string,
-  credentials: IInitialScheduleFormData['credentials']
+  inputFilePath: string
 ): ComposerSchedulerFormValues => ({
   schedulerSelection: COMPOSER_SCHEDULER_NAME,
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
-  projectId: initialSchedulerStateData?.credentials?.project_id ?? credentials?.project_id ?? '',
+  projectId: initialSchedulerStateData?.credentials?.project_id ?? '',
   composerRegion:  initialSchedulerStateData?.credentials?.region_id ?? '',
   executionMode: initialSchedulerStateData.initialDefaults?.kernelDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
   environment: '',

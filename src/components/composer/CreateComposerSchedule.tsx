@@ -106,7 +106,7 @@ export const CreateComposerSchedule: React.FC<
   console.log('getValues', getValues());
 
   // --- Fetch Regions based on selected Project ID ---
-  useEffect(() => {
+
     const fetchRegions = async () => {
       if (selectedProjectId) {
         setValue('composerRegion', '');
@@ -135,10 +135,11 @@ export const CreateComposerSchedule: React.FC<
           }
         } catch (authenticationError) {
           handleOpenLoginWidget(app);
-    } finally {
-      setLoadingState(prev => ({ ...prev, region: false }));
-    }
-  }, [selectedProjectId]);
+        } finally {
+          setLoadingState(prev => ({ ...prev, region: false }));
+        }
+      }
+    };
 
   const fetchEnvironments = useCallback(async () => {
     try {
