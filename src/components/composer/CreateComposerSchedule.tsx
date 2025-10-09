@@ -16,7 +16,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { MuiChipsInput } from 'mui-chips-input';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
@@ -45,6 +44,7 @@ import { ILabelValue } from '../../interfaces/CommonInterface';
 import { Controller, FieldErrors } from 'react-hook-form';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
+import { FormInputChips } from '../common/formFields/FormInputChips';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
@@ -517,20 +517,11 @@ export const CreateComposerSchedule: React.FC<
       </div>
       {(emailOnFailure || emailOnRetry || emailOnSuccess) && (
         <div className="scheduler-form-element-container">
-          <Controller
+          <FormInputChips
             name="emailRecipients"
             control={control}
-            render={({ field, fieldState }) => (
-              <MuiChipsInput
-                {...field} // Spreads value, onChange, onBlur from RHF
-                className="select-job-style"
-                addOnBlur={true}
-                inputProps={{ placeholder: '' }}
-                label="Email recipients"
-                error={!!fieldState.error}
-                helperText={fieldState.error ? fieldState.error.message : null}
-              />
-            )}
+            label="Email recipients"
+            error={composerErrors.emailRecipients}
           />
         </div>
       )}

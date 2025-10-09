@@ -32,12 +32,6 @@ const customEmailSchema = z
     'Please enter a valid email address. E.g username@domain.com'
   );
 
-// Helper schema for email validation (can remain as is)
-const emailSchema = z
-  .array(customEmailSchema)
-  .min(1, 'Email recipients is required field')
-  .optional(); // Removed the specific message here as it will be handled by superRefine
-
 export const createComposerSchema = createNotebookCommonSchema.extend({
   schedulerSelection: z.literal('composer'), // Discriminator property
   projectId: z.string().min(1, 'Project ID is required'),
@@ -65,7 +59,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   emailOnFailure: z.boolean().default(false),
   emailOnRetry: z.boolean().default(false),
   emailOnSuccess: z.boolean().default(false),
-  emailRecipients: emailSchema, // This field is optional by itself, the required logic is in the emailSchema def
+  emailRecipients: z.array(customEmailSchema).optional(),
   runOption: z.enum(['runNow', 'runOnSchedule'], {
     errorMap: () => ({ message: 'Please select a run option' })
   }),
