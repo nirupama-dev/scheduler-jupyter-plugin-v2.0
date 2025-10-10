@@ -16,7 +16,6 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { MuiChipsInput } from 'mui-chips-input';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
@@ -42,10 +41,10 @@ import {
 import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
 import { ILabelValue } from '../../interfaces/CommonInterface';
-import { Controller } from 'react-hook-form';
+import { Controller, FieldErrors } from 'react-hook-form';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
-import { FieldErrors } from 'react-hook-form';
 import z from 'zod';
+import { FormInputChips } from '../common/formFields/FormInputChips';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
@@ -73,7 +72,6 @@ export const CreateComposerSchedule: React.FC<
   const [serverlessOptions, setServerlessOptions] = useState<
     ILabelValue<string>[]
   >([]);
-  const [emailList, setEmailList] = useState<string[]>([]);
   const [loadingState, setLoadingState] = useState<ILoadingStateComposer>({
     projectId: false,
     region: false,
@@ -376,7 +374,7 @@ export const CreateComposerSchedule: React.FC<
       </div>
       <div
         className={
-          errors.composerRegion
+          composerErrors.composerRegion
             ? 'scheduler-form-element-container scheduler-input-top error-input'
             : 'scheduler-form-element-container scheduler-input-top'
         }
@@ -421,7 +419,6 @@ export const CreateComposerSchedule: React.FC<
           label="Notebook"
           control={control}
           isChecked={true}
-          disabled={true}
         />
       </div>
       <AddParameters control={control} errors={errors} />
@@ -520,15 +517,11 @@ export const CreateComposerSchedule: React.FC<
       </div>
       {(emailOnFailure || emailOnRetry || emailOnSuccess) && (
         <div className="scheduler-form-element-container">
-          <MuiChipsInput
+          <FormInputChips
             name="emailRecipients"
-            className="select-job-style"
-            onChange={e => setEmailList(e)}
-            addOnBlur={true}
-            value={emailList}
-            inputProps={{ placeholder: '' }}
+            control={control}
             label="Email recipients"
-            //error={composerErrors.emailRecipients}
+            error={composerErrors.emailRecipients}
           />
         </div>
       )}
