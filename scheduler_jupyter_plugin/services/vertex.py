@@ -323,7 +323,7 @@ class Client:
                             if max_run_count == "1" and cron_value == "* * * * *":
                                 schedule_value = "run once"
                             else:
-                                schedule_value = self.parse_schedule(cron)
+                                schedule_value = self.parse_schedule(cron_value)
 
                             formatted_schedule = {
                                 "name": schedule.get("name"),
