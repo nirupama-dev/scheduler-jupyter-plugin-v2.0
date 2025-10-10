@@ -1,7 +1,10 @@
 import { z } from 'zod';
 import { createVertexSchema } from './CreateVertexSchema';
 import { createComposerSchema } from './CreateComposerSchema';
-import { EVERY_MINUTE_CRON } from '../utils/Constants';
+import {
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  EVERY_MINUTE_CRON
+} from '../utils/Constants';
 
 /**
  * Combined schema for creating a job, either in Vertex or Composer.
@@ -29,6 +32,38 @@ export const combinedCreateFormSchema = z
             code: z.ZodIssueCode.custom,
             message:
               'Accelerator count is required and must be a positive integer.'
+          });
+        }
+      }
+
+      if (
+        vertexData.customerEncryptionType !==
+          DEFAULT_CUSTOMER_MANAGED_SELECTION &&
+        !vertexData.manualKey
+      ) {
+        ctx.addIssue({
+          path: ['manualKey'],
+          code: z.ZodIssueCode.custom,
+          message: 'Required manual encryption key'
+        });
+      }
+
+      if (
+        vertexData.customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
+      ) {
+        if (!vertexData.keyRing) {
+          ctx.addIssue({
+            path: ['keyRing'],
+            code: z.ZodIssueCode.custom,
+            message: 'Key Ring required'
+          });
+        }
+
+        if (vertexData.keyRing && !vertexData.cryptoKey) {
+          ctx.addIssue({
+            path: ['cryptoKey'],
+            code: z.ZodIssueCode.custom,
+            message: 'Crypto key required'
           });
         }
       }

@@ -25,7 +25,8 @@ import {
   DEFAULT_ENCRYPTION_SELECTED,
   CUSTOMER_ENCRYPTION,
   DEFAULT_CUSTOMER_MANAGED_SELECTION,
-  CUSTOMER_MAANGED_ENCRYPTION
+  CUSTOMER_MAANGED_ENCRYPTION,
+  ENCRYPTION_MANUAL_KEY_SAMPLE
 } from '../utils/Constants';
 import {
   createNotebookCommonSchema,
@@ -54,7 +55,17 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   ]),
   keyRing: z.string(),
   cryptoKey: z.string(),
-  manualKey: z.string(),
+  manualKey: z.string().refine(
+    val => {
+      const numericRegex =
+        /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
+
+      return numericRegex.test(val);
+    },
+    {
+      message: ENCRYPTION_MANUAL_KEY_SAMPLE
+    }
+  ),
   networkOption: z
     .enum(['networkInThisProject', 'networkSharedFromHostProject'])
     .optional(),

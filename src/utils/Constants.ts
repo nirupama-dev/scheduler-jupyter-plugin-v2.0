@@ -387,3 +387,11 @@ export const SECURITY_KEY =
 
 export const CUSTOMER_MANAGED_ENCRYPTION_LINK =
   'Google Cloud Key Management Service';
+
+export const CUSTOMER_MANAGED_RADIO_OPTIONS = [
+  { label: '', value: DEFAULT_CUSTOMER_MANAGED_SELECTION },
+  { label: '', value: CUSTOMER_MAANGED_ENCRYPTION }
+];
+
+export const ENCRYPTION_MANUAL_KEY_SAMPLE =
+  'Example format:projects/<project-name>/locations/<location-name>/keyRings/<keyring-name>/cryptoKeys/<key-name>';

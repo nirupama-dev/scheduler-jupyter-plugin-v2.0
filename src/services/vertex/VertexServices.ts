@@ -49,6 +49,7 @@ import { settingController } from '../../utils/Config';
 import { vertexScheduleRunResponseTransformation } from '../../utils/vertexExecutionHistoryTransformation';
 import path from 'path';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
+import { labelValueTransform } from '../../utils/VertexDataTransform';
 // import { error } from 'console';
 export class VertexServices {
   /**
@@ -745,7 +746,7 @@ export class VertexServices {
   ) => {
     try {
       const { region, projectId, accessToken } = listKeyRingsPayload;
-      const keyRingList = await requestAPI(
+      const keyRingResponse = await requestAPI(
         `api/cloudKms/listKeyRings?region_id=${region}&project_id=${projectId}`,
         {
           headers: {
@@ -754,6 +755,7 @@ export class VertexServices {
           }
         }
       );
+      const keyRingList = labelValueTransform(keyRingResponse as string[]);
       return keyRingList;
     } catch (error: any) {
       const errorResponse = `Error in Key Rings : ${error}`;
@@ -778,8 +780,11 @@ export class VertexServices {
         }
       }
     )
-      .then((response: any) => {
-        return response;
+      .then((cryptoListResponse: any) => {
+        const cryptoKeyList = labelValueTransform(
+          cryptoListResponse as string[]
+        );
+        return cryptoKeyList;
       })
       .catch((error: Error) => {
         const errorResponse = `Error listing Keys : ${error}`;

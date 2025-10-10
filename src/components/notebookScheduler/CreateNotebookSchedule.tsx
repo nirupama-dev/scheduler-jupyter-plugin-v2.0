@@ -331,7 +331,8 @@ export const CreateNotebookSchedule = (
         const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
           transformZodSchemaToVertexSchedulePayload(
             vertexData,
-            initialFormData.credentials.project_id
+            initialFormData.credentials.project_id,
+            initialFormData.credentials.region_id || ''
           );
         console.log('Vertex Payload:', vertexPayload);
 
