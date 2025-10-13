@@ -61,7 +61,10 @@ export class VertexServices {
           setMachineTypeList(formattedResponse);
         } else if (formattedResponse.length === undefined) {
           try {
-            if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
+            if (
+              'code' in formattedResponse.error &&
+              formattedResponse.error.code === HTTP_STATUS_FORBIDDEN
+            ) {
               // Pattern to check whether string contains link
               const pattern =
                 // eslint-disable-next-line
@@ -74,6 +77,8 @@ export class VertexServices {
               } else {
                 setApiError(formattedResponse.error.message);
               }
+            } else {
+              throw formattedResponse.error;
             }
           } catch (error) {
             const errorResponse = `Error fetching machine type list: ${error}`;
