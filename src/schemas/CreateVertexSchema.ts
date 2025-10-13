@@ -53,19 +53,22 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
     DEFAULT_CUSTOMER_MANAGED_SELECTION,
     CUSTOMER_MANGED_ENCRYPTION
   ]),
-  keyRing: z.string(),
-  cryptoKey: z.string(),
-  manualKey: z.string().refine(
-    val => {
-      const numericRegex =
-        /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
+  keyRing: z.string().optional(),
+  cryptoKey: z.string().optional(),
+  manualKey: z
+    .string()
+    .refine(
+      val => {
+        const numericRegex =
+          /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
 
-      return numericRegex.test(val);
-    },
-    {
-      message: ENCRYPTION_MANUAL_KEY_SAMPLE
-    }
-  ),
+        return numericRegex.test(val ?? '');
+      },
+      {
+        message: ENCRYPTION_MANUAL_KEY_SAMPLE
+      }
+    )
+    .optional(),
   networkOption: z
     .enum(['networkInThisProject', 'networkSharedFromHostProject'])
     .optional(),

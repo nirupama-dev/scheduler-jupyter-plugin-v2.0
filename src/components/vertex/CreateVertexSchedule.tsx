@@ -627,7 +627,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('subNetwork', ''); // Clear the actual subNetwork field
         setValue('sharedNetwork', { network: '', subnetwork: '' });
         setValue('keyRing', '');
+        setKeyRingList([]);
         setValue('cryptoKey', '');
+        setCryptoKeyList([]);
         // Trigger validation for these fields to show errors if they become invalid
         trigger([
           'vertexRegion',
@@ -642,12 +644,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('vertexRegion', ''); // Clear region if cleared
         // Reset machine type and dependent fields when region is cleared
         setValue('machineType', '');
-        // Reset all dependent fields and their values
-        setValue('machineType', '');
         setValue('acceleratorType', '');
         setValue('acceleratorCount', '');
         setValue('keyRing', '');
+        setKeyRingList([]);
         setValue('cryptoKey', '');
+        setCryptoKeyList([]);
         setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
         setValue('subNetwork', ''); // Clear the actual subNetwork field
@@ -666,8 +668,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       if (encryptionSelected === CUSTOMER_ENCRYPTION) {
         if (customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION) {
           trigger(['keyRing']);
-        } else if (customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION) {
           trigger(['cryptoKey']);
+        } else if (customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION) {
+          trigger(['manualKey']);
         }
       }
     },
