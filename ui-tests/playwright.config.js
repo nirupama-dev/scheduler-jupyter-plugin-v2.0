@@ -27,5 +27,13 @@ module.exports = {
     url: 'http://localhost:8888/lab',
     timeout: 120 * 1000,
     reuseExistingServer: !process.env.CI
-  }
+  },
+  use: {
+    launchOptions: {
+      // 1
+      args: ["--start-maximized"],
+    },
+  },
+  // Add support for tags using TEST_TAG environment variable
+  grep: process.env.TEST_TAG ? new RegExp(process.env.TEST_TAG, 'i') : undefined
 };
