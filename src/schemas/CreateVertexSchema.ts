@@ -25,7 +25,7 @@ import {
   DEFAULT_ENCRYPTION_SELECTED,
   CUSTOMER_ENCRYPTION,
   DEFAULT_CUSTOMER_MANAGED_SELECTION,
-  CUSTOMER_MAANGED_ENCRYPTION,
+  CUSTOMER_MANGED_ENCRYPTION,
   ENCRYPTION_MANUAL_KEY_SAMPLE
 } from '../utils/Constants';
 import {
@@ -51,7 +51,7 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   encryptionOption: z.enum([DEFAULT_ENCRYPTION_SELECTED, CUSTOMER_ENCRYPTION]),
   customerEncryptionType: z.enum([
     DEFAULT_CUSTOMER_MANAGED_SELECTION,
-    CUSTOMER_MAANGED_ENCRYPTION
+    CUSTOMER_MANGED_ENCRYPTION
   ]),
   keyRing: z.string(),
   cryptoKey: z.string(),

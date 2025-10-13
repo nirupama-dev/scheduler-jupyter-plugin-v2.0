@@ -68,7 +68,7 @@ import {
   CUSTOMER_ENCRYPTION,
   DEFAULT_CUSTOMER_MANAGED_SELECTION,
   CUSTOMER_MANAGED_RADIO_OPTIONS,
-  CUSTOMER_MAANGED_ENCRYPTION,
+  CUSTOMER_MANGED_ENCRYPTION,
   DEFAULT_ENCRYPTION_SELECTED
 } from '../../utils/Constants';
 
@@ -94,6 +94,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   isValid,
   credentials,
   editScheduleData,
+  clearErrors,
   app
   // ... other props
 }) => {
@@ -665,7 +666,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       if (encryptionSelected === CUSTOMER_ENCRYPTION) {
         if (customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION) {
           trigger(['keyRing']);
-        } else if (customerEncryptionType === CUSTOMER_MAANGED_ENCRYPTION) {
+        } else if (customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION) {
           trigger(['cryptoKey']);
         }
       }
@@ -832,6 +833,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       setCryptoKeyList(cryptoKeyListResponse);
       if (!editScheduleData?.editMode) {
         setValue('cryptoKey', cryptoKeyListResponse[0].value);
+        clearErrors('cryptoKey');
       }
     }
     setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
@@ -863,6 +865,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   useEffect(() => {
     if (keyRingSelected) {
       listCryptoKeysAPI(keyRingSelected);
+    } else {
+      setValue('cryptoKey', '');
+      setCryptoKeyList([]);
     }
   }, [keyRingSelected]);
 
@@ -872,12 +877,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
     ) {
       listKeyRings();
+      clearErrors('manualKey');
     }
   }, [currentRegion, customerEncryptionType, encryptionSelected]);
 
   useEffect(() => {
     if (
-      customerEncryptionType === CUSTOMER_MAANGED_ENCRYPTION ||
+      customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION ||
       encryptionSelected === DEFAULT_ENCRYPTION_SELECTED
     ) {
       setValue('keyRing', '');
@@ -889,666 +895,651 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         keyRings: false,
         cryptoKeys: false
       }));
+      clearErrors(['keyRing', 'cryptoKey']);
     }
   }, [customerEncryptionType, cryptoKeySelected, encryptionSelected]);
 
   // --- Render Component UI ---
   return (
-    console.log(
-      'keyrinf error',
-      vertexErrors.keyRing,
-      'crypto error',
-      vertexErrors.cryptoKey
-    ),
-    (
-      <div>
-        {/* Region Dropdown */}
-        <div className="scheduler-form-element-container">
-          <FormInputDropdown
-            name="vertexRegion"
-            control={control}
-            label="Region*"
-            options={VERTEX_REGIONS}
-            customClass="scheduler-tag-style"
-            loading={loadingState.region}
-            onChangeCallback={handleRegionChange}
-            error={vertexErrors.vertexRegion}
-            disabled={editScheduleData?.editMode}
-          />
-        </div>
-        {/* Machine Type Dropdown */}
-        <div
-          className={
-            vertexErrors.vertexRegion
-              ? 'scheduler-form-element-container scheduler-input-top error-input'
-              : 'scheduler-form-element-container scheduler-input-top'
+    <div>
+      {/* Region Dropdown */}
+      <div className="scheduler-form-element-container">
+        <FormInputDropdown
+          name="vertexRegion"
+          control={control}
+          label="Region*"
+          options={VERTEX_REGIONS}
+          customClass="scheduler-tag-style"
+          loading={loadingState.region}
+          onChangeCallback={handleRegionChange}
+          error={vertexErrors.vertexRegion}
+          disabled={editScheduleData?.editMode}
+        />
+      </div>
+      {/* Machine Type Dropdown */}
+      <div
+        className={
+          vertexErrors.vertexRegion
+            ? 'scheduler-form-element-container scheduler-input-top error-input'
+            : 'scheduler-form-element-container scheduler-input-top'
+        }
+      >
+        <FormInputDropdown
+          name="machineType"
+          control={control}
+          label="Machine Type*"
+          options={machineTypeList.map(item => item.machineType)}
+          customClass="scheduler-tag-style"
+          loading={loadingState.machineType}
+          error={vertexErrors.machineType}
+          disabled={
+            !currentRegion ||
+            loadingState.machineType ||
+            machineTypeList.length === 0
           }
-        >
-          <FormInputDropdown
-            name="machineType"
-            control={control}
-            label="Machine Type*"
-            options={machineTypeList.map(item => item.machineType)}
-            customClass="scheduler-tag-style"
-            loading={loadingState.machineType}
-            error={vertexErrors.machineType}
-            disabled={
-              !currentRegion ||
-              loadingState.machineType ||
-              machineTypeList.length === 0
+          onChangeCallback={selectedMachineType => {
+            setValue('machineType', selectedMachineType);
+            setValue('acceleratorType', '');
+            setValue('acceleratorCount', '');
+            trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
+          }}
+        />
+      </div>
+      {/* Accelerator Type and Count (conditionally rendered) */}
+      {currentMachineType &&
+        selectedMachineType?.acceleratorConfigs &&
+        selectedMachineType.acceleratorConfigs.length > 0 && (
+          <div
+            className={
+              vertexErrors.acceleratorCount
+                ? 'horizontal-element-wrapper scheduler-input-top element-bottom'
+                : 'horizontal-element-wrapper scheduler-input-top'
             }
-            onChangeCallback={selectedMachineType => {
-              setValue('machineType', selectedMachineType);
-              setValue('acceleratorType', '');
-              setValue('acceleratorCount', '');
-              trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
+          >
+            <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+              <FormInputDropdown
+                name="acceleratorType"
+                control={control}
+                label="Accelerator Type"
+                options={getAcceleratedTypeOptions(
+                  selectedMachineType.acceleratorConfigs
+                )}
+                customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
+                error={vertexErrors.acceleratorType}
+                disabled={!currentMachineType || loadingState.machineType}
+                onChangeCallback={() => {
+                  setValue('acceleratorCount', '');
+                  trigger('acceleratorCount');
+                }}
+              />
+            </div>
+
+            {currentAcceleratorType &&
+              selectedMachineType.acceleratorConfigs.map(accelConfig =>
+                accelConfig.acceleratorType.value === currentAcceleratorType &&
+                accelConfig.allowedCounts.length > 0 ? (
+                  <div
+                    className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr"
+                    key={accelConfig.acceleratorType.value}
+                  >
+                    <FormInputDropdown
+                      name="acceleratorCount"
+                      control={control}
+                      label="Accelerator Count*"
+                      options={accelConfig.allowedCounts.map(count => ({
+                        label: count.value.toString(),
+                        value: count.value.toString()
+                      }))}
+                      customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
+                      error={vertexErrors.acceleratorCount}
+                      disabled={!currentAcceleratorType}
+                    />
+                  </div>
+                ) : null
+              )}
+          </div>
+        )}
+      {/* Kernel Dropdown */}
+      <div
+        className={
+          vertexErrors.machineType
+            ? 'scheduler-form-element-container scheduler-input-top error-input'
+            : 'scheduler-form-element-container scheduler-input-top'
+        }
+      >
+        <FormInputDropdown
+          name="kernelName"
+          control={control}
+          label="Kernel*"
+          options={KERNEL_VALUE}
+          customClass="scheduler-tag-style"
+          error={vertexErrors.kernelName}
+        />
+      </div>
+      {/* Cloud Storage Bucket Dropdown */}
+      <div
+        className={
+          vertexErrors.kernelName
+            ? 'scheduler-form-element-container scheduler-input-top error-input'
+            : 'scheduler-form-element-container scheduler-input-top'
+        }
+      >
+        <FormInputDropdown
+          name="cloudStorageBucket"
+          control={control}
+          label="Cloud Storage Bucket*"
+          options={cloudStorageList}
+          customClass="scheduler-tag-style"
+          filterOptions={filterCloudStorageOptions}
+          loading={loadingState.cloudStorageBucket}
+          error={vertexErrors.cloudStorageBucket}
+          onChangeCallback={handleCloudStorageDropdownChange}
+          disabled={isCreatingBucket}
+        />
+        {isCreatingBucket && newBucketCreated && (
+          <div style={{ color: '#1976d2', marginTop: 4 }}>
+            Creating new bucket <b>{newBucketCreated}</b>...
+          </div>
+        )}
+      </div>
+      {/* Disk Type and Size */}
+      <div
+        className={
+          vertexErrors.cloudStorageBucket
+            ? 'horizontal-element-wrapper scheduler-input-top error-input'
+            : 'horizontal-element-wrapper scheduler-input-top'
+        }
+      >
+        <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+          <FormInputDropdown
+            name="diskType"
+            control={control}
+            label="Disk Type*"
+            options={DISK_TYPE_VALUE}
+            customClass="scheduler-tag-style"
+            error={vertexErrors.diskType}
+            onChangeCallback={() => {
+              setValue('diskSize', ''); // Clear disk size when disk type changes
+              trigger('diskSize');
             }}
           />
         </div>
-        {/* Accelerator Type and Count (conditionally rendered) */}
-        {currentMachineType &&
-          selectedMachineType?.acceleratorConfigs &&
-          selectedMachineType.acceleratorConfigs.length > 0 && (
-            <div
-              className={
-                vertexErrors.acceleratorCount
-                  ? 'horizontal-element-wrapper scheduler-input-top element-bottom'
-                  : 'horizontal-element-wrapper scheduler-input-top'
-              }
-            >
+        <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+          <FormInputText
+            label="Disk size*"
+            control={control}
+            name="diskSize"
+            onBlurCallback={handleDiskSizeBlur}
+            error={vertexErrors.diskSize}
+            type="number"
+            disabled={!currentDiskType}
+          />
+        </div>
+      </div>
+      {/* Service Account Dropdown */}
+      <div
+        className={
+          vertexErrors.diskSize || vertexErrors.diskType
+            ? 'scheduler-form-element-container'
+            : 'scheduler-form-element-container footer-text scheduler-input-top'
+        }
+      >
+        <FormInputDropdown
+          name="serviceAccount"
+          control={control}
+          label="Service account*"
+          options={serviceAccountList}
+          loading={loadingState.serviceAccount}
+          error={vertexErrors.serviceAccount}
+        />
+      </div>
+      {/* Encryption */}
+      <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+        {ENCRYPTION_TEXT}
+      </div>
+      <div className="scheduler-form-element-container panel-margin">
+        <FormInputRadio
+          name="encryptionOption"
+          control={control}
+          className="network-layout"
+          options={ENCRYPTION_OPTIONS.map(option => {
+            const newOption: RadioOption = { ...option };
+            return newOption;
+          })}
+          error={vertexErrors.networkOption}
+          projectId={credentials?.project_id}
+        />
+      </div>
+      {/* --- Customer-Managed Encryption (CMEK) Section --- */}
+      {encryptionSelected === CUSTOMER_ENCRYPTION && (
+        <div className="schedule-child-section horizontal-element-wrapper">
+          <FormInputRadio
+            name="customerEncryptionType"
+            control={control}
+            className="schedule-radio-btn encryption-custom-radio"
+            options={CUSTOMER_MANAGED_RADIO_OPTIONS}
+            errorFlag={vertexErrors.keyRing || vertexErrors.cryptoKey}
+          />
+
+          {/* Option 1: Select Key Ring and Key */}
+          <div className="encryption-custom-radio-element">
+            <div className="horizontal-element-wrapper scheduler-input-top">
               <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
                 <FormInputDropdown
-                  name="acceleratorType"
+                  name="keyRing"
                   control={control}
-                  label="Accelerator Type"
-                  options={getAcceleratedTypeOptions(
-                    selectedMachineType.acceleratorConfigs
-                  )}
-                  customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
-                  error={vertexErrors.acceleratorType}
-                  disabled={!currentMachineType || loadingState.machineType}
-                  onChangeCallback={() => {
-                    setValue('acceleratorCount', '');
-                    trigger('acceleratorCount');
-                  }}
+                  label="Key rings*"
+                  options={keyRingList}
+                  loading={loadingState.keyRings}
+                  disabled={
+                    !currentRegion ||
+                    customerEncryptionType !==
+                      DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                    loadingState.keyRings
+                  }
+                  error={vertexErrors.keyRing}
+                  onChangeCallback={keyRingSelected =>
+                    handleKeyRingChange(keyRingSelected)
+                  }
                 />
               </div>
+              <div className="scheduler-form-element-container create-scheduler-form-element-input-fl">
+                <FormInputDropdown
+                  name="cryptoKey"
+                  control={control}
+                  label="Keys*"
+                  options={cryptoKeyList}
+                  loading={loadingState.cryptoKeys}
+                  disabled={
+                    !watch('keyRing') ||
+                    customerEncryptionType !==
+                      DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                    loadingState.cryptoKeys
+                  }
+                  error={vertexErrors.cryptoKey}
+                  onChangeCallback={cryptoKeySelected =>
+                    handleCryptoKeyChange(cryptoKeySelected)
+                  }
+                />
+              </div>
+            </div>
 
-              {currentAcceleratorType &&
-                selectedMachineType.acceleratorConfigs.map(accelConfig =>
-                  accelConfig.acceleratorType.value ===
-                    currentAcceleratorType &&
-                  accelConfig.allowedCounts.length > 0 ? (
-                    <div
-                      className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr"
-                      key={accelConfig.acceleratorType.value}
-                    >
-                      <FormInputDropdown
-                        name="acceleratorCount"
-                        control={control}
-                        label="Accelerator Count*"
-                        options={accelConfig.allowedCounts.map(count => ({
-                          label: count.value.toString(),
-                          value: count.value.toString()
-                        }))}
-                        customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
-                        error={vertexErrors.acceleratorCount}
-                        disabled={!currentAcceleratorType}
-                      />
-                    </div>
-                  ) : null
-                )}
+            {/* Option 2: Enter Key Manually */}
+            <div className="scheduler-form-element-container scheduler-input-top encryption-custom-radio-manual">
+              <FormInputText
+                name="manualKey"
+                control={control}
+                label="Enter key manually*"
+                error={vertexErrors.manualKey}
+                placeholder="projects/PROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/KEY"
+                disabled={
+                  customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
+                }
+                // onChangeCallback={handleManualEncryptionChange}
+              />
             </div>
-          )}
-        {/* Kernel Dropdown */}
-        <div
-          className={
-            vertexErrors.machineType
-              ? 'scheduler-form-element-container scheduler-input-top error-input'
-              : 'scheduler-form-element-container scheduler-input-top'
-          }
-        >
-          <FormInputDropdown
-            name="kernelName"
-            control={control}
-            label="Kernel*"
-            options={KERNEL_VALUE}
-            customClass="scheduler-tag-style"
-            error={vertexErrors.kernelName}
-          />
+          </div>
         </div>
-        {/* Cloud Storage Bucket Dropdown */}
-        <div
-          className={
-            vertexErrors.kernelName
-              ? 'scheduler-form-element-container scheduler-input-top error-input'
-              : 'scheduler-form-element-container scheduler-input-top'
-          }
-        >
-          <FormInputDropdown
-            name="cloudStorageBucket"
-            control={control}
-            label="Cloud Storage Bucket*"
-            options={cloudStorageList}
-            customClass="scheduler-tag-style"
-            filterOptions={filterCloudStorageOptions}
-            loading={loadingState.cloudStorageBucket}
-            error={vertexErrors.cloudStorageBucket}
-            onChangeCallback={handleCloudStorageDropdownChange}
-            disabled={isCreatingBucket}
-          />
-          {isCreatingBucket && newBucketCreated && (
-            <div style={{ color: '#1976d2', marginTop: 4 }}>
-              Creating new bucket <b>{newBucketCreated}</b>...
-            </div>
-          )}
-        </div>
-        {/* Disk Type and Size */}
-        <div
-          className={
-            vertexErrors.cloudStorageBucket
-              ? 'horizontal-element-wrapper scheduler-input-top error-input'
-              : 'horizontal-element-wrapper scheduler-input-top'
-          }
-        >
+      )}
+      {/* Network Configuration Section */}
+      <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+        {NETWORK_CONFIGURATION_LABEL}
+      </div>
+      <p>{NETWORK_CONFIGURATION_LABEL_DESCRIPTION}</p>
+      <div className="scheduler-form-element-container panel-margin">
+        <FormInputRadio
+          name="networkOption"
+          control={control}
+          className="network-layout"
+          options={NETWORK_OPTIONS.map(option => {
+            const newOption: RadioOption = { ...option };
+            // Check if the current option is the "host project" option
+            if (option.value === 'networkSharedFromHostProject') {
+              // If there's no hostProject, disable this option
+              if (!hostProject?.name) {
+                newOption.disabled = true;
+              } // Add the host project name to the label if it exists
+              if (hostProject?.name) {
+                newOption.label = `${option.label} "${hostProject.name}"`;
+              }
+            }
+            return newOption;
+          })}
+          error={vertexErrors.networkOption}
+          onChange={() => {
+            // // Clear all network-related fields when network option changes
+            // setValue('primaryNetwork', '');
+            // setValue('subNetwork', '');
+            // setValue('sharedNetwork', { network: '', subnetwork: '' });
+            // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
+          }}
+        />
+      </div>
+      {/* Conditional Network Fields */}
+      {currentNetworkOption === 'networkInThisProject' ? ( // 'networkInThisProject'
+        <div className="horizontal-element-wrapper">
           <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
             <FormInputDropdown
-              name="diskType"
+              name="primaryNetwork"
               control={control}
-              label="Disk Type*"
-              options={DISK_TYPE_VALUE}
-              customClass="scheduler-tag-style"
-              error={vertexErrors.diskType}
-              onChangeCallback={() => {
-                setValue('diskSize', ''); // Clear disk size when disk type changes
-                trigger('diskSize');
+              label="Primary network"
+              customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
+              options={primaryNetworkList}
+              loading={loadingState.primaryNetwork}
+              error={vertexErrors.primaryNetwork}
+              disabled={!currentRegion || loadingState.primaryNetwork}
+              onChangeCallback={selected => {
+                console.log('Primary network selected:', selected);
+                console.log('Setting primary network to:', selected.value);
+                // setValue('primaryNetwork', selected ? selected.value : '');
+                setValue('subNetwork', ''); // Clear subnetwork when primary changes
+                trigger(['subNetwork']); // Trigger validation for subnetwork
               }}
             />
           </div>
-          <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
-            <FormInputText
-              label="Disk size*"
+
+          <div className="scheduler-form-element-container create-scheduler-form-element-input-fl">
+            <FormInputDropdown
+              name="subNetwork"
               control={control}
-              name="diskSize"
-              onBlurCallback={handleDiskSizeBlur}
-              error={vertexErrors.diskSize}
-              type="number"
-              disabled={!currentDiskType}
+              label="Sub network"
+              customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
+              options={subNetworkList}
+              loading={loadingState.subNetwork}
+              error={vertexErrors.subNetwork}
+              disabled={
+                !getValues('vertexRegion') ||
+                !getValues('primaryNetwork') ||
+                loadingState.subNetwork
+              }
+              onChangeCallback={selected => {
+                console.log('Sub network selected:', selected);
+                // setValue('subNetwork', selected ? selected.value : '');
+                trigger(['subNetwork']);
+                trigger('primaryNetwork'); // Ensure primary network validation is updated
+              }}
             />
           </div>
         </div>
-        {/* Service Account Dropdown */}
-        <div
-          className={
-            vertexErrors.diskSize || vertexErrors.diskType
-              ? 'scheduler-form-element-container'
-              : 'scheduler-form-element-container footer-text scheduler-input-top'
-          }
-        >
-          <FormInputDropdown
-            name="serviceAccount"
-            control={control}
-            label="Service account*"
-            options={serviceAccountList}
-            loading={loadingState.serviceAccount}
-            error={vertexErrors.serviceAccount}
-          />
-        </div>
-        {/* Encryption */}
-        <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
-          {ENCRYPTION_TEXT}
-        </div>
-        <div className="scheduler-form-element-container panel-margin">
-          <FormInputRadio
-            name="encryptionOption"
-            control={control}
-            className="network-layout"
-            options={ENCRYPTION_OPTIONS.map(option => {
-              const newOption: RadioOption = { ...option };
-              return newOption;
-            })}
-            error={vertexErrors.networkOption}
-            projectId={credentials?.project_id}
-          />
-        </div>
-        {/* --- Customer-Managed Encryption (CMEK) Section --- */}
-        {encryptionSelected === CUSTOMER_ENCRYPTION && (
-          <div className="schedule-child-section horizontal-element-wrapper">
-            <FormInputRadio
-              name="customerEncryptionType"
+      ) : (
+        // 'networkSharedFromHostProject'
+        <>
+          <div className="scheduler-form-element-container">
+            <FormInputDropdown
+              name="sharedNetwork"
               control={control}
-              className={
-                vertexErrors.keyRing || vertexErrors.cryptoKey
-                  ? 'schedule-radio-btn encryption-custom-radio encryption-radio-error '
-                  : 'schedule-radio-btn encryption-custom-radio'
+              label="Shared subnetwork*"
+              options={sharedNetworkList}
+              customClass="scheduler-tag-style"
+              loading={loadingState.sharedNetwork}
+              error={
+                vertexErrors.sharedNetwork &&
+                'message' in vertexErrors.sharedNetwork
+                  ? (vertexErrors.sharedNetwork as import('react-hook-form').FieldError)
+                  : undefined
               }
-              options={CUSTOMER_MANAGED_RADIO_OPTIONS}
-            />
-
-            {/* Option 1: Select Key Ring and Key */}
-            <div className="encryption-custom-radio-element">
-              <div className="horizontal-element-wrapper scheduler-input-top">
-                <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
-                  <FormInputDropdown
-                    name="keyRing"
-                    control={control}
-                    label="Key rings*"
-                    options={keyRingList}
-                    loading={loadingState.keyRings}
-                    disabled={
-                      !currentRegion ||
-                      customerEncryptionType !==
-                        DEFAULT_CUSTOMER_MANAGED_SELECTION ||
-                      loadingState.keyRings
-                    }
-                    error={vertexErrors.keyRing}
-                    onChangeCallback={keyRingSelected =>
-                      handleKeyRingChange(keyRingSelected)
-                    }
-                  />
-                </div>
-                <div className="scheduler-form-element-container create-scheduler-form-element-input-fl">
-                  <FormInputDropdown
-                    name="cryptoKey"
-                    control={control}
-                    label="Keys*"
-                    options={cryptoKeyList}
-                    loading={loadingState.cryptoKeys}
-                    disabled={
-                      !watch('keyRing') ||
-                      customerEncryptionType !==
-                        DEFAULT_CUSTOMER_MANAGED_SELECTION ||
-                      loadingState.cryptoKeys
-                    }
-                    error={vertexErrors.cryptoKey}
-                    onChangeCallback={cryptoKeySelected =>
-                      handleCryptoKeyChange(cryptoKeySelected)
-                    }
-                  />
-                </div>
-              </div>
-
-              {/* Option 2: Enter Key Manually */}
-              <div className="scheduler-form-element-container scheduler-input-top encryption-custom-radio-manual">
-                <FormInputText
-                  name="manualKey"
-                  control={control}
-                  label="Enter key manually*"
-                  error={vertexErrors.manualKey}
-                  placeholder="projects/PROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/KEY"
-                  disabled={
-                    customerEncryptionType ===
-                    DEFAULT_CUSTOMER_MANAGED_SELECTION
-                  }
-                  // onChangeCallback={handleManualEncryptionChange}
-                />
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Network Configuration Section */}
-        <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
-          {NETWORK_CONFIGURATION_LABEL}
-        </div>
-        <p>{NETWORK_CONFIGURATION_LABEL_DESCRIPTION}</p>
-        <div className="scheduler-form-element-container panel-margin">
-          <FormInputRadio
-            name="networkOption"
-            control={control}
-            className="network-layout"
-            options={NETWORK_OPTIONS.map(option => {
-              const newOption: RadioOption = { ...option };
-              // Check if the current option is the "host project" option
-              if (option.value === 'networkSharedFromHostProject') {
-                // If there's no hostProject, disable this option
-                if (!hostProject?.name) {
-                  newOption.disabled = true;
-                } // Add the host project name to the label if it exists
-                if (hostProject?.name) {
-                  newOption.label = `${option.label} "${hostProject.name}"`;
-                }
+              disabled={
+                !hostProject ||
+                Object.keys(hostProject).length === 0 ||
+                loadingState.sharedNetwork
               }
-              return newOption;
-            })}
-            error={vertexErrors.networkOption}
-            onChange={() => {
-              // // Clear all network-related fields when network option changes
-              // setValue('primaryNetwork', '');
-              // setValue('subNetwork', '');
-              // setValue('sharedNetwork', { network: '', subnetwork: '' });
-              // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
-            }}
-          />
-        </div>
-        {/* Conditional Network Fields */}
-        {currentNetworkOption === 'networkInThisProject' ? ( // 'networkInThisProject'
-          <div className="horizontal-element-wrapper">
-            <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
-              <FormInputDropdown
-                name="primaryNetwork"
-                control={control}
-                label="Primary network"
-                customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
-                options={primaryNetworkList}
-                loading={loadingState.primaryNetwork}
-                error={vertexErrors.primaryNetwork}
-                disabled={!currentRegion || loadingState.primaryNetwork}
-                onChangeCallback={selected => {
-                  console.log('Primary network selected:', selected);
-                  console.log('Setting primary network to:', selected.value);
-                  // setValue('primaryNetwork', selected ? selected.value : '');
-                  setValue('subNetwork', ''); // Clear subnetwork when primary changes
-                  trigger(['subNetwork']); // Trigger validation for subnetwork
-                }}
-              />
-            </div>
-
-            <div className="scheduler-form-element-container create-scheduler-form-element-input-fl">
-              <FormInputDropdown
-                name="subNetwork"
-                control={control}
-                label="Sub network"
-                customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
-                options={subNetworkList}
-                loading={loadingState.subNetwork}
-                error={vertexErrors.subNetwork}
-                disabled={
-                  !getValues('vertexRegion') ||
-                  !getValues('primaryNetwork') ||
-                  loadingState.subNetwork
-                }
-                onChangeCallback={selected => {
-                  console.log('Sub network selected:', selected);
-                  // setValue('subNetwork', selected ? selected.value : '');
-                  trigger(['subNetwork']);
-                  trigger('primaryNetwork'); // Ensure primary network validation is updated
-                }}
-              />
-            </div>
-          </div>
-        ) : (
-          // 'networkSharedFromHostProject'
-          <>
-            <div className="scheduler-form-element-container">
-              <FormInputDropdown
-                name="sharedNetwork"
-                control={control}
-                label="Shared subnetwork*"
-                options={sharedNetworkList}
-                customClass="scheduler-tag-style"
-                loading={loadingState.sharedNetwork}
-                error={
-                  vertexErrors.sharedNetwork &&
-                  'message' in vertexErrors.sharedNetwork
-                    ? (vertexErrors.sharedNetwork as import('react-hook-form').FieldError)
-                    : undefined
-                }
-                disabled={
-                  !hostProject ||
-                  Object.keys(hostProject).length === 0 ||
-                  loadingState.sharedNetwork
-                }
-                onChangeCallback={selectedOption => {
-                  const selectedSharedNetwork = selectedOption?.value as
-                    | ISharedNetwork
-                    | undefined;
-                  if (selectedSharedNetwork) {
-                    setValue(
-                      'sharedNetwork.network',
-                      selectedSharedNetwork.network
-                    );
-                    setValue(
-                      'sharedNetwork.subnetwork',
-                      selectedSharedNetwork.subnetwork
-                    );
-                  } else {
-                    setValue('sharedNetwork.network', '');
-                    setValue('sharedNetwork.subnetwork', '');
-                  }
-                  trigger([
+              onChangeCallback={selectedOption => {
+                const selectedSharedNetwork = selectedOption?.value as
+                  | ISharedNetwork
+                  | undefined;
+                if (selectedSharedNetwork) {
+                  setValue(
                     'sharedNetwork.network',
-                    'sharedNetwork.subnetwork'
-                  ]);
-                }}
-              />
+                    selectedSharedNetwork.network
+                  );
+                  setValue(
+                    'sharedNetwork.subnetwork',
+                    selectedSharedNetwork.subnetwork
+                  );
+                } else {
+                  setValue('sharedNetwork.network', '');
+                  setValue('sharedNetwork.subnetwork', '');
+                }
+                trigger(['sharedNetwork.network', 'sharedNetwork.subnetwork']);
+              }}
+            />
+          </div>
+          {showSharedNetworkError && (
+            <ErrorMessage message={showSharedNetworkError} showIcon={false} />
+          )}
+        </>
+      )}
+      {/* Schedule Section */}
+      <div className="create-scheduler-label">Schedule</div>
+      <div className="scheduler-form-element-container">
+        <FormInputRadio
+          name="scheduleMode"
+          control={control}
+          className="network-layout"
+          options={SCHEDULE_MODE_OPTIONS}
+          error={vertexErrors.scheduleMode}
+          onChange={() => {
+            if (watch('scheduleMode') === 'runNow') {
+              console.log('Resetting schedule fields for Run Now mode');
+              setValue('internalScheduleMode', undefined);
+              setValue('scheduleFieldCronFormat', '');
+              setValue('scheduleValueUserFriendly', '');
+              setValue('startTime', '');
+              setValue('endTime', '');
+              setValue('maxRunCount', '');
+              setValue('timeZone', '');
+            } else {
+              if (!getValues('internalScheduleMode')) {
+                setValue('internalScheduleMode', 'userFriendly');
+              }
+              if (!getValues('scheduleValueUserFriendly')) {
+                setValue('scheduleValueUserFriendly', EVERY_MINUTE_CRON);
+              }
+              if (!getValues('startTime')) {
+                setValue('startTime', dayjs().toISOString());
+              }
+              if (!getValues('endTime')) {
+                setValue('endTime', dayjs().add(1, 'day').toISOString());
+              }
+              if (!getValues('timeZone')) {
+                setValue(
+                  'timeZone',
+                  Intl.DateTimeFormat().resolvedOptions().timeZone
+                );
+              }
+            }
+            trigger([
+              'internalScheduleMode',
+              'scheduleFieldCronFormat',
+              'scheduleValueUserFriendly',
+              'startTime',
+              'endTime',
+              'maxRunCount',
+              'timeZone'
+            ]);
+          }}
+        />
+      </div>
+      <div className="schedule-child-section">
+        {currentScheduleMode === 'runSchedule' && (
+          <>
+            <FormInputRadio
+              name="internalScheduleMode"
+              control={control}
+              className="schedule-radio-btn"
+              options={RUN_ON_SCHEDULE_OPTIONS}
+              error={vertexErrors.internalScheduleMode}
+              onChange={() => {
+                // if (watch('internalScheduleMode') === 'cronFormat') {
+                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
+                //   setValue('scheduleFieldCronFormat', '');
+                // } else {
+                //   setValue('scheduleFieldCronFormat', '');
+                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
+                // }
+                trigger([
+                  'scheduleFieldCronFormat',
+                  'scheduleValueUserFriendly'
+                ]);
+              }}
+            />
+
+            <div className="horizontal-element-wrapper module-top">
+              <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <div className="cscheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+                  <Controller
+                    name="startTime"
+                    control={control}
+                    render={({ field }) => (
+                      <DateTimePicker
+                        {...field}
+                        className="scheduler-tag-style create-scheduler-form-element-input-fl"
+                        label="Start Date*"
+                        value={field.value ? dayjs(field.value) : null}
+                        onChange={newValue => {
+                          field.onChange(
+                            newValue ? newValue.toISOString() : null
+                          );
+                          trigger(['startTime', 'endTime']);
+                        }}
+                        slots={{ openPickerIcon: CalendarMonthIcon }}
+                        slotProps={{
+                          actionBar: { actions: ['clear'] },
+                          tabs: { hidden: true },
+                          textField: {
+                            error: !!vertexErrors.startTime,
+                            helperText: vertexErrors.startTime?.message
+                          }
+                        }}
+                        disablePast
+                        closeOnSelect={true}
+                      />
+                    )}
+                  />
+                </div>
+                <div className="create-scheduler-form-element-input-fl create-pr">
+                  <Controller
+                    name="endTime"
+                    control={control}
+                    render={({ field }) => (
+                      <DateTimePicker
+                        {...field}
+                        className="scheduler-tag-style create-scheduler-form-element-input-fl"
+                        label="End Date*"
+                        value={field.value ? dayjs(field.value) : null}
+                        onChange={newValue => {
+                          field.onChange(
+                            newValue ? newValue.toISOString() : null
+                          );
+                          trigger('endTime');
+                        }}
+                        slots={{ openPickerIcon: CalendarMonthIcon }}
+                        slotProps={{
+                          actionBar: { actions: ['clear'] },
+                          field: { clearable: true },
+                          tabs: { hidden: true },
+                          textField: {
+                            error: !!vertexErrors.endTime,
+                            helperText: vertexErrors.endTime?.message
+                          }
+                        }}
+                        disablePast
+                        closeOnSelect={true}
+                      />
+                    )}
+                  />
+                </div>
+              </LocalizationProvider>
             </div>
-            {showSharedNetworkError && (
-              <ErrorMessage message={showSharedNetworkError} showIcon={false} />
-            )}
           </>
         )}
-        {/* Schedule Section */}
-        <div className="create-scheduler-label">Schedule</div>
-        <div className="scheduler-form-element-container">
-          <FormInputRadio
-            name="scheduleMode"
-            control={control}
-            className="network-layout"
-            options={SCHEDULE_MODE_OPTIONS}
-            error={vertexErrors.scheduleMode}
-            onChange={() => {
-              if (watch('scheduleMode') === 'runNow') {
-                console.log('Resetting schedule fields for Run Now mode');
-                setValue('internalScheduleMode', undefined);
-                setValue('scheduleFieldCronFormat', '');
-                setValue('scheduleValueUserFriendly', '');
-                setValue('startTime', '');
-                setValue('endTime', '');
-                setValue('maxRunCount', '');
-                setValue('timeZone', '');
-              } else {
-                if (!getValues('internalScheduleMode')) {
-                  setValue('internalScheduleMode', 'userFriendly');
-                }
-                if (!getValues('scheduleValueUserFriendly')) {
-                  setValue('scheduleValueUserFriendly', EVERY_MINUTE_CRON);
-                }
-                if (!getValues('startTime')) {
-                  setValue('startTime', dayjs().toISOString());
-                }
-                if (!getValues('endTime')) {
-                  setValue('endTime', dayjs().add(1, 'day').toISOString());
-                }
-                if (!getValues('timeZone')) {
-                  setValue(
-                    'timeZone',
-                    Intl.DateTimeFormat().resolvedOptions().timeZone
-                  );
-                }
-              }
-              trigger([
-                'internalScheduleMode',
-                'scheduleFieldCronFormat',
-                'scheduleValueUserFriendly',
-                'startTime',
-                'endTime',
-                'maxRunCount',
-                'timeZone'
-              ]);
-            }}
-          />
-        </div>
-        <div className="schedule-child-section">
-          {currentScheduleMode === 'runSchedule' && (
-            <>
-              <FormInputRadio
-                name="internalScheduleMode"
-                control={control}
-                className="schedule-radio-btn"
-                options={RUN_ON_SCHEDULE_OPTIONS}
-                error={vertexErrors.internalScheduleMode}
-                onChange={() => {
-                  // if (watch('internalScheduleMode') === 'cronFormat') {
-                  //   setValue('scheduleValue', EVERY_MINUTE_CRON);
-                  //   setValue('scheduleFieldCronFormat', '');
-                  // } else {
-                  //   setValue('scheduleFieldCronFormat', '');
-                  //   setValue('scheduleValue', EVERY_MINUTE_CRON);
-                  // }
-                  trigger([
-                    'scheduleFieldCronFormat',
-                    'scheduleValueUserFriendly'
-                  ]);
-                }}
-              />
 
-              <div className="horizontal-element-wrapper module-top">
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <div className="cscheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
-                    <Controller
-                      name="startTime"
-                      control={control}
-                      render={({ field }) => (
-                        <DateTimePicker
-                          {...field}
-                          className="scheduler-tag-style create-scheduler-form-element-input-fl"
-                          label="Start Date*"
-                          value={field.value ? dayjs(field.value) : null}
-                          onChange={newValue => {
-                            field.onChange(
-                              newValue ? newValue.toISOString() : null
-                            );
-                            trigger(['startTime', 'endTime']);
-                          }}
-                          slots={{ openPickerIcon: CalendarMonthIcon }}
-                          slotProps={{
-                            actionBar: { actions: ['clear'] },
-                            tabs: { hidden: true },
-                            textField: {
-                              error: !!vertexErrors.startTime,
-                              helperText: vertexErrors.startTime?.message
-                            }
-                          }}
-                          disablePast
-                          closeOnSelect={true}
-                        />
-                      )}
-                    />
-                  </div>
-                  <div className="create-scheduler-form-element-input-fl create-pr">
-                    <Controller
-                      name="endTime"
-                      control={control}
-                      render={({ field }) => (
-                        <DateTimePicker
-                          {...field}
-                          className="scheduler-tag-style create-scheduler-form-element-input-fl"
-                          label="End Date*"
-                          value={field.value ? dayjs(field.value) : null}
-                          onChange={newValue => {
-                            field.onChange(
-                              newValue ? newValue.toISOString() : null
-                            );
-                            trigger('endTime');
-                          }}
-                          slots={{ openPickerIcon: CalendarMonthIcon }}
-                          slotProps={{
-                            actionBar: { actions: ['clear'] },
-                            field: { clearable: true },
-                            tabs: { hidden: true },
-                            textField: {
-                              error: !!vertexErrors.endTime,
-                              helperText: vertexErrors.endTime?.message
-                            }
-                          }}
-                          disablePast
-                          closeOnSelect={true}
-                        />
-                      )}
-                    />
-                  </div>
-                </LocalizationProvider>
+        {currentScheduleMode === 'runSchedule' &&
+          currentInternalScheduleMode === 'cronFormat' && (
+            <>
+              <div
+                className={
+                  vertexErrors.endTime?.message ||
+                  vertexErrors.startTime?.message
+                    ? 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input'
+                    : 'scheduler-form-element-container schedule-input-field scheduler-input-top'
+                }
+              >
+                <FormInputText
+                  label="Schedule*"
+                  control={control}
+                  name="scheduleFieldCronFormat"
+                  error={vertexErrors.scheduleFieldCronFormat}
+                  onChangeCallback={handleCronExpression}
+                />
+              </div>
+              <div>
+                <span className="tab-description tab-text-sub-cl">
+                  {SCHEDULE_FORMAT_DESCRIPTION}
+                </span>
+                <div className="learn-more-url">
+                  <LearnMore path={CORN_EXP_DOC_URL} />
+                </div>
               </div>
             </>
           )}
 
-          {currentScheduleMode === 'runSchedule' &&
-            currentInternalScheduleMode === 'cronFormat' && (
-              <>
-                <div
-                  className={
-                    vertexErrors.endTime?.message ||
-                    vertexErrors.startTime?.message
-                      ? 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input'
-                      : 'scheduler-form-element-container schedule-input-field scheduler-input-top'
-                  }
-                >
-                  <FormInputText
-                    label="Schedule*"
-                    control={control}
-                    name="scheduleFieldCronFormat"
-                    error={vertexErrors.scheduleFieldCronFormat}
-                    onChangeCallback={handleCronExpression}
-                  />
-                </div>
-                <div>
-                  <span className="tab-description tab-text-sub-cl">
-                    {SCHEDULE_FORMAT_DESCRIPTION}
-                  </span>
-                  <div className="learn-more-url">
-                    <LearnMore path={CORN_EXP_DOC_URL} />
-                  </div>
-                </div>
-              </>
-            )}
-
-          {currentScheduleMode === 'runSchedule' &&
-            currentInternalScheduleMode === 'userFriendly' && (
-              <div className="scheduler-input-top">
-                <Controller
-                  name="scheduleValueUserFriendly"
-                  control={control}
-                  render={({ field }) => (
-                    <Cron
-                      value={field.value || ''}
-                      setValue={(newValue: string) => {
-                        field.onChange(newValue);
-                        handleCronExpression(newValue);
-                      }}
-                      allowedPeriods={
-                        allowedPeriodsCron as PeriodType[] | undefined
-                      }
-                    />
-                  )}
-                />
-                {vertexErrors.scheduleValueUserFriendly && (
-                  <ErrorMessage
-                    message={
-                      vertexErrors.scheduleValueUserFriendly.message ||
-                      'Schedule is required'
+        {currentScheduleMode === 'runSchedule' &&
+          currentInternalScheduleMode === 'userFriendly' && (
+            <div className="scheduler-input-top">
+              <Controller
+                name="scheduleValueUserFriendly"
+                control={control}
+                render={({ field }) => (
+                  <Cron
+                    value={field.value || ''}
+                    setValue={(newValue: string) => {
+                      field.onChange(newValue);
+                      handleCronExpression(newValue);
+                    }}
+                    allowedPeriods={
+                      allowedPeriodsCron as PeriodType[] | undefined
                     }
-                    showIcon={false}
                   />
                 )}
-              </div>
-            )}
-
-          {currentScheduleMode === 'runSchedule' && (
-            <>
-              <div className="scheduler-form-element-container scheduler-input-top">
-                <FormInputDropdown
-                  name="timeZone"
-                  control={control}
-                  label="Time Zone*"
-                  options={timezones}
-                  customClass="scheduler-tag-style"
-                  error={vertexErrors.timeZone}
+              />
+              {vertexErrors.scheduleValueUserFriendly && (
+                <ErrorMessage
+                  message={
+                    vertexErrors.scheduleValueUserFriendly.message ||
+                    'Schedule is required'
+                  }
+                  showIcon={false}
                 />
-              </div>
-
-              <div className="scheduler-form-element-container scheduler-input-top">
-                <FormInputText
-                  label="Max runs"
-                  control={control}
-                  name="maxRunCount"
-                  error={vertexErrors.maxRunCount}
-                  type="number"
-                />
-              </div>
-            </>
+              )}
+            </div>
           )}
-        </div>
+
+        {currentScheduleMode === 'runSchedule' && (
+          <>
+            <div className="scheduler-form-element-container scheduler-input-top">
+              <FormInputDropdown
+                name="timeZone"
+                control={control}
+                label="Time Zone*"
+                options={timezones}
+                customClass="scheduler-tag-style"
+                error={vertexErrors.timeZone}
+              />
+            </div>
+
+            <div className="scheduler-form-element-container scheduler-input-top">
+              <FormInputText
+                label="Max runs"
+                control={control}
+                name="maxRunCount"
+                error={vertexErrors.maxRunCount}
+                type="number"
+              />
+            </div>
+          </>
+        )}
       </div>
-    )
+    </div>
   );
 };

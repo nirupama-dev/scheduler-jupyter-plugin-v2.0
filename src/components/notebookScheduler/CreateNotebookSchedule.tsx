@@ -244,7 +244,8 @@ export const CreateNotebookSchedule = (
     setValue,
     getValues,
     trigger,
-    setError
+    setError,
+    clearErrors
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
     values: initialFormValues,
@@ -499,6 +500,7 @@ export const CreateNotebookSchedule = (
               isValid={isValid}
               credentials={initialFormData.credentials}
               editScheduleData={initialFormData.editModeData}
+              clearErrors={clearErrors}
               app={app}
             />
           )}

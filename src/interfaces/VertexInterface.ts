@@ -45,6 +45,7 @@ export interface ICreateVertexSchedulerProps {
   isValid: boolean;
   credentials: IAuthCredentials;
   editScheduleData: IEditScheduleData | null | undefined;
+  clearErrors: any;
   app: JupyterFrontEnd;
 }
 

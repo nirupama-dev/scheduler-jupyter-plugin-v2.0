@@ -380,7 +380,7 @@ export const CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT = 'Manage via';
 
 export const DEFAULT_CUSTOMER_MANAGED_SELECTION = 'key';
 
-export const CUSTOMER_MAANGED_ENCRYPTION = 'manual';
+export const CUSTOMER_MANGED_ENCRYPTION = 'manual';
 
 export const SECURITY_KEY =
   'https://console.cloud.google.com/security/kms/keyrings';
@@ -390,7 +390,7 @@ export const CUSTOMER_MANAGED_ENCRYPTION_LINK =
 
 export const CUSTOMER_MANAGED_RADIO_OPTIONS = [
   { label: '', value: DEFAULT_CUSTOMER_MANAGED_SELECTION },
-  { label: '', value: CUSTOMER_MAANGED_ENCRYPTION }
+  { label: '', value: CUSTOMER_MANGED_ENCRYPTION }
 ];
 
 export const ENCRYPTION_MANUAL_KEY_SAMPLE =

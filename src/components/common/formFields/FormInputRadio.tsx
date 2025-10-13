@@ -35,7 +35,8 @@ import {
   CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT,
   SECURITY_KEY,
   CUSTOMER_MANAGED_ENCRYPTION_LINK,
-  ENCRYPTION_OPTIONS
+  ENCRYPTION_OPTIONS,
+  CUSTOMER_MANGED_ENCRYPTION
 } from '../../../utils/Constants';
 import LearnMore from '../links/LearnMore';
 
@@ -46,7 +47,8 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
   options = [],
   error,
   hostProject,
-  projectId = ''
+  projectId = '',
+  errorFlag
 }) => {
   const safeOptions = Array.isArray(options) ? options : [];
   const hasHostProject =
@@ -70,7 +72,17 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
               </>
             </Typography>
           }
-          control={<Radio size="small" />}
+          control={
+            <Radio
+              size="small"
+              sx={{
+                paddingTop:
+                  errorFlag && singleOption.value === CUSTOMER_MANGED_ENCRYPTION
+                    ? '30px'
+                    : ''
+              }}
+            />
+          }
           className="scheduler-label-font"
           disabled={singleOption.disabled}
         />
