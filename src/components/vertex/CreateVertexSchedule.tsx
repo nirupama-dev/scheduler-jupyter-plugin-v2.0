@@ -847,6 +847,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const handleKeyRingChange = (selectedKeyRing: string | null) => {
     if (selectedKeyRing) {
       setValue('keyRing', selectedKeyRing);
+      clearErrors('keyRing');
       setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
       trigger('cryptoKey');
     }
@@ -876,6 +877,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       encryptionSelected === CUSTOMER_ENCRYPTION &&
       customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
     ) {
+      trigger('keyRing');
       listKeyRings();
       clearErrors('manualKey');
     }
