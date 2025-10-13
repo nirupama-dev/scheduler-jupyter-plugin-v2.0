@@ -111,7 +111,7 @@ export interface ILoaderProps {
   messageClassName?: string;
 }
 
-export interface IInitialScheduleFormData {
+export interface IInitialSchedulerContextData {
   credentials?: IAuthCredentials | undefined;
   editModeData?: IEditScheduleData;
   initialDefaults?: INotebookKernalSchdulerDefaults;

@@ -30,15 +30,14 @@ import {
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME,
+  SCHEDULE_MODE_OPTIONS,
   SCHEDULE_VALUE_EXPRESSION,
   DEFAULT_ENCRYPTION_SELECTED,
   DEFAULT_CUSTOMER_MANAGED_SELECTION
 } from './Constants';
-import {
-  INotebookKernalSchdulerDefaults,
-  IInitialScheduleFormData
-} from '../interfaces/CommonInterface';
+import { IInitialSchedulerContextData } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
+import { ScheduleMode } from '../types/CommonSchedulerTypes';
 
 /**
  * Formats a timestamp into a specific string format.
@@ -75,7 +74,7 @@ const generateDefaultJobName = () => {
  * It provides a set of initial values that can be used when creating a new Vertex schedule.
  */
 const getDefaultVertexValues = (
-  initialSchedulerStateData: IInitialScheduleFormData,
+  initialSchedulerStateData: IInitialSchedulerContextData,
   sessionContext: ISessionContext
 ): VertexSchedulerFormValues => {
   const inputFilePath = sessionContext?.path;
@@ -105,7 +104,7 @@ const getDefaultVertexValues = (
     subNetwork: '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'
     diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
     diskSize: DEFAULT_DISK_SIZE,
-    scheduleMode: 'runNow',
+    scheduleMode: SCHEDULE_MODE_OPTIONS[0].value as ScheduleMode, // Default to first option which is 'One-time'
     internalScheduleMode: 'cronFormat',
     scheduleFieldCronFormat: '',
     scheduleValueUserFriendly: '',
@@ -125,16 +124,17 @@ const getDefaultVertexValues = (
  * It provides a set of initial values that can be used when creating a new Composer schedule.
  */
 const getDefaultComposerValues = (
-  initialKernelDetails: INotebookKernalSchdulerDefaults,
-  inputFilePath: string,
-  credentials: IInitialScheduleFormData['credentials']
+  initialSchedulerStateData: IInitialSchedulerContextData,
+  inputFilePath: string
 ): ComposerSchedulerFormValues => ({
   schedulerSelection: COMPOSER_SCHEDULER_NAME,
   jobName: generateDefaultJobName(),
   inputFile: inputFilePath, // input file is fetched from the Session context path
-  projectId: credentials?.project_id ?? '',
-  composerRegion: credentials?.region_id ?? '',
-  executionMode: initialKernelDetails?.kernelDetails?.executionMode ?? 'local', // Default to 'local' if executionMode is not provided
+  projectId: initialSchedulerStateData?.credentials?.project_id ?? '',
+  composerRegion: initialSchedulerStateData?.credentials?.region_id ?? '',
+  executionMode:
+    initialSchedulerStateData.initialDefaults?.kernelDetails?.executionMode ??
+    'local', // Default to 'local' if executionMode is not provided
   environment: '',
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
   retryDelay: 5, // Matches Zod's default
@@ -143,8 +143,8 @@ const getDefaultComposerValues = (
   emailOnSuccess: false,
   emailRecipients: [], // Default for array of emails
   runOption: 'runNow',
-  cluster: initialKernelDetails?.kernelDetails?.selectedClusterName ?? '',
-  serverless: initialKernelDetails.kernelDetails?.selectedServerlessName ?? '',
+  cluster: '',
+  serverless: '',
   timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone,
   scheduleValue: SCHEDULE_VALUE_EXPRESSION
 });
@@ -155,18 +155,14 @@ const getDefaultComposerValues = (
  * @returns CombinedCreateFormValues that match one of the discriminated union branches.
  */
 export const getInitialFormValues = (
-  formState: IInitialScheduleFormData,
+  formState: IInitialSchedulerContextData,
   sessionContext: ISessionContext | null | undefined
 ): CombinedCreateFormValues => {
   if (!sessionContext?.path) {
     throw new Error('Notebook path not found in this session');
   }
   if (formState.initialDefaults?.schedulerType === 'composer') {
-    return getDefaultComposerValues(
-      formState.initialDefaults,
-      sessionContext?.path,
-      formState.credentials
-    );
+    return getDefaultComposerValues(formState, sessionContext?.path);
   }
   // Default to Vertex if no criteria or criteria is 'vertex' and load default vertex values.
   return getDefaultVertexValues(formState, sessionContext);

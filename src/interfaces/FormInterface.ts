@@ -120,3 +120,10 @@ export interface IErrorMessageProps {
   showIcon?: boolean; // Optional prop to show/hide an icon
   errorWidth?: boolean; // Optional prop to control width
 }
+
+export interface IFormInputChipsProps {
+  name: string;
+  control: Control<any>;
+  label: string;
+  error: any;
+}
