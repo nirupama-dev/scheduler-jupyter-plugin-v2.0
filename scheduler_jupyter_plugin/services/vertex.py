@@ -600,12 +600,16 @@ class Client:
                         jobs = resp.get("notebookExecutionJobs")
                         for job in jobs:
                             if start_date:
-                                # getting only the jobs whose create time is equal to start date
-                                # splitting it in order to get only the date part from the values which is in zulu format (2011-08-12T20:17:46.384Z)
-                                if (
-                                    start_date.rsplit("-", 1)[0]
-                                    == job.get("createTime").rsplit("-", 1)[0]
-                                ):
+                                # 1. Get the date part (YYYY-MM-DD)
+                                start_date_only = start_date.partition("T")[0]
+                                job_create_date = job.get("createTime", "").partition("T")[0]
+
+                                # 2. Extract YYYY-MM by splitting on the hyphen and joining the first two elements.
+                                #    Example: '2025-10-13' -> ['2025', '10', '13'] -> '2025-10'
+                                start_year_month = "-".join(start_date_only.split("-")[:2])
+                                job_year_month = "-".join(job_create_date.split("-")[:2])
+
+                                if start_year_month == job_year_month:
                                     execution_jobs.append(job)
                             else:
                                 execution_jobs.append(job)
