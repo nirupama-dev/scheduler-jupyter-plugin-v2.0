@@ -1121,6 +1121,7 @@ const CreateVertexScheduler = ({
       if (!createCompleted) {
         subNetworkAPI(primaryNetworkSelected?.name);
       }
+      setErrorMessageSubnetworkNetwork('');
     }
   }, [region]);
 
