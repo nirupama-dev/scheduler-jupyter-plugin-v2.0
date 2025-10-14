@@ -716,6 +716,7 @@ const CreateVertexScheduler = ({
    */
   const handlekeyManuallyRadio = () => {
     setCustomerEncryptionRadioValue('manually');
+    setCryptoKeyLoading(false);
     setKeyRingSelected('');
     setCryptoKeySelected('');
     setManualKeySelected('');
@@ -1109,6 +1110,7 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     if (!region) {
+      setMachineTypeLoading(false);
       setMachineTypeList([]);
       setMachineTypeSelected(null);
       setCryptoKeySelected('');
@@ -1120,6 +1122,7 @@ const CreateVertexScheduler = ({
       if (!createCompleted) {
         subNetworkAPI(primaryNetworkSelected?.name);
       }
+      setErrorMessageSubnetworkNetwork('');
     }
   }, [region]);
 
@@ -1143,10 +1146,13 @@ const CreateVertexScheduler = ({
   }, [cloudStorageList]);
 
   useEffect(() => {
-    const machineTypeOptions = machineTypeList.map(item => item.machineType);
-    setMachineTypeSelected(
-      machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) || null
-    );
+    if (region) {
+      const machineTypeOptions = machineTypeList.map(item => item.machineType);
+      setMachineTypeSelected(
+        machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) ||
+          null
+      );
+    }
   }, [machineTypeList]);
 
   useEffect(() => {
@@ -1161,8 +1167,17 @@ const CreateVertexScheduler = ({
   }, [diskSize]);
 
   useEffect(() => {
-    listCryptoKeysAPI(keyRingSelected);
+    if (keyRingSelected) {
+      listCryptoKeysAPI(keyRingSelected);
+    }
   }, [keyRingSelected]);
+
+  useEffect(() => {
+    if (!keyRingSelected) {
+      setCryptoKeySelected('');
+      setCryptoKeyList([]);
+    }
+  }, [cryptoKeySelected]);
 
   useEffect(() => {
     if (projectId && region) {
