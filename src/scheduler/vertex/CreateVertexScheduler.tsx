@@ -716,7 +716,6 @@ const CreateVertexScheduler = ({
    */
   const handlekeyManuallyRadio = () => {
     setCustomerEncryptionRadioValue('manually');
-    setCryptoKeyLoading(false);
     setKeyRingSelected('');
     setCryptoKeySelected('');
     setManualKeySelected('');
@@ -777,23 +776,12 @@ const CreateVertexScheduler = ({
       cryptoKeyListResponse.length > 0
     ) {
       setCryptoKeyList(cryptoKeyListResponse);
+      if (!editMode) {
+        setCryptoKeySelected(cryptoKeyListResponse[0]);
+      }
     }
     setCryptoKeyLoading(false);
   };
-
-  useEffect(() => {
-    if (
-      customerEncryptionRadioValue === DEFAULT_CUSTOMER_MANAGED_SELECTION &&
-      keyRingSelected
-    ) {
-      if (!editMode) {
-        setCryptoKeySelected(cryptoKeyList[0]);
-      }
-    } else {
-      setCryptoKeyLoading(false);
-      setCryptoKeyList([]);
-    }
-  }, [cryptoKeyList]);
 
   /**
    * Handles manual key entry
@@ -1177,12 +1165,7 @@ const CreateVertexScheduler = ({
   }, [diskSize]);
 
   useEffect(() => {
-    if (keyRingSelected) {
-      listCryptoKeysAPI(keyRingSelected);
-    } else {
-      setCryptoKeyLoading(false);
-      setCryptoKeyList([]);
-    }
+    listCryptoKeysAPI(keyRingSelected);
   }, [keyRingSelected]);
 
   useEffect(() => {
