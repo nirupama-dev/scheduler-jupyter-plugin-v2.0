@@ -188,6 +188,9 @@ class MockListSchedulesClientSession:
                         "createNotebookExecutionJobRequest": {
                             "notebookExecutionJob": {
                                 "kernelName": "python3",  # at least one of these must be present
+                                'labels': {
+                                    "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench"  # must be "workbench" to be valid
+                                },
                                 # "workbenchRuntime": {},
                                 # "customEnvironmentSpec": {},
                             }
