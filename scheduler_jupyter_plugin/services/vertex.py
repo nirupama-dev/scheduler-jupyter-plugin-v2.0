@@ -13,7 +13,6 @@
 # limitations under the License.
 
 
-from urllib3 import request
 import aiohttp
 import json
 from cron_descriptor import get_description
@@ -309,8 +308,6 @@ class Client:
                             if custom_label_value != "workbench":
                                  continue    
                             
-                            print("Schedule:", schedule, "labels:", custom_label_value)
-
                             # parsing to get the required schedule value
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
