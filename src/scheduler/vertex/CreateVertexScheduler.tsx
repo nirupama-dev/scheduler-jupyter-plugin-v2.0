@@ -716,6 +716,7 @@ const CreateVertexScheduler = ({
    */
   const handlekeyManuallyRadio = () => {
     setCustomerEncryptionRadioValue('manually');
+    setCryptoKeyLoading(false);
     setKeyRingSelected('');
     setCryptoKeySelected('');
     setManualKeySelected('');
@@ -1166,8 +1167,17 @@ const CreateVertexScheduler = ({
   }, [diskSize]);
 
   useEffect(() => {
-    listCryptoKeysAPI(keyRingSelected);
+    if (keyRingSelected) {
+      listCryptoKeysAPI(keyRingSelected);
+    }
   }, [keyRingSelected]);
+
+  useEffect(() => {
+    if (!keyRingSelected) {
+      setCryptoKeySelected('');
+      setCryptoKeyList([]);
+    }
+  }, [cryptoKeySelected]);
 
   useEffect(() => {
     if (projectId && region) {
