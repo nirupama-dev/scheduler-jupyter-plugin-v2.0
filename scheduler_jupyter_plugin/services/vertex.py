@@ -13,6 +13,7 @@
 # limitations under the License.
 
 
+from urllib3 import request
 import aiohttp
 import json
 from cron_descriptor import get_description
@@ -292,27 +293,25 @@ class Client:
                     else:
                         schedule_list = []
                         schedules = resp.get("schedules")
+                       
                         for schedule in schedules:
                             # filter for a workbench schedule
-                            # ie atleast any one of the following is not available.
-                            # workbenchRuntime or kernel or customEnvironmentSpec
-                            if (
-                                schedule.get("createNotebookExecutionJobRequest").get(
-                                    "notebookExecutionJob"
-                                )
-                                is None
-                            ):
+                            # using the custom label added while creating the schedule on plugin
+                            if not (request := schedule.get("createNotebookExecutionJobRequest")):
                                 continue
-                            notebook_execution_job = schedule.get(
-                                "createNotebookExecutionJobRequest"
-                            ).get("notebookExecutionJob")
-                            if (
-                                notebook_execution_job.get("workbenchRuntime") is None
-                                and notebook_execution_job.get("kernelName") is None
-                                and notebook_execution_job.get("customEnvironmentSpec")
-                                is None
-                            ):
+                            if not (job := request.get("notebookExecutionJob")):
                                 continue
+                            if not (labels := job.get("labels")):
+                                continue
+                            custom_label_value = labels.get(
+                                "aiplatform.googleapis.com/colab_enterprise_entry_service"
+                            )
+                            if custom_label_value != "workbench":
+                                 continue    
+                            
+                            print("Schedule:", schedule, "labels:", custom_label_value)
+
+                            # parsing to get the required schedule value
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
                             cron_value = (
