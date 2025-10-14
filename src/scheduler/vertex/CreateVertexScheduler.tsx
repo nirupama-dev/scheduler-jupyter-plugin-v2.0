@@ -1109,6 +1109,7 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     if (!region) {
+      setMachineTypeLoading(false);
       setMachineTypeList([]);
       setMachineTypeSelected(null);
       setCryptoKeySelected('');
@@ -1143,10 +1144,13 @@ const CreateVertexScheduler = ({
   }, [cloudStorageList]);
 
   useEffect(() => {
-    const machineTypeOptions = machineTypeList.map(item => item.machineType);
-    setMachineTypeSelected(
-      machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) || null
-    );
+    if (region) {
+      const machineTypeOptions = machineTypeList.map(item => item.machineType);
+      setMachineTypeSelected(
+        machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) ||
+          null
+      );
+    }
   }, [machineTypeList]);
 
   useEffect(() => {
