@@ -1689,7 +1689,7 @@ const CreateVertexScheduler = ({
                     />
                   </div>
                   {!manualValidation && (
-                    <div className="error-key-parent-manual">
+                    <div className="error-manual-encryption">
                       <div className="error-key-missing">{KEY_MESSAGE}</div>
                     </div>
                   )}
