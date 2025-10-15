@@ -1117,6 +1117,8 @@ const CreateVertexScheduler = ({
       setKeyRingSelected('');
       setCryptoKeyList([]);
       setKeyRingList([]);
+      setSubNetworkSelected(null);
+      setSubNetworkList([]);
     } else {
       machineTypeAPI();
       if (!createCompleted) {
