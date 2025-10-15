@@ -314,7 +314,9 @@ const CreateVertexScheduler = ({
   ) => {
     setPrimaryNetworkSelected(primaryValue);
     setSubNetworkSelected(null);
-    subNetworkAPI(primaryValue?.name);
+    if (region) {
+      subNetworkAPI(primaryValue?.name);
+    }
   };
 
   /**
@@ -1121,7 +1123,7 @@ const CreateVertexScheduler = ({
       setSubNetworkList([]);
     } else {
       machineTypeAPI();
-      if (!createCompleted) {
+      if (!createCompleted && primaryNetworkSelected) {
         subNetworkAPI(primaryNetworkSelected?.name);
       }
       setErrorMessageSubnetworkNetwork('');
@@ -1819,19 +1821,21 @@ const CreateVertexScheduler = ({
                     />
                   )}
                   clearIcon={false}
-                  disabled={editMode || !primaryNetworkSelected}
+                  disabled={editMode || !primaryNetworkSelected || !region}
                   noOptionsText={
                     <span className="network-option-helper-text">
                       {SUBNETWORK_VERTEX_ERROR}
                     </span>
                   }
                 />
-                {errorMessageSubnetworkNetwork && (
-                  <ErrorMessage
-                    message={errorMessageSubnetworkNetwork}
-                    showIcon={false}
-                  />
-                )}
+                {errorMessageSubnetworkNetwork &&
+                  region &&
+                  primaryNetworkSelected && (
+                    <ErrorMessage
+                      message={errorMessageSubnetworkNetwork}
+                      showIcon={false}
+                    />
+                  )}
               </div>
             </div>
           ) : (
