@@ -515,7 +515,7 @@
   color: #34a853;
 }
 
-.success-message-pack {
+.element-section-top {
   padding-top: 5px;
 }
 
@@ -836,4 +836,10 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   text-decoration: underline;
   cursor: pointer;
   padding-left: 3px;
+}
+
+.schedule-label-edit-row {
+  display: flex;
+  margin: 15px 0;
+  padding-bottom: 9px;
 }
