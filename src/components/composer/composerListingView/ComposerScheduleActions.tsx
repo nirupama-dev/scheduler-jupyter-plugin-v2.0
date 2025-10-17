@@ -2,7 +2,7 @@
 import React from 'react';
 import {
   iconDeleteAction,
-  iconEditDag,
+  iconEditSchedule,
   iconEditNotebook,
   iconPause,
   iconPlay,
@@ -59,7 +59,7 @@ export const renderActions = (
         <ActionButton
           title="Edit Schedule"
           onClick={() => handleEditSchedule(data.jobid)}
-          icon={iconEditDag}
+          icon={iconEditSchedule}
         />
       )}
 
