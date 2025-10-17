@@ -314,7 +314,9 @@ const CreateVertexScheduler = ({
   ) => {
     setPrimaryNetworkSelected(primaryValue);
     setSubNetworkSelected(null);
-    subNetworkAPI(primaryValue?.name);
+    if (region) {
+      subNetworkAPI(primaryValue?.name);
+    }
   };
 
   /**
@@ -716,6 +718,7 @@ const CreateVertexScheduler = ({
    */
   const handlekeyManuallyRadio = () => {
     setCustomerEncryptionRadioValue('manually');
+    setCryptoKeyLoading(false);
     setKeyRingSelected('');
     setCryptoKeySelected('');
     setManualKeySelected('');
@@ -1109,17 +1112,21 @@ const CreateVertexScheduler = ({
 
   useEffect(() => {
     if (!region) {
+      setMachineTypeLoading(false);
       setMachineTypeList([]);
       setMachineTypeSelected(null);
       setCryptoKeySelected('');
       setKeyRingSelected('');
       setCryptoKeyList([]);
       setKeyRingList([]);
+      setSubNetworkSelected(null);
+      setSubNetworkList([]);
     } else {
       machineTypeAPI();
-      if (!createCompleted) {
+      if (!createCompleted && primaryNetworkSelected) {
         subNetworkAPI(primaryNetworkSelected?.name);
       }
+      setErrorMessageSubnetworkNetwork('');
     }
   }, [region]);
 
@@ -1143,10 +1150,13 @@ const CreateVertexScheduler = ({
   }, [cloudStorageList]);
 
   useEffect(() => {
-    const machineTypeOptions = machineTypeList.map(item => item.machineType);
-    setMachineTypeSelected(
-      machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) || null
-    );
+    if (region) {
+      const machineTypeOptions = machineTypeList.map(item => item.machineType);
+      setMachineTypeSelected(
+        machineTypeOptions.find(option => option === DEFAULT_MACHINE_TYPE) ||
+          null
+      );
+    }
   }, [machineTypeList]);
 
   useEffect(() => {
@@ -1161,8 +1171,17 @@ const CreateVertexScheduler = ({
   }, [diskSize]);
 
   useEffect(() => {
-    listCryptoKeysAPI(keyRingSelected);
+    if (keyRingSelected) {
+      listCryptoKeysAPI(keyRingSelected);
+    }
   }, [keyRingSelected]);
+
+  useEffect(() => {
+    if (!keyRingSelected) {
+      setCryptoKeySelected('');
+      setCryptoKeyList([]);
+    }
+  }, [cryptoKeySelected]);
 
   useEffect(() => {
     if (projectId && region) {
@@ -1670,7 +1689,7 @@ const CreateVertexScheduler = ({
                     />
                   </div>
                   {!manualValidation && (
-                    <div className="error-key-parent-manual">
+                    <div className="error-manual-encryption">
                       <div className="error-key-missing">{KEY_MESSAGE}</div>
                     </div>
                   )}
@@ -1802,19 +1821,21 @@ const CreateVertexScheduler = ({
                     />
                   )}
                   clearIcon={false}
-                  disabled={editMode || !primaryNetworkSelected}
+                  disabled={editMode || !primaryNetworkSelected || !region}
                   noOptionsText={
                     <span className="network-option-helper-text">
                       {SUBNETWORK_VERTEX_ERROR}
                     </span>
                   }
                 />
-                {errorMessageSubnetworkNetwork && (
-                  <ErrorMessage
-                    message={errorMessageSubnetworkNetwork}
-                    showIcon={false}
-                  />
-                )}
+                {errorMessageSubnetworkNetwork &&
+                  region &&
+                  primaryNetworkSelected && (
+                    <ErrorMessage
+                      message={errorMessageSubnetworkNetwork}
+                      showIcon={false}
+                    />
+                  )}
               </div>
             </div>
           ) : (

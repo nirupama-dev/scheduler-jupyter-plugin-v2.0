@@ -292,27 +292,23 @@ class Client:
                     else:
                         schedule_list = []
                         schedules = resp.get("schedules")
+                       
                         for schedule in schedules:
                             # filter for a workbench schedule
-                            # ie atleast any one of the following is not available.
-                            # workbenchRuntime or kernel or customEnvironmentSpec
-                            if (
-                                schedule.get("createNotebookExecutionJobRequest").get(
-                                    "notebookExecutionJob"
-                                )
-                                is None
-                            ):
+                            # using the custom label added while creating the schedule on plugin
+                            if not (request := schedule.get("createNotebookExecutionJobRequest")):
                                 continue
-                            notebook_execution_job = schedule.get(
-                                "createNotebookExecutionJobRequest"
-                            ).get("notebookExecutionJob")
-                            if (
-                                notebook_execution_job.get("workbenchRuntime") is None
-                                and notebook_execution_job.get("kernelName") is None
-                                and notebook_execution_job.get("customEnvironmentSpec")
-                                is None
-                            ):
+                            if not (job := request.get("notebookExecutionJob")):
                                 continue
+                            if not (labels := job.get("labels")):
+                                continue
+                            custom_label_value = labels.get(
+                                "aiplatform.googleapis.com/colab_enterprise_entry_service"
+                            )
+                            if custom_label_value != "workbench":
+                                 continue    
+                            
+                            # parsing to get the required schedule value
                             max_run_count = schedule.get("maxRunCount")
                             cron = schedule.get("cron")
                             cron_value = (
@@ -323,7 +319,7 @@ class Client:
                             if max_run_count == "1" and cron_value == "* * * * *":
                                 schedule_value = "run once"
                             else:
-                                schedule_value = self.parse_schedule(cron)
+                                schedule_value = self.parse_schedule(cron_value)
 
                             formatted_schedule = {
                                 "name": schedule.get("name"),
@@ -600,12 +596,16 @@ class Client:
                         jobs = resp.get("notebookExecutionJobs")
                         for job in jobs:
                             if start_date:
-                                # getting only the jobs whose create time is equal to start date
-                                # splitting it in order to get only the date part from the values which is in zulu format (2011-08-12T20:17:46.384Z)
-                                if (
-                                    start_date.rsplit("-", 1)[0]
-                                    == job.get("createTime").rsplit("-", 1)[0]
-                                ):
+                                # 1. Get the date part (YYYY-MM-DD)
+                                start_date_only = start_date.partition("T")[0]
+                                job_create_date = job.get("createTime", "").partition("T")[0]
+
+                                # 2. Extract YYYY-MM by splitting on the hyphen and joining the first two elements.
+                                #    Example: '2025-10-13' -> ['2025', '10', '13'] -> '2025-10'
+                                start_year_month = "-".join(start_date_only.split("-")[:2])
+                                job_year_month = "-".join(job_create_date.split("-")[:2])
+
+                                if start_year_month == job_year_month:
                                     execution_jobs.append(job)
                             else:
                                 execution_jobs.append(job)
