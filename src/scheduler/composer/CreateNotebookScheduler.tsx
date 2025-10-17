@@ -812,7 +812,7 @@ const CreateNotebookScheduler = ({
                   tag="div"
                   className="icon-white logo-alignment-style success_icon icon-size-status"
                 />
-                <div className="success-message-pack warning-font success-message-cl-package warning-message">
+                <div className="element-section-top warning-font success-message-cl-package warning-message">
                   {packageInstallationMessage}
                 </div>
               </div>

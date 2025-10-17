@@ -183,7 +183,7 @@ function LabelProperties({
 
             return (
               <div key={label}>
-                <div className="job-label-edit-row">
+                <div className="schedule-label-edit-row">
                   <div className="key-message-wrapper">
                     <div className="select-text-overlay-label">
                       <Input
@@ -274,7 +274,7 @@ function LabelProperties({
                     </div>
                     {labelDetailUpdated[index].split(':')[1] === '' &&
                       labelDetailUpdated[index] !== '' && (
-                        <div className="error-key-missing">
+                        <div className="error-key-missing element-section-top">
                           Value is required
                         </div>
                       )}
