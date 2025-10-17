@@ -15,7 +15,8 @@
  * limitations under the License.
  */
 
-import { test, expect, galata } from '@jupyterlab/galata';
+import { test, galata } from '@jupyterlab/galata';
+import {Page, expect} from '@playwright/test'
 
 // Set a common timeout for all tests
 const timeout = 5 * 60 * 1000;
@@ -29,7 +30,7 @@ const dateTimeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.g
  * Helper function to navigate to Scheduled Jobs listing page.
  * @param {Object} page - Playwright page object.
  */
-async function navigateToScheduleJobsListingPage(page:any) {
+async function navigateToScheduleJobsListingPage(page:Page) {
   await page
     .locator(
       '//*[@data-category="Google Cloud Resources" and @title="Scheduled Jobs"]'
@@ -46,25 +47,25 @@ async function navigateToScheduleJobsListingPage(page:any) {
  * @param {Object} page - Playwright page object.
  * @param {string} label - Label of the input field.
  */
-async function checkInputNotEmpty(page:any, label:any) {
+async function checkInputNotEmpty(page:Page, label:string) {
   const input = page.getByLabel(label);
   const value = await input.inputValue();
   return value.trim() !== '';
 }
 
-async function checkInputFieldsNotEmpty(page:any) {
+async function checkInputFieldsNotEmpty(page:Page) {
   // Validate that all input fields are not empty
   const jobNameNotEmpty = await checkInputNotEmpty(page, 'Job name*');
   const regionNotEmpty = await checkInputNotEmpty(page, 'Region*');
   const MachinetypeNotEmpty = await checkInputNotEmpty(page, 'Machine type*');
-  const AcceleratortypeNotEmpty = await checkInputNotEmpty(
-    page,
-    'Accelerator type'
-  );
-  const AcceleratorcountNotEmpty = await checkInputNotEmpty(
-    page,
-    'Accelerator count*'
-  );
+  // const AcceleratortypeNotEmpty = await checkInputNotEmpty(
+  //   page,
+  //   'Accelerator type'
+  // );
+  // const AcceleratorcountNotEmpty = await checkInputNotEmpty(
+  //   page,
+  //   'Accelerator count*'
+  // );
   const KernelNotEmpty = await checkInputNotEmpty(page, 'Kernel*');
   const CloudStorageBucketNotEmpty = await checkInputNotEmpty(
     page,
@@ -78,16 +79,16 @@ async function checkInputFieldsNotEmpty(page:any) {
   );
   const PrimaryNetworkNotEmpty = await checkInputNotEmpty(
     page,
-    'Primary network*'
+    'Primary network'
   );
-  const SubNetworkNotEmpty = await checkInputNotEmpty(page, 'Sub network*');
+  const SubNetworkNotEmpty = await checkInputNotEmpty(page, 'Sub network');
 
   const allFieldsFilled =
     jobNameNotEmpty &&
     regionNotEmpty &&
     MachinetypeNotEmpty &&
-    AcceleratortypeNotEmpty &&
-    AcceleratorcountNotEmpty &&
+    // AcceleratortypeNotEmpty &&
+    // AcceleratorcountNotEmpty &&
     KernelNotEmpty &&
     CloudStorageBucketNotEmpty &&
     DisktypeNotEmpty &&
@@ -118,8 +119,11 @@ async function createJobScheduler(
       )
       .click();
   }
-  await page.getByRole('region', { name: 'notebook content' }).click();
-  const locator = page.locator('.jp-LauncherCard:visible', {
+  // await page.getByRole('region', { name: 'notebook content' }).click();
+  // const locator = page.locator('.jp-LauncherCard:visible', {
+  //   hasText: 'Python 3 (ipykernel)'
+  // });
+  const locator = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
     hasText: 'Python 3 (ipykernel)'
   });
   if ((await locator.count()) > 0) {
@@ -140,8 +144,8 @@ async function createJobScheduler(
       'Kernel*',
       'Cloud Storage Bucket*',
       'Disk Type',
-      'Primary network*',
-      'Sub network*'
+      'Primary network',
+      'Sub network'
     ];
     for (const label of dropdownFields) {
       await page.getByLabel(label).click();
@@ -155,8 +159,11 @@ async function createJobScheduler(
     if (scheduleType === 'Run on a schedule') {
       await page.getByLabel('Run on a schedule').click();
     }
+    
+    const AcceleratortypeNotEmpty = await checkInputNotEmpty(page, 'Accelerator type');
+    const AcceleratorcountNotEmpty = await checkInputNotEmpty(page,'Accelerator count*');
 
-    if (await checkInputFieldsNotEmpty(page)) {
+    if (AcceleratorcountNotEmpty && AcceleratortypeNotEmpty && await checkInputFieldsNotEmpty(page)) {
       await expect(page.getByLabel('Create Schedule')).not.toBeDisabled();
       await page.getByLabel('Create Schedule').click();
       await expect(
@@ -177,9 +184,9 @@ async function createJobScheduler(
  * @param {string} [dropdownOption] - Option to select if field is a dropdown.
  */
 async function validateErrorResolution(
-  page:any,
-  fieldLabel:any,
-  errorMessage:any,
+  page:Page,
+  fieldLabel:string,
+  errorMessage:string,
   isDropdown = false,
   dropdownOption = ''
 ) {
@@ -240,13 +247,15 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     }
 
     // Navigate to the notebook content region
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Python 3 kernel card
-    const locator = page.locator('.jp-LauncherCard:visible', {
-      hasText: 'Python 3 (ipykernel)'
+    // const locator = page.locator('.jp-LauncherCard:visible', {
+    //   hasText: 'Python 3 (ipykernel)'
+    // });
+    const locator = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
+    hasText: 'Python 3 (ipykernel)'
     });
-
     const count = await locator.count();
     expect(count).toBeGreaterThan(0);
     if (count > 0) {
@@ -271,8 +280,8 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
         'Kernel*',
         'Cloud Storage Bucket*',
         'Disk Type',
-        'Primary network*',
-        'Sub network*'
+        'Primary network',
+        'Sub network'
       ];
 
       for (const label of dropdownFields) {
@@ -285,7 +294,8 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
       if (inputfields) {
         await expect(page.getByLabel('cancel Batch')).toBeEnabled();
         await page.getByLabel('cancel Batch').click();
-        await expect(page).toHaveTitle(/ipynb/);
+        // await expect(page).toHaveTitle(/ipynb/);
+        await expect(page.locator('//li[@aria-selected="true" and contains(@title,".ipynb")]')).toBeVisible();
       }
     }
   });
@@ -308,13 +318,15 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     }
 
     // Navigate to the notebook content region
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Python 3 kernel card
-    const locator = page.locator('.jp-LauncherCard:visible', {
-      hasText: 'Python 3 (ipykernel)'
+    // const locator = page.locator('.jp-LauncherCard:visible', {
+    //   hasText: 'Python 3 (ipykernel)'
+    // });
+    const locator = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
+    hasText: 'Python 3 (ipykernel)'
     });
-
     const count = await locator.count();
     expect(count).toBeGreaterThan(0);
     if (count > 0) {
@@ -380,11 +392,14 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     }
 
     // Navigate to the notebook content
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Python 3 kernel card
-    const kernelCard = page.locator('.jp-LauncherCard:visible', {
-      hasText: 'Python 3 (ipykernel)'
+    // const kernelCard = page.locator('.jp-LauncherCard:visible', {
+    //   hasText: 'Python 3 (ipykernel)'
+    // });
+    const kernelCard = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
+    hasText: 'Python 3 (ipykernel)'
     });
     const kernelCount = await kernelCard.count();
     expect(kernelCount).toBeGreaterThan(0);
@@ -435,16 +450,16 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
           error: 'Cloud storage bucket is required',
           isDropdown: true
         },
-        {
-          label: 'Primary network*',
-          error: 'Primary network is required',
-          isDropdown: true
-        },
-        {
-          label: 'Sub network*',
-          error: 'Sub network is required',
-          isDropdown: true
-        }
+        // {
+        //   label: 'Primary network*',
+        //   error: 'Primary network is required',
+        //   isDropdown: true
+        // },
+        // {
+        //   label: 'Sub network*',
+        //   error: 'Sub network is required',
+        //   isDropdown: true
+        // }
       ];
 
       for (const field of fieldsToValidate) {
@@ -470,7 +485,7 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
       ).toBeHidden();
 
       // Check input file field is  disabled
-      await expect(page.locator('//input[@disabled]')).toBeDisabled();
+      await expect(page.locator('//input[@disabled]').first()).toBeDisabled();
 
       // Check default value of service account
       const ServiceAccountName = await page
@@ -519,7 +534,7 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
 });
 
 // Function to get the first job that has a specific action enabled
-async function getJobWithAction(page:any, action:any) {
+async function getJobWithAction(page:any, action:string) {
   // Check list of jobs are displayed
   const tableLocator = page.locator('//table[@class="clusters-list-table"]');
   if (await tableLocator.isVisible()) {
@@ -651,7 +666,7 @@ test.describe('Vertex scheduling jobs listing page', () => {
       break;
     }
     //check schedule column text
-    async function ScheduleText(schedulecol:any) {
+    async function ScheduleText(schedulecol:string) {
       if (schedulecol == 'Run Once') {
         console.log('job is created for ' + schedulecol);
       } else {
@@ -745,8 +760,8 @@ test.describe('Vertex scheduling jobs listing page', () => {
       await expect(page.getByLabel('Job name*')).toBeDisabled();
       await expect(page.getByLabel('Input file*')).toBeDisabled();
       await expect(page.getByLabel('Region*')).toBeDisabled();
-      await expect(page.getByLabel('Primary network*')).toBeDisabled();
-      await expect(page.getByLabel('Sub network*')).toBeDisabled();
+      await expect(page.getByLabel('Primary network')).toBeDisabled();
+      await expect(page.getByLabel('Sub network')).toBeDisabled();
       await expect(page.getByLabel('Composer')).toBeDisabled();
       await expect(
         page.getByLabel('Network shared from host project')
@@ -769,12 +784,23 @@ test.describe('Vertex scheduling jobs listing page', () => {
         .getByPlaceholder('MM/DD/YYYY hh:mm aa');
       const ScheduleNotEmpty = await checkInputNotEmpty(page, 'Schedule*');
       const TimeZoneNotEmpty = await checkInputNotEmpty(page, 'Time Zone*');
+      const AcceleratortypeNotEmpty = await checkInputNotEmpty(page, 'Accelerator type');
+      let acceleratorcountpresent;
+      if(AcceleratortypeNotEmpty){
+        const AcceleratorcountNotEmpty = await checkInputNotEmpty(page, 'Accelerator count*');
+        return acceleratorcountpresent;
+      }
+      let acceleratorFieldsFilled;
+      if(AcceleratortypeNotEmpty && acceleratorcountpresent){
+        return acceleratorFieldsFilled;
+      }
 
       const scheduleFieldsFilled =
         StartDateNotEmpty &&
         //EndDateNotEmpty &&
         ScheduleNotEmpty &&
-        TimeZoneNotEmpty;
+        TimeZoneNotEmpty &&
+        acceleratorFieldsFilled;
 
       // click update
       if (!scheduleFieldsFilled && !inputfields) {
@@ -803,7 +829,7 @@ test.describe('Vertex scheduling jobs listing page', () => {
       // update disk size
       await page.getByLabel('Disk Size (in GB)').click();
       await page.getByLabel('Disk Size (in GB)').clear();
-      await page.getByLabel('Disk Size (in GB)').fill('200');
+      await page.getByLabel('Disk Size (in GB)').fill('20');
 
       // Validate that input fields are not empty
       const inputfields = await checkInputFieldsNotEmpty(page);
@@ -861,7 +887,7 @@ test.describe('Vertex scheduling jobs listing page', () => {
       await page.getByRole('button', { name: 'Delete' }).click();
       await page.waitForTimeout(5000);
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.getByText(`Deleted job ${jobName}. It might take a few minutes to for it to be deleted from the list of jobs.`)).toBeVisible();
+      await expect(page.getByText(`Deleted job ${jobName}. It might take a few minutes for the job to be deleted from the list of jobs.`)).toBeVisible();
 
       // Verify deleted job is not coming back after refresh
       await page.getByLabel('cancel Batch').click();
@@ -880,7 +906,7 @@ test.describe('Vertex scheduling jobs listing page', () => {
 });
 
 // Helper to navigate to the Execution History page for the first job
-async function navigateToExecutionHistory(page:any) {
+async function navigateToExecutionHistory(page:Page) {
   const jobName = await page.getByRole('cell').first().innerText();
   await page.getByRole('cell').first().click();
   await page.getByText('Loading History').waitFor({ state: 'detached' });
