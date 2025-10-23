@@ -481,6 +481,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       if (!selectedProjectId || !selectedRegion) {
         setEnvOptions([]);
         setValue('environment', '');
+        setDagList([]);
+
         return;
       }
       try {
