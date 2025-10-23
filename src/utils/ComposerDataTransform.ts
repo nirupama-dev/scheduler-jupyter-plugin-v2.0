@@ -37,7 +37,7 @@ export const transformZodSchemaToComposerSchedulePayload = (
   );
   const outputFormats = composerScheduleData.outputFormatAsNotebook
     ? ['Notebook']
-    : [];// Adjust this logic if there are more formats in future
+    : []; // Adjust this logic if there are more formats in future
 
   const composerPayloadData: IComposerSchedulePayload = {
     ...(composerScheduleData.jobId
@@ -91,7 +91,7 @@ export const transformComposerScheduleDataToZodSchema = (
     JSON.stringify(composerScheduleData)
   );
   const outputFormats = composerScheduleData.output_formats ?? [];
-    
+
   const composerScheduleDataForForm: ComposerSchedulerFormValues = {
     jobId: composerScheduleData.dag_id,
     jobName: composerScheduleData.dag_id!,
@@ -100,7 +100,8 @@ export const transformComposerScheduleDataToZodSchema = (
     composerRegion: composerScheduleData.region_id!,
     projectId: composerScheduleData.project_id!,
     environment: composerScheduleData.composer_environment!,
-    outputFormatAsNotebook: outputFormats.length !== 0 && outputFormats.includes('Notebook'),
+    outputFormatAsNotebook:
+      outputFormats.length !== 0 && outputFormats.includes('Notebook'),
     retryCount: composerScheduleData.retry_count!,
     retryDelay: composerScheduleData.retry_delay!,
     executionMode:

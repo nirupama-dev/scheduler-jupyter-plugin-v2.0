@@ -148,3 +148,7 @@
 .table-row-pad {
   padding-left: 15px;
 }
+
+.listing-spinner {
+  padding: 5px;
+}

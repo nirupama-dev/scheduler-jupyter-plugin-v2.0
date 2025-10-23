@@ -80,7 +80,7 @@ export const renderActions = (
 
       {/* Trigger Button */}
       {data.name === actionPerformedScheduleName.triggerLoading ? (
-        <LoadingSpinner iconClassName="spin-loader-custom-style" />
+        <LoadingSpinner iconClassName="listing-spinner" />
       ) : (
         <ActionButton
           title={'Trigger the job'}

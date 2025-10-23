@@ -363,7 +363,6 @@ export const GOOGLE_MANAGED_ENCRYPTION_KEY = 'googleManagedEncryption';
 export const CUSTOMER_ENCRYPTION = 'customerManagedEncryption';
 export const DEFAULT_ENCRYPTION_SELECTED = GOOGLE_MANAGED_ENCRYPTION_KEY;
 
-
 export const ENCRYPTION_OPTIONS = [
   {
     label: 'Google-managed encryption key',
