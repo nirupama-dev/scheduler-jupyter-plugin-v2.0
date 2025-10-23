@@ -18,7 +18,7 @@
 import React from 'react';
 import {
   iconDeleteAction,
-  iconEditDag,
+  iconEditSchedule,
   iconPause,
   iconPlay,
   iconTrigger
@@ -94,7 +94,7 @@ export const renderActions = (
       {is_status_paused === 'COMPLETED' ? (
         <ActionButton
           title="Edit Schedule"
-          icon={iconEditDag}
+          icon={iconEditSchedule}
           disabled={true}
         />
       ) : loaderState.editScheduleLoader ? (
@@ -103,7 +103,7 @@ export const renderActions = (
         <ActionButton
           title={'Edit Schedule'}
           onClick={e => handleEditschedule(data.name)}
-          icon={iconEditDag}
+          icon={iconEditSchedule}
           className={'icon-buttons-style'}
         />
       )}

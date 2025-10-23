@@ -22,7 +22,7 @@ import ScheduledNotebooksIcon from '../../style/icons/scheduled_notebooks_icon.s
 import PlayIcon from '../../style/icons/scheduler_play.svg';
 import PauseIcon from '../../style/icons/scheduler_pause.svg';
 import TriggerIcon from '../../style/icons/scheduler_trigger.svg';
-import EditIconDisable from '../../style/icons/scheduler_edit_calendar.svg';
+import EditScheduleIcon from '../../style/icons/scheduler_calendar.svg';
 import EditNotebookIcon from '../../style/icons/scheduler_edit_dag.svg';
 import DeleteIconLarge from '../../style/icons/scheduler_delete.svg';
 import ErrorIcon from '../../style/icons/error_icon.svg';
@@ -78,9 +78,9 @@ export const iconTrigger = new LabIcon({
   svgstr: TriggerIcon
 });
 
-export const iconEditDag = new LabIcon({
-  name: 'launcher:edit-disable-icon',
-  svgstr: EditIconDisable
+export const iconEditSchedule = new LabIcon({
+  name: 'launcher:edit-schedule-icon',
+  svgstr: EditScheduleIcon
 });
 
 export const iconDeleteAction = new LabIcon({
