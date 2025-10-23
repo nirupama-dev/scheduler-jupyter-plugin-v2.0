@@ -41,9 +41,6 @@ export const transformZodSchemaToComposerSchedulePayload = (
     : []; // Adjust this logic if there are more formats in future
 
   const composerPayloadData: IComposerSchedulePayload = {
-    // ...(composerScheduleData.jobId
-    //   ? { dag_id: composerScheduleData.jobId! }
-    //   : {}),
     input_filename: composerScheduleData.inputFile,
     composer_environment_name: composerScheduleData.environment,
     output_formats: outputFormats,
