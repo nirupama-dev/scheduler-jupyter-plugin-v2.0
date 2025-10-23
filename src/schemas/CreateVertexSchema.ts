@@ -19,7 +19,15 @@
  * It extends the common notebook schema and includes Vertex-specific fields.
  */
 import { z } from 'zod';
-import { DISK_MIN_SIZE, DISK_MAX_SIZE } from '../utils/Constants';
+import {
+  DISK_MIN_SIZE,
+  DISK_MAX_SIZE,
+  DEFAULT_ENCRYPTION_SELECTED,
+  CUSTOMER_ENCRYPTION,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  CUSTOMER_MANGED_ENCRYPTION,
+  ENCRYPTION_MANUAL_KEY_SAMPLE
+} from '../utils/Constants';
 import {
   createNotebookCommonSchema,
   parameterSchema,
@@ -39,6 +47,28 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   kernelName: z.string().min(1, 'Kernel is required.'),
   cloudStorageBucket: z.string().min(1, 'Cloud storage bucket is required.'),
   serviceAccount: z.string().min(1, 'Service account is required.'),
+  // Encryption fields
+  encryptionOption: z.enum([DEFAULT_ENCRYPTION_SELECTED, CUSTOMER_ENCRYPTION]),
+  customerEncryptionType: z.enum([
+    DEFAULT_CUSTOMER_MANAGED_SELECTION,
+    CUSTOMER_MANGED_ENCRYPTION
+  ]),
+  keyRing: z.string().optional(),
+  cryptoKey: z.string().optional(),
+  manualKey: z
+    .string()
+    .refine(
+      val => {
+        const numericRegex =
+          /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
+
+        return numericRegex.test(val ?? '');
+      },
+      {
+        message: ENCRYPTION_MANUAL_KEY_SAMPLE
+      }
+    )
+    .optional(),
   networkOption: z
     .enum(['networkInThisProject', 'networkSharedFromHostProject'])
     .optional(),

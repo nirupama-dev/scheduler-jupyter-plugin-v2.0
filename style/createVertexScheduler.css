@@ -72,3 +72,15 @@
 .tab-description {
   width: 512px;
 }
+
+.encryption-custom-radio {
+  padding-top: 27px;
+}
+
+.encryption-custom-radio-element {
+  padding-left: 34px;
+}
+
+.encryption-custom-radio-manual {
+  margin-top: 10px;
+}

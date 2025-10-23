@@ -62,7 +62,14 @@ import {
   DEFAULT_DISK_SIZE,
   EVERY_MINUTE_CRON,
   NETWORK_IN_THIS_PROJECT_VALUE,
-  NETWORK_SHARED_FROM_HOST_PROJECT_VALUE
+  NETWORK_SHARED_FROM_HOST_PROJECT_VALUE,
+  ENCRYPTION_TEXT,
+  ENCRYPTION_OPTIONS,
+  CUSTOMER_ENCRYPTION,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  CUSTOMER_MANAGED_RADIO_OPTIONS,
+  CUSTOMER_MANGED_ENCRYPTION,
+  DEFAULT_ENCRYPTION_SELECTED
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -87,6 +94,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   isValid,
   credentials,
   editScheduleData,
+  clearErrors,
   app
   // ... other props
 }) => {
@@ -120,8 +128,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     primaryNetwork: false,
     subNetwork: false,
     sharedNetwork: false,
-    hostProject: false // Initialized
+    hostProject: false,
+    keyRings: false,
+    cryptoKeys: false
   });
+
+  //Encryption states
+  const [keyRingList, setKeyRingList] = useState<ILabelValue<string>[]>([]);
+  const [cryptoKeyList, setCryptoKeyList] = useState<ILabelValue<string>[]>([]);
 
   // Timezones for dropdown
   const timezones: ILabelValue<string>[] = useMemo(
@@ -143,6 +157,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const currentInternalScheduleMode = watch('internalScheduleMode');
   const currentPrimaryNetwork = watch('primaryNetwork');
   const currentSchedulerSelection = watch('schedulerSelection');
+  const encryptionSelected = watch('encryptionOption');
+  const customerEncryptionType = watch('customerEncryptionType');
+  const keyRingSelected = watch('keyRing');
+  const cryptoKeySelected = watch('cryptoKey');
+
+  //
   const isVertexForm = currentSchedulerSelection === 'vertex';
   const vertexErrors = isVertexForm
     ? (errors as FieldErrors<z.infer<typeof createVertexSchema>>)
@@ -606,6 +626,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('primaryNetwork', '');
         setValue('subNetwork', ''); // Clear the actual subNetwork field
         setValue('sharedNetwork', { network: '', subnetwork: '' });
+        setValue('keyRing', '');
+        setKeyRingList([]);
+        setValue('cryptoKey', '');
+        setCryptoKeyList([]);
         // Trigger validation for these fields to show errors if they become invalid
         trigger([
           'vertexRegion',
@@ -620,10 +644,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('vertexRegion', ''); // Clear region if cleared
         // Reset machine type and dependent fields when region is cleared
         setValue('machineType', '');
-        // Reset all dependent fields and their values
-        setValue('machineType', '');
         setValue('acceleratorType', '');
         setValue('acceleratorCount', '');
+        setValue('keyRing', '');
+        setKeyRingList([]);
+        setValue('cryptoKey', '');
+        setCryptoKeyList([]);
         setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
         setValue('subNetwork', ''); // Clear the actual subNetwork field
@@ -637,6 +663,15 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           'subNetwork',
           'sharedNetwork'
         ]);
+      }
+
+      if (encryptionSelected === CUSTOMER_ENCRYPTION) {
+        if (customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION) {
+          trigger(['keyRing']);
+          trigger(['cryptoKey']);
+        } else if (customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION) {
+          trigger(['manualKey']);
+        }
       }
     },
     [setValue, trigger]
@@ -761,6 +796,114 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   );
   console.log('Isvalid:', isValid);
   console.log('Errors:', errors);
+
+  /**
+   * List Customer managed encryption key rings
+   */
+  const listKeyRings = async () => {
+    const listKeyRingsPayload = {
+      region: currentRegion,
+      projectId: credentials?.project_id,
+      accessToken: credentials?.access_token
+    };
+    setLoadingState(prev => ({ ...prev, keyRings: true }));
+    const keyRingList = await VertexServices.listKeyRings(listKeyRingsPayload);
+    if (Array.isArray(keyRingList) && keyRingList.length > 0) {
+      setKeyRingList(keyRingList);
+    }
+    setLoadingState(prev => ({ ...prev, keyRings: false }));
+  };
+
+  /**
+   * List crypto keys from KmS key ring
+   * @param {string} keyRing selected key ring to list down the keys
+   */
+  const listCryptoKeysAPI = async (keyRing: string) => {
+    const listKeysPayload = {
+      credentials: {
+        region: credentials?.region_id,
+        projectId: credentials?.project_id,
+        accessToken: credentials?.access_token
+      },
+      keyRing
+    };
+    const cryptoKeyListResponse =
+      await VertexServices.listCryptoKeysAPIService(listKeysPayload);
+    if (
+      Array.isArray(cryptoKeyListResponse) &&
+      cryptoKeyListResponse.length > 0
+    ) {
+      setCryptoKeyList(cryptoKeyListResponse);
+      if (!editScheduleData?.editMode) {
+        setValue('cryptoKey', cryptoKeyListResponse[0].value);
+        clearErrors('cryptoKey');
+      }
+    }
+    setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
+  };
+
+  /**
+   * Handle key ring change
+   * @param {string | null} selectedKeyRing selected key ring
+   */
+
+  const handleKeyRingChange = (selectedKeyRing: string | null) => {
+    if (selectedKeyRing) {
+      setValue('keyRing', selectedKeyRing);
+      clearErrors('keyRing');
+      setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
+      trigger('cryptoKey');
+    }
+  };
+
+  /**
+   * Handle crypo key change
+   * @param {string | null} selectedCryptoKey selected crypto key
+   */
+  const handleCryptoKeyChange = (selectedCryptoKey: string | null) => {
+    if (selectedCryptoKey) {
+      setValue('cryptoKey', selectedCryptoKey);
+    }
+  };
+
+  useEffect(() => {
+    if (keyRingSelected) {
+      listCryptoKeysAPI(keyRingSelected);
+    } else {
+      setValue('cryptoKey', '');
+      setCryptoKeyList([]);
+    }
+  }, [keyRingSelected]);
+
+  useEffect(() => {
+    if (
+      encryptionSelected === CUSTOMER_ENCRYPTION &&
+      customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
+    ) {
+      trigger('keyRing');
+      listKeyRings();
+      clearErrors('manualKey');
+    }
+  }, [currentRegion, customerEncryptionType, encryptionSelected]);
+
+  useEffect(() => {
+    if (
+      customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION ||
+      encryptionSelected === DEFAULT_ENCRYPTION_SELECTED
+    ) {
+      setValue('keyRing', '');
+      setKeyRingList([]);
+      setValue('cryptoKey', '');
+      setCryptoKeyList([]);
+      setLoadingState(prev => ({
+        ...prev,
+        keyRings: false,
+        cryptoKeys: false
+      }));
+      clearErrors(['keyRing', 'cryptoKey']);
+    }
+  }, [customerEncryptionType, cryptoKeySelected, encryptionSelected]);
+
   // --- Render Component UI ---
   return (
     <div>
@@ -778,7 +921,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           disabled={editScheduleData?.editMode}
         />
       </div>
-
       {/* Machine Type Dropdown */}
       <div
         className={
@@ -808,7 +950,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           }}
         />
       </div>
-
       {/* Accelerator Type and Count (conditionally rendered) */}
       {currentMachineType &&
         selectedMachineType?.acceleratorConfigs &&
@@ -863,7 +1004,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               )}
           </div>
         )}
-
       {/* Kernel Dropdown */}
       <div
         className={
@@ -881,7 +1021,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           error={vertexErrors.kernelName}
         />
       </div>
-
       {/* Cloud Storage Bucket Dropdown */}
       <div
         className={
@@ -908,7 +1047,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           </div>
         )}
       </div>
-
       {/* Disk Type and Size */}
       <div
         className={
@@ -943,7 +1081,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           />
         </div>
       </div>
-
       {/* Service Account Dropdown */}
       <div
         className={
@@ -961,13 +1098,99 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           error={vertexErrors.serviceAccount}
         />
       </div>
+      {/* Encryption */}
+      <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+        {ENCRYPTION_TEXT}
+      </div>
+      <div className="scheduler-form-element-container panel-margin">
+        <FormInputRadio
+          name="encryptionOption"
+          control={control}
+          className="network-layout"
+          options={ENCRYPTION_OPTIONS.map(option => {
+            const newOption: RadioOption = { ...option };
+            return newOption;
+          })}
+          error={vertexErrors.networkOption}
+          projectId={credentials?.project_id}
+        />
+      </div>
+      {/* --- Customer-Managed Encryption (CMEK) Section --- */}
+      {encryptionSelected === CUSTOMER_ENCRYPTION && (
+        <div className="schedule-child-section horizontal-element-wrapper">
+          <FormInputRadio
+            name="customerEncryptionType"
+            control={control}
+            className="schedule-radio-btn encryption-custom-radio"
+            options={CUSTOMER_MANAGED_RADIO_OPTIONS}
+            errorFlag={vertexErrors.keyRing || vertexErrors.cryptoKey}
+          />
 
+          {/* Option 1: Select Key Ring and Key */}
+          <div className="encryption-custom-radio-element">
+            <div className="horizontal-element-wrapper scheduler-input-top">
+              <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
+                <FormInputDropdown
+                  name="keyRing"
+                  control={control}
+                  label="Key rings*"
+                  options={keyRingList}
+                  loading={loadingState.keyRings}
+                  disabled={
+                    !currentRegion ||
+                    customerEncryptionType !==
+                      DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                    loadingState.keyRings
+                  }
+                  error={vertexErrors.keyRing}
+                  onChangeCallback={keyRingSelected =>
+                    handleKeyRingChange(keyRingSelected)
+                  }
+                />
+              </div>
+              <div className="scheduler-form-element-container create-scheduler-form-element-input-fl">
+                <FormInputDropdown
+                  name="cryptoKey"
+                  control={control}
+                  label="Keys*"
+                  options={cryptoKeyList}
+                  loading={loadingState.cryptoKeys}
+                  disabled={
+                    !watch('keyRing') ||
+                    customerEncryptionType !==
+                      DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                    loadingState.cryptoKeys
+                  }
+                  error={vertexErrors.cryptoKey}
+                  onChangeCallback={cryptoKeySelected =>
+                    handleCryptoKeyChange(cryptoKeySelected)
+                  }
+                />
+              </div>
+            </div>
+
+            {/* Option 2: Enter Key Manually */}
+            <div className="scheduler-form-element-container scheduler-input-top encryption-custom-radio-manual">
+              <FormInputText
+                name="manualKey"
+                control={control}
+                label="Enter key manually*"
+                error={vertexErrors.manualKey}
+                placeholder="projects/PROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/KEY"
+                disabled={
+                  customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
+                }
+                // onChangeCallback={handleManualEncryptionChange}
+              />
+            </div>
+          </div>
+        </div>
+      )}
       {/* Network Configuration Section */}
       <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
         {NETWORK_CONFIGURATION_LABEL}
       </div>
       <p>{NETWORK_CONFIGURATION_LABEL_DESCRIPTION}</p>
-
       <div className="scheduler-form-element-container panel-margin">
         <FormInputRadio
           name="networkOption"
@@ -997,7 +1220,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           }}
         />
       </div>
-
       {/* Conditional Network Fields */}
       {currentNetworkOption === 'networkInThisProject' ? ( // 'networkInThisProject'
         <div className="horizontal-element-wrapper">
@@ -1092,7 +1314,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           )}
         </>
       )}
-
       {/* Schedule Section */}
       <div className="create-scheduler-label">Schedule</div>
       <div className="scheduler-form-element-container">
@@ -1144,7 +1365,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           }}
         />
       </div>
-
       <div className="schedule-child-section">
         {currentScheduleMode === 'runSchedule' && (
           <>
