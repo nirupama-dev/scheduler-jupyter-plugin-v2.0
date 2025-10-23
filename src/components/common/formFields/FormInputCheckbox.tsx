@@ -29,7 +29,6 @@ export const FormInputCheckbox: React.FC<IFormInputCheckboxProps> = ({
   name,
   control,
   label,
-  isChecked = false,
   disabled = false,
   className
 }) => {
@@ -42,14 +41,13 @@ export const FormInputCheckbox: React.FC<IFormInputCheckboxProps> = ({
           render={({ field }) => (
             <Checkbox
               {...field} // Spreads onChange, onBlur, value (boolean)
-              checked={isChecked || field.value} // Ensure checked prop is explicitly set by field.value
+              checked={field.value ?? false}
             />
           )}
         />
       }
       label={label}
       disabled={disabled}
-      value={isChecked}
       sx={{
         '& .MuiTypography-root': {
           fontSize: '0.813rem' // Adjust the size as needed
