@@ -113,6 +113,7 @@ export interface IFormInputCheckboxProps {
   isChecked?: boolean; // Optional prop to control the checked state
   disabled?: boolean; // Optional prop to disable the checkbox
   className?: string; // Optional prop for additional styling
+  onChangeCallback?: () => void; // Optional callback on change
 }
 
 export interface IErrorMessageProps {
