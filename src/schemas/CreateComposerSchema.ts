@@ -65,11 +65,9 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   }),
   scheduleValue: z.string().optional(),
   timeZone: z.string().optional(),
-  outputFormats: z
-    .string()
-    .array()
-    .min(1, 'At least one output format is required')
-    .optional(),
+  outputFormatAsNotebook: z
+    .boolean()
+    .default(true),
   parameters: z.array(parameterSchema).optional(),
   cluster: z.string().optional(),
   serverless: z.string().optional(),

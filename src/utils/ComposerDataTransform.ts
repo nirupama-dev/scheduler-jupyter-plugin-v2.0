@@ -36,13 +36,17 @@ export const transformZodSchemaToComposerSchedulePayload = (
     'transform UI composer values to payload: Input: ',
     JSON.stringify(composerScheduleData)
   );
+  const outputFormats = composerScheduleData.outputFormatAsNotebook
+    ? ['Notebook']
+    : []; // Adjust this logic if there are more formats in future
+
   const composerPayloadData: IComposerSchedulePayload = {
     // ...(composerScheduleData.jobId
     //   ? { dag_id: composerScheduleData.jobId! }
     //   : {}),
     input_filename: composerScheduleData.inputFile,
     composer_environment_name: composerScheduleData.environment,
-    output_formats: composerScheduleData.outputFormats ?? [],
+    output_formats: outputFormats,
     parameters:
       composerScheduleData.parameters &&
       composerScheduleData.parameters.length > 0
@@ -90,6 +94,8 @@ export const transformComposerScheduleDataToZodSchema = (
     'transform backend composer values to UI form values: Input: ',
     JSON.stringify(composerScheduleData)
   );
+  const outputFormats = composerScheduleData.output_formats ?? [];
+
   const composerScheduleDataForForm: ComposerSchedulerFormValues = {
     jobId: composerScheduleData.dag_id,
     jobName: composerScheduleData.dag_id!,
@@ -98,7 +104,8 @@ export const transformComposerScheduleDataToZodSchema = (
     composerRegion: composerScheduleData.region_id!,
     projectId: composerScheduleData.project_id!,
     environment: composerScheduleData.composer_environment_name!,
-    outputFormats: composerScheduleData.output_formats ?? '',
+    outputFormatAsNotebook:
+      outputFormats.length !== 0 && outputFormats.includes('Notebook'),
     retryCount: composerScheduleData.retry_count!,
     retryDelay: composerScheduleData.retry_delay!,
     executionMode:
