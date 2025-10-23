@@ -356,3 +356,42 @@ export const COMPOSER_EXECUTION_HISTORY_DAG_HEADER = [
 ];
 
 export const NO_ROWS_TO_DISPLAY = 'No rows to display';
+
+export const ENCRYPTION_TEXT = 'Encryption';
+
+export const DEFAULT_ENCRYPTION_SELECTED = 'googleManagedEncryption';
+export const CUSTOMER_ENCRYPTION = 'customerManagedEncryption';
+
+export const ENCRYPTION_OPTIONS = [
+  {
+    label: 'Google-managed encryption key',
+    value: DEFAULT_ENCRYPTION_SELECTED
+  },
+  {
+    label: 'Customer managed encryption key(CMEK)',
+    value: CUSTOMER_ENCRYPTION
+  }
+];
+
+export const GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT =
+  'No configuration required';
+
+export const CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT = 'Manage via';
+
+export const DEFAULT_CUSTOMER_MANAGED_SELECTION = 'key';
+
+export const CUSTOMER_MANGED_ENCRYPTION = 'manual';
+
+export const SECURITY_KEY =
+  'https://console.cloud.google.com/security/kms/keyrings';
+
+export const CUSTOMER_MANAGED_ENCRYPTION_LINK =
+  'Google Cloud Key Management Service';
+
+export const CUSTOMER_MANAGED_RADIO_OPTIONS = [
+  { label: '', value: DEFAULT_CUSTOMER_MANAGED_SELECTION },
+  { label: '', value: CUSTOMER_MANGED_ENCRYPTION }
+];
+
+export const ENCRYPTION_MANUAL_KEY_SAMPLE =
+  'Example format:projects/<project-name>/locations/<location-name>/keyRings/<keyring-name>/cryptoKeys/<key-name>';

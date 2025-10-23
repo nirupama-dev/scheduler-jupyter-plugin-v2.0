@@ -19,7 +19,12 @@
  */
 import { aiplatform_v1 } from 'googleapis';
 import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema';
-import { CRON_FOR_SCHEDULE_EVERY_MIN, DEFAULT_TIME_ZONE } from './Constants';
+import {
+  CRON_FOR_SCHEDULE_EVERY_MIN,
+  CUSTOMER_ENCRYPTION,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  DEFAULT_TIME_ZONE
+} from './Constants';
 import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
 
 /**
@@ -31,7 +36,8 @@ import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
  */
 export const transformZodSchemaToVertexSchedulePayload = (
   VertexScheduleData: VertexSchedulerFormValues,
-  projectId: string
+  projectId: string,
+  region: string
 ) => {
   console.log(
     'Vertex Schedule Data from UI:',
@@ -119,6 +125,21 @@ export const transformZodSchemaToVertexSchedulePayload = (
       }
     }
   };
+  if (VertexScheduleData.encryptionOption === CUSTOMER_ENCRYPTION) {
+    const encryptionSpec = {
+      kmsKeyName: VertexScheduleData.manualKey
+        ? VertexScheduleData.manualKey
+        : `projects/${projectId}/locations/${region}/keyRings/${VertexScheduleData.keyRing}/cryptoKeys/${VertexScheduleData.cryptoKey}`
+    };
+
+    if (
+      vertexPayload.createNotebookExecutionJobRequest &&
+      vertexPayload.createNotebookExecutionJobRequest.notebookExecutionJob
+    ) {
+      vertexPayload.createNotebookExecutionJobRequest.notebookExecutionJob.encryptionSpec =
+        encryptionSpec;
+    }
+  }
   console.log(
     'Vertex Schedule Payload:',
     JSON.stringify(vertexPayload, null, 2)
@@ -128,7 +149,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
 
 /**
  * Transforms Vertex Schedule response from backend to Zod schema format for Create/ Update UI Form .
- * @param vertexScheduleData
+ * @param vertexScheduleDatae
  * @param scheduleRegion
  * @param projectIdFromCredentials
  * @returns
@@ -188,6 +209,32 @@ export const transformVertexScheduleResponseToZodSchema = (
     vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
       ?.customEnvironmentSpec?.machineSpec?.acceleratorType ?? '';
 
+  let keyRing = '',
+    cryptoKey = '';
+  if (
+    vertexScheduleData.createNotebookExecutionJobRequest &&
+    vertexScheduleData.createNotebookExecutionJobRequest
+      ?.notebookExecutionJob &&
+    vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
+      ?.encryptionSpec &&
+    vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
+      ?.encryptionSpec.kmsKeyName
+  ) {
+    const encryptionValue =
+      vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
+        ?.encryptionSpec.kmsKeyName;
+    // Define the regular expression pattern with capturing groups
+    const pattern = /keyRings\/(.*?)\/cryptoKeys\/(.*?)$/;
+
+    // Use the `exec` method to find matches
+    const match = pattern.exec(encryptionValue);
+
+    if (match && match.length > 0) {
+      keyRing = match[1];
+      cryptoKey = match[2];
+    }
+  }
+
   const vertexScheduleDataForForm: VertexSchedulerFormValues = {
     schedulerSelection: 'vertex',
     jobId: jobId,
@@ -221,6 +268,11 @@ export const transformVertexScheduleResponseToZodSchema = (
     serviceAccount:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.serviceAccount ?? '',
+    encryptionOption: CUSTOMER_ENCRYPTION,
+    customerEncryptionType: DEFAULT_CUSTOMER_MANAGED_SELECTION,
+    keyRing: keyRing,
+    cryptoKey: cryptoKey,
+    manualKey: '',
     networkOption: networkOption,
     primaryNetwork: primaryNetwork,
     subNetwork: subnetwork,
@@ -240,6 +292,13 @@ export const transformVertexScheduleResponseToZodSchema = (
     scheduleMode: scheduleMode
   };
 
+  if (
+    vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
+      ?.encryptionSpec?.kmsKeyName
+  ) {
+    //TODO : Add encryption fields to form
+  }
+
   console.log(
     'Transformed Vertex Schedule Data for UI: Input: ',
     JSON.stringify(vertexScheduleData),
@@ -247,4 +306,20 @@ export const transformVertexScheduleResponseToZodSchema = (
     JSON.stringify(vertexScheduleDataForForm, null, 2)
   );
   return vertexScheduleDataForForm;
+};
+
+/**
+ * Converte Array into {label:'', value: ''} pair of array
+ * @param args string of array
+ * @returns Object having {label:'', value: ''} pair of array
+ */
+export const labelValueTransform = (args: string[]) => {
+  const transformedObject = Array.isArray(args)
+    ? args.map(item => ({
+        label: item,
+        value: item
+      }))
+    : [];
+
+  return transformedObject;
 };

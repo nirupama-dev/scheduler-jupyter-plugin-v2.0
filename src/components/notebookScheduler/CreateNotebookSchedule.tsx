@@ -259,7 +259,8 @@ export const CreateNotebookSchedule = (
     setValue,
     getValues,
     trigger,
-    setError
+    setError,
+    clearErrors
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
     values: initialFormValues,
@@ -349,7 +350,8 @@ export const CreateNotebookSchedule = (
         const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
           transformZodSchemaToVertexSchedulePayload(
             vertexData,
-            initialSchedulerDataContext.credentials.project_id
+            initialSchedulerDataContext.credentials.project_id,
+            initialSchedulerDataContext.credentials.region_id || ''
           );
         console.log('Vertex Payload:', vertexPayload);
 
@@ -519,6 +521,7 @@ export const CreateNotebookSchedule = (
               isValid={isValid}
               credentials={initialSchedulerDataContext.credentials}
               editScheduleData={initialSchedulerDataContext.editModeData}
+              clearErrors={clearErrors}
               app={app}
             />
           )}
