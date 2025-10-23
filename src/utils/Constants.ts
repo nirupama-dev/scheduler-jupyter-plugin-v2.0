@@ -359,13 +359,15 @@ export const NO_ROWS_TO_DISPLAY = 'No rows to display';
 
 export const ENCRYPTION_TEXT = 'Encryption';
 
-export const DEFAULT_ENCRYPTION_SELECTED = 'googleManagedEncryption';
+export const GOOGLE_MANAGED_ENCRYPTION_KEY = 'googleManagedEncryption';
 export const CUSTOMER_ENCRYPTION = 'customerManagedEncryption';
+export const DEFAULT_ENCRYPTION_SELECTED = GOOGLE_MANAGED_ENCRYPTION_KEY;
+
 
 export const ENCRYPTION_OPTIONS = [
   {
     label: 'Google-managed encryption key',
-    value: DEFAULT_ENCRYPTION_SELECTED
+    value: GOOGLE_MANAGED_ENCRYPTION_KEY
   },
   {
     label: 'Customer managed encryption key(CMEK)',
@@ -378,9 +380,9 @@ export const GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT =
 
 export const CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT = 'Manage via';
 
-export const DEFAULT_CUSTOMER_MANAGED_SELECTION = 'key';
+export const PREDEFINED_CMEK = 'prefinedKeyRingAndCryptoKey';
 
-export const CUSTOMER_MANGED_ENCRYPTION = 'manual';
+export const MANUAL_CMEK = 'manualCMEK';
 
 export const SECURITY_KEY =
   'https://console.cloud.google.com/security/kms/keyrings';
@@ -389,8 +391,8 @@ export const CUSTOMER_MANAGED_ENCRYPTION_LINK =
   'Google Cloud Key Management Service';
 
 export const CUSTOMER_MANAGED_RADIO_OPTIONS = [
-  { label: '', value: DEFAULT_CUSTOMER_MANAGED_SELECTION },
-  { label: '', value: CUSTOMER_MANGED_ENCRYPTION }
+  { label: '', value: PREDEFINED_CMEK },
+  { label: '', value: MANUAL_CMEK }
 ];
 
 export const ENCRYPTION_MANUAL_KEY_SAMPLE =

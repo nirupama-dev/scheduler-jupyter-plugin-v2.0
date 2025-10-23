@@ -35,8 +35,9 @@ import {
   CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT,
   SECURITY_KEY,
   CUSTOMER_MANAGED_ENCRYPTION_LINK,
-  ENCRYPTION_OPTIONS,
-  CUSTOMER_MANGED_ENCRYPTION
+  MANUAL_CMEK,
+  GOOGLE_MANAGED_ENCRYPTION_KEY,
+  CUSTOMER_ENCRYPTION
 } from '../../../utils/Constants';
 import LearnMore from '../links/LearnMore';
 
@@ -76,7 +77,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
               size="small"
               sx={{
                 paddingTop:
-                  errorFlag && singleOption.value === CUSTOMER_MANGED_ENCRYPTION
+                  errorFlag && singleOption.value === MANUAL_CMEK
                     ? '30px'
                     : ''
               }}
@@ -94,6 +95,33 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
               <LearnMore path={SHARED_NETWORK_DOC_URL} />
             </div>
           </>
+        )}
+
+        {/* Encryption  */}
+
+        {singleOption.value === GOOGLE_MANAGED_ENCRYPTION_KEY && (
+          <>
+            <span className="sub-para tab-text-sub-cl">
+              {GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT}
+            </span>
+          </>
+        )}
+
+        {singleOption.value === CUSTOMER_ENCRYPTION && (
+          <div>
+            <span className="sub-para tab-text-sub-cl">
+              {CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT}{' '}
+            </span>
+
+            <span
+              className="submit-job-learn-more"
+              onClick={() => {
+                window.open(`${SECURITY_KEY}?project=${projectId}`, '_blank');
+              }}
+            >
+              {CUSTOMER_MANAGED_ENCRYPTION_LINK}
+            </span>
+          </div>
         )}
       </React.Fragment>
     ));
