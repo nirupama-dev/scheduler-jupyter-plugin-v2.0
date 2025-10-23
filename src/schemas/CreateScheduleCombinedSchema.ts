@@ -1,7 +1,12 @@
 import { z } from 'zod';
 import { createVertexSchema } from './CreateVertexSchema';
 import { createComposerSchema } from './CreateComposerSchema';
-import { EVERY_MINUTE_CRON } from '../utils/Constants';
+import {
+  CUSTOMER_ENCRYPTION,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  ENCRYPTION_MANUAL_KEY_SAMPLE,
+  EVERY_MINUTE_CRON
+} from '../utils/Constants';
 
 /**
  * Combined schema for creating a job, either in Vertex or Composer.
@@ -30,6 +35,51 @@ export const combinedCreateFormSchema = z
             message:
               'Accelerator count is required and must be a positive integer.'
           });
+        }
+      }
+
+      if (vertexData.encryptionOption === CUSTOMER_ENCRYPTION) {
+        if (
+          vertexData.customerEncryptionType ===
+          DEFAULT_CUSTOMER_MANAGED_SELECTION
+        ) {
+          // Validate the dropdowns
+          if (!vertexData.keyRing) {
+            ctx.addIssue({
+              path: ['keyRing'],
+              code: z.ZodIssueCode.custom,
+              message: 'Key Ring is required.'
+            });
+          }
+
+          if (vertexData.keyRing && !vertexData.cryptoKey) {
+            ctx.addIssue({
+              path: ['cryptoKey'],
+              code: z.ZodIssueCode.custom,
+              message: 'Crypto key is required.'
+            });
+          }
+        } else {
+          if (!vertexData.manualKey) {
+            ctx.addIssue({
+              path: ['manualKey'],
+              code: z.ZodIssueCode.custom,
+              message: 'Required manual encryption key'
+            });
+          }
+          // Add your regex validation here as well
+          const numericRegex =
+            /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
+          if (
+            vertexData.manualKey &&
+            !numericRegex.test(vertexData.manualKey)
+          ) {
+            ctx.addIssue({
+              path: ['manualKey'],
+              code: z.ZodIssueCode.custom,
+              message: ENCRYPTION_MANUAL_KEY_SAMPLE
+            });
+          }
         }
       }
 

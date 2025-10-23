@@ -45,6 +45,7 @@ export interface ICreateVertexSchedulerProps {
   isValid: boolean;
   credentials: IAuthCredentials;
   editScheduleData: IEditScheduleData | null | undefined;
+  clearErrors: any;
   app: JupyterFrontEnd;
 }
 
@@ -147,6 +148,8 @@ export interface ILoadingStateVertex {
   subNetwork: boolean;
   sharedNetwork: boolean;
   hostProject: boolean;
+  keyRings: boolean;
+  cryptoKeys: boolean;
 }
 
 export interface IServiceAccount {
@@ -368,4 +371,15 @@ export interface IActionButtonProps {
   onClick?: (e: React.MouseEvent) => void;
   disabled?: boolean;
   className?: string;
+}
+
+export interface IKeyRingPayload {
+  region: string | undefined;
+  projectId: string | undefined;
+  accessToken: string | undefined;
+}
+
+export interface ICryptoListKeys {
+  credentials: IKeyRingPayload;
+  keyRing: string;
 }

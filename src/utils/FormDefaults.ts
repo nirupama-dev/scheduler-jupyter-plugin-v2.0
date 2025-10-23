@@ -31,7 +31,9 @@ import {
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME,
   SCHEDULE_MODE_OPTIONS,
-  SCHEDULE_VALUE_EXPRESSION
+  SCHEDULE_VALUE_EXPRESSION,
+  DEFAULT_ENCRYPTION_SELECTED,
+  DEFAULT_CUSTOMER_MANAGED_SELECTION
 } from './Constants';
 import { IInitialSchedulerContextData } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
@@ -92,6 +94,11 @@ const getDefaultVertexValues = (
     vertexRegion: initialSchedulerStateData?.credentials?.region_id ?? '', //set from credentials.
     cloudStorageBucket: DEFAULT_CLOUD_STORAGE_BUCKET.value, // Assumes DEFAULT_CLOUD_STORAGE_BUCKET will be found by useEffect
     serviceAccount: DEFAULT_SERVICE_ACCOUNT, // Assumes DEFAULT_SERVICE_ACCOUNT will be found by useEffect
+    encryptionOption: DEFAULT_ENCRYPTION_SELECTED,
+    customerEncryptionType: DEFAULT_CUSTOMER_MANAGED_SELECTION,
+    keyRing: '',
+    cryptoKey: '',
+    manualKey: '',
     networkOption: DEFAULT_NETWORK_SELECTED,
     primaryNetwork: '', // Will be dynamically set by primaryNetworkSelected if 'networkInThisProject'
     subNetwork: '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'

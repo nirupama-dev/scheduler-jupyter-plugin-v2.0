@@ -92,6 +92,7 @@ class DescribeUpdateVertexJob(BaseModel):
     gcs_notebook_source: str
     disk_type: Optional[str] = None
     disk_size: Optional[str] = None
+    kms_key_name: Optional[str] = None
 
     @classmethod
     def from_dict(cls, data):
