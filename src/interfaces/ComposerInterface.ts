@@ -49,11 +49,13 @@ export interface ICreateComposerSchedulerProps {
 }
 
 export interface IComposerSchedulePayload {
-  dag_id?: string;
+  dag_id: string;
+  name: string;
   input_filename: string;
   project_id: string;
   region_id: string;
-  composer_environment: string;
+  composer_environment_name: string;
+  local_kernel: boolean;
   output_formats: string[];
   parameters: string;
   serverless_name?: string;
@@ -63,9 +65,9 @@ export interface IComposerSchedulePayload {
   retry_count: number | undefined;
   retry_delay: number | undefined;
   email_failure?: string;
-  email_retry?: string;
+  email_delay?: string;
   email_success?: string;
-  email_recipients?: string[];
+  email?: string[];
   stop_cluster: string;
   time_zone?: string;
   packages_to_install?: string[];
