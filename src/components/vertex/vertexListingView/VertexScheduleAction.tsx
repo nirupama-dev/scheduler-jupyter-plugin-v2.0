@@ -49,7 +49,7 @@ export const renderActions = (
     <div className="actions-icon-btn">
       {/* Pause/Unpause Button */}
       {data.name === actionPerformedScheduleName.resumePauseLoading ? (
-        <LoadingSpinner iconClassName="spin-loader-custom-style" />
+        <LoadingSpinner iconClassName="listing-spinner" />
       ) : (
         <ActionButton
           title={
