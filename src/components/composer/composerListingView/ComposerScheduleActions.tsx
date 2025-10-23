@@ -28,7 +28,7 @@ export const renderActions = (
     <div className="actions-icon-btn">
       {/* Pause/Unpause Button */}
       {data.jobid === loadingState.update ? (
-        <LoadingSpinner iconClassName="spin-loader-custom-style" />
+        <LoadingSpinner iconClassName="listing-spinner" />
       ) : (
         <ActionButton
           title={isPaused ? 'Unpause' : 'Pause'}
@@ -39,7 +39,7 @@ export const renderActions = (
 
       {/* Trigger Button */}
       {data.jobid === loadingState.trigger ? (
-        <LoadingSpinner iconClassName="spin-loader-custom-style" />
+        <LoadingSpinner iconClassName="listing-spinner" />
       ) : (
         <ActionButton
           title={isPaused ? "Can't Trigger Paused job" : 'Trigger the job'}
@@ -54,7 +54,7 @@ export const renderActions = (
 
       {/* Edit Schedule Button */}
       {data.jobid === loadingState.editSchedule ? (
-        <LoadingSpinner iconClassName="spin-loader-custom-style" />
+        <LoadingSpinner iconClassName="listing-spinner" />
       ) : (
         <ActionButton
           title="Edit Schedule"
@@ -66,7 +66,7 @@ export const renderActions = (
       {/* Edit Notebook Button (Conditional on GCS Plugin) */}
       {isGCSPluginInstalled ? (
         data.jobid === loadingState.editNotebook ? (
-          <LoadingSpinner iconClassName="spin-loader-custom-style" />
+          <LoadingSpinner iconClassName="listing-spinner" />
         ) : (
           <ActionButton
             title="Edit Notebook"
