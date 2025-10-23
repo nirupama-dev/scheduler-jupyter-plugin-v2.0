@@ -58,9 +58,8 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
 
   const generateRadioOptions = () => {
     return safeOptions.map(singleOption => (
-      <>
+      <React.Fragment key={singleOption.value}>
         <FormControlLabel
-          key={singleOption.value}
           value={singleOption.value}
           label={
             <Typography sx={{ fontSize: 13 }}>
@@ -86,8 +85,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
           className="scheduler-label-font"
           disabled={singleOption.disabled}
         />
-
-        {singleOption.label === NETWORK_OPTIONS[1].label && (
+        {singleOption.value === NETWORK_OPTIONS[1].value && (
           <>
             <span className="sub-para tab-text-sub-cl">
               {SHARED_NETWORK_DESCRIPTION}
@@ -97,34 +95,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
             </div>
           </>
         )}
-
-        {/* Encryption  */}
-
-        {singleOption.label === ENCRYPTION_OPTIONS[0].label && (
-          <>
-            <span className="sub-para tab-text-sub-cl">
-              {GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT}
-            </span>
-          </>
-        )}
-
-        {singleOption.label === ENCRYPTION_OPTIONS[1].label && (
-          <div>
-            <span className="sub-para tab-text-sub-cl">
-              {CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT}{' '}
-            </span>
-
-            <span
-              className="submit-job-learn-more"
-              onClick={() => {
-                window.open(`${SECURITY_KEY}?project=${projectId}`, '_blank');
-              }}
-            >
-              {CUSTOMER_MANAGED_ENCRYPTION_LINK}
-            </span>
-          </div>
-        )}
-      </>
+      </React.Fragment>
     ));
   };
 
@@ -138,7 +109,11 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
           fieldState: { error: fieldError }, // eslint-disable-line @typescript-eslint/no-unused-vars
           formState
         }) => (
-          <RadioGroup value={value} onChange={onChange} className={className}>
+          <RadioGroup
+            value={value ?? ''}
+            onChange={onChange}
+            className={className}
+          >
             {generateRadioOptions()}
           </RadioGroup>
         )}

@@ -415,10 +415,13 @@ export const CreateComposerSchedule: React.FC<
       </div>
       <div className="scheduler-form-element-container">
         <FormInputCheckbox
-          name="outputFormats"
+          name="outputFormatAsNotebook"
           label="Notebook"
           control={control}
-          isChecked={true}
+          disabled={true}
+          onChangeCallback={() => {
+            trigger('outputFormatAsNotebook');
+          }}
         />
       </div>
       <AddParameters control={control} errors={errors} />

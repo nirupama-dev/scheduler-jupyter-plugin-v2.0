@@ -136,6 +136,7 @@ const getDefaultComposerValues = (
     initialSchedulerStateData.initialDefaults?.kernelDetails?.executionMode ??
     'local', // Default to 'local' if executionMode is not provided
   environment: '',
+  outputFormatAsNotebook: true, //  Default to Notebook as outputformat
   retryCount: 2, // Matches Zod's default if preprocess resolves to number
   retryDelay: 5, // Matches Zod's default
   emailOnFailure: false,
