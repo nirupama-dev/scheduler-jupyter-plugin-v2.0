@@ -18,6 +18,7 @@
 /**
  * Data Type Transformation Util for Composer Schedule functionality.
  */
+import { v4 as uuidv4 } from 'uuid';
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
 import { IComposerSchedulePayload } from '../interfaces/ComposerInterface';
 
@@ -37,16 +38,11 @@ export const transformZodSchemaToComposerSchedulePayload = (
   );
   const outputFormats = composerScheduleData.outputFormatAsNotebook
     ? ['Notebook']
-    : [];// Adjust this logic if there are more formats in future
+    : []; // Adjust this logic if there are more formats in future
 
   const composerPayloadData: IComposerSchedulePayload = {
-    ...(composerScheduleData.jobId
-      ? { dag_id: composerScheduleData.jobId! }
-      : {}),
     input_filename: composerScheduleData.inputFile,
-    project_id: composerScheduleData.projectId,
-    region_id: composerScheduleData.composerRegion,
-    composer_environment: composerScheduleData.environment,
+    composer_environment_name: composerScheduleData.environment,
     output_formats: outputFormats,
     parameters:
       composerScheduleData.parameters &&
@@ -55,23 +51,28 @@ export const transformZodSchemaToComposerSchedulePayload = (
             .map(param => `${param.key}:${param.value}`)
             .join(',')
         : '',
-    serverless_name: composerScheduleData.serverless ?? undefined,
-    cluster_name: composerScheduleData.cluster ?? undefined,
+    local_kernel: composerScheduleData.executionMode === 'local' ? true : false,
     mode_selected: composerScheduleData.executionMode,
-    schedule_value: composerScheduleData.scheduleValue ?? '',
     retry_count: composerScheduleData.retryCount ?? '',
     retry_delay: composerScheduleData.retryDelay ?? '',
     email_failure:
       composerScheduleData.emailOnFailure === true ? 'true' : 'false',
-    email_retry: composerScheduleData.emailOnRetry === true ? 'true' : 'false',
+    email_delay: composerScheduleData.emailOnRetry === true ? 'true' : 'false',
     email_success:
       composerScheduleData.emailOnSuccess === true ? 'true' : 'false',
-    email_recipients: composerScheduleData.emailRecipients ?? undefined,
+    email: composerScheduleData.emailRecipients ?? undefined,
+    name: composerScheduleData.jobName,
+    schedule_value: composerScheduleData.scheduleValue ?? '',
     stop_cluster:
       composerScheduleData.stopClusterAfterExecution === true
         ? 'true'
         : 'false',
+    dag_id: composerScheduleData.jobId ?? uuidv4(),
     time_zone: composerScheduleData.timeZone ?? '',
+    project_id: composerScheduleData.projectId,
+    region_id: composerScheduleData.composerRegion,
+    serverless_name: composerScheduleData.serverless ?? undefined,
+    cluster_name: composerScheduleData.cluster ?? undefined,
     packages_to_install: packagesToInstall ?? []
   };
   console.log('output: ', JSON.stringify(composerPayloadData));
@@ -91,7 +92,7 @@ export const transformComposerScheduleDataToZodSchema = (
     JSON.stringify(composerScheduleData)
   );
   const outputFormats = composerScheduleData.output_formats ?? [];
-    
+
   const composerScheduleDataForForm: ComposerSchedulerFormValues = {
     jobId: composerScheduleData.dag_id,
     jobName: composerScheduleData.dag_id!,
@@ -99,8 +100,9 @@ export const transformComposerScheduleDataToZodSchema = (
     schedulerSelection: 'composer',
     composerRegion: composerScheduleData.region_id!,
     projectId: composerScheduleData.project_id!,
-    environment: composerScheduleData.composer_environment!,
-    outputFormatAsNotebook: outputFormats.length !== 0 && outputFormats.includes('Notebook'),
+    environment: composerScheduleData.composer_environment_name!,
+    outputFormatAsNotebook:
+      outputFormats.length !== 0 && outputFormats.includes('Notebook'),
     retryCount: composerScheduleData.retry_count!,
     retryDelay: composerScheduleData.retry_delay!,
     executionMode:
@@ -115,8 +117,8 @@ export const transformComposerScheduleDataToZodSchema = (
       composerScheduleData.email_success?.toLowerCase() === 'true',
     emailOnFailure:
       composerScheduleData.email_failure?.toLowerCase() === 'true',
-    emailOnRetry: composerScheduleData.email_retry?.toLowerCase() === 'true',
-    emailRecipients: composerScheduleData.email_recipients ?? undefined,
+    emailOnRetry: composerScheduleData.email_delay?.toLowerCase() === 'true',
+    emailRecipients: composerScheduleData.email ?? undefined,
     parameters: composerScheduleData.parameters
       ? composerScheduleData.parameters.split(',').map(item => {
           const [key, value] = item.trim().split(':');

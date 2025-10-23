@@ -77,9 +77,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
               size="small"
               sx={{
                 paddingTop:
-                  errorFlag && singleOption.value === MANUAL_CMEK
-                    ? '30px'
-                    : ''
+                  errorFlag && singleOption.value === MANUAL_CMEK ? '30px' : ''
               }}
             />
           }

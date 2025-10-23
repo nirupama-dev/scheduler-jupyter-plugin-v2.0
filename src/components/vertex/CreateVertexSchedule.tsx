@@ -1138,8 +1138,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   loading={loadingState.keyRings}
                   disabled={
                     !currentRegion ||
-                    customerEncryptionType !==
-                      PREDEFINED_CMEK ||
+                    customerEncryptionType !== PREDEFINED_CMEK ||
                     loadingState.keyRings
                   }
                   error={vertexErrors.keyRing}
@@ -1157,8 +1156,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   loading={loadingState.cryptoKeys}
                   disabled={
                     !watch('keyRing') ||
-                    customerEncryptionType !==
-                      PREDEFINED_CMEK ||
+                    customerEncryptionType !== PREDEFINED_CMEK ||
                     loadingState.cryptoKeys
                   }
                   error={vertexErrors.cryptoKey}
@@ -1177,9 +1175,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 label="Enter key manually*"
                 error={vertexErrors.manualKey}
                 placeholder="projects/PROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/KEY"
-                disabled={
-                  customerEncryptionType === PREDEFINED_CMEK
-                }
+                disabled={customerEncryptionType === PREDEFINED_CMEK}
                 // onChangeCallback={handleManualEncryptionChange}
               />
             </div>

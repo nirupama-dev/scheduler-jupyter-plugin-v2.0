@@ -39,10 +39,7 @@ export const combinedCreateFormSchema = z
       }
 
       if (vertexData.encryptionOption === CUSTOMER_ENCRYPTION) {
-        if (
-          vertexData.customerEncryptionType ===
-          PREDEFINED_CMEK
-        ) {
+        if (vertexData.customerEncryptionType === PREDEFINED_CMEK) {
           // Validate the dropdowns
           if (!vertexData.keyRing) {
             ctx.addIssue({
