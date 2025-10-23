@@ -35,8 +35,9 @@ import {
   CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT,
   SECURITY_KEY,
   CUSTOMER_MANAGED_ENCRYPTION_LINK,
-  ENCRYPTION_OPTIONS,
-  CUSTOMER_MANGED_ENCRYPTION
+  MANUAL_CMEK,
+  GOOGLE_MANAGED_ENCRYPTION_KEY,
+  CUSTOMER_ENCRYPTION
 } from '../../../utils/Constants';
 import LearnMore from '../links/LearnMore';
 
@@ -76,7 +77,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
               size="small"
               sx={{
                 paddingTop:
-                  errorFlag && singleOption.value === CUSTOMER_MANGED_ENCRYPTION
+                  errorFlag && singleOption.value === MANUAL_CMEK
                     ? '30px'
                     : ''
               }}
@@ -98,7 +99,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
 
         {/* Encryption  */}
 
-        {singleOption.label === ENCRYPTION_OPTIONS[0].label && (
+        {singleOption.value === GOOGLE_MANAGED_ENCRYPTION_KEY && (
           <>
             <span className="sub-para tab-text-sub-cl">
               {GOOGLE_MANAGED_ENCRYPTION_HELPER_TEXT}
@@ -106,7 +107,7 @@ export const FormInputRadio: React.FC<IFormInputProps> = ({
           </>
         )}
 
-        {singleOption.label === ENCRYPTION_OPTIONS[1].label && (
+        {singleOption.value === CUSTOMER_ENCRYPTION && (
           <div>
             <span className="sub-para tab-text-sub-cl">
               {CUSTOMER_MANAGED_ENCRYPTION_HELPER_TEXT}{' '}

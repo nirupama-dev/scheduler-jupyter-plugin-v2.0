@@ -3,7 +3,7 @@ import { createVertexSchema } from './CreateVertexSchema';
 import { createComposerSchema } from './CreateComposerSchema';
 import {
   CUSTOMER_ENCRYPTION,
-  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  PREDEFINED_CMEK,
   ENCRYPTION_MANUAL_KEY_SAMPLE,
   EVERY_MINUTE_CRON
 } from '../utils/Constants';
@@ -41,7 +41,7 @@ export const combinedCreateFormSchema = z
       if (vertexData.encryptionOption === CUSTOMER_ENCRYPTION) {
         if (
           vertexData.customerEncryptionType ===
-          DEFAULT_CUSTOMER_MANAGED_SELECTION
+          PREDEFINED_CMEK
         ) {
           // Validate the dropdowns
           if (!vertexData.keyRing) {

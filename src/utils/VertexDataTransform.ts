@@ -22,7 +22,7 @@ import { VertexSchedulerFormValues } from '../schemas/CreateVertexSchema';
 import {
   CRON_FOR_SCHEDULE_EVERY_MIN,
   CUSTOMER_ENCRYPTION,
-  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  PREDEFINED_CMEK,
   DEFAULT_TIME_ZONE
 } from './Constants';
 import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
@@ -269,7 +269,7 @@ export const transformVertexScheduleResponseToZodSchema = (
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.serviceAccount ?? '',
     encryptionOption: CUSTOMER_ENCRYPTION,
-    customerEncryptionType: DEFAULT_CUSTOMER_MANAGED_SELECTION,
+    customerEncryptionType: PREDEFINED_CMEK,
     keyRing: keyRing,
     cryptoKey: cryptoKey,
     manualKey: '',

@@ -66,9 +66,9 @@ import {
   ENCRYPTION_TEXT,
   ENCRYPTION_OPTIONS,
   CUSTOMER_ENCRYPTION,
-  DEFAULT_CUSTOMER_MANAGED_SELECTION,
+  PREDEFINED_CMEK,
   CUSTOMER_MANAGED_RADIO_OPTIONS,
-  CUSTOMER_MANGED_ENCRYPTION,
+  MANUAL_CMEK,
   DEFAULT_ENCRYPTION_SELECTED
 } from '../../utils/Constants';
 
@@ -666,10 +666,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       }
 
       if (encryptionSelected === CUSTOMER_ENCRYPTION) {
-        if (customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION) {
+        if (customerEncryptionType === PREDEFINED_CMEK) {
           trigger(['keyRing']);
           trigger(['cryptoKey']);
-        } else if (customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION) {
+        } else if (customerEncryptionType === MANUAL_CMEK) {
           trigger(['manualKey']);
         }
       }
@@ -878,7 +878,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   useEffect(() => {
     if (
       encryptionSelected === CUSTOMER_ENCRYPTION &&
-      customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
+      customerEncryptionType === PREDEFINED_CMEK
     ) {
       trigger('keyRing');
       listKeyRings();
@@ -888,7 +888,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
   useEffect(() => {
     if (
-      customerEncryptionType === CUSTOMER_MANGED_ENCRYPTION ||
+      customerEncryptionType === MANUAL_CMEK ||
       encryptionSelected === DEFAULT_ENCRYPTION_SELECTED
     ) {
       setValue('keyRing', '');
@@ -1139,7 +1139,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   disabled={
                     !currentRegion ||
                     customerEncryptionType !==
-                      DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                      PREDEFINED_CMEK ||
                     loadingState.keyRings
                   }
                   error={vertexErrors.keyRing}
@@ -1158,7 +1158,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   disabled={
                     !watch('keyRing') ||
                     customerEncryptionType !==
-                      DEFAULT_CUSTOMER_MANAGED_SELECTION ||
+                      PREDEFINED_CMEK ||
                     loadingState.cryptoKeys
                   }
                   error={vertexErrors.cryptoKey}
@@ -1178,7 +1178,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 error={vertexErrors.manualKey}
                 placeholder="projects/PROJECT/locations/LOCATION/keyRings/KEYRING/cryptoKeys/KEY"
                 disabled={
-                  customerEncryptionType === DEFAULT_CUSTOMER_MANAGED_SELECTION
+                  customerEncryptionType === PREDEFINED_CMEK
                 }
                 // onChangeCallback={handleManualEncryptionChange}
               />
