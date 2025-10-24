@@ -29,7 +29,7 @@ export const PaginationComponent = ({
   totalCount
 }: IPaginationViewProps) => {
   return (
-    <div>
+    <div className="pagination-container-listing">
       {isLoading ? null : (
         <div className="pagination-parent-view-main">
           <div className="pagination-numbers" aria-disabled={isLoading}>
