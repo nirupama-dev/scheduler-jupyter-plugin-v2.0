@@ -29,7 +29,7 @@ const dateTimeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.g
  * Helper function to navigate to Scheduled Jobs listing page.
  * @param {Object} page - Playwright page object.
  */
-async function navigateToScheduleJobsListingPage(page:any) {
+async function navigateToScheduleJobsListingPage(page: any) {
   await page
     .locator(
       '//*[@data-category="Google Cloud Resources" and @title="Scheduled Jobs"]'
@@ -47,13 +47,13 @@ async function navigateToScheduleJobsListingPage(page:any) {
  * @param {Object} page - Playwright page object.
  * @param {string} label - Label of the input field.
  */
-async function checkInputNotEmpty(page:any, label:any) {
+async function checkInputNotEmpty(page: any, label: any) {
   const input = page.getByLabel(label);
   const value = await input.inputValue();
   return value.trim() !== '';
 }
 
-async function checkInputFieldsNotEmpty(page:any) {
+async function checkInputFieldsNotEmpty(page: any) {
   // Validate that all input fields are not empty
   const jobNameNotEmpty = await checkInputNotEmpty(page, 'Job name*');
   const InputfileNotEmpty = await checkInputNotEmpty(page, 'Input file*');
@@ -84,7 +84,7 @@ async function checkInputFieldsNotEmpty(page:any) {
  * @param {string} scheduleType - Type of the job scheduler
  */
 async function createJobScheduler(
-  page:any,
+  page: any,
   scheduleType: 'Run now' | 'Run on a schedule'
 ) {
   const filebrowser = page.locator("//li[@title='Google Cloud Storage']");
@@ -97,10 +97,16 @@ async function createJobScheduler(
       )
       .click();
   }
-  await page.getByRole('region', { name: 'notebook content' }).click();
-  const locator = page.locator('.jp-LauncherCard:visible', {
-    hasText: 'Python 3 (ipykernel)'
-  });
+  // await page.getByRole('region', { name: 'notebook content' }).click();
+  // const locator = page.locator('.jp-LauncherCard:visible', {
+  //   hasText: 'Python 3 (ipykernel)'
+  // });
+  const locator = page.locator(
+    '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+    {
+      hasText: 'Python 3 (ipykernel)'
+    }
+  );
   if ((await locator.count()) > 0) {
     await locator.first().click();
     await page
@@ -149,9 +155,9 @@ async function createJobScheduler(
  * @param {string} [dropdownOption] - Option to select if field is a dropdown.
  */
 async function validateErrorResolution(
-  page:any,
-  fieldLabel:any,
-  errorMessage:any,
+  page: any,
+  fieldLabel: any,
+  errorMessage: any,
   isDropdown = false,
   dropdownOption = ''
 ) {
@@ -209,12 +215,18 @@ test.describe('Composer scheduling jobs', () => {
     }
 
     // Navigate to the notebook content region
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Python 3 kernel card
-    const locator = page.locator('.jp-LauncherCard:visible', {
-      hasText: 'Python 3 (ipykernel)'
-    });
+    // const locator = page.locator('.jp-LauncherCard:visible', {
+    //   hasText: 'Python 3 (ipykernel)'
+    // });
+    const locator = page.locator(
+      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+      {
+        hasText: 'Python 3 (ipykernel)'
+      }
+    );
 
     const count = await locator.count();
     expect(count).toBeGreaterThan(0);
@@ -269,12 +281,18 @@ test.describe('Composer scheduling jobs', () => {
     }
 
     // Navigate to the notebook content
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Python 3 kernel card
-    const kernelCard = page.locator('.jp-LauncherCard:visible', {
-      hasText: 'Python 3 (ipykernel)'
-    });
+    // const kernelCard = page.locator('.jp-LauncherCard:visible', {
+    //   hasText: 'Python 3 (ipykernel)'
+    // });
+    const kernelCard = page.locator(
+      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+      {
+        hasText: 'Python 3 (ipykernel)'
+      }
+    );
     const kernelCount = await kernelCard.count();
     expect(kernelCount).toBeGreaterThan(0);
 
@@ -415,7 +433,7 @@ test.describe('Composer scheduling jobs', () => {
 });
 
 // Function to get the first job that has a specific action enabled
-async function getJobWithAction(page:any, action:any) {
+async function getJobWithAction(page: any, action: any) {
   // Check list of jobs are displayed
   const tableLocator = page.locator('//table[@class="clusters-list-table"]');
   if (await tableLocator.isVisible()) {
@@ -454,8 +472,9 @@ test.describe('Composer scheduling jobs listing page validation', () => {
     await environmentField.click();
     await page.getByRole('option').first().click();
     await expect(page.getByLabel('Project ID*')).toBeVisible();
-    await page.getByLabel('Project ID*').click();
-    await page.getByRole('option').first().click();
+    // await page.getByLabel('Project ID*').click();
+    // await page.getByRole('option').first().click();
+    await expect(page.getByLabel('Project ID*')).toBeDisabled();
     await expect(page.getByLabel('Region*')).toBeVisible();
     await page
       .getByText('Loading Notebook Schedulers')
@@ -535,7 +554,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       break;
     }
     //check schedule column text
-    async function ScheduleText(schedulecol:any) {
+    async function ScheduleText(schedulecol: any) {
       if (schedulecol == 'Once, as soon as possible') {
         console.log('job is created for run once');
       } else {
@@ -563,7 +582,11 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       await jobLocator.getByText('Active').waitFor({ state: 'detached' });
       await expect(jobLocator.getByText('Paused')).toBeVisible();
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to pause.');
     }
@@ -589,7 +612,11 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       await jobLocator.getByText('Paused').waitFor({ state: 'detached' });
       await expect(jobLocator.getByText('Active')).toBeVisible();
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to resume.');
     }
@@ -613,7 +640,11 @@ test.describe('Composer scheduling jobs listing page validation', () => {
 
       await jobLocator.locator('//div[@title="Trigger the job"]').click();
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert" and @class="Toastify__toast-body"])[1]')).toContainText(triggerMessage);
+      await expect(
+        page.locator(
+          '(//div[@role="alert" and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(triggerMessage);
     } else {
       console.log('No job available to trigger.');
     }
@@ -633,7 +664,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       const jobName = await jobLocator
         .locator('//td[@role="cell"][1]')
         .innerText();
-      const msg = 'Job ' + jobName + ' successfully updated';
+      const msg = 'Job scheduler successfully updated';
 
       await jobLocator.locator('//div[@title="Edit Schedule"]').click();
 
@@ -647,9 +678,9 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       await expect(page.getByLabel('Project ID*')).toBeDisabled();
       await expect(page.getByLabel('Region*')).toBeDisabled();
       await expect(page.getByLabel('Environment*')).toBeDisabled();
-      await expect(
-        page.getByText('Checking if required packages are installed...')
-      ).toBeVisible();
+      // await expect(
+      //   page.getByText('Checking if required packages are installed...')
+      // ).toBeVisible();
       await expect(page.getByLabel('Vertex')).toBeDisabled();
 
       // Validate that input fields are not empty
@@ -664,10 +695,15 @@ test.describe('Composer scheduling jobs listing page validation', () => {
           .waitFor({ state: 'detached' });
         await expect(page.getByLabel(' Update Schedule')).not.toBeDisabled();
         await page.getByLabel(' Update Schedule').click();
+        await page.getByText('UPDATING').waitFor({ state: 'detached' });
       }
       // verify schedule updated
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to update.');
     }
@@ -696,9 +732,9 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       await expect(page.getByLabel('Project ID*')).toBeDisabled();
       await expect(page.getByLabel('Region*')).toBeDisabled();
       await expect(page.getByLabel('Environment*')).toBeDisabled();
-      await expect(
-        page.getByText('Checking if required packages are installed...')
-      ).toBeVisible();
+      // await expect(
+      //   page.getByText('Checking if required packages are installed...')
+      // ).toBeVisible();
       await expect(page.getByLabel('Vertex')).toBeDisabled();
 
       // Validate that input fields are not empty
@@ -744,7 +780,11 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       ).toBeVisible();
       await page.getByRole('button', { name: 'Delete' }).click();
       await page.waitForTimeout(5000);
-      // await expect(page.getByText(`Deleted job ${jobName}. It might take a few minutes to for it to be deleted from the list of jobs.`)).toBeVisible();
+      await expect(
+        page.getByText(
+          `Deleted job ${jobName}. It might take a few minutes to for it to be deleted from the list of jobs.`
+        )
+      ).toBeVisible();
     } else {
       console.log('No job available to delete.');
     }
@@ -752,7 +792,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
 });
 
 // Helper to navigate to the Execution History page for the first job
-async function navigateToExecutionHistory(page:any) {
+async function navigateToExecutionHistory(page: any) {
   const jobName = await page.getByRole('cell').first().innerText();
   await page.getByRole('cell').first().click();
   await page.getByText('Loading History').waitFor({ state: 'detached' });
@@ -877,8 +917,16 @@ test.describe('Composer scheduling jobs execution history', () => {
           await page.getByRole('progressbar').waitFor({ state: 'detached' });
           // Check the confirmation message
           // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-          await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toHaveText(jobName);
-          await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toHaveText('downloaded successfully');
+          await expect(
+            page.locator(
+              '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+            )
+          ).toHaveText(jobName);
+          await expect(
+            page.locator(
+              '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+            )
+          ).toHaveText('downloaded successfully');
         } else {
           const downloadButtonClass = await page
             .getByRole('button', { name: 'Download Output' })

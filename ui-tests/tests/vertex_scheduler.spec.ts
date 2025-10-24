@@ -16,7 +16,7 @@
  */
 
 import { test, galata } from '@jupyterlab/galata';
-import {Page, expect} from '@playwright/test'
+import { Page, expect } from '@playwright/test';
 
 // Set a common timeout for all tests
 const timeout = 5 * 60 * 1000;
@@ -30,7 +30,7 @@ const dateTimeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.g
  * Helper function to navigate to Scheduled Jobs listing page.
  * @param {Object} page - Playwright page object.
  */
-async function navigateToScheduleJobsListingPage(page:Page) {
+async function navigateToScheduleJobsListingPage(page: Page) {
   await page
     .locator(
       '//*[@data-category="Google Cloud Resources" and @title="Scheduled Jobs"]'
@@ -47,13 +47,13 @@ async function navigateToScheduleJobsListingPage(page:Page) {
  * @param {Object} page - Playwright page object.
  * @param {string} label - Label of the input field.
  */
-async function checkInputNotEmpty(page:Page, label:string) {
+async function checkInputNotEmpty(page: Page, label: string) {
   const input = page.getByLabel(label);
   const value = await input.inputValue();
   return value.trim() !== '';
 }
 
-async function checkInputFieldsNotEmpty(page:Page) {
+async function checkInputFieldsNotEmpty(page: Page) {
   // Validate that all input fields are not empty
   const jobNameNotEmpty = await checkInputNotEmpty(page, 'Job name*');
   const regionNotEmpty = await checkInputNotEmpty(page, 'Region*');
@@ -106,7 +106,7 @@ async function checkInputFieldsNotEmpty(page:Page) {
  * @param {string} scheduleType - Type of the job scheduler
  */
 async function createJobScheduler(
-  page:any,
+  page: any,
   scheduleType: 'Run now' | 'Run on a schedule'
 ) {
   const filebrowser = page.locator("//li[@title='Google Cloud Storage']");
@@ -123,9 +123,12 @@ async function createJobScheduler(
   // const locator = page.locator('.jp-LauncherCard:visible', {
   //   hasText: 'Python 3 (ipykernel)'
   // });
-  const locator = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
-    hasText: 'Python 3 (ipykernel)'
-  });
+  const locator = page.locator(
+    '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+    {
+      hasText: 'Python 3 (ipykernel)'
+    }
+  );
   if ((await locator.count()) > 0) {
     await locator.first().click();
     await page
@@ -159,11 +162,21 @@ async function createJobScheduler(
     if (scheduleType === 'Run on a schedule') {
       await page.getByLabel('Run on a schedule').click();
     }
-    
-    const AcceleratortypeNotEmpty = await checkInputNotEmpty(page, 'Accelerator type');
-    const AcceleratorcountNotEmpty = await checkInputNotEmpty(page,'Accelerator count*');
 
-    if (AcceleratorcountNotEmpty && AcceleratortypeNotEmpty && await checkInputFieldsNotEmpty(page)) {
+    const AcceleratortypeNotEmpty = await checkInputNotEmpty(
+      page,
+      'Accelerator type'
+    );
+    const AcceleratorcountNotEmpty = await checkInputNotEmpty(
+      page,
+      'Accelerator count*'
+    );
+
+    if (
+      AcceleratorcountNotEmpty &&
+      AcceleratortypeNotEmpty &&
+      (await checkInputFieldsNotEmpty(page))
+    ) {
       await expect(page.getByLabel('Create Schedule')).not.toBeDisabled();
       await page.getByLabel('Create Schedule').click();
       await expect(
@@ -184,9 +197,9 @@ async function createJobScheduler(
  * @param {string} [dropdownOption] - Option to select if field is a dropdown.
  */
 async function validateErrorResolution(
-  page:Page,
-  fieldLabel:string,
-  errorMessage:string,
+  page: Page,
+  fieldLabel: string,
+  errorMessage: string,
   isDropdown = false,
   dropdownOption = ''
 ) {
@@ -253,9 +266,12 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     // const locator = page.locator('.jp-LauncherCard:visible', {
     //   hasText: 'Python 3 (ipykernel)'
     // });
-    const locator = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
-    hasText: 'Python 3 (ipykernel)'
-    });
+    const locator = page.locator(
+      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+      {
+        hasText: 'Python 3 (ipykernel)'
+      }
+    );
     const count = await locator.count();
     expect(count).toBeGreaterThan(0);
     if (count > 0) {
@@ -295,7 +311,11 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
         await expect(page.getByLabel('cancel Batch')).toBeEnabled();
         await page.getByLabel('cancel Batch').click();
         // await expect(page).toHaveTitle(/ipynb/);
-        await expect(page.locator('//li[@aria-selected="true" and contains(@title,".ipynb")]')).toBeVisible();
+        await expect(
+          page.locator(
+            '//li[@aria-selected="true" and contains(@title,".ipynb")]'
+          )
+        ).toBeVisible();
       }
     }
   });
@@ -324,9 +344,12 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     // const locator = page.locator('.jp-LauncherCard:visible', {
     //   hasText: 'Python 3 (ipykernel)'
     // });
-    const locator = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
-    hasText: 'Python 3 (ipykernel)'
-    });
+    const locator = page.locator(
+      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+      {
+        hasText: 'Python 3 (ipykernel)'
+      }
+    );
     const count = await locator.count();
     expect(count).toBeGreaterThan(0);
     if (count > 0) {
@@ -398,9 +421,12 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     // const kernelCard = page.locator('.jp-LauncherCard:visible', {
     //   hasText: 'Python 3 (ipykernel)'
     // });
-    const kernelCard = page.locator('(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]', {
-    hasText: 'Python 3 (ipykernel)'
-    });
+    const kernelCard = page.locator(
+      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+      {
+        hasText: 'Python 3 (ipykernel)'
+      }
+    );
     const kernelCount = await kernelCard.count();
     expect(kernelCount).toBeGreaterThan(0);
 
@@ -449,7 +475,7 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
           label: 'Cloud Storage Bucket*',
           error: 'Cloud storage bucket is required',
           isDropdown: true
-        },
+        }
         // {
         //   label: 'Primary network*',
         //   error: 'Primary network is required',
@@ -534,7 +560,7 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
 });
 
 // Function to get the first job that has a specific action enabled
-async function getJobWithAction(page:any, action:string) {
+async function getJobWithAction(page: any, action: string) {
   // Check list of jobs are displayed
   const tableLocator = page.locator('//table[@class="clusters-list-table"]');
   if (await tableLocator.isVisible()) {
@@ -666,7 +692,7 @@ test.describe('Vertex scheduling jobs listing page', () => {
       break;
     }
     //check schedule column text
-    async function ScheduleText(schedulecol:string) {
+    async function ScheduleText(schedulecol: string) {
       if (schedulecol == 'Run Once') {
         console.log('job is created for ' + schedulecol);
       } else {
@@ -692,7 +718,11 @@ test.describe('Vertex scheduling jobs listing page', () => {
       await jobLocator.getByText('ACTIVE').waitFor({ state: 'detached' });
       await expect(jobLocator.getByText('PAUSED')).toBeVisible();
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to pause.');
     }
@@ -715,7 +745,11 @@ test.describe('Vertex scheduling jobs listing page', () => {
       await jobLocator.getByText('PAUSED').waitFor({ state: 'detached' });
       await expect(jobLocator.getByText('ACTIVE')).toBeVisible();
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to resume.');
     }
@@ -736,7 +770,11 @@ test.describe('Vertex scheduling jobs listing page', () => {
       await jobLocator.locator('//div[@title="Trigger the job"]').click();
       await page.getByRole('progressbar').nth(1).waitFor({ state: 'detached' });
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert" and @class="Toastify__toast-body"])[1]') ).toContainText(triggerMessage);
+      await expect(
+        page.locator(
+          '(//div[@role="alert" and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(triggerMessage);
     } else {
       console.log('No job available to trigger.');
     }
@@ -784,14 +822,20 @@ test.describe('Vertex scheduling jobs listing page', () => {
         .getByPlaceholder('MM/DD/YYYY hh:mm aa');
       const ScheduleNotEmpty = await checkInputNotEmpty(page, 'Schedule*');
       const TimeZoneNotEmpty = await checkInputNotEmpty(page, 'Time Zone*');
-      const AcceleratortypeNotEmpty = await checkInputNotEmpty(page, 'Accelerator type');
+      const AcceleratortypeNotEmpty = await checkInputNotEmpty(
+        page,
+        'Accelerator type'
+      );
       let acceleratorcountpresent;
-      if(AcceleratortypeNotEmpty){
-        const AcceleratorcountNotEmpty = await checkInputNotEmpty(page, 'Accelerator count*');
+      if (AcceleratortypeNotEmpty) {
+        const AcceleratorcountNotEmpty = await checkInputNotEmpty(
+          page,
+          'Accelerator count*'
+        );
         return acceleratorcountpresent;
       }
       let acceleratorFieldsFilled;
-      if(AcceleratortypeNotEmpty && acceleratorcountpresent){
+      if (AcceleratortypeNotEmpty && acceleratorcountpresent) {
         return acceleratorFieldsFilled;
       }
 
@@ -811,7 +855,11 @@ test.describe('Vertex scheduling jobs listing page', () => {
       }
       // verify schedule updated
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to update.');
     }
@@ -887,7 +935,11 @@ test.describe('Vertex scheduling jobs listing page', () => {
       await page.getByRole('button', { name: 'Delete' }).click();
       await page.waitForTimeout(5000);
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.getByText(`Deleted job ${jobName}. It might take a few minutes for the job to be deleted from the list of jobs.`)).toBeVisible();
+      await expect(
+        page.getByText(
+          `Deleted job ${jobName}. It might take a few minutes for the job to be deleted from the list of jobs.`
+        )
+      ).toBeVisible();
 
       // Verify deleted job is not coming back after refresh
       await page.getByLabel('cancel Batch').click();
@@ -906,7 +958,7 @@ test.describe('Vertex scheduling jobs listing page', () => {
 });
 
 // Helper to navigate to the Execution History page for the first job
-async function navigateToExecutionHistory(page:Page) {
+async function navigateToExecutionHistory(page: Page) {
   const jobName = await page.getByRole('cell').first().innerText();
   await page.getByRole('cell').first().click();
   await page.getByText('Loading History').waitFor({ state: 'detached' });
@@ -936,8 +988,16 @@ test.describe('Vertex scheduling jobs execution history', () => {
       ).toBeVisible();
 
       // Verify logs button is displayed
-      await expect(page.locator('//div[@class="execution-history-main-wrapper" and @role="button"]')).toBeVisible();
-      await expect(page.locator('//div[@class="execution-history-main-wrapper" and @role="button"]')).toBeEnabled();
+      await expect(
+        page.locator(
+          '//div[@class="execution-history-main-wrapper" and @role="button"]'
+        )
+      ).toBeVisible();
+      await expect(
+        page.locator(
+          '//div[@class="execution-history-main-wrapper" and @role="button"]'
+        )
+      ).toBeEnabled();
 
       // Verify current date is selected
       const now = new Date();
@@ -1030,7 +1090,13 @@ test.describe('Vertex scheduling jobs execution history', () => {
           await page.getByRole('progressbar').waitFor({ state: 'detached' });
           // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
           // await expect(page.getByText(jobName + ` job history downloaded successfully`)).toBeVisible();
-          await expect(page.getByText('.ipynb has been successfully downloaded from the ' + jobName + ` job history`)).toBeVisible();
+          await expect(
+            page.getByText(
+              '.ipynb has been successfully downloaded from the ' +
+                jobName +
+                ` job history`
+            )
+          ).toBeVisible();
         } else {
           const downloadButtonClass = await page
             .getByRole('button', { name: 'Download Output' })

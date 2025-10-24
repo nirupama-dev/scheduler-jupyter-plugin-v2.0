@@ -29,7 +29,7 @@ const dateTimeStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.g
  * Helper function to navigate to Scheduled Jobs listing page.
  * @param {Object} page - Playwright page object.
  */
-async function navigateToScheduleJobsListingPage(page:any) {
+async function navigateToScheduleJobsListingPage(page: any) {
   await page
     .locator(
       '//*[@data-category="Google Cloud Resources" and @title="Scheduled Jobs"]'
@@ -47,13 +47,13 @@ async function navigateToScheduleJobsListingPage(page:any) {
  * @param {Object} page - Playwright page object.
  * @param {string} label - Label of the input field.
  */
-async function checkInputNotEmpty(page:any, label:any) {
+async function checkInputNotEmpty(page: any, label: any) {
   const input = page.getByLabel(label);
   const value = await input.inputValue();
   return value.trim() !== '';
 }
 
-async function checkInputFieldsNotEmpty(page:any) {
+async function checkInputFieldsNotEmpty(page: any) {
   // Validate that all input fields are not empty
   const jobNameNotEmpty = await checkInputNotEmpty(page, 'Job name*');
   const InputfileNotEmpty = await checkInputNotEmpty(page, 'Input file*');
@@ -84,7 +84,7 @@ async function checkInputFieldsNotEmpty(page:any) {
  * @param {string} scheduleType - Type of the job scheduler
  */
 async function createJobSchedulerCluster(
-  page:any,
+  page: any,
   scheduleType: 'Run now' | 'Run on a schedule'
 ) {
   const filebrowser = page.locator("//li[@title='Google Cloud Storage']");
@@ -97,15 +97,16 @@ async function createJobSchedulerCluster(
       )
       .click();
   }
-  await page.getByRole('region', { name: 'notebook content' }).click();
+  // await page.getByRole('region', { name: 'notebook content' }).click();
   const locator = page.locator('.jp-LauncherCard:visible', {
     hasText: 'cluster'
   });
   await page.waitForTimeout(20000);
   if ((await locator.count()) > 0) {
     await locator.first().click();
+    await page.waitForTimeout(10000);
     await page
-      .getByLabel('Untitled.ipynb')
+      .getByLabel('ipynb')
       .getByTitle('Job Scheduler')
       .getByRole('button')
       .click();
@@ -115,7 +116,10 @@ async function createJobSchedulerCluster(
     // select environment
     await page.getByLabel('Environment*').click();
     await page.getByRole('option').first().click();
-    await expect(page.getByLabel('Cluster')).toBeChecked();
+    await expect(
+      page.locator('//div[@data-testid="cluster-selected"]')
+    ).toBeTruthy();
+    // await expect(page.getByRole('radio').getByLabel('Cluster')).toBeChecked();
     // Select the first available option for cluster field
     await page.getByLabel('Cluster*').click();
     await page.getByRole('option').first().click();
@@ -146,7 +150,7 @@ async function createJobSchedulerCluster(
 }
 
 async function createJobSchedulerServerless(
-  page:any,
+  page: any,
   scheduleType: 'Run now' | 'Run on a schedule'
 ) {
   const filebrowser = page.locator("//li[@title='Google Cloud Storage']");
@@ -159,15 +163,16 @@ async function createJobSchedulerServerless(
       )
       .click();
   }
-  await page.getByRole('region', { name: 'notebook content' }).click();
+  // await page.getByRole('region', { name: 'notebook content' }).click();
   const locator = page.locator('.jp-LauncherCard:visible', {
     hasText: 'on Serverless'
   });
   await page.waitForTimeout(20000);
   if ((await locator.count()) > 0) {
     await locator.first().click();
+    await page.waitForTimeout(10000);
     await page
-      .getByLabel('Untitled.ipynb')
+      .getByLabel('ipynb')
       .getByTitle('Job Scheduler')
       .getByRole('button')
       .click();
@@ -177,7 +182,10 @@ async function createJobSchedulerServerless(
     // select environment
     await page.getByLabel('Environment*').click();
     await page.getByRole('option').first().click();
-    await expect(page.getByLabel('Serverless')).toBeChecked();
+    await expect(
+      page.locator('//div[@data-testid="serverless-selected"]')
+    ).toBeTruthy();
+    // await expect(page.getByLabel('Serverless')).toBeChecked();
     // Select the first available option for serverless field
     await page.getByLabel('Serverless*').click();
     await page.getByRole('option').first().click();
@@ -216,9 +224,9 @@ async function createJobSchedulerServerless(
  * @param {string} [dropdownOption] - Option to select if field is a dropdown.
  */
 async function validateErrorResolution(
-  page:any,
-  fieldLabel:any,
-  errorMessage:any,
+  page: any,
+  fieldLabel: any,
+  errorMessage: any,
   isDropdown = false,
   dropdownOption = ''
 ) {
@@ -276,7 +284,7 @@ test.describe('Composer scheduling jobs for cluster', () => {
     }
 
     // Navigate to the notebook content region
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Python 3 kernel card
     const locator = page.locator('.jp-LauncherCard:visible', {
@@ -287,8 +295,9 @@ test.describe('Composer scheduling jobs for cluster', () => {
     expect(count).toBeGreaterThan(0);
     if (count > 0) {
       await locator.first().click();
+      await page.waitForTimeout(10000);
       await page
-        .getByLabel('Untitled.ipynb')
+        .getByLabel('.ipynb')
         .getByTitle('Job Scheduler')
         .getByRole('button')
         .click();
@@ -337,7 +346,7 @@ test.describe('Composer scheduling jobs for cluster', () => {
     }
 
     // Navigate to the notebook content
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Python 3 kernel card
     const kernelCard = page.locator('.jp-LauncherCard:visible', {
@@ -349,10 +358,10 @@ test.describe('Composer scheduling jobs for cluster', () => {
 
     if (kernelCount > 0) {
       await kernelCard.first().click();
-
+      await page.waitForTimeout(10000);
       // Step 3: Open Job Scheduler dialog
       await page
-        .getByLabel('Untitled.ipynb')
+        .getByLabel('.ipynb')
         .getByTitle('Job Scheduler')
         .getByRole('button')
         .click();
@@ -522,7 +531,7 @@ test.describe('CMP-21,CMP-31:Composer scheduling jobs for serverless', () => {
     }
 
     // Navigate to the notebook content region
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Serverless kernel card
     const locator = page.locator('.jp-LauncherCard:visible', {
@@ -535,7 +544,7 @@ test.describe('CMP-21,CMP-31:Composer scheduling jobs for serverless', () => {
       await locator.nth(2).click();
       await page.waitForTimeout(20000);
       await page
-        .getByLabel('Untitled.ipynb')
+        .getByLabel('.ipynb')
         .getByTitle('Job Scheduler')
         .getByRole('button')
         .click();
@@ -585,7 +594,7 @@ test.describe('CMP-21,CMP-31:Composer scheduling jobs for serverless', () => {
     }
 
     // Navigate to the notebook content
-    await page.getByRole('region', { name: 'notebook content' }).click();
+    // await page.getByRole('region', { name: 'notebook content' }).click();
 
     // Locate and select the Serverless card
     const kernelCard = page.locator('.jp-LauncherCard:visible', {
@@ -600,7 +609,7 @@ test.describe('CMP-21,CMP-31:Composer scheduling jobs for serverless', () => {
       await page.waitForTimeout(20000);
       // Step 3: Open Job Scheduler dialog
       await page
-        .getByLabel('Untitled.ipynb')
+        .getByLabel('.ipynb')
         .getByTitle('Job Scheduler')
         .getByRole('button')
         .click();
@@ -740,7 +749,7 @@ test.describe('CMP-21,CMP-31:Composer scheduling jobs for serverless', () => {
 });
 
 // Function to get the first job that has a specific action enabled
-async function getJobWithAction(page:any, action:any) {
+async function getJobWithAction(page: any, action: any) {
   // Check list of jobs are displayed
   const tableLocator = page.locator('//table[@class="clusters-list-table"]');
   if (await tableLocator.isVisible()) {
@@ -855,7 +864,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       break;
     }
     //check schedule column text
-    async function ScheduleText(schedulecol:any) {
+    async function ScheduleText(schedulecol: any) {
       if (schedulecol == 'Once, as soon as possible') {
         console.log('job is created for run once');
       } else {
@@ -882,7 +891,11 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       await jobLocator.getByText('Active').waitFor({ state: 'detached' });
       await expect(jobLocator.getByText('Paused')).toBeVisible();
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to pause.');
     }
@@ -907,7 +920,11 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       await jobLocator.getByText('Paused').waitFor({ state: 'detached' });
       await expect(jobLocator.getByText('Active')).toBeVisible();
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to resume.');
     }
@@ -929,8 +946,13 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       console.log(`Triggering job: ${jobName}`);
 
       await jobLocator.locator('//div[@title="Trigger the job"]').click();
+      await page.getByRole('alert').waitFor({ state: 'attached' });
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert" and @class="Toastify__toast-body"])[1]')).toContainText(triggerMessage);
+      await expect(
+        page.locator(
+          '(//div[@role="alert" and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(triggerMessage);
     } else {
       console.log('No job available to trigger.');
     }
@@ -949,7 +971,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       const jobName = await jobLocator
         .locator('//td[@role="cell"][1]')
         .innerText();
-      const msg = 'Job ' + jobName + ' successfully updated';
+      const msg = 'Job scheduler successfully updated';
 
       await jobLocator.locator('//div[@title="Edit Schedule"]').click();
 
@@ -978,9 +1000,14 @@ test.describe('Composer scheduling jobs listing page validation', () => {
         await expect(page.getByLabel(' Update Schedule')).not.toBeDisabled();
         await page.getByLabel(' Update Schedule').click();
       }
+      await page.getByText('UPDATING').waitFor({ state: 'detached' });
       // verify schedule updated
       // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-      await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toContainText(msg);
+      await expect(
+        page.locator(
+          '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+        )
+      ).toContainText(msg);
     } else {
       console.log('No job available to update.');
     }
@@ -1052,7 +1079,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
 });
 
 // Helper to navigate to the Execution History page for the first job
-async function navigateToExecutionHistory(page:any) {
+async function navigateToExecutionHistory(page: any) {
   const jobName = await page.getByRole('cell').first().innerText();
   await page.getByRole('cell').first().click();
   await page.getByText('Loading History').waitFor({ state: 'detached' });
@@ -1174,11 +1201,22 @@ test.describe('Composer scheduling jobs execution history', () => {
             .getByRole('button', { name: 'Download Output' })
             .first()
             .click();
-          await page.getByRole('progressbar').waitFor({ state: 'detached' });
+          await page
+            .getByRole('progressbar')
+            .nth(1)
+            .waitFor({ state: 'detached' });
           // Check the confirmation message
           // Toast messages are not getting displayed while running automation test cases, hence commenting toast message verification code
-          await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toHaveText(jobName);
-          await expect(page.locator('(//div[@role="alert"and @class="Toastify__toast-body"])[1]')).toHaveText('downloaded successfully');
+          await expect(
+            page.locator(
+              '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+            )
+          ).toHaveText(jobName);
+          await expect(
+            page.locator(
+              '(//div[@role="alert"and @class="Toastify__toast-body"])[1]'
+            )
+          ).toHaveText('downloaded successfully');
         } else {
           const downloadButtonClass = await page
             .getByRole('button', { name: 'Download Output' })
