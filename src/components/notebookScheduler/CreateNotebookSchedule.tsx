@@ -49,7 +49,7 @@ import {
 } from '../../interfaces/CommonInterface';
 import { VertexSchedulerFormValues } from '../../schemas/CreateVertexSchema';
 import { ComposerSchedulerFormValues } from '../../schemas/CreateComposerSchema';
-import { getInitialFormValues } from '../../utils/FormDefaults';
+import { getInitialFormValues, validateForm } from '../../utils/FormDefaults';
 import { Button } from '@mui/material';
 import { IComposerSchedulePayload } from '../../interfaces/ComposerInterface';
 import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
@@ -298,6 +298,7 @@ export const CreateNotebookSchedule = (
           ...vertexDefaults,
           schedulerSelection: VERTEX_SCHEDULER_NAME
         });
+        validateForm(trigger); // validate whole form
       } else if (schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME) {
         // Get a new set of default Composer-specific values
         const composerDefaults = getInitialFormValues(
@@ -317,6 +318,7 @@ export const CreateNotebookSchedule = (
           ...composerDefaults,
           schedulerSelection: COMPOSER_SCHEDULER_NAME
         });
+        validateForm(trigger); // validate whole form
       }
     }
   }, [
