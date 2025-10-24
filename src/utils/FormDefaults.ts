@@ -168,3 +168,7 @@ export const getInitialFormValues = (
   // Default to Vertex if no criteria or criteria is 'vertex' and load default vertex values.
   return getDefaultVertexValues(formState, sessionContext);
 };
+
+export const validateForm = async (trigger: () => void) => {
+  await trigger();
+};
