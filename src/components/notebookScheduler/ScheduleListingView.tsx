@@ -14,8 +14,11 @@ import {
 // import { ListVertexSchedule } from '../vertex/scheduleListingView/ListVertexSchedule';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
+import { abortApiCall } from '../../utils/Config';
 
-export const ScheduleListingView = () => {
+export const ScheduleListingView = (abortControllers: {
+  abortControllers: any;
+}) => {
   const schedulerContext = useSchedulerContext();
   const [schedulerSelected, setSchedulerSelected] = useState<
     string | undefined
@@ -58,7 +61,7 @@ export const ScheduleListingView = () => {
   ) => {
     const selectedScheduler = (event.target as HTMLInputElement).value;
     setSchedulerSelected(selectedScheduler);
-    console.log('selectedScheduler', selectedScheduler);
+    abortApiCall(abortControllers);
     navigate(`/list/${selectedScheduler}`);
   };
 
