@@ -56,6 +56,9 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
     .string()
     .refine(
       val => {
+        if (val === '' || val === undefined || val === null) {
+            return true; // Empty is valid unless made required by superRefine
+        }
         const numericRegex =
           /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
 
