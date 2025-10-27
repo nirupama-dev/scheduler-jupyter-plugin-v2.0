@@ -263,12 +263,18 @@ export const CreateNotebookSchedule = (
     clearErrors
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
-    values: initialFormValues,
+    // values: initialFormValues,
     mode: 'all'
   });
 
   const schedulerSelectionSelected = watch('schedulerSelection');
   console.log('Scheduler Selection:', getValues('schedulerSelection'));
+
+  useEffect(() => {
+    if (initialFormValues) {
+      reset(initialFormValues);
+    }
+  }, [initialFormValues, reset]);
 
   // Watch for changes in schedulerSelection to reset form values accordingly
   useEffect(() => {
@@ -322,8 +328,7 @@ export const CreateNotebookSchedule = (
   }, [
     schedulerSelectionSelected,
     initialSchedulerDataContext,
-    sessionContext,
-    reset,
+    sessionContext, 
     getValues
   ]);
 
