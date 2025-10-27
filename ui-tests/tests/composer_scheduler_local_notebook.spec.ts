@@ -186,12 +186,12 @@ async function validateErrorResolution(
 }
 
 test.describe('Composer scheduling jobs', () => {
-  test('Can create a job scheduler with Run now', async ({ page }) => {
+  test('CMP-59:Can create a job scheduler with Run now', async ({ page }) => {
     test.setTimeout(timeout);
     await createJobScheduler(page, 'Run now');
   });
 
-  test('Can create a job scheduler with Run on a schedule', async ({
+  test('CMP-59:Can create a job scheduler with Run on a schedule', async ({
     page
   }) => {
     test.setTimeout(timeout);
