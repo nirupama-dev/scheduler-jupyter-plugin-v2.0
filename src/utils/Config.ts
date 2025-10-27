@@ -41,6 +41,32 @@ export const settingController = (abortControllers: any) => {
  * @param {any} abortControllers API list to abort
  */
 export const abortApiCall = (abortControllers: any) => {
-  abortControllers.current.forEach((controller: any) => controller.abort());
-  abortControllers.current = [];
+  // Accept either the ref itself or an object with .abortControllers
+  const ref = abortControllers?.current
+    ? abortControllers
+    : abortControllers?.abortControllers;
+
+  if (!ref) {
+    return;
+  }
+
+  const controllers = ref.current;
+  if (!controllers || !Array.isArray(controllers) || controllers.length === 0) {
+    return;
+  }
+
+  try {
+    controllers.forEach((controller: any) => {
+      if (controller && typeof controller.abort === 'function') {
+        controller.abort();
+      }
+    });
+  } catch {
+    return;
+  } finally {
+    // clear stored controllers
+    if (ref.current) {
+      ref.current = [];
+    }
+  }
 };
