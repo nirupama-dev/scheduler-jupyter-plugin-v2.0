@@ -32,7 +32,7 @@ import {
   COMPOSER_SCHEDULER_NAME,
   SCHEDULE_MODE_OPTIONS,
   SCHEDULE_VALUE_EXPRESSION,
-  DEFAULT_ENCRYPTION_SELECTED,
+  DEFAULT_ENCRYPTION_SELECTED
 } from './Constants';
 import { IInitialSchedulerContextData } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
