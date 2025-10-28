@@ -269,7 +269,7 @@ export const CreateComposerSchedule: React.FC<
       setComposerEnvData([]);
       trigger(['composerRegion', 'environment', 'projectId']);
     },
-    [setValue]
+    [setValue, trigger]
   );
 
   // Handle Region change: Clear Environment
@@ -280,7 +280,7 @@ export const CreateComposerSchedule: React.FC<
       setComposerEnvData([]);
       trigger(['environment', 'composerRegion']);
     },
-    [setValue]
+    [setValue, trigger]
   );
 
   const findEnvironmentSelected = (
@@ -318,7 +318,6 @@ export const CreateComposerSchedule: React.FC<
 
   const handleEnvChange = useCallback(
     (environmentValue: string) => {
-      setValue('environment', environmentValue);
       if (environmentValue) {
         const selectedEnvironment = findEnvironmentSelected(
           environmentValue,
@@ -333,7 +332,7 @@ export const CreateComposerSchedule: React.FC<
       }
       trigger('environment');
     },
-    [setValue, composerEnvData]
+    [composerEnvData, executionMode, checkRequiredPackages, trigger]
   );
 
   const handleCronExpression = useCallback(
@@ -447,6 +446,7 @@ export const CreateComposerSchedule: React.FC<
                 loading={loadingState.cluster}
                 customClass="scheduler-tag-style "
                 error={composerErrors.cluster}
+                onChangeCallback={() => trigger('cluster')}
               />
             </div>
           )}
@@ -461,6 +461,7 @@ export const CreateComposerSchedule: React.FC<
                 loading={loadingState.serverless}
                 customClass="scheduler-tag-style "
                 error={composerErrors.serverless}
+                onChangeCallback={() => trigger('serverless')}
               />
             </div>
           )}
@@ -566,6 +567,7 @@ export const CreateComposerSchedule: React.FC<
               options={timeZoneOptions}
               customClass="scheduler-tag-style "
               error={composerErrors.timeZone}
+              onChangeCallback={() => trigger('timeZone')}
             />
           </div>
         </div>

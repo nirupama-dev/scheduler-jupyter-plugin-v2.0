@@ -32,8 +32,7 @@ import {
   COMPOSER_SCHEDULER_NAME,
   SCHEDULE_MODE_OPTIONS,
   SCHEDULE_VALUE_EXPRESSION,
-  DEFAULT_ENCRYPTION_SELECTED,
-  PREDEFINED_CMEK
+  DEFAULT_ENCRYPTION_SELECTED
 } from './Constants';
 import { IInitialSchedulerContextData } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
@@ -95,7 +94,6 @@ const getDefaultVertexValues = (
     cloudStorageBucket: DEFAULT_CLOUD_STORAGE_BUCKET.value, // Assumes DEFAULT_CLOUD_STORAGE_BUCKET will be found by useEffect
     serviceAccount: DEFAULT_SERVICE_ACCOUNT, // Assumes DEFAULT_SERVICE_ACCOUNT will be found by useEffect
     encryptionOption: DEFAULT_ENCRYPTION_SELECTED,
-    customerEncryptionType: PREDEFINED_CMEK,
     keyRing: '',
     cryptoKey: '',
     manualKey: '',
