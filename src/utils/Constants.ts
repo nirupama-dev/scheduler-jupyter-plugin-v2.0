@@ -221,8 +221,8 @@ export const DEFAULT_CLOUD_STORAGE_BUCKET = {
 
 export const DISK_TYPE_VALUE: ILabelValue<string>[] = [
   {
-    label: 'pd-standard (Persistent Disk Standard',
-    value: 'pd-standard (Persistent Disk Standard'
+    label: 'pd-standard (Persistent Disk Standard)',
+    value: 'pd-standard (Persistent Disk Standard)'
   },
   {
     label: 'pd-ssd (Persistent Disk Solid state Drive)',

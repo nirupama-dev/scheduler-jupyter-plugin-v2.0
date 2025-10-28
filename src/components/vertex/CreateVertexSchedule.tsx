@@ -904,6 +904,30 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, [customerEncryptionType, cryptoKeySelected, encryptionSelected]);
 
+  useEffect(() => {
+    if (editScheduleData?.editMode) {
+      const schedulerEditData = editScheduleData.existingScheduleData;
+
+      if (schedulerEditData) {
+        DISK_TYPE_VALUE.map(diskType => {
+          const regex = /^([^\s]+)/; //Regx to extract machine type value. eg: n1-standard-96 (96 CPUs, 386.55 GB RAM) to n1-standard-96
+          const diskTypeValue = diskType.value.match(regex);
+          if (
+            diskTypeValue &&
+            'diskType' in schedulerEditData &&
+            diskTypeValue[1] === schedulerEditData.diskType
+          ) {
+            setValue('diskType', diskType.value);
+          }
+        });
+
+        if ('diskSize' in schedulerEditData) {
+          setValue('diskSize', schedulerEditData.diskSize);
+        }
+      }
+    }
+  }, [editScheduleData?.editMode]);
+
   // --- Render Component UI ---
   return (
     <div>
