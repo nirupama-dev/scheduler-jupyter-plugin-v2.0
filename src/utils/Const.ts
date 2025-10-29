@@ -167,3 +167,8 @@ export const KEY_MESSAGE =
 
 export const INPUT_HELPER_TEXT =
   'This schedule will run a copy of this notebook in its current state. If you edit the original notebook, you must create a new schedule to run the updated version of the notebook.';
+export const NO_EXECUTION_FOUND =
+  'There are no job executions available for this schedule';
+
+export const EXECUTION_DATE_SELECTION_HELPER_TEXT =
+  'Select a date to view schedule execution history';
