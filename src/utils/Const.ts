@@ -164,3 +164,9 @@ export const DEFAULT_CUSTOMER_MANAGED_SELECTION = 'key';
 
 export const KEY_MESSAGE =
   'Example format:projects/<project-name>/locations/<location-name>/keyRings/<keyring-name>/cryptoKeys/<key-name>';
+
+export const NO_EXECUTION_FOUND =
+  'There are no job executions available for this schedule';
+
+export const EXECUTION_DATE_SELECTION_HELPER_TEXT =
+  'Select a date to view schedule execution history';
