@@ -27,7 +27,7 @@
     "style": "style/index.css",
     "repository": {
         "type": "git",
-        "url": "https://github.com/GoogleCloudPlatform/scheduler-jupyter-plugin.git"
+        "url": "https://github.com/nirupama-dev/scheduler-jupyter-plugin-v2.0.git"
     },
     "scripts": {
         "build": "jlpm build:lib && jlpm build:labextension:dev",
