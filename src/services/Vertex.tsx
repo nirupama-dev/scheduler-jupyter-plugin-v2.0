@@ -959,6 +959,7 @@ export class VertexServices {
     }
   };
 
+  // Fetch last run execution for the schedule
   static readonly fetchLastRunStatus = async (
     fetchLastRunPayload: IFetchLastRunPayload
   ) => {

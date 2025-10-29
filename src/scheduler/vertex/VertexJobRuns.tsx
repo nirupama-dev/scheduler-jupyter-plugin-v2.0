@@ -76,13 +76,9 @@ const VertexJobRuns = ({
   const filteredData = React.useMemo(() => {
     if (selectedDate) {
       const selectedDateString = selectedDate.toDate().toDateString(); // Only date, ignoring time
-      if (vertexScheduleRunsList.length > 0) {
-        return vertexScheduleRunsList.filter(scheduleRun => {
-          return (
-            new Date(scheduleRun.date).toDateString() === selectedDateString
-          );
-        });
-      }
+      return vertexScheduleRunsList.filter(scheduleRun => {
+        return new Date(scheduleRun.date).toDateString() === selectedDateString;
+      });
     }
     return [];
   }, [vertexScheduleRunsList, selectedDate]);
