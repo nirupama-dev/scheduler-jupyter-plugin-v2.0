@@ -165,6 +165,8 @@ export const DEFAULT_CUSTOMER_MANAGED_SELECTION = 'key';
 export const KEY_MESSAGE =
   'Example format:projects/<project-name>/locations/<location-name>/keyRings/<keyring-name>/cryptoKeys/<key-name>';
 
+export const INPUT_HELPER_TEXT =
+  'This schedule will run a copy of this notebook in its current state. If you edit the original notebook, you must create a new schedule to run the updated version of the notebook.';
 export const NO_EXECUTION_FOUND =
   'There are no job executions available for this schedule';
 
