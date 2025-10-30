@@ -448,6 +448,13 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
       await expect(page.getByLabel('Composer')).toBeVisible();
       await expect(page.getByLabel('Composer')).not.toBeChecked();
 
+      // Check input file text box explanation
+      await page
+        .getByText(
+          'This schedule will run a copy of this notebook in its current state. If you edit the original notebook, you must create a new schedule to run the updated version of the notebook.'
+        )
+        .isVisible();
+
       // Check default value of cloud storage bucket
       const CloudStorageBucketName = await page
         .getByLabel('Cloud Storage Bucket*')
@@ -797,6 +804,12 @@ test.describe('Vertex scheduling jobs listing page', () => {
       //validate disabled fields
       await expect(page.getByLabel('Job name*')).toBeDisabled();
       await expect(page.getByLabel('Input file*')).toBeDisabled();
+      // Check input file text box explanation
+      await page
+        .getByText(
+          'This schedule will run a copy of this notebook in its current state. If you edit the original notebook, you must create a new schedule to run the updated version of the notebook.'
+        )
+        .isVisible();
       await expect(page.getByLabel('Region*')).toBeDisabled();
       await expect(page.getByLabel('Primary network')).toBeDisabled();
       await expect(page.getByLabel('Sub network')).toBeDisabled();

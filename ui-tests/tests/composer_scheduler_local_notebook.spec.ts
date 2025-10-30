@@ -317,6 +317,13 @@ test.describe('Composer scheduling jobs', () => {
         page.getByRole('radiogroup').first().getByTestId('composer-selected')
       ).toBeTruthy();
 
+      // Check input file text box explanation
+      await page
+        .getByText(
+          'This schedule will run a copy of this notebook in its current state. If you edit the original notebook, you must create a new schedule to run the updated version of the notebook.'
+        )
+        .isVisible();
+
       // Validate all errors and resolve them
       const fieldsToValidate = [
         {
@@ -675,6 +682,12 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       //validate disabled fields
       await expect(page.getByLabel('Job name*')).toBeDisabled();
       await expect(page.getByLabel('Input file*')).toBeDisabled();
+      // Check input file text box explanation
+      await page
+        .getByText(
+          'This schedule will run a copy of this notebook in its current state. If you edit the original notebook, you must create a new schedule to run the updated version of the notebook.'
+        )
+        .isVisible();
       await expect(page.getByLabel('Project ID*')).toBeDisabled();
       await expect(page.getByLabel('Region*')).toBeDisabled();
       await expect(page.getByLabel('Environment*')).toBeDisabled();
@@ -756,6 +769,34 @@ test.describe('Composer scheduling jobs listing page validation', () => {
       await page.locator('//table[@class="clusters-list-table"]').isVisible();
     } else {
       console.log('No job available to update.');
+    }
+  });
+
+  // Test to handle the "Edit Notebook" action
+  test('CMP-60:Can edit a notebook', async ({ page }) => {
+    test.setTimeout(timeout);
+    await navigateToScheduleJobsListingPage(page);
+    const jobLocator = await getJobWithAction(page, 'Edit Notebook');
+
+    if (jobLocator) {
+      await expect(
+        jobLocator.locator('//div[@title="Edit Notebook"]')
+      ).toBeEnabled();
+      await jobLocator.locator('//div[@title="Edit Notebook"]').click();
+      await page.getByRole('progressbar').waitFor({ state: 'detached' });
+      const kernelpopup = await page
+        .locator('//div[@class="lm-Widget lm-Panel jp-Dialog-content"]')
+        .isVisible();
+      if (kernelpopup) {
+        await page.getByLabel('Select Kernel').click();
+      } else {
+        console.log('no kernel popup');
+      }
+      await expect(
+        page.locator(
+          '//div[@class="lm-TabBar-tabLabel" and contains(text(),".ipynb")]'
+        )
+      ).toBeVisible();
     }
   });
 
