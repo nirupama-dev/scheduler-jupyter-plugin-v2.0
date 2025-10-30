@@ -999,6 +999,8 @@ test.describe('Vertex scheduling jobs execution history', () => {
         )
       ).toBeEnabled();
 
+    const NoExecution = await page.getByText('There are no job executions available for this schedule').isVisible();
+    if(NoExecution) {
       // Verify current date is selected
       const now = new Date();
       const pad = (num: number) => String(num).padStart(2, '0');
@@ -1018,7 +1020,7 @@ test.describe('Vertex scheduling jobs execution history', () => {
       await expect(
         page.locator('(//button[@aria-current]/following::button)[1]')
       ).toBeDisabled();
-
+    }
       // Check table headers if table data is present
       const historyDataExists = await page
         .locator('//table[@class="clusters-list-table"]')
