@@ -999,28 +999,30 @@ test.describe('Vertex scheduling jobs execution history', () => {
         )
       ).toBeEnabled();
 
-    const NoExecution = await page.getByText('There are no job executions available for this schedule').isVisible();
-    if(NoExecution) {
-      // Verify current date is selected
-      const now = new Date();
-      const pad = (num: number) => String(num).padStart(2, '0');
-      const date = `${pad(now.getDate())}`;
-      const selecteddate = await page
-        .locator('//button[@aria-current]')
-        .innerText();
-      console.log(selecteddate);
-      const length = selecteddate.length;
-      if (length == 1) {
-        const date2 = '0' + selecteddate;
-        await expect(date2).toContain(date);
-      } else {
-        await expect(selecteddate).toContain(date);
+      const NoExecution = await page
+        .getByText('There are no job executions available for this schedule')
+        .isVisible();
+      if (NoExecution) {
+        // Verify current date is selected
+        const now = new Date();
+        const pad = (num: number) => String(num).padStart(2, '0');
+        const date = `${pad(now.getDate())}`;
+        const selecteddate = await page
+          .locator('//button[@aria-current]')
+          .innerText();
+        console.log(selecteddate);
+        const length = selecteddate.length;
+        if (length == 1) {
+          const date2 = '0' + selecteddate;
+          await expect(date2).toContain(date);
+        } else {
+          await expect(selecteddate).toContain(date);
+        }
+        // Verify future dates are disabled
+        await expect(
+          page.locator('(//button[@aria-current]/following::button)[1]')
+        ).toBeDisabled();
       }
-      // Verify future dates are disabled
-      await expect(
-        page.locator('(//button[@aria-current]/following::button)[1]')
-      ).toBeDisabled();
-    }
       // Check table headers if table data is present
       const historyDataExists = await page
         .locator('//table[@class="clusters-list-table"]')
@@ -1046,10 +1048,24 @@ test.describe('Vertex scheduling jobs execution history', () => {
         //expect(rowCount).toBeGreaterThanOrEqual(1);
         if (rowCount > 0) {
           console.log('Logs are displayed');
+        } else if (NoExecution) {
+          await expect(
+            page.getByText(
+              'There are no job executions available for this schedule'
+            )
+          ).toBeVisible();
+          console.log('No executions are displayed');
         } else {
           await expect(page.getByText('No rows to display')).toBeVisible();
           console.log('No warnings or errors are displayed');
         }
+      } else if (NoExecution) {
+        await expect(
+          page.getByText(
+            'There are no job executions available for this schedule'
+          )
+        ).toBeVisible();
+        console.log('No executions are displayed');
       } else {
         await expect(page.getByText('No rows to display')).toBeVisible();
         console.log('History data is unavailable');
@@ -1074,6 +1090,9 @@ test.describe('Vertex scheduling jobs execution history', () => {
 
       const historyDataExists = await page
         .locator('//table[@class="clusters-list-table"]')
+        .isVisible();
+      const NoExecution = await page
+        .getByText('There are no job executions available for this schedule')
         .isVisible();
       if (historyDataExists) {
         // Check the status and download the output
@@ -1111,6 +1130,13 @@ test.describe('Vertex scheduling jobs execution history', () => {
           // Ensure the status is failed or penging oe running
           expect(['Failed', 'pending', 'running']).toContainEqual(status);
         }
+      } else if (NoExecution) {
+        await expect(
+          page.getByText(
+            'There are no job executions available for this schedule'
+          )
+        ).toBeVisible();
+        console.log('No executions are displayed');
       } else {
         await expect(page.getByText('No rows to display')).toBeVisible();
         console.log('History data is unavailable');
