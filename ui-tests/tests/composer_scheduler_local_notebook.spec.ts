@@ -102,7 +102,7 @@ async function createJobScheduler(
   //   hasText: 'Python 3 (ipykernel)'
   // });
   const locator = page.locator(
-    '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+    '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel) (Local)"])[1]',
     {
       hasText: 'Python 3 (ipykernel)'
     }
@@ -222,7 +222,7 @@ test.describe('Composer scheduling jobs', () => {
     //   hasText: 'Python 3 (ipykernel)'
     // });
     const locator = page.locator(
-      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel) (Local)"])[1]',
       {
         hasText: 'Python 3 (ipykernel)'
       }
@@ -288,7 +288,7 @@ test.describe('Composer scheduling jobs', () => {
     //   hasText: 'Python 3 (ipykernel)'
     // });
     const kernelCard = page.locator(
-      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel)"])[1]',
+      '(//*[@data-category="Notebook" and @title="Python 3 (ipykernel) (Local)"])[1]',
       {
         hasText: 'Python 3 (ipykernel)'
       }
