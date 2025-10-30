@@ -396,7 +396,7 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     }
   });
 
-  test('CMP-01,VTX-01,VTX-03,VTX-04,VTX-05,VTX_06,VTX-07,VTX-08,VTX-09,VTX-10,VTX-16,VTX-17,VTX-18,VTX-19,VTX-20,VTX-21,VTX-22,VTX-23,VTX-24,VTX-26,VTX-30,VTX-31:Sanity: can perform field validation', async ({
+  test('CMP-01,VTX-01,VTX-03,VTX-04,VTX-05,VTX_06,VTX-07,VTX-08,VTX-09,VTX-10,VTX-16,VTX-17,VTX-18,VTX-19,VTX-20,VTX-21,VTX-22,VTX-23,VTX-24,VTX-26,VTX-30,VTX-31,VTX-68:Sanity: can perform field validation', async ({
     page
   }) => {
     test.setTimeout(150 * 1000);
@@ -787,7 +787,7 @@ test.describe('Vertex scheduling jobs listing page', () => {
     }
   });
 
-  test('VTX-46,VTX-47,VTX-54:Edit a schedule', async ({ page }) => {
+  test('VTX-46,VTX-47,VTX-54,VTX-69:Edit a schedule', async ({ page }) => {
     test.setTimeout(timeout);
     await navigateToScheduleJobsListingPage(page);
     const jobLocator = await getJobWithAction(page, 'Edit Schedule');
