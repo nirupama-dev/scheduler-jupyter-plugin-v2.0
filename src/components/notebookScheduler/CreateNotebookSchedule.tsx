@@ -31,6 +31,7 @@ import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import {
   COMPOSER_SCHEDULER_NAME,
+  INPUT_HELPER_TEXT,
   SCHEDULE_LABEL_VERTEX,
   SCHEDULER_OPTIONS,
   VERTEX_SCHEDULER_NAME
@@ -493,6 +494,11 @@ export const CreateNotebookSchedule = (
                 disabled={true}
               />
             </div>
+          </div>
+          <div className="input-file-description-text">
+            <span className="tab-description tab-text-sub-cl">
+              {INPUT_HELPER_TEXT}
+            </span>
           </div>
 
           <div className="scheduler-form-element-container">
