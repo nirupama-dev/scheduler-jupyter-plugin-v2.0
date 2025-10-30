@@ -158,3 +158,8 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   cursor: pointer;
   padding-left: 3px;
 }
+
+.input-file-description-text {
+  padding-top: 5px;
+  width: 512px;
+}
