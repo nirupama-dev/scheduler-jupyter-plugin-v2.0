@@ -54,6 +54,8 @@ const executionHistoryReducer = (state: any, action: any) => {
       return { ...state, scheduleId: action.payload };
     case 'SET_VERTEX_RUNS':
       return { ...state, vertexScheduleRunsList: action.payload };
+    case 'SET_INITIAL_DISPLAY_DATE':
+      return { ...state, initialStateDate: action.payload };
     default:
       return state;
   }
@@ -65,6 +67,7 @@ const initialState = {
   scheduleRunsData: undefined,
   selectedMonth: dayjs(),
   selectedDate: dayjs(),
+  initialDisplayDate: dayjs(),
   isLoading: false,
   greyListDates: [],
   redListDates: [],
@@ -111,11 +114,53 @@ export const useExecutionHistory = (
     }
   };
 
+  /**
+   * Fetch last run execution for the schedule
+   */
+  const fetchLastRunScheduleExecution = async () => {
+    // setIsLoading(true);
+    dispatch({ type: 'SET_LOADING', payload: true });
+    const fetchLastRunPayload = {
+      scheduleId: scheduleId,
+      region: region,
+      abortControllers
+    };
+    const executionData: any =
+      await VertexServices.fetchLastRunStatus(fetchLastRunPayload);
+    if (executionData) {
+      // setHasJobExecutions(true);
+      // setSelectedMonth(executionData ? dayjs(executionData) : null);
+      dispatch({
+        type: 'SET_MONTH',
+        payload: executionData ? dayjs(executionData) : null
+      });
+      // setSelectedDate(executionData ? dayjs(executionData) : null);
+      dispatch({
+        type: 'SET_SELECTED_DATE',
+        payload: executionData ? dayjs(executionData) : null
+      });
+      // setInitialDisplayDate(executionData ? dayjs(executionData) : null);
+      dispatch({
+        type: 'SET_INITIAL_DISPLAY_DATE',
+        payload: executionData ? dayjs(executionData) : null
+      });
+    } else {
+      // setHasJobExecutions(false);
+      // setSelectedDate(dayjs(currentDate));
+      dispatch({
+        type: 'SET_SELECTED_DATE',
+        payload: dayjs(new Date().toLocaleDateString())
+      });
+      // setIsLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
   useEffect(() => {
-    if (region && scheduleId) {
+    if (region && scheduleId && selectedMonth) {
       scheduleRunsList();
     }
-  }, [region, scheduleId, selectedMonth]);
+  }, [selectedMonth]);
 
   useEffect(() => {
     if (scheduleId) {
@@ -128,6 +173,8 @@ export const useExecutionHistory = (
       type: 'SET_SELECTED_DATE',
       payload: dayjs(new Date().toLocaleDateString())
     });
+
+    fetchLastRunScheduleExecution();
   }, []);
 
   const handleDateSelection = useCallback(

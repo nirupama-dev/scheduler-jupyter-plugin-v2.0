@@ -45,6 +45,8 @@ const VertexExecutionHistory = ({
   const {
     vertexScheduleRunsList,
     selectedDate,
+    selectedMonth,
+    initialDisplayDate,
     isLoading,
     greyListDates,
     redListDates,
@@ -65,6 +67,8 @@ const VertexExecutionHistory = ({
     createTime,
     currentDate,
     selectedDate,
+    selectedMonth,
+    initialDisplayDate,
     greyListDates,
     redListDates,
     greenListDates,

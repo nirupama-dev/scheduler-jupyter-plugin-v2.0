@@ -383,3 +383,9 @@ export interface ICryptoListKeys {
   credentials: IKeyRingPayload;
   keyRing: string;
 }
+
+export interface IFetchLastRunPayload {
+  scheduleId: any;
+  region: string;
+  abortControllers: any;
+}
