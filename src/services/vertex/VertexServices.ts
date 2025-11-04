@@ -460,7 +460,13 @@ export class VertexServices {
         { signal }
       );
 
-      return jobExecutionList[0].createTime;
+      if (jobExecutionList.length > 0) {
+        return jobExecutionList[0].createTime
+          ? jobExecutionList[0].createTime
+          : null;
+      } else {
+        return null;
+      }
     } catch (error: any) {
       if (error instanceof AuthenticationError) {
         throw error;

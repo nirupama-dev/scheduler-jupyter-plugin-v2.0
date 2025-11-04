@@ -55,7 +55,9 @@ const executionHistoryReducer = (state: any, action: any) => {
     case 'SET_VERTEX_RUNS':
       return { ...state, vertexScheduleRunsList: action.payload };
     case 'SET_INITIAL_DISPLAY_DATE':
-      return { ...state, initialStateDate: action.payload };
+      return { ...state, initialDisplayDate: action.payload };
+    case 'SET_HAS_SCHEDULE_EXECUTIONS':
+      return { ...state, hasScheduleExecutions: action.payload };
     default:
       return state;
   }
@@ -65,15 +67,16 @@ const initialState = {
   scheduleId: '',
   vertexScheduleRunsList: [],
   scheduleRunsData: undefined,
-  selectedMonth: dayjs(),
-  selectedDate: dayjs(),
-  initialDisplayDate: dayjs(),
+  selectedMonth: null,
+  selectedDate: null,
+  initialDisplayDate: null,
   isLoading: false,
   greyListDates: [],
   redListDates: [],
   greenListDates: [],
   darkGreenListDates: [],
-  projectId: ''
+  projectId: '',
+  hasScheduleExecutions: false
 };
 
 export const useExecutionHistory = (
@@ -118,7 +121,6 @@ export const useExecutionHistory = (
    * Fetch last run execution for the schedule
    */
   const fetchLastRunScheduleExecution = async () => {
-    // setIsLoading(true);
     dispatch({ type: 'SET_LOADING', payload: true });
     const fetchLastRunPayload = {
       scheduleId: scheduleId,
@@ -128,30 +130,31 @@ export const useExecutionHistory = (
     const executionData: any =
       await VertexServices.fetchLastRunStatus(fetchLastRunPayload);
     if (executionData) {
-      // setHasJobExecutions(true);
-      // setSelectedMonth(executionData ? dayjs(executionData) : null);
+      dispatch({
+        type: 'SET_HAS_SCHEDULE_EXECUTIONS',
+        payload: true
+      });
       dispatch({
         type: 'SET_MONTH',
         payload: executionData ? dayjs(executionData) : null
       });
-      // setSelectedDate(executionData ? dayjs(executionData) : null);
       dispatch({
         type: 'SET_SELECTED_DATE',
         payload: executionData ? dayjs(executionData) : null
       });
-      // setInitialDisplayDate(executionData ? dayjs(executionData) : null);
       dispatch({
         type: 'SET_INITIAL_DISPLAY_DATE',
         payload: executionData ? dayjs(executionData) : null
       });
     } else {
-      // setHasJobExecutions(false);
-      // setSelectedDate(dayjs(currentDate));
+      dispatch({
+        type: 'SET_HAS_SCHEDULE_EXECUTIONS',
+        payload: false
+      });
       dispatch({
         type: 'SET_SELECTED_DATE',
         payload: dayjs(new Date().toLocaleDateString())
       });
-      // setIsLoading(false);
       dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
