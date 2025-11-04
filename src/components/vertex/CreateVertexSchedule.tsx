@@ -861,7 +861,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    */
   const handleCryptoKeyChange = (selectedCryptoKey: string | null) => {
     trigger('cryptoKey');
-    
   };
 
   useEffect(() => {

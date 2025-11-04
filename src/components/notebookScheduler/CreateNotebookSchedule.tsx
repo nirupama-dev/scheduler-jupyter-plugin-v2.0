@@ -330,7 +330,7 @@ export const CreateNotebookSchedule = (
   }, [
     schedulerSelectionSelected,
     initialSchedulerDataContext,
-    sessionContext, 
+    sessionContext,
     getValues
   ]);
 

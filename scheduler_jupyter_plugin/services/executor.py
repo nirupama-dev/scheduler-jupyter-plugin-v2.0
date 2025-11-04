@@ -25,6 +25,7 @@ from google.cloud.jupyter_config.config import (
 )
 import aiofiles
 import json
+import asyncio
 
 import aiohttp
 import pendulum
@@ -120,11 +121,13 @@ class Client:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(self._access_token)
-            bucket = await storage.Client(
+            storage_client = storage.Client(
                 credentials=credentials, project=project_id
-            ).bucket(bucket_name)
+            )
+            bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(file_path)
-            return blob.exists()
+            exists = await asyncio.to_thread(blob.exists)
+            return exists
         except Exception as error:
             self.log.exception(f"Error checking file: {error}")
             raise IOError(f"Error creating dag: {error}")
