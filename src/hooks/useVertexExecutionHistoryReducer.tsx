@@ -20,8 +20,12 @@ import { useCallback, useEffect, useReducer } from 'react';
 import { VertexServices } from '../services/vertex/VertexServices';
 import { handleOpenLoginWidget } from '../components/common/login/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IExecutionHistoryState } from '../interfaces/VertexInterface';
 
-const executionHistoryReducer = (state: any, action: any) => {
+const executionHistoryReducer = (
+  state: IExecutionHistoryState,
+  action: any
+) => {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
@@ -43,7 +47,7 @@ const executionHistoryReducer = (state: any, action: any) => {
         ...state,
         selectedMonth: resolvedMonth,
         selectedDate:
-          resolvedMonth.month() !== dayjs().month() ? null : dayjs(),
+          resolvedMonth?.month() !== dayjs().month() ? null : dayjs(),
         scheduleId: '',
         vertexScheduleRunsList: []
       };
@@ -127,24 +131,24 @@ export const useExecutionHistory = (
       region: region,
       abortControllers
     };
-    const executionData: any =
+    const scheduleLastRunDate: string =
       await VertexServices.fetchLastRunStatus(fetchLastRunPayload);
-    if (executionData) {
+    if (scheduleLastRunDate) {
       dispatch({
         type: 'SET_HAS_SCHEDULE_EXECUTIONS',
         payload: true
       });
       dispatch({
         type: 'SET_MONTH',
-        payload: executionData ? dayjs(executionData) : null
+        payload: scheduleLastRunDate ? dayjs(scheduleLastRunDate) : null
       });
       dispatch({
         type: 'SET_SELECTED_DATE',
-        payload: executionData ? dayjs(executionData) : null
+        payload: scheduleLastRunDate ? dayjs(scheduleLastRunDate) : null
       });
       dispatch({
         type: 'SET_INITIAL_DISPLAY_DATE',
-        payload: executionData ? dayjs(executionData) : null
+        payload: scheduleLastRunDate ? dayjs(scheduleLastRunDate) : null
       });
     } else {
       dispatch({

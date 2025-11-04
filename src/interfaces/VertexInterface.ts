@@ -389,3 +389,19 @@ export interface IFetchLastRunPayload {
   region: string;
   abortControllers: any;
 }
+
+export interface IExecutionHistoryState {
+  scheduleId: string;
+  vertexScheduleRunsList: IScheduleRun[];
+  scheduleRunsData: unknown;
+  selectedMonth: Dayjs | null;
+  selectedDate: Dayjs | null;
+  initialDisplayDate: Dayjs | null;
+  isLoading: boolean;
+  greyListDates: Dayjs[];
+  redListDates: Dayjs[];
+  greenListDates: Dayjs[];
+  darkGreenListDates: Dayjs[];
+  projectId: string;
+  hasScheduleExecutions: boolean;
+}
