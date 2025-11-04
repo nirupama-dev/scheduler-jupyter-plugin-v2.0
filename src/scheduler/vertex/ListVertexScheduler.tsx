@@ -756,13 +756,7 @@ function ListVertexScheduler({
                   );
                 })}
               </div>
-            ) : (
-              <iconPending.react
-                tag="div"
-                title="No Job State Found"
-                className="logo-alignment-style success_icon icon-size icon-completed"
-              />
-            )
+            ) : null
           ) : (
             <CircularProgress
               className="spin-loader-custom-style"
