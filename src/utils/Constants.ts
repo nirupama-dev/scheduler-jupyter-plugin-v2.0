@@ -396,3 +396,11 @@ export const CUSTOMER_MANAGED_RADIO_OPTIONS = [
 
 export const ENCRYPTION_MANUAL_KEY_SAMPLE =
   'Example format:projects/<project-name>/locations/<location-name>/keyRings/<keyring-name>/cryptoKeys/<key-name>';
+
+export const NO_EXECUTION_FOUND =
+  'There are no job executions available for this schedule';
+
+export const EXECUTION_DATE_SELECTION_HELPER_TEXT =
+  'Select a date to view schedule execution history';
+
+export const EXECUTION_DATE_WITH_NO_DATA = 'No rows to display on';

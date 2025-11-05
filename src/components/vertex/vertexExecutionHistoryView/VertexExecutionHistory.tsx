@@ -28,6 +28,7 @@ import { abortApiCall } from '../../../utils/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { handleOpenLoginWidget } from '../../common/login/Config';
 import { SCHEDULE_LABEL_VERTEX } from '../../../utils/Constants';
+import dayjs from 'dayjs';
 
 const VertexExecutionHistory = ({
   abortControllers,
@@ -39,12 +40,14 @@ const VertexExecutionHistory = ({
   const navigate = useNavigate();
   const location = useLocation();
   const { scheduleId, region, scheduleName, createTime } = location.state;
-  const currentDate = new Date().toLocaleDateString();
+  const currentDate = dayjs(new Date().toLocaleDateString());
   const [fileExists, setFileExists] = useState<object>({});
 
   const {
     vertexScheduleRunsList,
     selectedDate,
+    selectedMonth,
+    initialDisplayDate,
     isLoading,
     greyListDates,
     redListDates,
@@ -52,6 +55,7 @@ const VertexExecutionHistory = ({
     darkGreenListDates,
     handleDateSelection,
     handleMonthChange,
+    hasScheduleExecutions,
     handleLogs,
     dispatch
   }: any = useExecutionHistory(
@@ -65,6 +69,8 @@ const VertexExecutionHistory = ({
     createTime,
     currentDate,
     selectedDate,
+    selectedMonth,
+    initialDisplayDate,
     greyListDates,
     redListDates,
     greenListDates,
@@ -83,6 +89,7 @@ const VertexExecutionHistory = ({
     dispatch,
     scheduleName,
     fileExists,
+    hasScheduleExecutions,
     app
   };
 
