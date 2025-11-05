@@ -27,6 +27,9 @@ import {
 } from '../../../interfaces/VertexInterface';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import {
+  EXECUTION_DATE_SELECTION_HELPER_TEXT,
+  EXECUTION_DATE_WITH_NO_DATA,
+  NO_EXECUTION_FOUND,
   VERTEX_EXECUTION_HISTORY_SCHEDULE_RUN_LOADER_TEXT,
   VERTEX_EXECUTION_HISTORY_TABLE_HEADER
 } from '../../../utils/Constants';
@@ -38,6 +41,7 @@ const VertexJobRuns = ({
   dispatch,
   scheduleName,
   fileExists,
+  hasScheduleExecutions,
   app
 }: any) => {
   const filteredData = useMemo(() => {
@@ -170,12 +174,17 @@ const VertexJobRuns = ({
             />
           </div>
         </div>
-      ) : selectedDate ? (
+      ) : hasScheduleExecutions && !selectedDate ? (
         <div className="no-data-style">
-          No rows to display on {dayjs(selectedDate).format('MMM D, YYYY')}
+          {EXECUTION_DATE_SELECTION_HELPER_TEXT}
+        </div>
+      ) : hasScheduleExecutions && selectedDate ? (
+        <div className="no-data-style">
+          {EXECUTION_DATE_WITH_NO_DATA}{' '}
+          {dayjs(selectedDate).format('MMM D, YYYY')}
         </div>
       ) : (
-        <div className="no-data-style">No rows to display</div>
+        <div className="no-data-style">{NO_EXECUTION_FOUND}</div>
       )}
     </div>
   );
