@@ -180,6 +180,7 @@ export const CreateNotebookSchedule = (
                 environment
               );
             if (fetchedData) {
+              console.log('Fetched Composer Schedule Data:', fetchedData);
               editScheduleData.existingScheduleData =
                 transformComposerScheduleDataToZodSchema(fetchedData);
             } else {
@@ -411,7 +412,7 @@ export const CreateNotebookSchedule = (
               environment: composerData.environment
             });
           }
-          navigate('/list');
+          navigate('/list/composer');
         }
       }
     } catch (error) {

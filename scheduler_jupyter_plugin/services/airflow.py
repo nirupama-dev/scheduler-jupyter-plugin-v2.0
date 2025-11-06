@@ -441,7 +441,7 @@ class Client:
                     "input_filename": input_notebook,
                     "project_id": project_id,
                     "region_id": region_id,
-                    "composer_environment": composer_environment,
+                    "composer_environment_name": composer_environment,
                     "parameters": parameters_list,
                     "mode_selected": mode_selected,
                     "cluster_name": cluster_name,

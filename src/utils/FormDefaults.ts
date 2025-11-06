@@ -31,7 +31,6 @@ import {
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME,
   SCHEDULE_MODE_OPTIONS,
-  SCHEDULE_VALUE_EXPRESSION,
   DEFAULT_ENCRYPTION_SELECTED
 } from './Constants';
 import { IInitialSchedulerContextData } from '../interfaces/CommonInterface';
@@ -145,7 +144,7 @@ const getDefaultComposerValues = (
   cluster: '',
   serverless: '',
   timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone,
-  scheduleValue: SCHEDULE_VALUE_EXPRESSION
+  scheduleValue: ''
 });
 
 /**
