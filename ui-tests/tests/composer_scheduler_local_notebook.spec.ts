@@ -630,7 +630,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
   });
 
   // Test to handle the "Trigger" action
-  test('CMP-46:Trigger a job', async ({ page }) => {
+  test('CMP-67,CMP-46:Trigger a job', async ({ page }) => {
     test.setTimeout(timeout);
     await navigateToScheduleJobsListingPage(page);
     await page
@@ -658,7 +658,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
   });
 
   // Test to handle "Edit Schedule" function
-  test('CMP-46,CMP-63:Edit a schedule', async ({ page }) => {
+  test('CMP-46,CMP-63,CMP-68:Edit a schedule', async ({ page }) => {
     test.setTimeout(timeout);
     await navigateToScheduleJobsListingPage(page);
     await page
@@ -723,7 +723,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
   });
 
   // Test to cancel "Edit Schedule"
-  test('Cancel Edit schedule', async ({ page }) => {
+  test('CMP-66:Cancel Edit schedule', async ({ page }) => {
     test.setTimeout(timeout);
     await navigateToScheduleJobsListingPage(page);
     await page
