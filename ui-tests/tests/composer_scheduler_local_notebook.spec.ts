@@ -186,12 +186,12 @@ async function validateErrorResolution(
 }
 
 test.describe('Composer scheduling jobs', () => {
-  test('CMP-59:Can create a job scheduler with Run now', async ({ page }) => {
+  test('CMP-65:Can create a job scheduler with Run now', async ({ page }) => {
     test.setTimeout(timeout);
     await createJobScheduler(page, 'Run now');
   });
 
-  test('CMP-59:Can create a job scheduler with Run on a schedule', async ({
+  test('CMP-65:Can create a job scheduler with Run on a schedule', async ({
     page
   }) => {
     test.setTimeout(timeout);
@@ -262,7 +262,7 @@ test.describe('Composer scheduling jobs', () => {
     }
   });
 
-  test('CMP-01,CMP-03,CMP-04,CMP-05,CMP-06,CMP-07,CMP-08,CMP-09,CMP-10,CMP-11,CMP-12,CMP-13,CMP-22,CMP-23,CMP-24,CMP-25,CMP-26,CMP-27.CMP-28,CMP-29,CMP-30,CMP-62:Sanity: can perform field validation', async ({
+  test('CMP-01,CMP-03,CMP-04,CMP-05,CMP-06,CMP-07,CMP-08,CMP-09,CMP-10,CMP-11,CMP-12,CMP-13,CMP-22,CMP-23,CMP-24,CMP-25,CMP-26,CMP-27.CMP-28,CMP-29,CMP-30,CMP-61,CMP-62:Sanity: can perform field validation', async ({
     page
   }) => {
     test.setTimeout(150 * 1000);

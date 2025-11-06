@@ -228,21 +228,21 @@ async function validateErrorResolution(
 }
 
 test.describe('VTX-25:Vertex scheduling jobs', () => {
-  test('VTX-14,VTX-15,VTX-27,VTX-28,VTX-67:Can create a job scheduler with Run now', async ({
+  test('VTX-67:Can create a job scheduler with Run now', async ({
     page
   }) => {
     test.setTimeout(timeout);
     await createJobScheduler(page, 'Run now');
   });
 
-  test('VTX-26,VTX-27,VTX-28,VTX-67:Can create a job scheduler with Run on a schedule', async ({
+  test('VTX-70:Can create a job scheduler with Run on a schedule', async ({
     page
   }) => {
     test.setTimeout(timeout);
     await createJobScheduler(page, 'Run on a schedule');
   });
 
-  test('VTX-29:Cancel job creation', async ({ page }) => {
+  test('VTX-27,VTX-28,VTX-29:Cancel job creation', async ({ page }) => {
     test.setTimeout(150 * 1000);
     let clusterNotEmpty = true;
 
@@ -306,7 +306,7 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
       }
 
       const inputfields = await checkInputFieldsNotEmpty(page);
-
+      await expect(page.getByLabel('Create Schedule')).not.toBeDisabled();
       if (inputfields) {
         await expect(page.getByLabel('cancel Batch')).toBeEnabled();
         await page.getByLabel('cancel Batch').click();
@@ -396,7 +396,7 @@ test.describe('VTX-25:Vertex scheduling jobs', () => {
     }
   });
 
-  test('CMP-01,VTX-01,VTX-03,VTX-04,VTX-05,VTX_06,VTX-07,VTX-08,VTX-09,VTX-10,VTX-16,VTX-17,VTX-18,VTX-19,VTX-20,VTX-21,VTX-22,VTX-23,VTX-24,VTX-26,VTX-30,VTX-31,VTX-68:Sanity: can perform field validation', async ({
+  test('CMP-01,VTX-01,VTX-03,VTX-04,VTX-05,VTX_06,VTX-07,VTX-08,VTX-09,VTX-10,VTX-14,VTX-15,VTX-21,VTX-22,VTX-23,VTX-24,VTX-26,VTX-30,VTX-31,VTX-68:Sanity: can perform field validation', async ({
     page
   }) => {
     test.setTimeout(150 * 1000);

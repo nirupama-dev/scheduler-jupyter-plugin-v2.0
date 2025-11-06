@@ -502,12 +502,12 @@ test.describe('Composer scheduling jobs for cluster', () => {
 });
 
 test.describe('CMP-21,CMP-31:Composer scheduling jobs for serverless', () => {
-  test('Can create a job scheduler with Run now', async ({ page }) => {
+  test('CMP-64:Can create a job scheduler with Run now', async ({ page }) => {
     test.setTimeout(timeout);
     await createJobSchedulerServerless(page, 'Run now');
   });
 
-  test('Can create a job scheduler with Run on a schedule', async ({
+  test('CMP-64:Can create a job scheduler with Run on a schedule', async ({
     page
   }) => {
     test.setTimeout(timeout);
