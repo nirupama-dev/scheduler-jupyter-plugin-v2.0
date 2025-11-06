@@ -877,6 +877,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       encryptionSelected === CUSTOMER_ENCRYPTION &&
       customerEncryptionType === PREDEFINED_CMEK
     ) {
+      setValue('manualKey', '');
       trigger('keyRing');
       listKeyRings();
       clearErrors('manualKey');

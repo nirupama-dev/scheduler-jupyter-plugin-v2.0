@@ -22,6 +22,7 @@ import {
   IDeleteSchedulerAPIResponse,
   IDownloadFile,
   IExecutionPayload,
+  IFetchLastRunPayload,
   IFormattedResponse,
   IKeyRingPayload,
   IOutputFileExistsPayload,
@@ -436,6 +437,58 @@ export class VertexServices {
       handleError({
         error: errorResponse
       });
+    }
+  };
+
+  // Fetch last run execution for the schedule
+  static readonly fetchLastRunStatus = async (
+    fetchLastRunPayload: IFetchLastRunPayload
+  ) => {
+    try {
+      const { scheduleId, region, abortControllers } = fetchLastRunPayload;
+      // Controller to abort pending API call
+      const controller = new AbortController();
+      abortControllers?.current.push(controller);
+      const signal = controller.signal;
+
+      //Extract Schedule id from schedule name.
+      // const scheduleId = schedule.name.split('/').pop();
+      const serviceURLLastRunResponse = 'api/vertex/listNotebookExecutionJobs';
+      const jobExecutionList: any = await requestAPI(
+        serviceURLLastRunResponse +
+          `?region_id=${region}&schedule_id=${scheduleId}&page_size=1&order_by=createTime desc`,
+        { signal }
+      );
+
+      if (jobExecutionList.length > 0) {
+        return jobExecutionList[0].createTime
+          ? jobExecutionList[0].createTime
+          : null;
+      } else {
+        return null;
+      }
+    } catch (error: any) {
+      if (error instanceof AuthenticationError) {
+        throw error;
+      }
+
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        error instanceof TypeError &&
+        error.toString().includes(ABORT_MESSAGE)
+      ) {
+        return null; // Return null on abort
+      }
+
+      handleError({
+        error: `Error in fetching the execution history: ${error}`
+      });
+
+      SchedulerLoggingService.log(
+        'Error fetching last five job executions',
+        LOG_LEVEL.ERROR
+      );
     }
   };
 

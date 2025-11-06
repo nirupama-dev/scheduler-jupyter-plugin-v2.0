@@ -26,7 +26,9 @@ import { SCHEDULE_LABEL_COMPOSER } from '../../../utils/Constants';
 const ExecutionCalendar = ({
   createTime,
   currentDate,
+  selectedMonth,
   selectedDate,
+  initialDisplayDate,
   handleDateSelection,
   handleMonthChange,
   greyListDates,
@@ -39,13 +41,14 @@ const ExecutionCalendar = ({
   <div className="execution-history-left-wrapper calender-top execution-wrapper-border-none">
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DateCalendar
+        key={initialDisplayDate ? initialDisplayDate.toISOString() : 'default'}
         minDate={
           fromPage && fromPage !== SCHEDULE_LABEL_COMPOSER
             ? dayjs(createTime)
             : dayjs().year(2024).startOf('year')
         }
         maxDate={dayjs(currentDate)}
-        referenceDate={dayjs(currentDate)}
+        referenceDate={selectedMonth ?? initialDisplayDate ?? currentDate}
         onChange={handleDateSelection}
         onMonthChange={handleMonthChange}
         slots={{ day: CustomDate }}
