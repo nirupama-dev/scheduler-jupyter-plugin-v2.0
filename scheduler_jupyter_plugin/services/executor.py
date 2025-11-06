@@ -329,7 +329,7 @@ class Client:
             raise IOError(f"Error checking packages: {error}")
 
     async def install_to_composer_environment(
-        self, local_kernel, composer_environment_name, packages_to_install, region_id
+        self, local_kernel, composer_environment_name, packages_to_install, region_id, project_id
     ):
         try:
             installing_packages = "false"
@@ -337,7 +337,7 @@ class Client:
                 for package in packages_to_install:
                     self.log.info(f"{package} is not installed. Installing...")
                     installing_packages = "true"
-                    sub_cmd = f"composer environments update {composer_environment_name} --location {region_id} --update-pypi-package {package}"
+                    sub_cmd = f"composer environments update {composer_environment_name} --location {region_id} --project {project_id} --update-pypi-package {package}"
                     await async_run_gcloud_subcommand(sub_cmd)
             return {"installing_packages": str(installing_packages)}
         except subprocess.CalledProcessError as install_error:
@@ -377,6 +377,7 @@ class Client:
                     job.composer_environment_name,
                     job.packages_to_install,
                     region_id,
+                    project_id
                 )
             if install_packages and install_packages.get("error"):
                 raise RuntimeError(install_packages)

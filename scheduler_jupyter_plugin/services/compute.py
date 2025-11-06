@@ -17,6 +17,7 @@ import proto
 from google.cloud import compute_v1
 import google.oauth2.credentials as oauth2
 from google.auth.exceptions import RefreshError
+from google.api_core.exceptions import Forbidden
 
 from scheduler_jupyter_plugin import urls
 from scheduler_jupyter_plugin.commons.constants import (
@@ -64,6 +65,9 @@ class Client:
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
             raise RuntimeError({"AUTHENTICATION_ERROR": str(e), "status": 401})
+        except Forbidden as e:
+            self.log.exception(f"FORBIDDEN_ERROR: {str(e)}")
+            raise RuntimeError({"error": str(e), "status": 403})
         except Exception as e:
             self.log.exception(f"Error fetching regions: {str(e)}")
             return {"Error fetching regions": str(e)}

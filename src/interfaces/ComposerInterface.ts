@@ -33,6 +33,7 @@ import {
   IInitialSchedulerContextData
 } from './CommonInterface';
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IEnvDropDownOption } from './FormInterface';
 
 export interface ICreateComposerSchedulerProps {
   control: Control<CombinedCreateFormValues>;
@@ -169,4 +170,9 @@ export interface ILoadingStateComposer {
   environment: boolean;
   cluster: boolean;
   serverless: boolean;
+}
+
+export interface IListComposer {
+  environmentOptions: IEnvDropDownOption[];
+  composerListResponse: IComposerEnvAPIResponse[];
 }
