@@ -835,6 +835,7 @@ test.describe('Composer scheduling jobs listing page validation', () => {
 // Helper to navigate to the Execution History page for the first job
 async function navigateToExecutionHistory(page: any) {
   const jobName = await page.getByRole('cell').first().innerText();
+  await page.waitForTimeout(5000);
   await page.getByRole('cell').first().click();
   await page.getByText('Loading History').waitFor({ state: 'detached' });
   await page
