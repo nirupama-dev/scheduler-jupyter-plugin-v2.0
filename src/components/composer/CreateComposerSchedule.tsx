@@ -148,6 +148,15 @@ export const CreateComposerSchedule: React.FC<
         selectedRegion
       );
       setEnvOptions(options);
+      const currentEnvValue = getValues('environment');
+      if (currentEnvValue) {
+        const isEnvValid = options.some(env => env.value === currentEnvValue);
+        if (isEnvValid) {
+          setValue('environment', currentEnvValue);
+        } else {
+          setValue('environment', '');
+        }
+      }
     } catch (authenticationError) {
       handleOpenLoginWidget(app);
     } finally {
@@ -232,7 +241,6 @@ export const CreateComposerSchedule: React.FC<
       setValue('composerRegion', '');
       setEnvOptions([]);
       setComposerEnvData([]);
-      setValue('environment', '');
     }
 
     // Clear subsequent fields when project_id changes
@@ -247,9 +255,8 @@ export const CreateComposerSchedule: React.FC<
     } else {
       setEnvOptions([]);
       setComposerEnvData([]);
-      setValue('environment', '');
     }
-  }, [selectedRegion, setValue]);
+  }, [selectedRegion]);
 
   /**
    * Effect to fetch Cluster/ Serverless data when execution mode changes.
@@ -355,7 +362,9 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleProjectIdChange}
           error={composerErrors.projectId}
-          disabled={true}
+          disabled={
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
         />
       </div>
       <div className="scheduler-form-element-container scheduler-input-top">
@@ -369,6 +378,9 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleRegionChange}
           error={composerErrors.composerRegion}
+          disabled={
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
         />
       </div>
       <div
@@ -385,7 +397,10 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           loading={loadingState.environment}
-          disabled={!selectedRegion}
+          disabled={
+            !selectedRegion ||
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={composerErrors.environment}

@@ -20,7 +20,7 @@
  */
 import { v4 as uuidv4 } from 'uuid';
 import { ComposerSchedulerFormValues } from '../schemas/CreateComposerSchema';
-import { IComposerSchedulePayload} from '../interfaces/ComposerInterface';
+import { IComposerSchedulePayload } from '../interfaces/ComposerInterface';
 
 /**
  * Transforming UI Form field data to Create/ Update Payload for backend functionality.
@@ -36,19 +36,17 @@ export const transformZodSchemaToComposerSchedulePayload = (
     'transform UI composer values to payload: Input: ',
     JSON.stringify(composerScheduleData)
   );
-  const outputFormats = composerScheduleData.outputFormatAsNotebook
-    ? ['Notebook']
-    : []; // Adjust this logic if there are more formats in future
 
   const composerPayloadData: IComposerSchedulePayload = {
     input_filename: composerScheduleData.inputFile,
     composer_environment_name: composerScheduleData.environment,
-    output_formats: outputFormats,
+    output_formats: ['Notebook'],
     parameters:
       composerScheduleData.parameters &&
       composerScheduleData.parameters.length > 0
-        ? composerScheduleData.parameters
-            .map(param => `${param.key}:${param.value}`)
+        ? composerScheduleData.parameters.map(
+            param => `${param.key}:${param.value}`
+          )
         : [],
     local_kernel: composerScheduleData.executionMode === 'local' ? true : false,
     mode_selected: composerScheduleData.executionMode,
@@ -74,7 +72,10 @@ export const transformZodSchemaToComposerSchedulePayload = (
     cluster_name: composerScheduleData.cluster ?? undefined,
     packages_to_install: packagesToInstall ?? []
   };
-  console.log('Composer schedule to be created: ', JSON.stringify(composerPayloadData));
+  console.log(
+    'Composer schedule to be created: ',
+    JSON.stringify(composerPayloadData)
+  );
   return composerPayloadData;
 };
 
@@ -118,7 +119,7 @@ export const transformComposerScheduleDataToZodSchema = (
       composerScheduleData.email_failure?.toLowerCase() === 'true',
     emailOnRetry: composerScheduleData.email_delay?.toLowerCase() === 'true',
     emailRecipients: composerScheduleData.email ?? undefined,
-    parameters: composerScheduleData.parameters 
+    parameters: composerScheduleData.parameters
       ? composerScheduleData.parameters.map(item => {
           const [key, value] = item.trim().split(':');
           return {
