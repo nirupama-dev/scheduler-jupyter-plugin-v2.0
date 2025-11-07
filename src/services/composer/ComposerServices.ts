@@ -25,7 +25,8 @@ import {
   IDagList,
   ISchedulerDagData,
   IUpdateSchedulerAPIResponse,
-  IListDagInfoAPIServiceResponse
+  IListDagInfoAPIServiceResponse,
+  IListComposer
 } from '../../interfaces/ComposerInterface';
 import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
@@ -194,7 +195,7 @@ export class ComposerServices {
   static readonly listComposersAPIService = async (
     projectId: string,
     region: string
-  ): Promise<IEnvDropDownOption[]> => {
+  ): Promise<IListComposer> => {
     try {
       const composerListResponse: IComposerEnvAPIResponse[] = await requestAPI(
         `composerList?project_id=${projectId}&region_id=${region}`
@@ -214,7 +215,12 @@ export class ComposerServices {
       );
       environmentOptions.sort((a, b) => a.label.localeCompare(b.label));
 
-      return environmentOptions;
+      const data = {
+        environmentOptions: environmentOptions,
+        composerListResponse: composerListResponse
+      };
+
+      return data;
     } catch (error) {
       if (error instanceof AuthenticationError) {
         throw error;
@@ -223,7 +229,7 @@ export class ComposerServices {
       handleErrorToast({
         error: errorResponse
       });
-      return [];
+      return { environmentOptions: [], composerListResponse: [] };
     }
   };
 
@@ -727,7 +733,8 @@ export class ComposerServices {
     dagId: string,
     composerSelectedList: string,
     project: string,
-    region: string
+    region: string,
+    missingPackageList: any
   ): Promise<any> => {
     try {
       const triggerResponse: any = await requestAPI(
@@ -747,11 +754,11 @@ export class ComposerServices {
         const errorObject = JSON.parse(jsonstr);
 
         if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
-          const installedPackageList: any = await requestAPI(
-            `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
-          );
+          // const installedPackageList: any = await requestAPI(
+          //   `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
+          // );
           // Return the response from the secondary API call to the handler
-          return installedPackageList;
+          return missingPackageList;
         }
       }
 

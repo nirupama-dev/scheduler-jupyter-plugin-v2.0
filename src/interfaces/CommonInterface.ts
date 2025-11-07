@@ -116,3 +116,8 @@ export interface IInitialSchedulerContextData {
   editModeData?: IEditScheduleData;
   initialDefaults?: INotebookKernalSchdulerDefaults;
 }
+
+export interface IProjectAPIResponse {
+  project_id: string;
+  name: string;
+}
