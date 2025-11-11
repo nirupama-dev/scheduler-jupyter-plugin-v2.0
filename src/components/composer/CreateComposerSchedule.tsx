@@ -33,6 +33,7 @@ import {
 } from '../../interfaces/ComposerInterface';
 import {
   allowedPeriodsCron,
+  COMPOSER_DEFAULT_SCHEDULE_VALUE,
   composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
@@ -90,7 +91,7 @@ export const CreateComposerSchedule: React.FC<
   // Watch for changes in form fields
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
-  const scheduleMode = watch('scheduleMode');
+  const runOption = watch('runOption');
   const emailOnFailure = watch('emailOnFailure');
   const emailOnRetry = watch('emailOnRetry');
   const emailOnSuccess = watch('emailOnSuccess');
@@ -266,6 +267,16 @@ export const CreateComposerSchedule: React.FC<
       fetchRemoteKernelData();
     }
   }, [executionMode, setValue]);
+
+  useEffect(() => {
+    if (runOption === 'runOnSchedule') {
+      if (!getValues('scheduleValue') || getValues('scheduleValue') === '') {
+        setValue('scheduleValue', COMPOSER_DEFAULT_SCHEDULE_VALUE);
+      }
+    } else {
+      setValue('scheduleValue', '');
+    }
+  }, [runOption]);
 
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
@@ -547,13 +558,13 @@ export const CreateComposerSchedule: React.FC<
       <div className="create-scheduler-label block-seperation">Schedule</div>
       <div className="scheduler-form-element-container">
         <FormInputRadio
-          name="scheduleMode"
+          name="runOption"
           control={control}
           className="network-layout"
           options={SCHEDULE_MODE_OPTIONS}
         />
       </div>
-      {scheduleMode === 'runSchedule' && (
+      {runOption === 'runOnSchedule' && (
         <div>
           <div className="scheduler-input-top">
             <Controller

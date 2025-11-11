@@ -107,7 +107,7 @@ export const SCHEDULE_MODE_OPTIONS = [
   },
   {
     label: 'Run on schedule',
-    value: 'runSchedule'
+    value: 'runOnSchedule'
   }
 ];
 
