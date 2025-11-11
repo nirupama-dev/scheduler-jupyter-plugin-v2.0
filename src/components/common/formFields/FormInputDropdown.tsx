@@ -42,7 +42,9 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
   disabled = false, // Default to false
   filterOptions,
   getOptionDisabled,
-  renderOption
+  renderOption,
+  retainDefaultOnClear = false,
+  defaultValue
   // onSearchInputChange,
   // freeSolo = false, // Default to false
   // placeholder = '',
@@ -52,61 +54,81 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
       <Controller
         name={name}
         control={control}
-        render={({ field: { onChange, value, ...fieldProps } }) => (
-          <Autocomplete
-            {...fieldProps}
-            options={options}
-            disabled={disabled}
-            getOptionLabel={option => option.label ?? ''} // How to get the label from an option object
-            // isOptionEqualToValue={(option, val) => option.value === val} // Essential for matching selected value
-            value={options.find(option => option.value === value) || null} // Set value based on full option object
-            onChange={(_, newValue) => {
-              const selectedValue = newValue ? newValue.value : '';
-              onChange(selectedValue); // react-hook-form update
-              if (onChangeCallback) {
-                onChangeCallback(selectedValue); // Custom callback with reason
-              }
-            }}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label={label}
-                error={!!error}
-                InputProps={{
-                  ...params.InputProps,
-                  endAdornment: (
-                    <React.Fragment>
-                      {loading ? (
-                        <CircularProgress color="inherit" size={20} />
-                      ) : null}
-                      {params.InputProps.endAdornment}
-                    </React.Fragment>
-                  )
-                }}
-              />
-            )}
-            renderOption={
-              renderOption ||
-              ((props, option) => {
-                // Custom rendering for the "Create new bucket" option
-                if (
-                  option.value === 'Create and Select' &&
-                  name === 'cloudStorageBucket'
-                ) {
-                  return (
-                    <li {...props} className="custom-add-bucket">
-                      {option.label}
-                    </li>
-                  );
+        render={({ field: { onChange, value, ...fieldProps } }) => {
+          // Get the currently selected option object
+          const selectedOption =
+            options.find(option => option.value === value) || null;
+
+          return (
+            <Autocomplete
+              {...fieldProps}
+              options={options}
+              disabled={disabled}
+              getOptionLabel={option => option.label ?? ''}
+              value={selectedOption}
+              onChange={(_, newValue) => {
+                let selectedValue: string;
+
+                // If a new value is selected, use its value.
+                if (newValue) {
+                  selectedValue = newValue.value;
+                } else if (retainDefaultOnClear && options.length > 0) {
+                  // --- FIX LOGIC APPLIED HERE ---
+                  // 1. If newValue is null (user cleared the field)
+                  // 2. AND retainDefaultOnClear is true
+                  // 3. AND options exist, set value to the first option (default).
+                  selectedValue = defaultValue || options[0].value;
+                } else {
+                  // Otherwise (no option, no default retention), set to empty string
+                  selectedValue = '';
                 }
 
-                return <li {...props}>{option.label}</li>;
-              })
-            }
-            filterOptions={filterOptions}
-            getOptionDisabled={getOptionDisabled}
-          />
-        )}
+                onChange(selectedValue); // react-hook-form update
+                if (onChangeCallback) {
+                  onChangeCallback(selectedValue); // Custom callback
+                }
+              }}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  label={label}
+                  error={!!error}
+                  InputProps={{
+                    ...params.InputProps,
+                    endAdornment: (
+                      <React.Fragment>
+                        {loading ? (
+                          <CircularProgress color="inherit" size={20} />
+                        ) : null}
+                        {params.InputProps.endAdornment}
+                      </React.Fragment>
+                    )
+                  }}
+                />
+              )}
+              renderOption={
+                renderOption ||
+                ((props, option) => {
+                  // Custom rendering for the "Create new bucket" option
+                  if (
+                    option.value === 'Create and Select' &&
+                    name === 'cloudStorageBucket'
+                  ) {
+                    return (
+                      <li {...props} className="custom-add-bucket">
+                        {option.label}
+                      </li>
+                    );
+                  }
+
+                  return <li {...props}>{option.label}</li>;
+                })
+              }
+              filterOptions={filterOptions}
+              getOptionDisabled={getOptionDisabled}
+            />
+          );
+        }}
       />
       <div>{error && <FormHelperText>{error.message}</FormHelperText>}</div>
     </FormControl>

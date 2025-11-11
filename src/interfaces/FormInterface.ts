@@ -73,6 +73,8 @@ export interface IFormInputDropdownProps<OptionType = ILabelValue<string>> {
   disabled?: boolean;
   getOptionDisabled?: (option: OptionType) => boolean;
   renderOption?: any;
+  retainDefaultOnClear?: boolean;
+  defaultValue?: string;
 }
 
 export interface IFormInputListingDropdownProps<
