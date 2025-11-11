@@ -36,21 +36,18 @@ export const transformZodSchemaToComposerSchedulePayload = (
     'transform UI composer values to payload: Input: ',
     JSON.stringify(composerScheduleData)
   );
-  const outputFormats = composerScheduleData.outputFormatAsNotebook
-    ? ['Notebook']
-    : []; // Adjust this logic if there are more formats in future
 
   const composerPayloadData: IComposerSchedulePayload = {
     input_filename: composerScheduleData.inputFile,
     composer_environment_name: composerScheduleData.environment,
-    output_formats: outputFormats,
+    output_formats: ['Notebook'],
     parameters:
       composerScheduleData.parameters &&
       composerScheduleData.parameters.length > 0
-        ? composerScheduleData.parameters
-            .map(param => `${param.key}:${param.value}`)
-            .join(',')
-        : '',
+        ? composerScheduleData.parameters.map(
+            param => `${param.key}:${param.value}`
+          )
+        : [],
     local_kernel: composerScheduleData.executionMode === 'local' ? true : false,
     mode_selected: composerScheduleData.executionMode,
     retry_count: composerScheduleData.retryCount ?? '',
@@ -75,7 +72,10 @@ export const transformZodSchemaToComposerSchedulePayload = (
     cluster_name: composerScheduleData.cluster ?? undefined,
     packages_to_install: packagesToInstall ?? []
   };
-  console.log('output: ', JSON.stringify(composerPayloadData));
+  console.log(
+    'Composer schedule to be created: ',
+    JSON.stringify(composerPayloadData)
+  );
   return composerPayloadData;
 };
 
@@ -120,7 +120,7 @@ export const transformComposerScheduleDataToZodSchema = (
     emailOnRetry: composerScheduleData.email_delay?.toLowerCase() === 'true',
     emailRecipients: composerScheduleData.email ?? undefined,
     parameters: composerScheduleData.parameters
-      ? composerScheduleData.parameters.split(',').map(item => {
+      ? composerScheduleData.parameters.map(item => {
           const [key, value] = item.trim().split(':');
           return {
             key: key.trim(),

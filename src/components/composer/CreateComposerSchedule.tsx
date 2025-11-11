@@ -33,6 +33,7 @@ import {
 } from '../../interfaces/ComposerInterface';
 import {
   allowedPeriodsCron,
+  COMPOSER_DEFAULT_SCHEDULE_VALUE,
   composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
@@ -90,7 +91,7 @@ export const CreateComposerSchedule: React.FC<
   // Watch for changes in form fields
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
-  const scheduleMode = watch('scheduleMode');
+  const runOption = watch('runOption');
   const emailOnFailure = watch('emailOnFailure');
   const emailOnRetry = watch('emailOnRetry');
   const emailOnSuccess = watch('emailOnSuccess');
@@ -148,6 +149,15 @@ export const CreateComposerSchedule: React.FC<
         selectedRegion
       );
       setEnvOptions(options);
+      const currentEnvValue = getValues('environment');
+      if (currentEnvValue) {
+        const isEnvValid = options.some(env => env.value === currentEnvValue);
+        if (isEnvValid) {
+          setValue('environment', currentEnvValue);
+        } else {
+          setValue('environment', '');
+        }
+      }
     } catch (authenticationError) {
       handleOpenLoginWidget(app);
     } finally {
@@ -232,7 +242,6 @@ export const CreateComposerSchedule: React.FC<
       setValue('composerRegion', '');
       setEnvOptions([]);
       setComposerEnvData([]);
-      setValue('environment', '');
     }
 
     // Clear subsequent fields when project_id changes
@@ -247,9 +256,8 @@ export const CreateComposerSchedule: React.FC<
     } else {
       setEnvOptions([]);
       setComposerEnvData([]);
-      setValue('environment', '');
     }
-  }, [selectedRegion, setValue]);
+  }, [selectedRegion]);
 
   /**
    * Effect to fetch Cluster/ Serverless data when execution mode changes.
@@ -260,6 +268,16 @@ export const CreateComposerSchedule: React.FC<
     }
   }, [executionMode, setValue]);
 
+  useEffect(() => {
+    if (runOption === 'runOnSchedule') {
+      if (!getValues('scheduleValue') || getValues('scheduleValue') === '') {
+        setValue('scheduleValue', COMPOSER_DEFAULT_SCHEDULE_VALUE);
+      }
+    } else {
+      setValue('scheduleValue', '');
+    }
+  }, [runOption]);
+
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
     (projectValue: string) => {
@@ -269,7 +287,7 @@ export const CreateComposerSchedule: React.FC<
       setComposerEnvData([]);
       trigger(['composerRegion', 'environment', 'projectId']);
     },
-    [setValue]
+    [setValue, trigger]
   );
 
   // Handle Region change: Clear Environment
@@ -280,7 +298,7 @@ export const CreateComposerSchedule: React.FC<
       setComposerEnvData([]);
       trigger(['environment', 'composerRegion']);
     },
-    [setValue]
+    [setValue, trigger]
   );
 
   const findEnvironmentSelected = (
@@ -318,7 +336,6 @@ export const CreateComposerSchedule: React.FC<
 
   const handleEnvChange = useCallback(
     (environmentValue: string) => {
-      setValue('environment', environmentValue);
       if (environmentValue) {
         const selectedEnvironment = findEnvironmentSelected(
           environmentValue,
@@ -333,7 +350,7 @@ export const CreateComposerSchedule: React.FC<
       }
       trigger('environment');
     },
-    [setValue, composerEnvData]
+    [composerEnvData, executionMode, checkRequiredPackages, trigger]
   );
 
   const handleCronExpression = useCallback(
@@ -356,7 +373,9 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleProjectIdChange}
           error={composerErrors.projectId}
-          disabled={true}
+          disabled={
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
         />
       </div>
       <div className="scheduler-form-element-container scheduler-input-top">
@@ -370,6 +389,9 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleRegionChange}
           error={composerErrors.composerRegion}
+          disabled={
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
         />
       </div>
       <div
@@ -386,7 +408,10 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           loading={loadingState.environment}
-          disabled={!selectedRegion}
+          disabled={
+            !selectedRegion ||
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={composerErrors.environment}
@@ -447,6 +472,7 @@ export const CreateComposerSchedule: React.FC<
                 loading={loadingState.cluster}
                 customClass="scheduler-tag-style "
                 error={composerErrors.cluster}
+                onChangeCallback={() => trigger('cluster')}
               />
             </div>
           )}
@@ -461,6 +487,7 @@ export const CreateComposerSchedule: React.FC<
                 loading={loadingState.serverless}
                 customClass="scheduler-tag-style "
                 error={composerErrors.serverless}
+                onChangeCallback={() => trigger('serverless')}
               />
             </div>
           )}
@@ -531,13 +558,13 @@ export const CreateComposerSchedule: React.FC<
       <div className="create-scheduler-label block-seperation">Schedule</div>
       <div className="scheduler-form-element-container">
         <FormInputRadio
-          name="scheduleMode"
+          name="runOption"
           control={control}
           className="network-layout"
           options={SCHEDULE_MODE_OPTIONS}
         />
       </div>
-      {scheduleMode === 'runSchedule' && (
+      {runOption === 'runOnSchedule' && (
         <div>
           <div className="scheduler-input-top">
             <Controller
@@ -566,6 +593,7 @@ export const CreateComposerSchedule: React.FC<
               options={timeZoneOptions}
               customClass="scheduler-tag-style "
               error={composerErrors.timeZone}
+              onChangeCallback={() => trigger('timeZone')}
             />
           </div>
         </div>

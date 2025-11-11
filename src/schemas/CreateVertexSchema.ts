@@ -49,13 +49,16 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   serviceAccount: z.string().min(1, 'Service account is required.'),
   // Encryption fields
   encryptionOption: z.enum([DEFAULT_ENCRYPTION_SELECTED, CUSTOMER_ENCRYPTION]),
-  customerEncryptionType: z.enum([PREDEFINED_CMEK, MANUAL_CMEK]),
+  customerEncryptionType: z.enum([PREDEFINED_CMEK, MANUAL_CMEK]).optional(),
   keyRing: z.string().optional(),
   cryptoKey: z.string().optional(),
   manualKey: z
     .string()
     .refine(
       val => {
+        if (val === '' || val === undefined || val === null) {
+          return true; // Empty is valid unless made required by superRefine
+        }
         const numericRegex =
           /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
 

@@ -750,13 +750,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));
             setIsCreatingBucket(false);
             setNewBucketCreated(null);
+            trigger('cloudStorageBucket');
           }
         }
       } else {
-        setValue('cloudStorageBucket', selectedOption ? selectedOption : '');
+        trigger('cloudStorageBucket');
       }
     },
-    [setValue, setCloudStorageList]
+    [setValue, setCloudStorageList, app]
   );
 
   // Error message for shared network if host project is missing or no networks
@@ -848,11 +849,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    */
 
   const handleKeyRingChange = (selectedKeyRing: string | null) => {
+    trigger(['keyRing', 'cryptoKey']);
     if (selectedKeyRing) {
-      setValue('keyRing', selectedKeyRing);
       clearErrors('keyRing');
-      setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
-      trigger('cryptoKey');
     }
   };
 
@@ -861,9 +860,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    * @param {string | null} selectedCryptoKey selected crypto key
    */
   const handleCryptoKeyChange = (selectedCryptoKey: string | null) => {
-    if (selectedCryptoKey) {
-      setValue('cryptoKey', selectedCryptoKey);
-    }
+    trigger('cryptoKey');
   };
 
   useEffect(() => {
@@ -944,7 +941,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             machineTypeList.length === 0
           }
           onChangeCallback={selectedMachineType => {
-            setValue('machineType', selectedMachineType.value);
             setValue('acceleratorType', '');
             setValue('acceleratorCount', '');
             trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
@@ -975,7 +971,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 disabled={!currentMachineType || loadingState.machineType}
                 onChangeCallback={() => {
                   setValue('acceleratorCount', '');
-                  trigger('acceleratorCount');
+                  trigger(['acceleratorType', 'acceleratorCount']);
                 }}
               />
             </div>
@@ -999,6 +995,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                       customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
                       error={vertexErrors.acceleratorCount}
                       disabled={!currentAcceleratorType}
+                      onChangeCallback={() => {
+                        trigger('acceleratorCount');
+                      }}
                     />
                   </div>
                 ) : null
@@ -1020,6 +1019,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           options={KERNEL_VALUE}
           customClass="scheduler-tag-style"
           error={vertexErrors.kernelName}
+          onChangeCallback={() => trigger('kernelName')}
         />
       </div>
       {/* Cloud Storage Bucket Dropdown */}
@@ -1066,7 +1066,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             error={vertexErrors.diskType}
             onChangeCallback={() => {
               setValue('diskSize', ''); // Clear disk size when disk type changes
-              trigger('diskSize');
+              trigger(['diskSize', 'diskType']);
             }}
           />
         </div>
@@ -1097,6 +1097,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           options={serviceAccountList}
           loading={loadingState.serviceAccount}
           error={vertexErrors.serviceAccount}
+          onChangeCallback={() => trigger('serviceAccount')}
         />
       </div>
       {/* Encryption */}
@@ -1235,7 +1236,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 console.log('Setting primary network to:', selected.value);
                 // setValue('primaryNetwork', selected ? selected.value : '');
                 setValue('subNetwork', ''); // Clear subnetwork when primary changes
-                trigger(['subNetwork']); // Trigger validation for subnetwork
+                trigger(['primaryNetwork', 'subNetwork']); // Trigger validation for subnetwork
               }}
             />
           </div>
@@ -1257,8 +1258,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               onChangeCallback={selected => {
                 console.log('Sub network selected:', selected);
                 // setValue('subNetwork', selected ? selected.value : '');
-                trigger(['subNetwork']);
-                trigger('primaryNetwork'); // Ensure primary network validation is updated
+                trigger(['subNetwork', 'primaryNetwork']);
               }}
             />
           </div>
@@ -1302,7 +1302,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   setValue('sharedNetwork.network', '');
                   setValue('sharedNetwork.subnetwork', '');
                 }
-                trigger(['sharedNetwork.network', 'sharedNetwork.subnetwork']);
+                trigger([
+                  'sharedNetwork',
+                  'sharedNetwork.network',
+                  'sharedNetwork.subnetwork'
+                ]);
               }}
             />
           </div>
