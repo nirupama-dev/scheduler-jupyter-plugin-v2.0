@@ -190,13 +190,8 @@ class Client:
                     .get(user_email, "")
                 )
                 if service_account:
-                    return service_account
-                else:
-                    return ""
-            else:
-                return ""
-        else:
-            return ""
+                    return service_account   
+        return ""
 
     async def prepare_dag(self, job, gcs_dag_bucket, dag_file, project_id, region_id):
         self.log.info("Generating dag file")
