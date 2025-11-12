@@ -46,6 +46,7 @@ import { Controller, FieldErrors } from 'react-hook-form';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
 import { FormInputChips } from '../common/formFields/FormInputChips';
+import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
@@ -81,6 +82,8 @@ export const CreateComposerSchedule: React.FC<
     serverless: false
     // ... initialize other mandatory properties
   });
+  const [defaultFormValues, setDefaultFormValues] =
+    useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
 
   const timezones = Object.keys(tzdata.zones).sort();
   const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
@@ -229,6 +232,7 @@ export const CreateComposerSchedule: React.FC<
     ) {
       fetchRemoteKernelData();
     }
+    setDefaultFormValues(getValues());
   }, []);
 
   /**
@@ -594,6 +598,8 @@ export const CreateComposerSchedule: React.FC<
               customClass="scheduler-tag-style "
               error={composerErrors.timeZone}
               onChangeCallback={() => trigger('timeZone')}
+              retainDefaultOnClear={true}
+              defaultValue={defaultFormValues.timeZone}
             />
           </div>
         </div>
