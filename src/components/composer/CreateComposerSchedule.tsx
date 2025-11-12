@@ -273,7 +273,7 @@ export const CreateComposerSchedule: React.FC<
   }, [executionMode, setValue]);
 
   useEffect(() => {
-    if (runOption === 'runOnSchedule') {
+    if (runOption === 'runSchedule') {
       if (!getValues('scheduleValue') || getValues('scheduleValue') === '') {
         setValue('scheduleValue', COMPOSER_DEFAULT_SCHEDULE_VALUE);
       }
@@ -281,6 +281,12 @@ export const CreateComposerSchedule: React.FC<
       setValue('scheduleValue', '');
     }
   }, [runOption]);
+
+  useEffect(() => {
+    if (!emailOnFailure && !emailOnRetry && !emailOnSuccess) {
+      setValue('emailRecipients', []);
+    }
+  }, [emailOnFailure, emailOnRetry, emailOnSuccess]);
 
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
@@ -451,6 +457,7 @@ export const CreateComposerSchedule: React.FC<
           onChangeCallback={() => {
             trigger('outputFormatAsNotebook');
           }}
+          disableColor={true}
         />
       </div>
       <AddParameters control={control} errors={errors} />
@@ -568,7 +575,7 @@ export const CreateComposerSchedule: React.FC<
           options={SCHEDULE_MODE_OPTIONS}
         />
       </div>
-      {runOption === 'runOnSchedule' && (
+      {runOption === 'runSchedule' && (
         <div>
           <div className="scheduler-input-top">
             <Controller
