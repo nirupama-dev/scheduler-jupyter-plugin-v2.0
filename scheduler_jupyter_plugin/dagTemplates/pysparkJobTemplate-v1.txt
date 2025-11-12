@@ -158,7 +158,7 @@ submit_pyspark_job = DataprocSubmitJobOperator(
         },
     },
     {% if multi_tenant_service_account %}
-    impersonation_chain=[{{multi_tenant_service_account}}],
+    impersonation_chain=['{{multi_tenant_service_account}}'],
     {% endif %}
     gcp_conn_id='google_cloud_default',  # Reference to the GCP connection
     dag=dag,

@@ -171,7 +171,6 @@ class Client:
         self, cluster_name, project_id, region_id
     ):
         cluster_data = await self.get_cluster_details(cluster_name, project_id, region_id)
-        print('*******1. cluster data', cluster_data)
         if cluster_data:
             multi_tenant = (
                 cluster_data.get("config", {})
@@ -179,13 +178,10 @@ class Client:
                 .get("properties", {})
                 .get("dataproc:dataproc.dynamic.multi.tenancy.enabled", "false")
             )
-            print('*******2. multi tenant', multi_tenant)
             if multi_tenant == "true":
                 cmd = "config get account"
                 process = await async_run_gcloud_subcommand(cmd)
-                print('*******3. process', process)
                 user_email = process.strip()
-                print('*******4. user email', user_email)
                 service_account = (
                     cluster_data.get("config", {})
                     .get("securityConfig", {})
@@ -193,7 +189,6 @@ class Client:
                     .get("userServiceAccountMapping", {})
                     .get(user_email, "")
                 )
-                print('*******5. service account', service_account)
                 if service_account:
                     return service_account
                 else:
