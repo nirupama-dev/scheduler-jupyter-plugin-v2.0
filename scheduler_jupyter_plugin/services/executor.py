@@ -295,6 +295,7 @@ class Client:
                 start_date=start_date,
                 parameters=parameters,
                 time_zone=time_zone,
+                output_formats=job.output_formats,
             )
         LOCAL_DAG_FILE_LOCATION = f"./scheduled-jobs/{job.name}"
         file_path = os.path.join(LOCAL_DAG_FILE_LOCATION, dag_file)
