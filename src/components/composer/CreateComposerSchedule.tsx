@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
@@ -84,7 +84,9 @@ export const CreateComposerSchedule: React.FC<
   });
   const [defaultFormValues, setDefaultFormValues] =
     useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
-
+  const lastCronValue = useRef(
+    getValues('scheduleValue') || COMPOSER_DEFAULT_SCHEDULE_VALUE
+  ); // memory state for last cron value on run on schedule
   const timezones = Object.keys(tzdata.zones).sort();
   const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
     label: zone,
@@ -104,9 +106,6 @@ export const CreateComposerSchedule: React.FC<
   const composerErrors = isComposerForm
     ? (errors as FieldErrors<z.infer<typeof createComposerSchema>>)
     : {};
-  console.log('is valid', isValid);
-  console.log('composerErrors', composerErrors);
-  console.log('getValues', getValues());
 
   // --- Fetch Regions based on selected Project ID ---
 
@@ -274,13 +273,15 @@ export const CreateComposerSchedule: React.FC<
 
   useEffect(() => {
     if (runOption === 'runSchedule') {
-      if (!getValues('scheduleValue') || getValues('scheduleValue') === '') {
-        setValue('scheduleValue', COMPOSER_DEFAULT_SCHEDULE_VALUE);
-      }
+      // When switching TO 'runSchedule', restore the last known cron value
+      setValue('scheduleValue', lastCronValue.current);
     } else {
+      // When switching AWAY (to 'runNow'), clear the form value
       setValue('scheduleValue', '');
+      console.log('clearing schedule value on run now');
     }
-  }, [runOption]);
+    console.log('getValues', getValues());
+  }, [runOption, setValue]);
 
   useEffect(() => {
     if (!emailOnFailure && !emailOnRetry && !emailOnSuccess) {
@@ -363,12 +364,9 @@ export const CreateComposerSchedule: React.FC<
     [composerEnvData, executionMode, checkRequiredPackages, trigger]
   );
 
-  const handleCronExpression = useCallback(
-    (value: string) => {
-      setValue('scheduleValue', value);
-    },
-    [setValue]
-  );
+  console.log('is valid', isValid);
+  console.log('composerErrors', composerErrors);
+  console.log('getValues', getValues());
 
   return (
     <div>
@@ -586,7 +584,7 @@ export const CreateComposerSchedule: React.FC<
                   value={field.value || ''}
                   setValue={(newValue: string) => {
                     field.onChange(newValue);
-                    handleCronExpression(newValue);
+                    lastCronValue.current = newValue;
                   }}
                   allowedPeriods={
                     allowedPeriodsCron as PeriodType[] | undefined
