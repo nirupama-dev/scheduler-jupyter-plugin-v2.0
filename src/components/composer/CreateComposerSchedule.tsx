@@ -275,7 +275,7 @@ export const CreateComposerSchedule: React.FC<
   }, [executionMode, setValue]);
 
   useEffect(() => {
-    if (runOption === 'runOnSchedule') {
+    if (runOption === 'runSchedule') {
       // When switching TO 'runOnSchedule', restore the last known cron value
       setValue('scheduleValue', lastCronValue);
     } else {
@@ -283,6 +283,12 @@ export const CreateComposerSchedule: React.FC<
       setValue('scheduleValue', '');
     }
   }, [runOption, setValue, lastCronValue]);
+
+  useEffect(() => {
+    if (!emailOnFailure && !emailOnRetry && !emailOnSuccess) {
+      setValue('emailRecipients', []);
+    }
+  }, [emailOnFailure, emailOnRetry, emailOnSuccess]);
 
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
@@ -446,6 +452,7 @@ export const CreateComposerSchedule: React.FC<
           onChangeCallback={() => {
             trigger('outputFormatAsNotebook');
           }}
+          disableColor={true}
         />
       </div>
       <AddParameters control={control} errors={errors} />
@@ -563,7 +570,7 @@ export const CreateComposerSchedule: React.FC<
           options={SCHEDULE_MODE_OPTIONS}
         />
       </div>
-      {runOption === 'runOnSchedule' && (
+      {runOption === 'runSchedule' && (
         <div>
           <div className="scheduler-input-top">
             <Controller
