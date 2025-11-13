@@ -44,7 +44,7 @@ export const FormInputText = ({
           size="small"
           error={!!fieldError}
           onChange={event => {
-            let rawValue = event.target.value;
+            const rawValue = event.target.value;
             let valueToRHF = rawValue;
 
             // Step 1: Handle the "Clear to 0" logic
