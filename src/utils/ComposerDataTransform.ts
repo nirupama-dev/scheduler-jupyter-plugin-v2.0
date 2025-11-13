@@ -131,7 +131,7 @@ export const transformComposerScheduleDataToZodSchema = (
     runOption:
       composerScheduleData.schedule_value === '@once'
         ? 'runNow'
-        : 'runOnSchedule',
+        : 'runSchedule',
     scheduleValue:
       composerScheduleData.schedule_value !== '@once'
         ? composerScheduleData.schedule_value

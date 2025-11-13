@@ -226,7 +226,7 @@ export const combinedCreateFormSchema = z
       }
 
       // Conditional validation for "Run on Schedule" fields
-      if (composerData.runOption === 'runOnSchedule') {
+      if (composerData.runOption === 'runSchedule') {
         if (!composerData.scheduleValue) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

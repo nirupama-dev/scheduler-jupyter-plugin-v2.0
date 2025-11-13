@@ -83,6 +83,7 @@ import {
 import { RadioOption } from '../../types/CommonSchedulerTypes';
 import { handleOpenLoginWidget } from '../common/login/Config';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
+import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -136,6 +137,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   //Encryption states
   const [keyRingList, setKeyRingList] = useState<ILabelValue<string>[]>([]);
   const [cryptoKeyList, setCryptoKeyList] = useState<ILabelValue<string>[]>([]);
+  const [defaultFormValues, setDefaultFormValues] =
+    useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
 
   // Timezones for dropdown
   const timezones: ILabelValue<string>[] = useMemo(
@@ -902,6 +905,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, [customerEncryptionType, cryptoKeySelected, encryptionSelected]);
 
+  useEffect(() => {
+    setDefaultFormValues(getValues());
+  }, []);
+
   // --- Render Component UI ---
   return (
     <div>
@@ -1531,6 +1538,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 options={timezones}
                 customClass="scheduler-tag-style"
                 error={vertexErrors.timeZone}
+                retainDefaultOnClear={true}
+                defaultValue={defaultFormValues.timeZone}
               />
             </div>
 
