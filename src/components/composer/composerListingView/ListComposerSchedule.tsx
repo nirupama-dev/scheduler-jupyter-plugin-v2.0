@@ -78,9 +78,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     });
   const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
     useState<boolean>(false);
-  const [defaultRegionFromAuth, setDefaultRegionFromAuth] = useState<
-    string | null
-  >(null);
+  const [composerRegion, setComposerRegion] = useState<string | null>(null);
   const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
   const [selectedDagId, setSelectedDagId] = useState('');
   const [bucketName, setBucketName] = useState('');
@@ -407,7 +405,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         if (credentials?.project_id) {
           setValue('projectId', credentials.project_id);
           if (credentials.region_id) {
-            setDefaultRegionFromAuth(credentials.region_id);
+            setComposerRegion(credentials.region_id);
           }
         }
         setLoadingState(prev => ({ ...prev, projectId: false }));
@@ -448,8 +446,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
 
         // Set the default region after options are fetched
         if (options.length > 0) {
-          const defaultRegion = defaultRegionFromAuth
-            ? options.find(opt => opt.value === defaultRegionFromAuth)
+          const defaultRegion = composerRegion
+            ? options.find(opt => opt.value === composerRegion)
             : options[0];
           if (defaultRegion) {
             setValue('composerRegion', defaultRegion.value);
@@ -470,11 +468,19 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       }
     };
 
+    // console.log('composerRouteState in region useEffect:', composerRouteState);
+    // if ('region' in composerRouteState) {
+    //   setComposerRegion(composerRouteState.region);
+    //   if (setComposerRouteState) {
+    //     setComposerRouteState(null);
+    //   }
+    //   return;
+    // }
     fetchRegions();
     // Clear subsequent fields when project_id changes
     setValue('environment', '');
     setDagList([]);
-  }, [selectedProjectId, defaultRegionFromAuth, setValue]);
+  }, [selectedProjectId, composerRegion, setValue]);
 
   useEffect(() => {
     const fetchEnvironments = async () => {

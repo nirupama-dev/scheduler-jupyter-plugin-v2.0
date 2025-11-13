@@ -420,7 +420,9 @@ class Client:
                     elif "email_on_retry" in line:
                         email_on_retry = line.split(":")[1].strip().replace(",", "")
                     elif "email_on_success" in line:
-                        email_on_success = line.split(":")[1].strip()
+                        email_on_success = line.split(":")[1].strip().replace(",", "")
+                    elif "output_formats" in line:
+                        output_formats = line.split(":")[-1].strip().strip("'\"")
                     elif "schedule_interval" in line:
                         schedule_interval = (
                             line.split("=")[-1]
@@ -441,7 +443,7 @@ class Client:
                     "input_filename": input_notebook,
                     "project_id": project_id,
                     "region_id": region_id,
-                    "composer_environment": composer_environment,
+                    "composer_environment_name": composer_environment,
                     "parameters": parameters_list,
                     "mode_selected": mode_selected,
                     "cluster_name": cluster_name,
@@ -455,6 +457,7 @@ class Client:
                     "schedule_value": schedule_interval,
                     "stop_cluster": stop_cluster_check,
                     "time_zone": time_zone,
+                    "output_formats": output_formats,
                 }
                 return payload
 

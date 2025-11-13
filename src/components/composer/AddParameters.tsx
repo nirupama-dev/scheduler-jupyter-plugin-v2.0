@@ -110,7 +110,7 @@ export const AddParameters: FC<IAddParametersProps> = ({ control, errors }) => {
       {fields.map((item, index) => (
         <Box
           key={item.id}
-          sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}
+          sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 2 }}
         >
           {/* Key Input Field */}
           <TextField

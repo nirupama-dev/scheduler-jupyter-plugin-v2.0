@@ -73,6 +73,8 @@ export interface IFormInputDropdownProps<OptionType = ILabelValue<string>> {
   disabled?: boolean;
   getOptionDisabled?: (option: OptionType) => boolean;
   renderOption?: any;
+  retainDefaultOnClear?: boolean;
+  defaultValue?: string;
 }
 
 export interface IFormInputListingDropdownProps<
@@ -114,6 +116,7 @@ export interface IFormInputCheckboxProps {
   disabled?: boolean; // Optional prop to disable the checkbox
   className?: string; // Optional prop for additional styling
   onChangeCallback?: () => void; // Optional callback on change
+  disableColor?: boolean;
 }
 
 export interface IErrorMessageProps {

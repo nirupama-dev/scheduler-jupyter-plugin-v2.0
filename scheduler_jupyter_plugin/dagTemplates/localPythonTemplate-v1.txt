@@ -27,7 +27,8 @@ default_args = {
     'email': {{email | safe}},
     'email_on_failure': {{email_failure}},     
     'email_on_retry': {{email_delay}},      
-    'email_on_success': {{email_success}}
+    'email_on_success': {{email_success}},
+    'output_formats': {{output_formats | safe}}
 }
 
 def write_output_to_file(run_id, **kwargs):
