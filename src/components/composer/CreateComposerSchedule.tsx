@@ -84,7 +84,9 @@ export const CreateComposerSchedule: React.FC<
   });
   const [defaultFormValues, setDefaultFormValues] =
     useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
-
+  const [lastCronValue, setLastCronValue] = useState(
+    getValues('scheduleValue') || COMPOSER_DEFAULT_SCHEDULE_VALUE
+  ); // memory state for last cron value on run on schedule
   const timezones = Object.keys(tzdata.zones).sort();
   const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
     label: zone,
@@ -274,13 +276,13 @@ export const CreateComposerSchedule: React.FC<
 
   useEffect(() => {
     if (runOption === 'runOnSchedule') {
-      if (!getValues('scheduleValue') || getValues('scheduleValue') === '') {
-        setValue('scheduleValue', COMPOSER_DEFAULT_SCHEDULE_VALUE);
-      }
+      // When switching TO 'runOnSchedule', restore the last known cron value
+      setValue('scheduleValue', lastCronValue);
     } else {
+      // When switching AWAY (to 'runNow'), clear the form value
       setValue('scheduleValue', '');
     }
-  }, [runOption]);
+  }, [runOption, setValue, lastCronValue]);
 
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
@@ -355,13 +357,6 @@ export const CreateComposerSchedule: React.FC<
       trigger('environment');
     },
     [composerEnvData, executionMode, checkRequiredPackages, trigger]
-  );
-
-  const handleCronExpression = useCallback(
-    (value: string) => {
-      setValue('scheduleValue', value);
-    },
-    [setValue]
   );
 
   return (
@@ -579,7 +574,7 @@ export const CreateComposerSchedule: React.FC<
                   value={field.value || ''}
                   setValue={(newValue: string) => {
                     field.onChange(newValue);
-                    handleCronExpression(newValue);
+                    setLastCronValue(newValue);
                   }}
                   allowedPeriods={
                     allowedPeriodsCron as PeriodType[] | undefined
