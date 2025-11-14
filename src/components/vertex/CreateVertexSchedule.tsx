@@ -1201,20 +1201,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           name="networkOption"
           control={control}
           className="network-layout"
-          options={NETWORK_OPTIONS.map(option => {
-            const newOption: RadioOption = { ...option };
-            // Check if the current option is the "host project" option
-            if (option.value === 'networkSharedFromHostProject') {
-              // If there's no hostProject, disable this option
-              if (!hostProject?.name) {
-                newOption.disabled = true;
-              } // Add the host project name to the label if it exists
-              if (hostProject?.name) {
-                newOption.label = `${option.label} "${hostProject.name}"`;
-              }
-            }
-            return newOption;
-          })}
+          options={NETWORK_OPTIONS}
           error={vertexErrors.networkOption}
           onChange={() => {
             // // Clear all network-related fields when network option changes
@@ -1329,7 +1316,15 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           name="scheduleMode"
           control={control}
           className="network-layout"
-          options={SCHEDULE_MODE_OPTIONS}
+          options={SCHEDULE_MODE_OPTIONS.map(option => {
+            const newOption: RadioOption = { ...option };
+            if (option.value === 'runNow') {
+              if (editScheduleData?.editMode) {
+                newOption.disabled = true;
+              }
+            }
+            return newOption;
+          })}
           error={vertexErrors.scheduleMode}
           onChange={() => {
             if (watch('scheduleMode') === 'runNow') {
