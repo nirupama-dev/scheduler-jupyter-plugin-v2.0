@@ -28,11 +28,13 @@ class ClusterListController(APIHandler):
         try:
             page_token = self.get_argument("pageToken")
             page_size = self.get_argument("pageSize")
+            project_id = self.get_argument("projectId")
+            region_id = self.get_argument("regionId")
             async with aiohttp.ClientSession() as client_session:
                 client = dataproc.Client(
                     await credentials.get_cached(), self.log, client_session
                 )
-                cluster_list = await client.list_clusters(page_size, page_token)
+                cluster_list = await client.list_clusters(page_size, page_token, project_id, region_id)
             self.finish(json.dumps(cluster_list))
         except RuntimeError as e:
             error_data = e.args[0]
@@ -52,11 +54,13 @@ class RuntimeController(APIHandler):
         try:
             page_token = self.get_argument("pageToken")
             page_size = self.get_argument("pageSize")
+            project_id = self.get_argument("projectId")
+            region_id = self.get_argument("regionId")
             async with aiohttp.ClientSession() as client_session:
                 client = dataproc.Client(
                     await credentials.get_cached(), self.log, client_session
                 )
-                runtime_list = await client.list_runtime(page_size, page_token)
+                runtime_list = await client.list_runtime(page_size, page_token, project_id, region_id)
             self.finish(json.dumps(runtime_list))
         except RuntimeError as e:
             error_data = e.args[0]

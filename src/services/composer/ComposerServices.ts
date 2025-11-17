@@ -45,12 +45,14 @@ export class ComposerServices {
    * @param previousClustersList
    */
   static readonly listClustersAPIService = async (
+    projectId: string,
+    region: string,
     nextPageToken?: string,
     previousClustersList?: (value: string[]) => void
   ) => {
     const pageToken = nextPageToken ?? '';
     try {
-      const serviceURL = `clusterList?pageSize=500&pageToken=${pageToken}`;
+      const serviceURL = `clusterList?pageSize=500&pageToken=${pageToken}&projectId=${projectId}&regionId=${region}`;
 
       const clusterListResponse: any = await requestAPI(serviceURL);
       let transformClusterListData = [];
@@ -72,6 +74,8 @@ export class ComposerServices {
 
       if (clusterListResponse.nextPageToken) {
         this.listClustersAPIService(
+          projectId,
+          region,
           clusterListResponse.nextPageToken,
           allClustersData
         );
@@ -113,13 +117,15 @@ export class ComposerServices {
    * @param previousSessionTemplatesList - Previously fetched session templates.
    */
   static readonly listSessionTemplatesAPIService = async (
+    projectId: string,
+    region: string,
     nextPageToken?: string,
     previousSessionTemplatesList?: object
   ) => {
     const pageToken = nextPageToken ?? '';
 
     try {
-      const serviceURL = `runtimeList?pageSize=500&pageToken=${pageToken}`;
+      const serviceURL = `runtimeList?pageSize=500&pageToken=${pageToken}&projectId=${projectId}&regionId=${region}`;
 
       const runtimeListResponse: any = await requestAPI(serviceURL);
       let transformSessionTemplateListData = [];
@@ -145,6 +151,8 @@ export class ComposerServices {
 
       if (runtimeListResponse.nextPageToken) {
         this.listSessionTemplatesAPIService(
+          projectId,
+          region,
           // setServerlessDataList,
           // setServerlessOptions,
           runtimeListResponse.nextPageToken,

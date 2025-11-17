@@ -172,7 +172,10 @@ export const CreateComposerSchedule: React.FC<
       if (executionMode === 'cluster') {
         setValue('serverless', '');
         const clusterOptionsFromAPI =
-          await ComposerServices.listClustersAPIService();
+          await ComposerServices.listClustersAPIService(
+            selectedProjectId,
+            selectedRegion
+          );
         setClusterOptions(clusterOptionsFromAPI);
         const selectedClusterName = clusterOptionsFromAPI.find(
           (clusterOption: ILabelValue<string>) =>
@@ -187,7 +190,10 @@ export const CreateComposerSchedule: React.FC<
       } else if (executionMode === 'serverless') {
         setValue('cluster', '');
         const serverlessOptionsFromAPI =
-          await ComposerServices.listSessionTemplatesAPIService();
+          await ComposerServices.listSessionTemplatesAPIService(
+            selectedProjectId,
+            selectedRegion
+          );
         setServerlessOptions(serverlessOptionsFromAPI);
         const selectedServerlessName = serverlessOptionsFromAPI.find(
           (serverlessOption: ILabelValue<string>) =>
@@ -266,10 +272,10 @@ export const CreateComposerSchedule: React.FC<
    * Effect to fetch Cluster/ Serverless data when execution mode changes.
    */
   useEffect(() => {
-    if (executionMode !== 'local') {
+    if (executionMode !== 'local' && selectedProjectId && selectedRegion) {
       fetchRemoteKernelData();
     }
-  }, [executionMode, setValue]);
+  }, [executionMode, selectedProjectId, selectedRegion]);
 
   useEffect(() => {
     if (runOption === 'runSchedule') {
