@@ -480,6 +480,7 @@ export const CreateNotebookSchedule = (
               control={control}
               name="jobName"
               error={errors.jobName}
+              disabled={initialSchedulerDataContext.editModeData?.editMode}
             />
           </div>
 

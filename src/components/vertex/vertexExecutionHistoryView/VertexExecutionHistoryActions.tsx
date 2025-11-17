@@ -21,6 +21,7 @@ import { VertexServices } from '../../../services/vertex/VertexServices';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import { IVertexExecutionHistoryActionsProps } from '../../../interfaces/VertexInterface';
 import { handleOpenLoginWidget } from '../../common/login/Config';
+import { ActionButton } from '../../common/button/ActionButton';
 
 const VertexExecutionHistoryActions = ({
   data,
@@ -55,7 +56,7 @@ const VertexExecutionHistoryActions = ({
     setIsDownloading(false);
   }, [data, scheduleName]);
 
-  const canDownload = data.state === 'succeeded' || fileExists;
+  const canDownload = data.state === 'succeeded' && fileExists;
 
   if (isDownloading) {
     return (
@@ -67,18 +68,12 @@ const VertexExecutionHistoryActions = ({
 
   return (
     <div className="action-btn-execution">
-      <div
-        role="button"
-        className={
-          canDownload
-            ? 'icon-buttons-style sub-title-heading'
-            : 'icon-buttons-style-disable sub-title-heading'
-        }
+      <ActionButton
         title="Download Output"
         onClick={canDownload ? handleDownloadOutput : undefined}
-      >
-        <iconDownload.react tag="div" />
-      </div>
+        icon={iconDownload}
+        disabled={!canDownload}
+      />
     </div>
   );
 };
