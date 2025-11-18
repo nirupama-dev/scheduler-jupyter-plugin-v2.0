@@ -181,6 +181,7 @@ export const CreateNotebookSchedule = (
                 environment
               );
             if (fetchedData) {
+              console.log('Fetched Composer Schedule Data:', fetchedData);
               editScheduleData.existingScheduleData =
                 transformComposerScheduleDataToZodSchema(fetchedData);
             } else {
@@ -264,12 +265,18 @@ export const CreateNotebookSchedule = (
     clearErrors
   } = useForm<CombinedCreateFormValues>({
     resolver: zodResolver(combinedCreateFormSchema),
-    values: initialFormValues,
+    // values: initialFormValues,
     mode: 'all'
   });
 
   const schedulerSelectionSelected = watch('schedulerSelection');
   console.log('Scheduler Selection:', getValues('schedulerSelection'));
+
+  useEffect(() => {
+    if (initialFormValues) {
+      reset(initialFormValues);
+    }
+  }, [initialFormValues, reset]);
 
   // Watch for changes in schedulerSelection to reset form values accordingly
   useEffect(() => {
@@ -326,7 +333,6 @@ export const CreateNotebookSchedule = (
     schedulerSelectionSelected,
     initialSchedulerDataContext,
     sessionContext,
-    reset,
     getValues
   ]);
 
@@ -407,7 +413,7 @@ export const CreateNotebookSchedule = (
               environment: composerData.environment
             });
           }
-          navigate('/list');
+          navigate('/list/composer');
         }
       }
     } catch (error) {
@@ -475,6 +481,7 @@ export const CreateNotebookSchedule = (
               control={control}
               name="jobName"
               error={errors.jobName}
+              disabled={initialSchedulerDataContext.editModeData?.editMode}
             />
           </div>
 

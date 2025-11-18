@@ -60,7 +60,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   emailOnRetry: z.boolean().default(false),
   emailOnSuccess: z.boolean().default(false),
   emailRecipients: z.array(customEmailSchema).optional(),
-  runOption: z.enum(['runNow', 'runOnSchedule'], {
+  runOption: z.enum(['runNow', 'runSchedule'], {
     errorMap: () => ({ message: 'Please select a run option' })
   }),
   scheduleValue: z.string().optional(),

@@ -5,7 +5,8 @@ import {
   CUSTOMER_ENCRYPTION,
   PREDEFINED_CMEK,
   ENCRYPTION_MANUAL_KEY_SAMPLE,
-  EVERY_MINUTE_CRON
+  EVERY_MINUTE_CRON,
+  MANUAL_CMEK
 } from '../utils/Constants';
 
 /**
@@ -39,7 +40,14 @@ export const combinedCreateFormSchema = z
       }
 
       if (vertexData.encryptionOption === CUSTOMER_ENCRYPTION) {
-        if (vertexData.customerEncryptionType === PREDEFINED_CMEK) {
+        // First, check that a customer encryption type is selected
+        if (!vertexData.customerEncryptionType) {
+          ctx.addIssue({
+            path: ['customerEncryptionType'], // This error will now appear
+            code: z.ZodIssueCode.custom,
+            message: 'Please select an encryption type (Predefined or Manual).'
+          });
+        } else if (vertexData.customerEncryptionType === PREDEFINED_CMEK) {
           // Validate the dropdowns
           if (!vertexData.keyRing) {
             ctx.addIssue({
@@ -48,7 +56,6 @@ export const combinedCreateFormSchema = z
               message: 'Key Ring is required.'
             });
           }
-
           if (vertexData.keyRing && !vertexData.cryptoKey) {
             ctx.addIssue({
               path: ['cryptoKey'],
@@ -56,7 +63,8 @@ export const combinedCreateFormSchema = z
               message: 'Crypto key is required.'
             });
           }
-        } else {
+        } else if (vertexData.customerEncryptionType === MANUAL_CMEK) {
+          // Validate the manual key field
           if (!vertexData.manualKey) {
             ctx.addIssue({
               path: ['manualKey'],
@@ -64,7 +72,7 @@ export const combinedCreateFormSchema = z
               message: 'Required manual encryption key'
             });
           }
-          // Add your regex validation here as well
+
           const numericRegex =
             /^projects\/[^/]+\/locations\/[^/]+\/keyRings\/[^/]+\/cryptoKeys\/[^/]+$/;
           if (
@@ -218,7 +226,7 @@ export const combinedCreateFormSchema = z
       }
 
       // Conditional validation for "Run on Schedule" fields
-      if (composerData.runOption === 'runOnSchedule') {
+      if (composerData.runOption === 'runSchedule') {
         if (!composerData.scheduleValue) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,

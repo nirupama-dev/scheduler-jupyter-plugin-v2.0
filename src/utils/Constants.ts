@@ -42,7 +42,7 @@ export const URL_LINK_PATTERN =
   /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g; // REGX to extract URL from string
 
 export const DEFAULT_TIME_ZONE = 'UTC';
-export const SCHEDULE_VALUE_EXPRESSION = '30 17 * * 1-5';
+export const COMPOSER_DEFAULT_SCHEDULE_VALUE = '30 17 * * 1-5';
 
 // Constants for disk size and cron validation in createVertexSchema
 export const DISK_MIN_SIZE = 10;
@@ -402,3 +402,10 @@ export const INPUT_HELPER_TEXT =
 
 export const CLOUD_STORAGE_BUCKET_HELPER_TEXT =
   'Select an existing bucket or create a new one.';
+export const NO_EXECUTION_FOUND =
+  'There are no job executions available for this schedule';
+
+export const EXECUTION_DATE_SELECTION_HELPER_TEXT =
+  'Select a date to view schedule execution history';
+
+export const EXECUTION_DATE_WITH_NO_DATA = 'No rows to display on';

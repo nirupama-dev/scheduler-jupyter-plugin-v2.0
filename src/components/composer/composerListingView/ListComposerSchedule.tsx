@@ -78,9 +78,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     });
   const [isGCSPluginInstalled, setIsGCSPluginInstalled] =
     useState<boolean>(false);
-  const [defaultRegionFromAuth, setDefaultRegionFromAuth] = useState<
-    string | null
-  >(null);
+  const [composerProjectId, setComposerProjectId] = useState<string>('');
+  const [composerRegion, setComposerRegion] = useState<string | null>(null);
   const [deletePopupOpen, setDeletePopupOpen] = useState<boolean>(false);
   const [selectedDagId, setSelectedDagId] = useState('');
   const [bucketName, setBucketName] = useState('');
@@ -405,9 +404,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         setLoadingState(prev => ({ ...prev, projectId: true }));
         const credentials = await authApi();
         if (credentials?.project_id) {
+          setComposerProjectId(credentials.project_id);
           setValue('projectId', credentials.project_id);
           if (credentials.region_id) {
-            setDefaultRegionFromAuth(credentials.region_id);
+            setComposerRegion(credentials.region_id);
           }
         }
         setLoadingState(prev => ({ ...prev, projectId: false }));
@@ -422,20 +422,18 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       composerRouteState.projectId
     ) {
       setValue('projectId', composerRouteState.projectId);
+      setComposerProjectId(composerRouteState.projectId);
       setValue('composerRegion', composerRouteState.region);
       setValue('environment', composerRouteState.environment);
-      if (setComposerRouteState) {
-        setComposerRouteState(null);
-      }
     } else {
       loadInitialCredentials();
     }
-  }, [setValue]);
+  }, []);
 
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
     const fetchRegions = async () => {
-      if (!selectedProjectId) {
+      if (!composerProjectId) {
         setRegionOptions([]);
         setValue('composerRegion', '');
         return;
@@ -443,16 +441,20 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       try {
         setLoadingState(prev => ({ ...prev, region: true }));
         const options =
-          await ComputeServices.regionAPIService(selectedProjectId);
+          await ComputeServices.regionAPIService(composerProjectId);
         setRegionOptions(options);
 
         // Set the default region after options are fetched
         if (options.length > 0) {
-          const defaultRegion = defaultRegionFromAuth
-            ? options.find(opt => opt.value === defaultRegionFromAuth)
-            : options[0];
-          if (defaultRegion) {
-            setValue('composerRegion', defaultRegion.value);
+          if (!composerRouteState?.region) {
+            const defaultRegion = composerRegion
+              ? options.find(opt => opt.value === composerRegion)
+              : options[0];
+            if (defaultRegion) {
+              setValue('composerRegion', defaultRegion.value);
+            }
+          } else {
+            setValue('composerRegion', composerRouteState?.region);
           }
         }
       } catch (error) {
@@ -470,15 +472,26 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       }
     };
 
+    // console.log('composerRouteState in region useEffect:', composerRouteState);
+    // if ('region' in composerRouteState) {
+    //   setComposerRegion(composerRouteState.region);
+    //   if (setComposerRouteState) {
+    //     setComposerRouteState(null);
+    //   }
+    //   return;
+    // }
     fetchRegions();
     // Clear subsequent fields when project_id changes
-    setValue('environment', '');
+    if (!composerRouteState?.environment) {
+      setValue('environment', '');
+    }
+
     setDagList([]);
-  }, [selectedProjectId, defaultRegionFromAuth, setValue]);
+  }, [composerProjectId, composerRegion, setValue]);
 
   useEffect(() => {
     const fetchEnvironments = async () => {
-      if (!selectedProjectId || !selectedRegion) {
+      if (!composerProjectId || !selectedRegion) {
         setEnvOptions([]);
         setValue('environment', '');
         setDagList([]);
@@ -488,12 +501,19 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       try {
         setLoadingState(prev => ({ ...prev, environment: true }));
         const options = await ComposerServices.listComposersAPIService(
-          selectedProjectId,
+          composerProjectId,
           selectedRegion
         );
         setEnvOptions(options);
         if (options.length > 0) {
-          await handleEnvChange(options[0].value);
+          if (!composerRouteState?.environment) {
+            await handleEnvChange(options[0].value);
+          } else {
+            await handleEnvChange(composerRouteState?.environment);
+            if (setComposerRouteState) {
+              setComposerRouteState(null);
+            }
+          }
         } else {
           setValue('environment', '');
           setDagList([]);
@@ -506,7 +526,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     };
 
     fetchEnvironments();
-  }, [selectedProjectId, selectedRegion, setValue, handleEnvChange]);
+  }, [composerProjectId, selectedRegion, setValue, handleEnvChange]);
 
   useEffect(() => {
     if (inputNotebookFilePath !== '') {

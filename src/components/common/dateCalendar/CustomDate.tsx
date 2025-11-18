@@ -97,7 +97,7 @@ export default function CustomDate(props: ICustomDateProps) {
       }
     }
 
-    if (isSelected) {
+    if (isSelected && !isLoading) {
       if (style.backgroundColor === 'transparent') {
         style.borderColor = '2px solid #3B78E7';
       }

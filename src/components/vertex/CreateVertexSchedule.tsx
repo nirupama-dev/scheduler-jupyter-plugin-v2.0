@@ -84,6 +84,7 @@ import {
 import { RadioOption } from '../../types/CommonSchedulerTypes';
 import { handleOpenLoginWidget } from '../common/login/Config';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
+import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
 
 export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   control,
@@ -137,6 +138,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   //Encryption states
   const [keyRingList, setKeyRingList] = useState<ILabelValue<string>[]>([]);
   const [cryptoKeyList, setCryptoKeyList] = useState<ILabelValue<string>[]>([]);
+  const [defaultFormValues, setDefaultFormValues] =
+    useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
 
   // Timezones for dropdown
   const timezones: ILabelValue<string>[] = useMemo(
@@ -751,13 +754,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             setLoadingState(prev => ({ ...prev, cloudStorageBucket: false }));
             setIsCreatingBucket(false);
             setNewBucketCreated(null);
+            trigger('cloudStorageBucket');
           }
         }
       } else {
-        setValue('cloudStorageBucket', selectedOption ? selectedOption : '');
+        trigger('cloudStorageBucket');
       }
     },
-    [setValue, setCloudStorageList]
+    [setValue, setCloudStorageList, app]
   );
 
   // Error message for shared network if host project is missing or no networks
@@ -849,11 +853,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    */
 
   const handleKeyRingChange = (selectedKeyRing: string | null) => {
+    trigger(['keyRing', 'cryptoKey']);
     if (selectedKeyRing) {
-      setValue('keyRing', selectedKeyRing);
       clearErrors('keyRing');
-      setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
-      trigger('cryptoKey');
     }
   };
 
@@ -862,9 +864,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    * @param {string | null} selectedCryptoKey selected crypto key
    */
   const handleCryptoKeyChange = (selectedCryptoKey: string | null) => {
-    if (selectedCryptoKey) {
-      setValue('cryptoKey', selectedCryptoKey);
-    }
+    trigger('cryptoKey');
   };
 
   useEffect(() => {
@@ -906,6 +906,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, [customerEncryptionType, cryptoKeySelected, encryptionSelected]);
 
+  useEffect(() => {
+    setDefaultFormValues(getValues());
+  }, []);
+
   // --- Render Component UI ---
   return (
     <div>
@@ -945,7 +949,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             machineTypeList.length === 0
           }
           onChangeCallback={selectedMachineType => {
-            setValue('machineType', selectedMachineType.value);
             setValue('acceleratorType', '');
             setValue('acceleratorCount', '');
             trigger(['machineType', 'acceleratorType', 'acceleratorCount']);
@@ -976,7 +979,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 disabled={!currentMachineType || loadingState.machineType}
                 onChangeCallback={() => {
                   setValue('acceleratorCount', '');
-                  trigger('acceleratorCount');
+                  trigger(['acceleratorType', 'acceleratorCount']);
                 }}
               />
             </div>
@@ -1000,6 +1003,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                       customClass="scheduler-tag-style create-scheduler-form-element-input-fl"
                       error={vertexErrors.acceleratorCount}
                       disabled={!currentAcceleratorType}
+                      onChangeCallback={() => {
+                        trigger('acceleratorCount');
+                      }}
                     />
                   </div>
                 ) : null
@@ -1021,6 +1027,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           options={KERNEL_VALUE}
           customClass="scheduler-tag-style"
           error={vertexErrors.kernelName}
+          onChangeCallback={() => trigger('kernelName')}
         />
       </div>
       {/* Cloud Storage Bucket Dropdown */}
@@ -1070,7 +1077,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             error={vertexErrors.diskType}
             onChangeCallback={() => {
               setValue('diskSize', ''); // Clear disk size when disk type changes
-              trigger('diskSize');
+              trigger(['diskSize', 'diskType']);
             }}
           />
         </div>
@@ -1101,6 +1108,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           options={serviceAccountList}
           loading={loadingState.serviceAccount}
           error={vertexErrors.serviceAccount}
+          onChangeCallback={() => trigger('serviceAccount')}
         />
       </div>
       {/* Encryption */}
@@ -1197,20 +1205,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           name="networkOption"
           control={control}
           className="network-layout"
-          options={NETWORK_OPTIONS.map(option => {
-            const newOption: RadioOption = { ...option };
-            // Check if the current option is the "host project" option
-            if (option.value === 'networkSharedFromHostProject') {
-              // If there's no hostProject, disable this option
-              if (!hostProject?.name) {
-                newOption.disabled = true;
-              } // Add the host project name to the label if it exists
-              if (hostProject?.name) {
-                newOption.label = `${option.label} "${hostProject.name}"`;
-              }
-            }
-            return newOption;
-          })}
+          options={NETWORK_OPTIONS}
           error={vertexErrors.networkOption}
           onChange={() => {
             // // Clear all network-related fields when network option changes
@@ -1239,7 +1234,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 console.log('Setting primary network to:', selected.value);
                 // setValue('primaryNetwork', selected ? selected.value : '');
                 setValue('subNetwork', ''); // Clear subnetwork when primary changes
-                trigger(['subNetwork']); // Trigger validation for subnetwork
+                trigger(['primaryNetwork', 'subNetwork']); // Trigger validation for subnetwork
               }}
             />
           </div>
@@ -1261,8 +1256,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               onChangeCallback={selected => {
                 console.log('Sub network selected:', selected);
                 // setValue('subNetwork', selected ? selected.value : '');
-                trigger(['subNetwork']);
-                trigger('primaryNetwork'); // Ensure primary network validation is updated
+                trigger(['subNetwork', 'primaryNetwork']);
               }}
             />
           </div>
@@ -1306,7 +1300,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   setValue('sharedNetwork.network', '');
                   setValue('sharedNetwork.subnetwork', '');
                 }
-                trigger(['sharedNetwork.network', 'sharedNetwork.subnetwork']);
+                trigger([
+                  'sharedNetwork',
+                  'sharedNetwork.network',
+                  'sharedNetwork.subnetwork'
+                ]);
               }}
             />
           </div>
@@ -1322,7 +1320,15 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           name="scheduleMode"
           control={control}
           className="network-layout"
-          options={SCHEDULE_MODE_OPTIONS}
+          options={SCHEDULE_MODE_OPTIONS.map(option => {
+            const newOption: RadioOption = { ...option };
+            if (option.value === 'runNow') {
+              if (editScheduleData?.editMode) {
+                newOption.disabled = true;
+              }
+            }
+            return newOption;
+          })}
           error={vertexErrors.scheduleMode}
           onChange={() => {
             if (watch('scheduleMode') === 'runNow') {
@@ -1531,6 +1537,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 options={timezones}
                 customClass="scheduler-tag-style"
                 error={vertexErrors.timeZone}
+                retainDefaultOnClear={true}
+                defaultValue={defaultFormValues.timeZone}
               />
             </div>
 
