@@ -27,13 +27,13 @@ async def test_list_clusters(monkeypatch, jp_fetch):
     response = await jp_fetch(
         "scheduler-plugin",
         "clusterList",
-        params={"pageSize": mock_page_size, "pageToken": mock_page_token, "projectId": mock_project_id, "regionId": mock_region_id},
+        params={"pageSize": mock_page_size, "pageToken": mock_page_token},
     )
     assert response.code == 200
     payload = json.loads(response.body)
     assert (
         payload["api_endpoint"]
-        == f"https://dataproc.googleapis.com//v1/projects/credentials-project/regions/{mock_region_id}/clusters?pageSize={mock_page_size}&pageToken={mock_page_token}"
+        == f"https://dataproc.googleapis.com//v1/projects/{mock_project_id}/regions/{mock_region_id}/clusters?pageSize={mock_page_size}&pageToken={mock_page_token}"
     )
     assert payload["headers"]["Authorization"] == f"Bearer mock-token"
 

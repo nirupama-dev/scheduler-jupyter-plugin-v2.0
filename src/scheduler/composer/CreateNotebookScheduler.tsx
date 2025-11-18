@@ -177,9 +177,7 @@ const CreateNotebookScheduler = ({
   const listClustersAPI = async () => {
     await SchedulerService.listClustersAPIService(
       setClusterList,
-      setIsLoadingKernelDetail,
-      projectId,
-      region
+      setIsLoadingKernelDetail
     );
   };
 
@@ -621,15 +619,11 @@ const CreateNotebookScheduler = ({
     setPackageInstallationMessage('');
     setEnvUpdateState(false);
     if (selectedMode === 'cluster') {
-      if (projectId && region) {
-        listClustersAPI();
-      } else {
-        setClusterList([]);
-      }
+      listClustersAPI();
     } else {
       listSessionTemplatesAPI();
     }
-  }, [selectedMode, region]);
+  }, [selectedMode]);
 
   /**
    * Effect to reset the region and composer environment selection when the project ID changes.

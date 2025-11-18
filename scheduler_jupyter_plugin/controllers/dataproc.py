@@ -28,13 +28,11 @@ class ClusterListController(APIHandler):
         try:
             page_token = self.get_argument("pageToken")
             page_size = self.get_argument("pageSize")
-            project_id = self.get_argument("projectId")
-            region_id = self.get_argument("regionId")
             async with aiohttp.ClientSession() as client_session:
                 client = dataproc.Client(
                     await credentials.get_cached(), self.log, client_session
                 )
-                cluster_list = await client.list_clusters(page_size, page_token, project_id, region_id)
+                cluster_list = await client.list_clusters(page_size, page_token)
             self.finish(json.dumps(cluster_list))
         except Exception as e:
             self.log.exception("Error fetching cluster list")

@@ -148,10 +148,10 @@ class Client:
             self.log.exception(f"Error uploading file to GCS: {str(error)}")
             raise IOError(str(error))
 
-    async def get_cluster_details(self, cluster_name, project_id, region_id):
+    async def get_cluster_details(self, cluster_name):
         try:
             dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
-            api_endpoint = f"{dataproc_url}/v1/projects/{project_id}/regions/{region_id}/clusters/{cluster_name}"
+            api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/regions/{self.region_id}/clusters/{cluster_name}"
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
@@ -167,10 +167,8 @@ class Client:
             self.log.exception("Error fetching cluster list")
             return {"error": str(e)}
 
-    async def multi_tenant_user_service_account(
-        self, cluster_name, project_id, region_id
-    ):
-        cluster_data = await self.get_cluster_details(cluster_name, project_id, region_id)
+    async def multi_tenant_user_service_account(self, cluster_name):
+        cluster_data = await self.get_cluster_details(cluster_name)
         if cluster_data:
             multi_tenant = (
                 cluster_data.get("config", {})
@@ -190,7 +188,7 @@ class Client:
                     .get(user_email, "")
                 )
                 if service_account:
-                    return service_account   
+                    return service_account
         return ""
 
     async def prepare_dag(self, job, gcs_dag_bucket, dag_file, project_id, region_id):
@@ -227,10 +225,10 @@ class Client:
             parameters = ""
         if job.local_kernel is False:
             if job.mode_selected == "cluster":
-                multi_tenant_service_account = await self.multi_tenant_user_service_account(
-                    cluster_name=job.cluster_name,
-                    project_id=project_id,
-                    region_id=region_id,
+                multi_tenant_service_account = (
+                    await self.multi_tenant_user_service_account(
+                        cluster_name=job.cluster_name
+                    )
                 )
                 template = environment.get_template(DAG_TEMPLATE_CLUSTER_V1)
                 if not job.input_filename.startswith(GCS):
