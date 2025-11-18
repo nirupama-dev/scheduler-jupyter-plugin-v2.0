@@ -95,14 +95,15 @@ const VertexJobRuns = ({
             succeeded: 'schedule-runs-table-data-state-success',
             failed: 'schedule-runs-table-data-state-failure',
             running: 'schedule-runs-table-data-state-running',
-            queued: 'schedule-runs-table-data-state-queued table-right-space'
+            queued: 'schedule-runs-table-data-state-queued table-right-space',
+            pending: 'schedule-runs-table-data-state-pending'
           };
           const className =
             stateClasses[cell.value as keyof typeof stateClasses] || '';
           return (
             <td
               {...cell.getCellProps()}
-              className="scheduler-table-data padding-zero"
+              className="scheduler-table-data padding-zero text-decoration"
             >
               <div className={`${className} execution-state`}>
                 {cell.render('Cell')}
