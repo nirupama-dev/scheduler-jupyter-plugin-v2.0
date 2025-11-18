@@ -54,7 +54,7 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
       <Controller
         name={name}
         control={control}
-        render={({ field: { onChange, value, ...fieldProps } }) => {
+        render={({ field: { onChange, onBlur, value, ...fieldProps } }) => {
           // Get the currently selected option object
           const selectedOption =
             options.find(option => option.value === value) || null;
@@ -67,25 +67,22 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
               getOptionLabel={option => option.label ?? ''}
               value={selectedOption}
               onChange={(_, newValue) => {
-                let selectedValue: string;
-
-                // If a new value is selected, use its value.
-                if (newValue) {
-                  selectedValue = newValue.value;
-                } else if (retainDefaultOnClear && options.length > 0) {
-                  // --- FIX LOGIC APPLIED HERE ---
-                  // 1. If newValue is null (user cleared the field)
-                  // 2. AND retainDefaultOnClear is true
-                  // 3. AND options exist, set value to the first option (default).
-                  selectedValue = defaultValue || options[0].value;
-                } else {
-                  // Otherwise (no option, no default retention), set to empty string
-                  selectedValue = '';
-                }
-
-                onChange(selectedValue); // react-hook-form update
+                const selectedValue = newValue ? newValue.value : '';
+                onChange(selectedValue); // RHF update
                 if (onChangeCallback) {
-                  onChangeCallback(selectedValue); // Custom callback
+                  onChangeCallback(selectedValue);
+                }
+              }}
+              onBlur={event => {
+                onBlur(); // Execute RHF's original onBlur (marks field as touched)
+
+                // If the field value is currently falsy (cleared/empty)
+                if (retainDefaultOnClear && !value && options.length > 0) {
+                  // Set value back to the default or the first option
+                  const retainedValue = defaultValue || options[0].value;
+
+                  // Call RHF's onChange to update the state, forcing retention
+                  onChange(retainedValue);
                 }
               }}
               renderInput={params => (
