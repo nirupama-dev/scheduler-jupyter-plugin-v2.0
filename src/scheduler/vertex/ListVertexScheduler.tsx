@@ -492,6 +492,8 @@ function ListVertexScheduler({
     schedulerData: any,
     scheduleName: string
   ) => {
+    console.log('when row is clicked schedulerdata', schedulerData);
+    console.log('when row is clicked scheduleName', scheduleName);
     abortApiCall();
     handleScheduleIdSelection(
       schedulerData,

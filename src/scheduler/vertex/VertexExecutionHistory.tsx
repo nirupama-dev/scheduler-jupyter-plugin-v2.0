@@ -217,6 +217,13 @@ const VertexExecutionHistory = ({
       });
   }, [projectId]);
 
+  console.log('Rerendering VertexExecutionHistory');
+  console.log('schedulerData', schedulerData);
+  console.log('currentDate', currentDate);
+  console.log('selectedMonth', selectedMonth);
+  console.log('selectedDate', selectedDate);
+  console.log('initialDisplayDate', initialDisplayDate);
+
   return (
     <>
       <div className="execution-history-main-wrapper">

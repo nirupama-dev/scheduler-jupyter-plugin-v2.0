@@ -116,6 +116,10 @@ const NotebookJobComponent = ({
   const abortControllers = useRef<any>([]); // Array of API signals to abort
 
   const handleDagIdSelection = (composerName: string, dagId: string) => {
+    console.log(
+      'In NotebookJobs.tsx, handleDagIdSelection called with: composer name and dagid',
+      { composerName, dagId }
+    );
     setShowExecutionHistory(true);
     setComposerName(composerName);
     setDagId(dagId);
@@ -134,6 +138,11 @@ const NotebookJobComponent = ({
     abortControllers.current.forEach((controller: any) => controller.abort());
     abortControllers.current = [];
   };
+
+  console.log(
+    'Rerendering NotebookJobComponent, showExecutionHistory:',
+    showExecutionHistory
+  );
 
   return (
     <>

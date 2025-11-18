@@ -620,6 +620,8 @@ function ListNotebookScheduler({
         <td {...cell.getCellProps()} className="clusters-table-data">
           <span
             onClick={() => {
+              console.log('On listing screen when onclick of row is triggered: composerEnvSelected', composerEnvSelected);
+              console.log('On listing screen when onclick of row is triggered: cell.value', cell.value);
               if (
                 composerEnvSelected &&
                 Object.hasOwn(composerEnvSelected, 'name') &&

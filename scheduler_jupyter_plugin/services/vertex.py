@@ -273,6 +273,7 @@ class Client:
 
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
         try:
+            self.log.info("SchedulerJupyterPlugin: Fetching schedules from Vertex AI")
             result = {}
 
             if next_page_token:
@@ -335,19 +336,20 @@ class Client:
                             schedule_list.append(formatted_schedule)
                         resp["schedules"] = schedule_list
                         result.update(resp)
+                        self.log.info("SchedulerJupyterPlugin: Schedules fetched successfully from Vertex AI")
                         return result
                 elif response.status == HTTP_STATUS_FORBIDDEN:
                     resp = await response.json()
                     return resp
                 else:
                     self.log.exception(
-                        f"Error listing schedules: {response.reason} {await response.text()}"
+                        f"SchedulerJupyterPlugin: Error listing schedules: {response.reason} {await response.text()}"
                     )
                     raise Exception(
                         f"Error listing schedules: {response.reason} {await response.text()}"
                     )
         except Exception as e:
-            self.log.exception(f"Error fetching schedules: {str(e)}")
+            self.log.exception(f"SchedulerJupyterPlugin: Error fetching schedules: {str(e)}")
             return {"Error fetching schedules": str(e)}
 
     async def pause_schedule(self, region_id, schedule_id):
@@ -578,6 +580,7 @@ class Client:
         self, region_id, schedule_id, order_by, page_size=None, start_date=None
     ):
         try:
+            self.log.info("SchedulerJupyterPlugin: Fetching notebook execution jobs from Vertex AI")
             execution_jobs = []
             if page_size:
                 api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&pageSize={page_size}&orderBy={order_by}"
@@ -609,16 +612,17 @@ class Client:
                                     execution_jobs.append(job)
                             else:
                                 execution_jobs.append(job)
+                        self.log.info("SchedulerJupyterPlugin: Notebook execution jobs fetched successfully from Vertex AI")
                         return execution_jobs
                 else:
                     self.log.exception(
-                        f"Error fetching notebook execution jobs: {response.reason} {await response.text()}"
+                        f"SchedulerJupyterPlugin: Error fetching notebook execution jobs: {response.reason} {await response.text()}"
                     )
                     raise Exception(
                         f"Error fetching notebook execution jobs: {response.reason} {await response.text()}"
                     )
         except Exception as e:
             self.log.exception(
-                f"Error fetching list of notebook execution jobs: {str(e)}"
+                f"SchedulerJupyterPlugin: Error fetching list of notebook execution jobs: {str(e)}"
             )
             return {"Error fetching list of notebook execution jobs": str(e)}

@@ -104,6 +104,9 @@ const VertexScheduleJobs = ({
     paginationVariables: IActivePaginationVariables | null | undefined,
     regionToLoad: string
   ) => {
+    console.log('handleScheduleIdSelection called with: schedulerdata', schedulerData)
+    console.log('handleScheduleIdSelection called with: scheduleName', scheduleName)
+    console.log('handleScheduleIdSelection called with: regionToLoad', regionToLoad)
     setShowExecutionHistory(true);
     setScheduleName(scheduleName);
     setSchedulerData(schedulerData);
@@ -118,6 +121,8 @@ const VertexScheduleJobs = ({
     abortControllers.current.forEach((controller: any) => controller.abort());
     abortControllers.current = [];
   };
+
+  console.log('VertexScheduleJobs render: showExecutionHistory', showExecutionHistory);
 
   return (
     <>

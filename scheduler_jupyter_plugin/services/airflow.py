@@ -81,12 +81,14 @@ class Client:
         )
         airflow_uri = airflow_obj.get("airflow_uri")
         try:
+            self.log.info("SchedulerJupyterPlugin: Fetching dag list")
             api_endpoint = f"{airflow_uri}/api/v1/dags?tags={TAGS}"
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
+                    self.log.info("SchedulerJupyterPlugin:  Dag list fetched successfully")
                     return resp, airflow_obj.get("bucket")
                 elif (
                     response.status >= HTTP_STATUS_SERVER_ERROR_START
@@ -96,7 +98,7 @@ class Client:
                 else:
                     raise Exception(f"{response.reason} {await response.text()}")
         except Exception as e:
-            self.log.exception(f"Error getting dag list: {str(e)}")
+            self.log.exception(f"SchedulerJupyterPlugin: Error getting dag list: {str(e)}")
             return {"error": str(e)}
 
     async def delete_job(self, composer_name, dag_id, from_page, project_id, region_id):
@@ -156,19 +158,21 @@ class Client:
         )
         airflow_uri = airflow_obj.get("airflow_uri")
         try:
+            self.log.info("SchedulerJupyterPlugin: Fetching dag run list")
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns?start_date_gte={start_date}&start_date_lte={end_date}&offset={offset}"
             async with self.client_session.get(
                 api_endpoint, headers=self.create_headers()
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
+                    self.log.info("SchedulerJupyterPlugin: Dag run list fetched successfully")
                     return resp
                 else:
                     raise Exception(
                         f"Error displaying BigQuery preview data: {response.reason} {await response.text()}"
                     )
         except Exception as e:
-            self.log.exception(f"Error fetching dag run list: {str(e)}")
+            self.log.exception(f"SchedulerJupyterPlugin: Error fetching dag run list: {str(e)}")
             return {"error": str(e)}
 
     async def list_dag_run_task(

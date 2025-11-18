@@ -113,6 +113,12 @@ const ExecutionHistory = ({
     setExecutionPageFlag(false);
   }, []);
 
+  console.log('Rerendering ExecutionHistory');
+  console.log('currentDate', currentDate);
+  console.log('selectedDate', selectedDate);
+  console.log('startDate', startDate);
+  console.log('endDate', endDate);
+
   return (
     <>
       <div className="execution-history-header">
