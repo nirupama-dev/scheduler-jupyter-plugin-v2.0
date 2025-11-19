@@ -69,7 +69,8 @@ import {
   PREDEFINED_CMEK,
   CUSTOMER_MANAGED_RADIO_OPTIONS,
   MANUAL_CMEK,
-  DEFAULT_ENCRYPTION_SELECTED
+  DEFAULT_ENCRYPTION_SELECTED,
+  CLOUD_STORAGE_BUCKET_HELPER_TEXT
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -1054,6 +1055,9 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             Creating new bucket <b>{newBucketCreated}</b>...
           </div>
         )}
+      </div>
+      <div className="tab-description tab-text-sub-cl">
+        {CLOUD_STORAGE_BUCKET_HELPER_TEXT}
       </div>
       {/* Disk Type and Size */}
       <div
