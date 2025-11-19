@@ -869,10 +869,13 @@ const uiConfigAPIResponseTransform = (rawItem: any): IMachineType => {
     }
   }
 
+  const regex = /^([^\s]+)/; //Regx to extract machine type value. eg: n1-standard-96 (96 CPUs, 386.55 GB RAM) to n1-standard-96
+  const machineTypeValue = rawItem.machineType.match(regex);
+
   return {
     machineType: {
       label: rawItem.machineType,
-      value: rawItem.machineType
+      value: machineTypeValue[1]
     },
     acceleratorConfigs:
       transformedAccelerators.length > 0 ? transformedAccelerators : null
