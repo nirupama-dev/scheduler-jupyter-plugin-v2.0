@@ -124,21 +124,6 @@ export const combinedCreateFormSchema = z
 
       // Schedule field validations
       if (vertexData.scheduleMode === 'runSchedule') {
-        // Start/end time required and valid
-        if (!vertexData.startTime) {
-          ctx.addIssue({
-            path: ['startTime'],
-            code: z.ZodIssueCode.custom,
-            message: 'Start time is required for scheduled jobs.'
-          });
-        }
-        if (!vertexData.endTime) {
-          ctx.addIssue({
-            path: ['endTime'],
-            code: z.ZodIssueCode.custom,
-            message: 'End time is required for scheduled jobs.'
-          });
-        }
         // If both present, end > start and both in the future
         if (vertexData.startTime && vertexData.endTime) {
           const start = new Date(vertexData.startTime).getTime();
@@ -181,14 +166,14 @@ export const combinedCreateFormSchema = z
             vertexData.scheduleFieldCronFormat.trim() === ''
           ) {
             ctx.addIssue({
-              path: ['scheduleField'],
+              path: ['scheduleFieldCronFormat'],
               code: z.ZodIssueCode.custom,
               message: 'Schedule field is required in cron format.'
             });
           }
           if (vertexData.scheduleFieldCronFormat === EVERY_MINUTE_CRON) {
             ctx.addIssue({
-              path: ['scheduleField'],
+              path: ['scheduleFieldCronFormat'],
               code: z.ZodIssueCode.custom,
               message: 'Every minute cron expression is not supported.'
             });
@@ -197,7 +182,7 @@ export const combinedCreateFormSchema = z
         if (vertexData.internalScheduleMode === 'userFriendly') {
           if (vertexData.scheduleValueUserFriendly === EVERY_MINUTE_CRON) {
             ctx.addIssue({
-              path: ['scheduleValue'],
+              path: ['scheduleValueUserFriendly'],
               code: z.ZodIssueCode.custom,
               message: 'Every minute cron expression is not supported.'
             });

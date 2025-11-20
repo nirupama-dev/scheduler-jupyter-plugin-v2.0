@@ -416,7 +416,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       );
 
       if (!isValidExisting) {
-        setValue('primaryNetwork', ''); //primary network is optional and by default empty. it will reset to blank value if editmode had some invalid bvalue as well.
+        setValue('primaryNetwork', ''); //primary network is optional and by default empty. it will reset to blank value if editmode had some invalid value as well.
         console.log(
           'Resetting primary network to empty as existing value is invalid.'
         );
@@ -427,7 +427,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       }
 
       setPrimaryNetworkList([]);
-      setValue('primaryNetwork', '');
+      // setValue('primaryNetwork', '');
       handleErrorToast({ error: 'Failed to fetch primary networks.' });
     } finally {
       setLoadingState(prev => ({ ...prev, primaryNetwork: false }));
@@ -482,7 +482,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         }
 
         setSubNetworkList([]);
-        setValue('subNetwork', '');
+        // setValue('subNetwork', '');
         handleErrorToast({ error: 'Failed to fetch subNetworks.' });
       } finally {
         setLoadingState(prev => ({ ...prev, subNetwork: false }));
@@ -1406,7 +1406,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                       <DateTimePicker
                         {...field}
                         className="scheduler-tag-style create-scheduler-form-element-input-fl"
-                        label="Start Date*"
+                        label="Start Date"
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
                           field.onChange(
@@ -1437,7 +1437,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                       <DateTimePicker
                         {...field}
                         className="scheduler-tag-style create-scheduler-form-element-input-fl"
-                        label="End Date*"
+                        label="End Date"
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
                           field.onChange(
