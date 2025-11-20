@@ -24,6 +24,10 @@ import ExecutionHistory from './ExecutionHistory';
 import { scheduleMode } from '../../utils/Const';
 import { ISettingRegistry } from '@jupyterlab/settingregistry';
 import { IComposerAPIResponse } from '../common/SchedulerInteface';
+import {
+  LOG_LEVEL,
+  SchedulerLoggingService
+} from '../../services/LoggingService';
 
 const NotebookJobComponent = ({
   app,
@@ -120,6 +124,10 @@ const NotebookJobComponent = ({
       'In NotebookJobs.tsx, handleDagIdSelection called with: composer name and dagid',
       { composerName, dagId }
     );
+    SchedulerLoggingService.log(
+      `In NotebookJobs.tsx, handleDagIdSelection called with: composer name: ${composerName}, dag id: ${dagId}`,
+      LOG_LEVEL.INFO
+    );
     setShowExecutionHistory(true);
     setComposerName(composerName);
     setDagId(dagId);
@@ -142,6 +150,10 @@ const NotebookJobComponent = ({
   console.log(
     'Rerendering NotebookJobComponent, showExecutionHistory:',
     showExecutionHistory
+  );
+  SchedulerLoggingService.log(
+    `Rerendering NotebookJobComponent, showExecutionHistory: ${showExecutionHistory}`,
+    LOG_LEVEL.INFO
   );
 
   return (

@@ -28,6 +28,10 @@ import ListDagTaskInstances from './ListDagTaskInstances';
 import { Box, LinearProgress } from '@mui/material';
 import { handleDebounce } from '../../utils/Config';
 import CustomDate from '../common/CustomDate';
+import {
+  LOG_LEVEL,
+  SchedulerLoggingService
+} from '../../services/LoggingService';
 
 const iconLeftArrow = new LabIcon({
   name: 'launcher:left-arrow-icon',
@@ -118,6 +122,11 @@ const ExecutionHistory = ({
   console.log('selectedDate', selectedDate);
   console.log('startDate', startDate);
   console.log('endDate', endDate);
+
+  SchedulerLoggingService.log(
+    `rendering execution history: 1.currentDate: ${currentDate}, 2.selectedDate ${selectedDate}, 3.startDate ${startDate}, 4.endDate ${endDate}`,
+    LOG_LEVEL.INFO
+  );
 
   return (
     <>

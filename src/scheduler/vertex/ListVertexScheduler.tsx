@@ -50,6 +50,10 @@ import {
 } from './VertexInterfaces';
 import dayjs from 'dayjs';
 import ErrorMessage from '../common/ErrorMessage';
+import {
+  LOG_LEVEL,
+  SchedulerLoggingService
+} from '../../services/LoggingService';
 
 function ListVertexScheduler({
   region,
@@ -494,6 +498,10 @@ function ListVertexScheduler({
   ) => {
     console.log('when row is clicked schedulerdata', schedulerData);
     console.log('when row is clicked scheduleName', scheduleName);
+    SchedulerLoggingService.log(
+      `when row is clicked 1.schedulerdata: ${schedulerData}, 2.scheduleName: ${scheduleName}`,
+      LOG_LEVEL.INFO
+    );
     abortApiCall();
     handleScheduleIdSelection(
       schedulerData,

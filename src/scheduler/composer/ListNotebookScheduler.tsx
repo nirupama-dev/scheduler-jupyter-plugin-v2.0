@@ -50,6 +50,10 @@ import { DynamicDropdown } from '../../controls/DynamicDropdown';
 import { projectListAPI } from '../../services/ProjectService';
 import { Notification } from '@jupyterlab/apputils';
 import { IComposerAPIResponse } from '../common/SchedulerInteface';
+import {
+  LOG_LEVEL,
+  SchedulerLoggingService
+} from '../../services/LoggingService';
 
 const iconDelete = new LabIcon({
   name: 'launcher:delete-icon',
@@ -620,8 +624,18 @@ function ListNotebookScheduler({
         <td {...cell.getCellProps()} className="clusters-table-data">
           <span
             onClick={() => {
-              console.log('On listing screen when onclick of row is triggered: composerEnvSelected', composerEnvSelected);
-              console.log('On listing screen when onclick of row is triggered: cell.value', cell.value);
+              console.log(
+                'On listing screen when onclick of row is triggered: composerEnvSelected',
+                composerEnvSelected
+              );
+              console.log(
+                'On listing screen when onclick of row is triggered: cell.value',
+                cell.value
+              );
+              SchedulerLoggingService.log(
+                `On listing screen when onclick of row is triggered: composerEnvSelected: ${composerEnvSelected}, cell.value: ${cell.value}`,
+                LOG_LEVEL.INFO
+              );
               if (
                 composerEnvSelected &&
                 Object.hasOwn(composerEnvSelected, 'name') &&

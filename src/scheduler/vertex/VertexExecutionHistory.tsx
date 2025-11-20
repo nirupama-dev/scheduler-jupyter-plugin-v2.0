@@ -34,6 +34,10 @@ import { LOG_EXPLORER_BASE_URL, VIEW_CLOUD_LOGS } from '../../utils/Const';
 import { handleErrorToast } from '../../utils/ErrorUtils';
 import CustomDate from '../common/CustomDate';
 import { VertexServices } from '../../services/Vertex';
+import {
+  LOG_LEVEL,
+  SchedulerLoggingService
+} from '../../services/LoggingService';
 
 const VertexExecutionHistory = ({
   region,
@@ -223,6 +227,10 @@ const VertexExecutionHistory = ({
   console.log('selectedMonth', selectedMonth);
   console.log('selectedDate', selectedDate);
   console.log('initialDisplayDate', initialDisplayDate);
+  SchedulerLoggingService.log(
+    `rendering VertexExecutionHistory: 1.currentDate: ${currentDate}, 2.selectedDate ${selectedDate}, 3.selectedMonth ${selectedMonth}, 4.initialDisplayDate ${initialDisplayDate}, 5. schedulerData ${JSON.stringify(schedulerData)}`,
+    LOG_LEVEL.INFO
+  );
 
   return (
     <>

@@ -27,6 +27,10 @@ import {
   ISchedulerData
 } from './VertexInterfaces';
 import VertexExecutionHistory from './VertexExecutionHistory';
+import {
+  LOG_LEVEL,
+  SchedulerLoggingService
+} from '../../services/LoggingService';
 
 const VertexScheduleJobs = ({
   app,
@@ -104,9 +108,24 @@ const VertexScheduleJobs = ({
     paginationVariables: IActivePaginationVariables | null | undefined,
     regionToLoad: string
   ) => {
-    console.log('handleScheduleIdSelection called with: schedulerdata', schedulerData)
-    console.log('handleScheduleIdSelection called with: scheduleName', scheduleName)
-    console.log('handleScheduleIdSelection called with: regionToLoad', regionToLoad)
+    console.log(
+      'handleScheduleIdSelection called with: schedulerdata',
+      schedulerData
+    );
+    console.log(
+      'handleScheduleIdSelection called with: scheduleName',
+      scheduleName
+    );
+    console.log(
+      'handleScheduleIdSelection called with: regionToLoad',
+      regionToLoad
+    );
+    SchedulerLoggingService.log(
+      `handleScheduleIdSelection called with: 1.schedulerdata: ${JSON.stringify(
+        schedulerData
+      )}, 2.scheduleName: ${scheduleName}, 3.regionToLoad: ${regionToLoad}`,
+      LOG_LEVEL.INFO
+    );
     setShowExecutionHistory(true);
     setScheduleName(scheduleName);
     setSchedulerData(schedulerData);
@@ -122,7 +141,14 @@ const VertexScheduleJobs = ({
     abortControllers.current = [];
   };
 
-  console.log('VertexScheduleJobs render: showExecutionHistory', showExecutionHistory);
+  console.log(
+    'VertexScheduleJobs render: showExecutionHistory',
+    showExecutionHistory
+  );
+  SchedulerLoggingService.log(
+    `VertexScheduleJobs render: showExecutionHistory: ${showExecutionHistory}`,
+    LOG_LEVEL.INFO
+  );
 
   return (
     <>
