@@ -77,7 +77,6 @@ const VertexExecutionHistory = ({
     darkGreenListDates,
     handleDateSelection,
     handleMonthChange,
-    handleLogs,
     isLoading,
     fromPage: SCHEDULE_LABEL_VERTEX
   };
@@ -133,14 +132,18 @@ const VertexExecutionHistory = ({
     navigate('/list');
   };
 
+  const executionHeaderProps = {
+    scheduleName: scheduleName ?? '',
+    handleBackButton,
+    handleLogs,
+    fromPage: SCHEDULE_LABEL_VERTEX,
+    vertexScheduleRunsList
+  };
+
   return (
     <>
       <div className="execution-history-main-wrapper">
-        <ExecutionHistoryHeader
-          scheduleName={scheduleName ?? ''}
-          handleBackButton={handleBackButton}
-          handleLogs={handleLogs}
-        />
+        <ExecutionHistoryHeader {...executionHeaderProps} />
       </div>
       <div className="execution-history-main-full-wrapper execution-top-border">
         <div className="execution-history-full-wrapper execution-wrapper-border-none">

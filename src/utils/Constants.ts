@@ -409,3 +409,6 @@ export const EXECUTION_DATE_SELECTION_HELPER_TEXT =
   'Select a date to view schedule execution history';
 
 export const EXECUTION_DATE_WITH_NO_DATA = 'No rows to display on';
+
+export const VERTEX_EXECUTION_HISTORY_LOGS_URL =
+  'https://console.cloud.google.com/logs/query';
