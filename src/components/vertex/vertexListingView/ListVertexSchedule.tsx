@@ -129,6 +129,7 @@ const ListVertexSchedule = ({
         setRegion(regionSelected.value);
       } else {
         setRegion('');
+        setVertexScheduleList([]);
       }
     },
     [region, abortControllers]

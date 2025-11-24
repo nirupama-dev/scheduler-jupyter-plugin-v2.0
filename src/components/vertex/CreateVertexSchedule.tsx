@@ -681,17 +681,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     [setValue, trigger]
   );
 
-  const handleDiskSizeBlur = useCallback(
-    (event: React.FocusEvent<HTMLInputElement>) => {
-      const diskSizeValue = getValues('diskSize');
-      // If disk size is blurred and is empty, set to default IF disk type is selected
-      if (diskSizeValue === '' && currentDiskType) {
-        setValue('diskSize', DEFAULT_DISK_SIZE);
-      }
-      trigger('diskSize'); // Trigger validation on blur
-    },
-    [setValue, currentDiskType, trigger, getValues]
-  );
+  useEffect(() => {
+    const diskSizeValue = getValues('diskSize');
+    const diskTypeValue = getValues('diskType');
+    if (diskSizeValue === '' && diskTypeValue) {
+      setValue('diskSize', DEFAULT_DISK_SIZE);
+    }
+    trigger('diskSize');
+  }, [getValues('diskType')]);
 
   const getAcceleratedTypeOptions = useCallback(
     (acceleratorConfigs: IAcceleratorConfig[]): ILabelValue<string>[] => {
@@ -1056,9 +1053,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           </div>
         )}
       </div>
-      <div className="tab-description tab-text-sub-cl">
-        {CLOUD_STORAGE_BUCKET_HELPER_TEXT}
-      </div>
+      {!vertexErrors.cloudStorageBucket && (
+        <div className="tab-description tab-text-sub-cl">
+          {CLOUD_STORAGE_BUCKET_HELPER_TEXT}
+        </div>
+      )}
       {/* Disk Type and Size */}
       <div
         className={
@@ -1086,7 +1085,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             label="Disk size*"
             control={control}
             name="diskSize"
-            onBlurCallback={handleDiskSizeBlur}
             error={vertexErrors.diskSize}
             type="number"
             disabled={!currentDiskType}
