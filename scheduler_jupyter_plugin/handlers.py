@@ -13,8 +13,10 @@
 # limitations under the License.
 
 
+import os
 import json
 import subprocess
+from datetime import datetime
 
 
 import tornado
@@ -137,6 +139,15 @@ class LogHandler(APIHandler):
         logger = self.log.getChild("SchedulerPluginClient")
         log_body = self.get_json_body()
         logger.log(log_body["level"], log_body["message"])
+
+        timestamp_day_str = datetime.now().strftime("%Y%m%d")
+        log_file = f"frontend_log_{timestamp_day_str}.log"
+        LOCAL_LOG_FILE_LOCATION = f"./scheduler-logs"
+        file_path = os.path.join(LOCAL_LOG_FILE_LOCATION, log_file)
+        os.makedirs(LOCAL_LOG_FILE_LOCATION, exist_ok=True)
+        with open(file_path, mode="a", encoding="utf-8") as message:
+            log_entry_json = json.dumps(log_body)
+            message.write(log_entry_json + "\n")
         self.finish({"status": "OK"})
 
 
