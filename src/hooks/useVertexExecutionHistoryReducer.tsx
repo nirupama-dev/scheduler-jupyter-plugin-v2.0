@@ -21,6 +21,7 @@ import { VertexServices } from '../services/vertex/VertexServices';
 import { handleOpenLoginWidget } from '../components/common/login/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IExecutionHistoryState } from '../interfaces/VertexInterface';
+import { VERTEX_EXECUTION_HISTORY_LOGS_URL } from '../utils/Constants';
 
 const executionHistoryReducer = (
   state: IExecutionHistoryState,
@@ -52,8 +53,6 @@ const executionHistoryReducer = (
         vertexScheduleRunsList: []
       };
     }
-    case 'SET_SCHEDULE_RUN_DATA':
-      return { ...state, scheduleRunsData: action.payload };
     case 'SET_SCHEDULE_RUN_ID':
       return { ...state, scheduleId: action.payload };
     case 'SET_VERTEX_RUNS':
@@ -70,7 +69,6 @@ const executionHistoryReducer = (
 const initialState = {
   scheduleId: '',
   vertexScheduleRunsList: [],
-  scheduleRunsData: undefined,
   selectedMonth: null,
   selectedDate: null,
   initialDisplayDate: null,
@@ -204,22 +202,23 @@ export const useExecutionHistory = (
   );
 
   const handleLogs = useCallback(() => {
-    if (!state.scheduleId) {
-      return;
-    }
-    const logExplorerUrl = new URL(
-      'https://console.cloud.google.com/logs/query'
-    );
-    logExplorerUrl.searchParams.set('query', `SEARCH("${state.scheduleId}")`);
-    if (state.scheduleRunsData?.startDate) {
+    if (state.vertexScheduleRunsList.length > 0) {
+      const logExplorerUrl = new URL(VERTEX_EXECUTION_HISTORY_LOGS_URL);
       logExplorerUrl.searchParams.set(
-        'cursorTimestamp',
-        state.scheduleRunsData.startDate
+        'query',
+        `SEARCH("${state.vertexScheduleRunsList[0].scheduleRunId}")`
       );
+      if (state.vertexScheduleRunsList?.startDate) {
+        logExplorerUrl.searchParams.set(
+          'cursorTimestamp',
+          state.vertexScheduleRunsList.startDate
+        );
+      }
+      logExplorerUrl.searchParams.set('project', state.projectId);
+      window.open(logExplorerUrl.toString(), '_blank');
     }
-    logExplorerUrl.searchParams.set('project', state.projectId);
-    window.open(logExplorerUrl.toString(), '_blank');
-  }, [state.scheduleId, state.scheduleRunsData, state.projectId]);
+    return;
+  }, [state.vertexScheduleRunsList, state.projectId]);
 
   return {
     ...state,

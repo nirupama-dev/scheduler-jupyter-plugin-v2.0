@@ -393,7 +393,6 @@ export interface IFetchLastRunPayload {
 export interface IExecutionHistoryState {
   scheduleId: string;
   vertexScheduleRunsList: IScheduleRun[];
-  scheduleRunsData: unknown;
   selectedMonth: Dayjs | null;
   selectedDate: Dayjs | null;
   initialDisplayDate: Dayjs | null;
