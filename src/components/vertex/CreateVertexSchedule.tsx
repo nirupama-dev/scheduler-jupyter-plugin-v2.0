@@ -416,7 +416,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       );
 
       if (!isValidExisting) {
-        setValue('primaryNetwork', ''); //primary network is optional and by default empty. it will reset to blank value if editmode had some invalid bvalue as well.
+        setValue('primaryNetwork', ''); //primary network is optional and by default empty. it will reset to blank value if editmode had some invalid value as well.
         console.log(
           'Resetting primary network to empty as existing value is invalid.'
         );
@@ -427,7 +427,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       }
 
       setPrimaryNetworkList([]);
-      setValue('primaryNetwork', '');
+      // setValue('primaryNetwork', '');
       handleErrorToast({ error: 'Failed to fetch primary networks.' });
     } finally {
       setLoadingState(prev => ({ ...prev, primaryNetwork: false }));
@@ -442,61 +442,55 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    */
   const fetchSubNetworks = useCallback(
     async (region: string, primaryNetworkValue: string) => {
-      console.log('fetchSubNetworks');
-      console.log(
-        'Fetching subnetworks for region:',
-        region,
-        'and primary network:',
-        primaryNetworkValue
-      );
-
       if (!region || !primaryNetworkValue) {
         setSubNetworkList([]);
         setValue('subNetwork', '');
         return;
       }
       setLoadingState(prev => ({ ...prev, subNetwork: true }));
-      try {
-        const primaryNetworkLabel = primaryNetworkList.find(
-          n => n.value === primaryNetworkValue
-        )?.label;
-        console.log('Primary network label:', primaryNetworkLabel);
-        const subNetworkListResp = await ComputeServices.subNetworkAPIService(
+      if (region && primaryNetworkValue) {
+        console.log('fetchSubNetworks');
+        console.log(
+          'Fetching subnetworks for region:',
           region,
-          primaryNetworkLabel
+          'and primary network:',
+          primaryNetworkValue
         );
-        setSubNetworkList(subNetworkListResp);
-        console.log('Fetched subnetworks:', subNetworkListResp);
-        // Set default or existing value if valid, otherwise reset
-        const currentSubnetworkValue = getValues('subNetwork');
-        const isValidExisting = subNetworkListResp.some(
-          sn => sn.value === currentSubnetworkValue
-        );
+        try {
+          const primaryNetworkLabel = primaryNetworkList.find(
+            n => n.value === primaryNetworkValue
+          )?.label;
+          console.log('Primary network label:', primaryNetworkLabel);
+          const subNetworkListResp = await ComputeServices.subNetworkAPIService(
+            region,
+            primaryNetworkLabel
+          );
+          setSubNetworkList(subNetworkListResp);
+          console.log('Fetched subnetworks:', subNetworkListResp);
+          // Set default or existing value if valid, otherwise reset
+          const currentSubnetworkValue = getValues('subNetwork');
+          const isValidExisting = subNetworkListResp.some(
+            sn => sn.value === currentSubnetworkValue
+          );
 
-        if (!isValidExisting) {
-          setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
-        }
-      } catch (error) {
-        if (error instanceof AuthenticationError) {
-          handleOpenLoginWidget(app);
-        }
+          if (!isValidExisting) {
+            setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
+          }
+        } catch (error) {
+          if (error instanceof AuthenticationError) {
+            handleOpenLoginWidget(app);
+          }
 
-        setSubNetworkList([]);
-        setValue('subNetwork', '');
-        handleErrorToast({ error: 'Failed to fetch subNetworks.' });
-      } finally {
-        setLoadingState(prev => ({ ...prev, subNetwork: false }));
-        trigger('subNetwork');
-        trigger('primaryNetwork'); // Ensure primary network validation is updated
+          setSubNetworkList([]);
+          handleErrorToast({ error: 'Failed to fetch subNetworks.' });
+        } finally {
+          setLoadingState(prev => ({ ...prev, subNetwork: false }));
+          trigger('subNetwork');
+          trigger('primaryNetwork'); // Ensure primary network validation is updated
+        }
       }
     },
-    [
-      setValue,
-      getValues,
-      editScheduleData,
-      currentNetworkOption,
-      currentPrimaryNetwork
-    ]
+    [setValue, getValues, editScheduleData, currentPrimaryNetwork]
   );
 
   /**
@@ -681,17 +675,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     [setValue, trigger]
   );
 
-  const handleDiskSizeBlur = useCallback(
-    (event: React.FocusEvent<HTMLInputElement>) => {
-      const diskSizeValue = getValues('diskSize');
-      // If disk size is blurred and is empty, set to default IF disk type is selected
-      if (diskSizeValue === '' && currentDiskType) {
-        setValue('diskSize', DEFAULT_DISK_SIZE);
-      }
-      trigger('diskSize'); // Trigger validation on blur
-    },
-    [setValue, currentDiskType, trigger, getValues]
-  );
+  useEffect(() => {
+    const diskSizeValue = getValues('diskSize');
+    const diskTypeValue = getValues('diskType');
+    if (diskSizeValue === '' && diskTypeValue) {
+      setValue('diskSize', DEFAULT_DISK_SIZE);
+    }
+    trigger('diskSize');
+  }, [getValues('diskType')]);
 
   const getAcceleratedTypeOptions = useCallback(
     (acceleratorConfigs: IAcceleratorConfig[]): ILabelValue<string>[] => {
@@ -1056,9 +1047,11 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           </div>
         )}
       </div>
-      <div className="tab-description tab-text-sub-cl">
-        {CLOUD_STORAGE_BUCKET_HELPER_TEXT}
-      </div>
+      {!vertexErrors.cloudStorageBucket && (
+        <div className="tab-description tab-text-sub-cl">
+          {CLOUD_STORAGE_BUCKET_HELPER_TEXT}
+        </div>
+      )}
       {/* Disk Type and Size */}
       <div
         className={
@@ -1086,7 +1079,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             label="Disk size*"
             control={control}
             name="diskSize"
-            onBlurCallback={handleDiskSizeBlur}
             error={vertexErrors.diskSize}
             type="number"
             disabled={!currentDiskType}
@@ -1406,7 +1398,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                       <DateTimePicker
                         {...field}
                         className="scheduler-tag-style create-scheduler-form-element-input-fl"
-                        label="Start Date*"
+                        label="Start Date"
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
                           field.onChange(
@@ -1437,7 +1429,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                       <DateTimePicker
                         {...field}
                         className="scheduler-tag-style create-scheduler-form-element-input-fl"
-                        label="End Date*"
+                        label="End Date"
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
                           field.onChange(
