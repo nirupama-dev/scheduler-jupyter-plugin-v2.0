@@ -442,61 +442,55 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    */
   const fetchSubNetworks = useCallback(
     async (region: string, primaryNetworkValue: string) => {
-      console.log('fetchSubNetworks');
-      console.log(
-        'Fetching subnetworks for region:',
-        region,
-        'and primary network:',
-        primaryNetworkValue
-      );
-
       if (!region || !primaryNetworkValue) {
         setSubNetworkList([]);
         setValue('subNetwork', '');
         return;
       }
       setLoadingState(prev => ({ ...prev, subNetwork: true }));
-      try {
-        const primaryNetworkLabel = primaryNetworkList.find(
-          n => n.value === primaryNetworkValue
-        )?.label;
-        console.log('Primary network label:', primaryNetworkLabel);
-        const subNetworkListResp = await ComputeServices.subNetworkAPIService(
+      if (region && primaryNetworkValue) {
+        console.log('fetchSubNetworks');
+        console.log(
+          'Fetching subnetworks for region:',
           region,
-          primaryNetworkLabel
+          'and primary network:',
+          primaryNetworkValue
         );
-        setSubNetworkList(subNetworkListResp);
-        console.log('Fetched subnetworks:', subNetworkListResp);
-        // Set default or existing value if valid, otherwise reset
-        const currentSubnetworkValue = getValues('subNetwork');
-        const isValidExisting = subNetworkListResp.some(
-          sn => sn.value === currentSubnetworkValue
-        );
+        try {
+          const primaryNetworkLabel = primaryNetworkList.find(
+            n => n.value === primaryNetworkValue
+          )?.label;
+          console.log('Primary network label:', primaryNetworkLabel);
+          const subNetworkListResp = await ComputeServices.subNetworkAPIService(
+            region,
+            primaryNetworkLabel
+          );
+          setSubNetworkList(subNetworkListResp);
+          console.log('Fetched subnetworks:', subNetworkListResp);
+          // Set default or existing value if valid, otherwise reset
+          const currentSubnetworkValue = getValues('subNetwork');
+          const isValidExisting = subNetworkListResp.some(
+            sn => sn.value === currentSubnetworkValue
+          );
 
-        if (!isValidExisting) {
-          setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
-        }
-      } catch (error) {
-        if (error instanceof AuthenticationError) {
-          handleOpenLoginWidget(app);
-        }
+          if (!isValidExisting) {
+            setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
+          }
+        } catch (error) {
+          if (error instanceof AuthenticationError) {
+            handleOpenLoginWidget(app);
+          }
 
-        setSubNetworkList([]);
-        // setValue('subNetwork', '');
-        handleErrorToast({ error: 'Failed to fetch subNetworks.' });
-      } finally {
-        setLoadingState(prev => ({ ...prev, subNetwork: false }));
-        trigger('subNetwork');
-        trigger('primaryNetwork'); // Ensure primary network validation is updated
+          setSubNetworkList([]);
+          handleErrorToast({ error: 'Failed to fetch subNetworks.' });
+        } finally {
+          setLoadingState(prev => ({ ...prev, subNetwork: false }));
+          trigger('subNetwork');
+          trigger('primaryNetwork'); // Ensure primary network validation is updated
+        }
       }
     },
-    [
-      setValue,
-      getValues,
-      editScheduleData,
-      currentNetworkOption,
-      currentPrimaryNetwork
-    ]
+    [setValue, getValues, editScheduleData, currentPrimaryNetwork]
   );
 
   /**
