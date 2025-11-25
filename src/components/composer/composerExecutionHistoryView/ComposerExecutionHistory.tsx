@@ -26,6 +26,7 @@ import ExecutionHistoryHeader from '../../vertex/vertexExecutionHistoryView/Vert
 import { Box, LinearProgress } from '@mui/material';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { abortApiCall } from '../../../utils/Config';
+import dayjs from 'dayjs';
 
 const ComposerExecutionHistory = ({
   abortControllers,
@@ -70,9 +71,9 @@ const ComposerExecutionHistory = ({
   );
 
   const calendarProps = {
-    createTime,
-    currentDate,
-    selectedDate,
+    createTime: createTime ? dayjs(createTime) : null,
+    currentDate: currentDate ? dayjs(currentDate) : dayjs(),
+    selectedDate: selectedDate ? dayjs(selectedDate) : null,
     greyListDates,
     redListDates,
     greenListDates,

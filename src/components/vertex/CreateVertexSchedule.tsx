@@ -1128,7 +1128,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           projectId={credentials?.project_id}
         />
       </div>
-      {/* --- Customer-Managed Encryption (CMEK) Section --- */}
+      {/* Customer-Managed Encryption (CMEK) */}
       {encryptionSelected === CUSTOMER_ENCRYPTION && (
         <div className="schedule-child-section horizontal-element-wrapper">
           <FormInputRadio
@@ -1139,7 +1139,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
             errorFlag={vertexErrors.keyRing || vertexErrors.cryptoKey}
           />
 
-          {/* Option 1: Select Key Ring and Key */}
+          {/* Select Key Ring and Key */}
           <div className="encryption-custom-radio-element">
             <div className="horizontal-element-wrapper scheduler-input-top">
               <div className="scheduler-form-element-container create-scheduler-form-element-input-fl create-pr">
@@ -1180,7 +1180,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               </div>
             </div>
 
-            {/* Option 2: Enter Key Manually */}
+            {/* Enter Key Manually */}
             <div className="scheduler-form-element-container scheduler-input-top encryption-custom-radio-manual">
               <FormInputText
                 name="manualKey"
