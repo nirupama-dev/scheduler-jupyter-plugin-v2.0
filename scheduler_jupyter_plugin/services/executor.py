@@ -232,7 +232,8 @@ class Client:
                 )
                 template = environment.get_template(DAG_TEMPLATE_CLUSTER_V1)
                 if not job.input_filename.startswith(GCS):
-                    input_notebook = f"gs://{gcs_dag_bucket}/dataproc-notebooks/{job.name}/input_notebooks/{job.input_filename}"
+                    trimmed_input_filename = job.input_filename.split('/')[-1]
+                    input_notebook = f"gs://{gcs_dag_bucket}/dataproc-notebooks/{job.name}/input_notebooks/{trimmed_input_filename}"
                 else:
                     input_notebook = job.input_filename
                 content = template.render(
@@ -305,7 +306,8 @@ class Client:
         else:
             template = environment.get_template(DAG_TEMPLATE_LOCAL_V1)
             if not job.input_filename.startswith(GCS):
-                input_notebook = f"gs://{gcs_dag_bucket}/dataproc-notebooks/{job.name}/input_notebooks/{job.input_filename}"
+                trimmed_input_filename = job.input_filename.split('/')[-1]
+                input_notebook = f"gs://{gcs_dag_bucket}/dataproc-notebooks/{job.name}/input_notebooks/{trimmed_input_filename}"
             else:
                 input_notebook = job.input_filename
             if len(job.parameters) != 0:
