@@ -50,7 +50,7 @@ export interface IDropdownOption {
 
 export interface IEnvDropDownOption extends IDropdownOption {
   state: string;
-  pypi_packages_installed?: {};
+  pypi_packages_installed?: Record<string, never>;
 }
 
 export interface IFormInputDropdownProps<OptionType = ILabelValue<string>> {
