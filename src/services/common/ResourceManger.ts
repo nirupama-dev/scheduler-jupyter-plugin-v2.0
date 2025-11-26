@@ -25,7 +25,7 @@ export class ResourceManagerServices {
   static readonly projectAPIService = async (): Promise<IDropdownOption[]> => {
     try {
       const projectResponse: IProjectAPIResponse[] =
-        await requestAPI(`projectsList`);
+        await requestAPI('projectsList');
 
       if (!Array.isArray(projectResponse)) {
         throw new Error('Invalid response format for project list');
