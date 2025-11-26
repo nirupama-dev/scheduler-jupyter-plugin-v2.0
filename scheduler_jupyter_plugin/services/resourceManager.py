@@ -17,6 +17,7 @@ from google.cloud import resourcemanager_v3
 import google.oauth2.credentials as oauth2
 from google.auth.exceptions import RefreshError
 
+
 class Client:
     def __init__(self, credentials, log):
         self.log = log
@@ -35,14 +36,16 @@ class Client:
         try:
             credentials = oauth2.Credentials(self._access_token)
             proj_client = resourcemanager_v3.ProjectsClient(credentials=credentials)
-                
-            projects = []  
+
+            projects = []
             projects_iterator = proj_client.search_projects()
             for project in projects_iterator:
-                projects.append({
-                    "project_id": project.project_id,
-                    "name": project.display_name,
-                })         
+                projects.append(
+                    {
+                        "project_id": project.project_id,
+                        "name": project.display_name,
+                    }
+                )
             return projects
 
         except RefreshError as e:

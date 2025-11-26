@@ -21,12 +21,15 @@ from jupyter_server.base.handlers import APIHandler
 from scheduler_jupyter_plugin import credentials
 from scheduler_jupyter_plugin.services import resourceManager
 
+
 class ProjectsListController(APIHandler):
     @tornado.web.authenticated
     async def get(self):
         """Returns projects list"""
         try:
-            resource_manager_client = resourceManager.Client(await credentials.get_cached(), self.log)
+            resource_manager_client = resourceManager.Client(
+                await credentials.get_cached(), self.log
+            )
             projects = await resource_manager_client.list_gcp_projects()
             self.finish(json.dumps(projects))
         except RuntimeError as e:

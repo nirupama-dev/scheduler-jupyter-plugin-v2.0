@@ -122,9 +122,7 @@ class Client:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
             credentials = oauth2.Credentials(self._access_token)
-            storage_client = storage.Client(
-                credentials=credentials, project=project_id
-            )
+            storage_client = storage.Client(credentials=credentials, project=project_id)
             bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(file_path)
             exists = await asyncio.to_thread(blob.exists)
@@ -166,7 +164,7 @@ class Client:
         except Exception as error:
             self.log.exception(f"Error uploading file to GCS: {str(error)}")
             raise IOError(str(error))
-        
+
     async def get_cluster_details(self, cluster_name):
         try:
             dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
@@ -186,9 +184,7 @@ class Client:
             self.log.exception("Error fetching cluster list")
             return {"error": str(e)}
 
-    async def multi_tenant_user_service_account(
-        self, cluster_name
-    ):
+    async def multi_tenant_user_service_account(self, cluster_name):
         cluster_data = await self.get_cluster_details(cluster_name)
         if cluster_data:
             multi_tenant = (
@@ -209,7 +205,7 @@ class Client:
                     .get(user_email, "")
                 )
                 if service_account:
-                    return service_account   
+                    return service_account
         return ""
 
     async def prepare_dag(self, job, gcs_dag_bucket, dag_file, project_id, region_id):
@@ -246,12 +242,14 @@ class Client:
             parameters = ""
         if job.local_kernel is False:
             if job.mode_selected == "cluster":
-                multi_tenant_service_account = await self.multi_tenant_user_service_account(
-                    cluster_name=job.cluster_name,
+                multi_tenant_service_account = (
+                    await self.multi_tenant_user_service_account(
+                        cluster_name=job.cluster_name,
+                    )
                 )
                 template = environment.get_template(DAG_TEMPLATE_CLUSTER_V1)
                 if not job.input_filename.startswith(GCS):
-                    trimmed_input_filename = job.input_filename.split('/')[-1]
+                    trimmed_input_filename = job.input_filename.split("/")[-1]
                     input_notebook = f"gs://{gcs_dag_bucket}/dataproc-notebooks/{job.name}/input_notebooks/{trimmed_input_filename}"
                 else:
                     input_notebook = job.input_filename
@@ -325,7 +323,7 @@ class Client:
         else:
             template = environment.get_template(DAG_TEMPLATE_LOCAL_V1)
             if not job.input_filename.startswith(GCS):
-                trimmed_input_filename = job.input_filename.split('/')[-1]
+                trimmed_input_filename = job.input_filename.split("/")[-1]
                 input_notebook = f"gs://{gcs_dag_bucket}/dataproc-notebooks/{job.name}/input_notebooks/{trimmed_input_filename}"
             else:
                 input_notebook = job.input_filename
@@ -385,7 +383,12 @@ class Client:
             raise IOError(f"Error checking packages: {error}")
 
     async def install_to_composer_environment(
-        self, local_kernel, composer_environment_name, packages_to_install, region_id, project_id
+        self,
+        local_kernel,
+        composer_environment_name,
+        packages_to_install,
+        region_id,
+        project_id,
     ):
         try:
             installing_packages = "false"
@@ -433,7 +436,7 @@ class Client:
                     job.composer_environment_name,
                     job.packages_to_install,
                     region_id,
-                    project_id
+                    project_id,
                 )
             if install_packages and install_packages.get("error"):
                 raise RuntimeError(install_packages)

@@ -300,7 +300,7 @@ class Client:
                         "status": response.status,
                     }
                 )
-            
+
     async def get_bucket(self, runtime_env, project_id, region_id):
         composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
         if project_id and region_id:
@@ -360,7 +360,7 @@ class Client:
             file_response = await self.get_dag_file(dag_id, bucket_name)
             content_str = file_response.decode("utf-8")
             file_content = re.sub(r"(?<!\\)\\(?!n)", "", content_str)
-            output_formats = ['Notebook']
+            output_formats = ["Notebook"]
 
             if file_content:
                 for line in file_content.split("\n"):

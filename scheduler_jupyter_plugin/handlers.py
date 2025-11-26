@@ -94,7 +94,7 @@ class CredentialsHandler(APIHandler):
         except RuntimeError as e:
             error_data = e.args[0]
             status_code = error_data.get("status", 500)
- 
+
             self.log.exception(f"Error fetching credentials from gcloud: {str(e)}")
             self.set_status(status_code)
             self.finish(json.dumps(error_data))
