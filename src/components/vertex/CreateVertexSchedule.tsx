@@ -815,6 +815,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    * @param {string} keyRing selected key ring to list down the keys
    */
   const listCryptoKeysAPI = async (keyRing: string) => {
+    setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
     const listKeysPayload = {
       credentials: {
         region: credentials?.region_id,
@@ -834,6 +835,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('cryptoKey', cryptoKeyListResponse[0].value);
         clearErrors('cryptoKey');
       }
+      setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
     }
     setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
   };
