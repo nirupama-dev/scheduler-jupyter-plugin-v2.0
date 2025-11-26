@@ -129,6 +129,7 @@ const ListVertexSchedule = ({
         setRegion(regionSelected.value);
       } else {
         setRegion('');
+        setVertexScheduleList([]);
       }
     },
     [region, abortControllers]
@@ -709,15 +710,17 @@ const ListVertexSchedule = ({
               fromPage="Vertex"
             />
             {vertexScheduleList.length > 0 && (
-              <PaginationComponent
-                canPreviousPage={canPreviousPage}
-                canNextPage={canNextPage}
-                pageNumber={pageNumber}
-                handleNextPage={handleNextPage}
-                handlePreviousPage={handlePreviousPage}
-                isLoading={loaderState.isLoading}
-                totalCount={totalCount}
-              />
+              <div className="pagination-container">
+                <PaginationComponent
+                  canPreviousPage={canPreviousPage}
+                  canNextPage={canNextPage}
+                  pageNumber={pageNumber}
+                  handleNextPage={handleNextPage}
+                  handlePreviousPage={handlePreviousPage}
+                  isLoading={loaderState.isLoading}
+                  totalCount={totalCount}
+                />
+              </div>
             )}
             {deletingScheduleDetails?.deletePopUpShow && (
               <DeletePopup

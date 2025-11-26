@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputCheckbox } from '../common/formFields/FormInputCheckbox';
 import { FormInputText } from '../common/formFields/FormInputText';
@@ -33,6 +33,7 @@ import {
 } from '../../interfaces/ComposerInterface';
 import {
   allowedPeriodsCron,
+  COMPOSER_DEFAULT_SCHEDULE_VALUE,
   composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
@@ -46,6 +47,7 @@ import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
 import { FormInputChips } from '../common/formFields/FormInputChips';
 import { ResourceManagerServices } from '../../services/common/ResourceManger';
+import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
 
 export const CreateComposerSchedule: React.FC<
   ICreateComposerSchedulerProps
@@ -84,7 +86,11 @@ export const CreateComposerSchedule: React.FC<
     serverless: false
     // ... initialize other mandatory properties
   });
-
+  const [defaultFormValues, setDefaultFormValues] =
+    useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
+  const lastCronValue = useRef(
+    getValues('scheduleValue') || COMPOSER_DEFAULT_SCHEDULE_VALUE
+  ); // memory state for last cron value on run on schedule
   const timezones = Object.keys(tzdata.zones).sort();
   const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
     label: zone,
@@ -94,7 +100,7 @@ export const CreateComposerSchedule: React.FC<
   // Watch for changes in form fields
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
-  const scheduleMode = watch('scheduleMode');
+  const runOption = watch('runOption');
   const emailOnFailure = watch('emailOnFailure');
   const emailOnRetry = watch('emailOnRetry');
   const emailOnSuccess = watch('emailOnSuccess');
@@ -104,9 +110,6 @@ export const CreateComposerSchedule: React.FC<
   const composerErrors = isComposerForm
     ? (errors as FieldErrors<z.infer<typeof createComposerSchema>>)
     : {};
-  console.log('is valid', isValid);
-  console.log('composerErrors', composerErrors);
-  console.log('getValues', getValues());
 
   const fetchProjects = async () => {
     setValue('projectId', '');
@@ -183,6 +186,15 @@ export const CreateComposerSchedule: React.FC<
       );
       setEnvOptions(options.environmentOptions);
       setComposerEnvData(options.composerListResponse);
+      const currentEnvValue = getValues('environment');
+      if (currentEnvValue) {
+        const isEnvValid = options.environmentOptions.some(env => env.value === currentEnvValue);
+        if (isEnvValid) {
+          setValue('environment', currentEnvValue);
+        } else {
+          setValue('environment', '');
+        }
+      }
     } catch (authenticationError) {
       handleOpenLoginWidget(app);
     } finally {
@@ -254,6 +266,7 @@ export const CreateComposerSchedule: React.FC<
     ) {
       fetchRemoteKernelData();
     }
+    setDefaultFormValues(getValues());
   }, []);
 
   useEffect(() => {
@@ -271,7 +284,6 @@ export const CreateComposerSchedule: React.FC<
       setValue('composerRegion', '');
       setEnvOptions([]);
       setComposerEnvData([]);
-      setValue('environment', '');
     }
 
     // Clear subsequent fields when project_id changes
@@ -286,9 +298,8 @@ export const CreateComposerSchedule: React.FC<
     } else {
       setEnvOptions([]);
       setComposerEnvData([]);
-      setValue('environment', '');
     }
-  }, [selectedRegion, setValue]);
+  }, [selectedRegion]);
 
   /**
    * Effect to fetch Cluster/ Serverless data when execution mode changes.
@@ -299,6 +310,24 @@ export const CreateComposerSchedule: React.FC<
     }
   }, [executionMode, setValue]);
 
+  useEffect(() => {
+    if (runOption === 'runSchedule') {
+      // When switching TO 'runSchedule', restore the last known cron value
+      setValue('scheduleValue', lastCronValue.current);
+    } else {
+      // When switching AWAY (to 'runNow'), clear the form value
+      setValue('scheduleValue', '');
+      console.log('clearing schedule value on run now');
+    }
+    console.log('getValues', getValues());
+  }, [runOption, setValue]);
+
+  useEffect(() => {
+    if (!emailOnFailure && !emailOnRetry && !emailOnSuccess) {
+      setValue('emailRecipients', []);
+    }
+  }, [emailOnFailure, emailOnRetry, emailOnSuccess]);
+
   // Handle Project ID change: Clear Region and Environment
   const handleProjectIdChange = useCallback(
     (projectValue: string) => {
@@ -308,7 +337,7 @@ export const CreateComposerSchedule: React.FC<
       setComposerEnvData([]);
       trigger(['composerRegion', 'environment', 'projectId']);
     },
-    [setValue]
+    [setValue, trigger]
   );
 
   // Handle Region change: Clear Environment
@@ -319,7 +348,7 @@ export const CreateComposerSchedule: React.FC<
       setComposerEnvData([]);
       trigger(['environment', 'composerRegion']);
     },
-    [setValue]
+    [setValue, trigger]
   );
 
   const findEnvironmentSelected = (
@@ -357,7 +386,6 @@ export const CreateComposerSchedule: React.FC<
 
   const handleEnvChange = useCallback(
     (environmentValue: string) => {
-      setValue('environment', environmentValue);
       if (environmentValue) {
         const selectedEnvironment = findEnvironmentSelected(
           environmentValue,
@@ -372,15 +400,12 @@ export const CreateComposerSchedule: React.FC<
       }
       trigger('environment');
     },
-    [setValue, composerEnvData]
+    [composerEnvData, executionMode, checkRequiredPackages, trigger]
   );
 
-  const handleCronExpression = useCallback(
-    (value: string) => {
-      setValue('scheduleValue', value);
-    },
-    [setValue]
-  );
+  console.log('is valid', isValid);
+  console.log('composerErrors', composerErrors);
+  console.log('getValues', getValues());
 
   return (
     <div>
@@ -395,6 +420,9 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleProjectIdChange}
           error={composerErrors.projectId}
+          disabled={
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
         />
       </div>
       <div className="scheduler-form-element-container scheduler-input-top">
@@ -408,6 +436,9 @@ export const CreateComposerSchedule: React.FC<
           customClass="scheduler-tag-style "
           onChangeCallback={handleRegionChange}
           error={composerErrors.composerRegion}
+          disabled={
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
         />
       </div>
       <div
@@ -424,7 +455,10 @@ export const CreateComposerSchedule: React.FC<
           setValue={setValue}
           options={envOptions}
           loading={loadingState.environment}
-          disabled={!selectedRegion}
+          disabled={
+            !selectedRegion ||
+            initialSchedulerDataContext?.editModeData?.editMode === true
+          }
           customClass="scheduler-tag-style "
           onChangeCallback={handleEnvChange}
           error={composerErrors.environment}
@@ -460,6 +494,7 @@ export const CreateComposerSchedule: React.FC<
           onChangeCallback={() => {
             trigger('outputFormatAsNotebook');
           }}
+          disableColor={true}
         />
       </div>
       <AddParameters control={control} errors={errors} />
@@ -485,6 +520,7 @@ export const CreateComposerSchedule: React.FC<
                 loading={loadingState.cluster}
                 customClass="scheduler-tag-style "
                 error={composerErrors.cluster}
+                onChangeCallback={() => trigger('cluster')}
               />
             </div>
           )}
@@ -499,6 +535,7 @@ export const CreateComposerSchedule: React.FC<
                 loading={loadingState.serverless}
                 customClass="scheduler-tag-style "
                 error={composerErrors.serverless}
+                onChangeCallback={() => trigger('serverless')}
               />
             </div>
           )}
@@ -569,13 +606,13 @@ export const CreateComposerSchedule: React.FC<
       <div className="create-scheduler-label block-seperation">Schedule</div>
       <div className="scheduler-form-element-container">
         <FormInputRadio
-          name="scheduleMode"
+          name="runOption"
           control={control}
           className="network-layout"
           options={SCHEDULE_MODE_OPTIONS}
         />
       </div>
-      {scheduleMode === 'runSchedule' && (
+      {runOption === 'runSchedule' && (
         <div>
           <div className="scheduler-input-top">
             <Controller
@@ -586,7 +623,7 @@ export const CreateComposerSchedule: React.FC<
                   value={field.value || ''}
                   setValue={(newValue: string) => {
                     field.onChange(newValue);
-                    handleCronExpression(newValue);
+                    lastCronValue.current = newValue;
                   }}
                   allowedPeriods={
                     allowedPeriodsCron as PeriodType[] | undefined
@@ -604,6 +641,9 @@ export const CreateComposerSchedule: React.FC<
               options={timeZoneOptions}
               customClass="scheduler-tag-style "
               error={composerErrors.timeZone}
+              onChangeCallback={() => trigger('timeZone')}
+              retainDefaultOnClear={true}
+              defaultValue={defaultFormValues.timeZone}
             />
           </div>
         </div>

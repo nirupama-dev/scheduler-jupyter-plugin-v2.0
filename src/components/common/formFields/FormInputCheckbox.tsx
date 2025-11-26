@@ -30,7 +30,8 @@ export const FormInputCheckbox: React.FC<IFormInputCheckboxProps> = ({
   control,
   label,
   disabled = false,
-  className
+  className,
+  disableColor = false
 }) => {
   return (
     <FormControlLabel
@@ -42,6 +43,14 @@ export const FormInputCheckbox: React.FC<IFormInputCheckboxProps> = ({
             <Checkbox
               {...field} // Spreads onChange, onBlur, value (boolean)
               checked={field.value ?? false}
+              sx={{
+                '&.Mui-disabled':
+                  disabled && disableColor
+                    ? {
+                        color: theme => theme.palette.primary.main
+                      }
+                    : {}
+              }}
             />
           )}
         />

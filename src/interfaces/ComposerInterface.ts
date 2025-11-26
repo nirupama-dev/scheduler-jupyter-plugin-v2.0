@@ -58,7 +58,7 @@ export interface IComposerSchedulePayload {
   composer_environment_name: string;
   local_kernel: boolean;
   output_formats: string[];
-  parameters: string;
+  parameters: string[];
   serverless_name?: string;
   cluster_name?: string;
   mode_selected: string;
@@ -150,13 +150,6 @@ export interface ILoadingStateComposerListing {
   editNotebook: string;
   delete: boolean;
   editSchedule: string;
-}
-
-export interface IDagList {
-  jobid: string;
-  notebookname: string;
-  schedule: string;
-  scheduleInterval: string;
 }
 
 export interface IListDagInfoAPIServiceResponse {

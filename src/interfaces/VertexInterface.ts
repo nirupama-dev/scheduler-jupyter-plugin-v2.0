@@ -383,3 +383,24 @@ export interface ICryptoListKeys {
   credentials: IKeyRingPayload;
   keyRing: string;
 }
+
+export interface IFetchLastRunPayload {
+  scheduleId: any;
+  region: string;
+  abortControllers: any;
+}
+
+export interface IExecutionHistoryState {
+  scheduleId: string;
+  vertexScheduleRunsList: IScheduleRun[];
+  selectedMonth: Dayjs | null;
+  selectedDate: Dayjs | null;
+  initialDisplayDate: Dayjs | null;
+  isLoading: boolean;
+  greyListDates: Dayjs[];
+  redListDates: Dayjs[];
+  greenListDates: Dayjs[];
+  darkGreenListDates: Dayjs[];
+  projectId: string;
+  hasScheduleExecutions: boolean;
+}

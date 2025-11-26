@@ -20,8 +20,13 @@ import { useCallback, useEffect, useReducer } from 'react';
 import { VertexServices } from '../services/vertex/VertexServices';
 import { handleOpenLoginWidget } from '../components/common/login/Config';
 import { JupyterFrontEnd } from '@jupyterlab/application';
+import { IExecutionHistoryState } from '../interfaces/VertexInterface';
+import { VERTEX_EXECUTION_HISTORY_LOGS_URL } from '../utils/Constants';
 
-const executionHistoryReducer = (state: any, action: any) => {
+const executionHistoryReducer = (
+  state: IExecutionHistoryState,
+  action: any
+) => {
   switch (action.type) {
     case 'SET_LOADING':
       return { ...state, isLoading: action.payload };
@@ -43,17 +48,19 @@ const executionHistoryReducer = (state: any, action: any) => {
         ...state,
         selectedMonth: resolvedMonth,
         selectedDate:
-          resolvedMonth.month() !== dayjs().month() ? null : dayjs(),
+          resolvedMonth?.month() !== dayjs().month() ? null : dayjs(),
         scheduleId: '',
         vertexScheduleRunsList: []
       };
     }
-    case 'SET_SCHEDULE_RUN_DATA':
-      return { ...state, scheduleRunsData: action.payload };
     case 'SET_SCHEDULE_RUN_ID':
       return { ...state, scheduleId: action.payload };
     case 'SET_VERTEX_RUNS':
       return { ...state, vertexScheduleRunsList: action.payload };
+    case 'SET_INITIAL_DISPLAY_DATE':
+      return { ...state, initialDisplayDate: action.payload };
+    case 'SET_HAS_SCHEDULE_EXECUTIONS':
+      return { ...state, hasScheduleExecutions: action.payload };
     default:
       return state;
   }
@@ -62,15 +69,16 @@ const executionHistoryReducer = (state: any, action: any) => {
 const initialState = {
   scheduleId: '',
   vertexScheduleRunsList: [],
-  scheduleRunsData: undefined,
-  selectedMonth: dayjs(),
-  selectedDate: dayjs(),
+  selectedMonth: null,
+  selectedDate: null,
+  initialDisplayDate: null,
   isLoading: false,
   greyListDates: [],
   redListDates: [],
   greenListDates: [],
   darkGreenListDates: [],
-  projectId: ''
+  projectId: '',
+  hasScheduleExecutions: false
 };
 
 export const useExecutionHistory = (
@@ -111,11 +119,53 @@ export const useExecutionHistory = (
     }
   };
 
+  /**
+   * Fetch last run execution for the schedule
+   */
+  const fetchLastRunScheduleExecution = async () => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    const fetchLastRunPayload = {
+      scheduleId: scheduleId,
+      region: region,
+      abortControllers
+    };
+    const scheduleLastRunDate: string =
+      await VertexServices.fetchLastRunStatus(fetchLastRunPayload);
+    if (scheduleLastRunDate) {
+      dispatch({
+        type: 'SET_HAS_SCHEDULE_EXECUTIONS',
+        payload: true
+      });
+      dispatch({
+        type: 'SET_MONTH',
+        payload: scheduleLastRunDate ? dayjs(scheduleLastRunDate) : null
+      });
+      dispatch({
+        type: 'SET_SELECTED_DATE',
+        payload: scheduleLastRunDate ? dayjs(scheduleLastRunDate) : null
+      });
+      dispatch({
+        type: 'SET_INITIAL_DISPLAY_DATE',
+        payload: scheduleLastRunDate ? dayjs(scheduleLastRunDate) : null
+      });
+    } else {
+      dispatch({
+        type: 'SET_HAS_SCHEDULE_EXECUTIONS',
+        payload: false
+      });
+      dispatch({
+        type: 'SET_SELECTED_DATE',
+        payload: dayjs(new Date().toLocaleDateString())
+      });
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
   useEffect(() => {
-    if (region && scheduleId) {
+    if (region && scheduleId && selectedMonth) {
       scheduleRunsList();
     }
-  }, [region, scheduleId, selectedMonth]);
+  }, [selectedMonth]);
 
   useEffect(() => {
     if (scheduleId) {
@@ -128,6 +178,8 @@ export const useExecutionHistory = (
       type: 'SET_SELECTED_DATE',
       payload: dayjs(new Date().toLocaleDateString())
     });
+
+    fetchLastRunScheduleExecution();
   }, []);
 
   const handleDateSelection = useCallback(
@@ -150,22 +202,23 @@ export const useExecutionHistory = (
   );
 
   const handleLogs = useCallback(() => {
-    if (!state.scheduleId) {
-      return;
-    }
-    const logExplorerUrl = new URL(
-      'https://console.cloud.google.com/logs/query'
-    );
-    logExplorerUrl.searchParams.set('query', `SEARCH("${state.scheduleId}")`);
-    if (state.scheduleRunsData?.startDate) {
+    if (state.vertexScheduleRunsList.length > 0) {
+      const logExplorerUrl = new URL(VERTEX_EXECUTION_HISTORY_LOGS_URL);
       logExplorerUrl.searchParams.set(
-        'cursorTimestamp',
-        state.scheduleRunsData.startDate
+        'query',
+        `SEARCH("${state.vertexScheduleRunsList[0].scheduleRunId}")`
       );
+      if (state.vertexScheduleRunsList?.startDate) {
+        logExplorerUrl.searchParams.set(
+          'cursorTimestamp',
+          state.vertexScheduleRunsList.startDate
+        );
+      }
+      logExplorerUrl.searchParams.set('project', state.projectId);
+      window.open(logExplorerUrl.toString(), '_blank');
     }
-    logExplorerUrl.searchParams.set('project', state.projectId);
-    window.open(logExplorerUrl.toString(), '_blank');
-  }, [state.scheduleId, state.scheduleRunsData, state.projectId]);
+    return;
+  }, [state.vertexScheduleRunsList, state.projectId]);
 
   return {
     ...state,

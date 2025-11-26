@@ -142,6 +142,16 @@
   cursor: pointer;
 }
 
+.schedule-runs-table-data-state-pending {
+  color: var(--jp-ui-font-color2);
+  padding-left: 15px;
+  cursor: default;
+}
+
+.text-decoration {
+  text-decoration: none !important;
+}
+
 .table-execution-history-vertex {
   height: calc(100vh - 212px);
 }

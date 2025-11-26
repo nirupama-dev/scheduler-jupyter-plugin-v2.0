@@ -44,14 +44,34 @@ export const FormInputText = ({
           size="small"
           error={!!fieldError}
           onChange={event => {
-            let newValue = event.target.value;
-            if (type === 'number' && newValue === '') {
-              // If it's a number field and the user clears it, set the value to '0'
-              newValue = '0';
+            const rawValue = event.target.value;
+            let valueToRHF = rawValue;
+            const isNumberType = type === 'number';
+
+            // Step 1: Handle the "Clear to 0" logic
+            if (isNumberType && rawValue === '') {
+              // If the user clears it, RHF gets '0'.
+              valueToRHF = '0';
             }
-            onChange(newValue);
+            // Step 2: Handle the "Typing over 0" logic
+            else if (
+              isNumberType &&
+              valueToRHF.length > 1 &&
+              valueToRHF.startsWith('0')
+            ) {
+              // Remove leading zeros if not followed by a decimal point
+              if (!valueToRHF.startsWith('0.')) {
+                valueToRHF = valueToRHF.replace(/^0+/, '');
+              }
+            }
+
+            // Handle case where user deletes everything and then types '0'
+            if (isNumberType && valueToRHF === '') {
+              valueToRHF = '0';
+            }
+            onChange(valueToRHF);
             if (onChangeCallback) {
-              onChangeCallback(event.target.value); // Trigger parent's sync logic
+              onChangeCallback(rawValue);
             }
           }}
           value={value ?? ''}
