@@ -596,7 +596,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       console.log('network option:', getValues('networkOption'));
       fetchSubNetworks(currentRegion, currentPrimaryNetwork || '');
       // Ensure shared network state is cleared
-      setValue('sharedNetwork', { network: '', subnetwork: '' });
+      setValue('sharedNetwork', undefined);
     }
   }, [
     currentRegion,
@@ -623,7 +623,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
         setValue('subNetwork', ''); // Clear the actual subNetwork field
-        setValue('sharedNetwork', { network: '', subnetwork: '' });
+        setValue('sharedNetwork', undefined);
         setValue('keyRing', '');
         setKeyRingList([]);
         setValue('cryptoKey', '');
@@ -651,7 +651,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         setValue('networkOption', DEFAULT_NETWORK_SELECTED);
         setValue('primaryNetwork', '');
         setValue('subNetwork', ''); // Clear the actual subNetwork field
-        setValue('sharedNetwork', { network: '', subnetwork: '' });
+        setValue('sharedNetwork', undefined);
         // Trigger validation for these fields to show errors if they become invalid
         trigger([
           'machineType',
