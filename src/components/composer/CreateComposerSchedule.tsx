@@ -412,7 +412,7 @@ export const CreateComposerSchedule: React.FC<
       <div className="scheduler-form-element-container">
         <FormInputDropdown
           name="projectId"
-          label="Project ID"
+          label="Composer Project ID*"
           control={control}
           setValue={setValue}
           options={projectOptions}
@@ -428,7 +428,7 @@ export const CreateComposerSchedule: React.FC<
       <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="composerRegion"
-          label="Region"
+          label="Composer Region*"
           control={control}
           setValue={setValue}
           options={regionOptions}

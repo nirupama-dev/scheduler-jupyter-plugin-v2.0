@@ -681,7 +681,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           <div className="scheduler-form-element-container select-panel-list-view-lay table-right-space">
             <FormInputListingDropdown
               name="projectId"
-              label="Project ID"
+              label="Composer Project ID"
               control={control}
               options={projectOptions}
               setValue={setValue}
@@ -691,7 +691,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           <div className="scheduler-form-element-container select-panel-list-view-lay table-right-space">
             <FormInputListingDropdown
               name="composerRegion"
-              label="Region"
+              label="Composer Region"
               control={control}
               options={regionOptions}
               setValue={setValue}
