@@ -188,7 +188,9 @@ export const CreateComposerSchedule: React.FC<
       setComposerEnvData(options.composerListResponse);
       const currentEnvValue = getValues('environment');
       if (currentEnvValue) {
-        const isEnvValid = options.environmentOptions.some(env => env.value === currentEnvValue);
+        const isEnvValid = options.environmentOptions.some(
+          env => env.value === currentEnvValue
+        );
         if (isEnvValid) {
           setValue('environment', currentEnvValue);
         } else {
