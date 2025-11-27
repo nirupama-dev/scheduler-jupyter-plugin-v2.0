@@ -42,9 +42,7 @@ import {
 import { Box, FormGroup } from '@mui/material';
 import { AddParameters } from './AddParameters';
 import { ILabelValue } from '../../interfaces/CommonInterface';
-import { Controller, FieldErrors } from 'react-hook-form';
-import { createComposerSchema } from '../../schemas/CreateComposerSchema';
-import z from 'zod';
+import { Controller } from 'react-hook-form';
 import { FormInputChips } from '../common/formFields/FormInputChips';
 import { ResourceManagerServices } from '../../services/common/ResourceManger';
 import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
@@ -107,9 +105,7 @@ export const CreateComposerSchedule: React.FC<
   const executionMode = watch('executionMode');
   const currentSchedulerSelection = watch('schedulerSelection');
   const isComposerForm = currentSchedulerSelection === 'composer';
-  const composerErrors = isComposerForm
-    ? (errors as FieldErrors<z.infer<typeof createComposerSchema>>)
-    : {};
+  const composerErrors = isComposerForm ? errors : {};
 
   const fetchProjects = async () => {
     setValue('projectId', '');
@@ -129,10 +125,10 @@ export const CreateComposerSchedule: React.FC<
         project => project.value === currentProjectValue
       );
       // If the project is valid, set it; otherwise, clear the field.
-      if (!isProjectValid) {
-        setValue('projectId', '');
-      } else {
+      if (isProjectValid) {
         setValue('projectId', currentProjectValue);
+      } else {
+        setValue('projectId', '');
       }
     } catch (authenticationError) {
       handleOpenLoginWidget(app);
@@ -164,10 +160,10 @@ export const CreateComposerSchedule: React.FC<
           region => region.value === currentRegionValue
         );
         // If the region is valid, set it; otherwise, clear the field.
-        if (!isRegionValid) {
-          setValue('composerRegion', '');
-        } else {
+        if (isRegionValid) {
           setValue('composerRegion', currentRegionValue);
+        } else {
+          setValue('composerRegion', '');
         }
       } catch (authenticationError) {
         handleOpenLoginWidget(app);
@@ -365,9 +361,7 @@ export const CreateComposerSchedule: React.FC<
   const checkRequiredPackages = (env: IComposerEnvAPIResponse) => {
     const packages_from_env = env?.pypi_packages;
     const missingPackages = packages_from_env
-      ? PACKAGES.filter(
-          pkg => !Object.prototype.hasOwnProperty.call(packages_from_env, pkg)
-        )
+      ? PACKAGES.filter(pkg => !Object.hasOwn(packages_from_env, pkg))
       : PACKAGES.slice(); // If packages_from_env is falsy, all are missing
 
     console.log(`Missing packages: ${missingPackages.join(', ')}`);
@@ -382,7 +376,6 @@ export const CreateComposerSchedule: React.FC<
         missingPackages.join(', ') +
         ' will get installed on creation of schedule';
       setError('environment', { message: message });
-      // setPackageInstalledList(missingPackages);
     }
   };
 

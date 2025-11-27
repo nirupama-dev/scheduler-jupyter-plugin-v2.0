@@ -630,7 +630,6 @@ const ListVertexSchedule = ({
       if (setVertexRouteState) {
         setVertexRouteState(null);
       }
-      return;
     } else {
       fetchRegion();
     }
@@ -696,45 +695,43 @@ const ListVertexSchedule = ({
       />
 
       {vertexScheduleList.length > 0 ? (
-        <>
-          <div className="notebook-templates-list-tabl e-parent table-cell-flow table-space-around scroll-list">
-            <TableData
-              getTableProps={getTableProps}
-              headerGroups={headerGroups}
-              getTableBodyProps={getTableBodyProps}
-              isLoading={loaderState.isLoadingTableContent}
-              rows={rows}
-              page={page}
-              prepareRow={prepareRow}
-              tableDataCondition={tableDataCondition}
-              fromPage="Vertex"
-            />
-            {vertexScheduleList.length > 0 && (
-              <div className="pagination-container">
-                <PaginationComponent
-                  canPreviousPage={canPreviousPage}
-                  canNextPage={canNextPage}
-                  pageNumber={pageNumber}
-                  handleNextPage={handleNextPage}
-                  handlePreviousPage={handlePreviousPage}
-                  isLoading={loaderState.isLoading}
-                  totalCount={totalCount}
-                />
-              </div>
-            )}
-            {deletingScheduleDetails?.deletePopUpShow && (
-              <DeletePopup
-                onCancel={() => handleCancelDelete()}
-                onDelete={() => handleDeleteScheduler(null)}
-                deletePopupOpen={
-                  deletingScheduleDetails?.deletePopUpShow ?? false
-                }
-                DeleteMsg={`This will delete ${deletingScheduleDetails.displayName} and cannot be undone.`}
-                deletingSchedule={deletingScheduleDetails.deletingStatus}
+        <div className="notebook-templates-list-tabl e-parent table-cell-flow table-space-around scroll-list">
+          <TableData
+            getTableProps={getTableProps}
+            headerGroups={headerGroups}
+            getTableBodyProps={getTableBodyProps}
+            isLoading={loaderState.isLoadingTableContent}
+            rows={rows}
+            page={page}
+            prepareRow={prepareRow}
+            tableDataCondition={tableDataCondition}
+            fromPage="Vertex"
+          />
+          {vertexScheduleList.length > 0 && (
+            <div className="pagination-container">
+              <PaginationComponent
+                canPreviousPage={canPreviousPage}
+                canNextPage={canNextPage}
+                pageNumber={pageNumber}
+                handleNextPage={handleNextPage}
+                handlePreviousPage={handlePreviousPage}
+                isLoading={loaderState.isLoading}
+                totalCount={totalCount}
               />
-            )}
-          </div>
-        </>
+            </div>
+          )}
+          {deletingScheduleDetails?.deletePopUpShow && (
+            <DeletePopup
+              onCancel={() => handleCancelDelete()}
+              onDelete={() => handleDeleteScheduler(null)}
+              deletePopupOpen={
+                deletingScheduleDetails?.deletePopUpShow ?? false
+              }
+              DeleteMsg={`This will delete ${deletingScheduleDetails.displayName} and cannot be undone.`}
+              deletingSchedule={deletingScheduleDetails.deletingStatus}
+            />
+          )}
+        </div>
       ) : (
         <>
           {!loaderState.initialLoading && !loaderState.isLoading && (

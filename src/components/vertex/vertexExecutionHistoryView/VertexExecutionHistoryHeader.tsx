@@ -43,10 +43,8 @@ const ExecutionHistoryHeader = ({
     </button>
     <div className="scheduler-page-title execution-header-wrap-arrow">
       Execution History:{' '}
-      {!scheduleName ? (
+      {scheduleName ?? (
         <LoadingSpinner iconClassName="spinner-schedule-title" />
-      ) : (
-        scheduleName
       )}
     </div>
     {fromPage === SCHEDULE_LABEL_VERTEX && (

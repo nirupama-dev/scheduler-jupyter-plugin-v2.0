@@ -33,7 +33,7 @@ export const PaginationComponent = ({
       {isLoading ? null : (
         <div className="pagination-parent-view-main">
           <div className="pagination-numbers" aria-disabled={isLoading}>
-            Page {pageNumber} of {totalCount !== 0 ? totalCount : 'Many'}
+            Page {pageNumber} of {totalCount === 0 ? 'Many' : totalCount}
           </div>
 
           <div

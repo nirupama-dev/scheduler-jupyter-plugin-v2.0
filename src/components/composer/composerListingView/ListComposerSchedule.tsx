@@ -250,9 +250,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const checkRequiredPackages = (env: IComposerEnvAPIResponse) => {
     const packages_from_env = env?.pypi_packages;
     const missingPackages = packages_from_env
-      ? PACKAGES.filter(
-          pkg => !Object.prototype.hasOwnProperty.call(packages_from_env, pkg)
-        )
+      ? PACKAGES.filter(pkg => !Object.hasOwn(packages_from_env, pkg))
       : PACKAGES.slice(); // If packages_from_env is falsy, all are missing
 
     if (missingPackages.length > 0) {
@@ -552,15 +550,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         }
       }
     };
-
-    // console.log('composerRouteState in region useEffect:', composerRouteState);
-    // if ('region' in composerRouteState) {
-    //   setComposerRegion(composerRouteState.region);
-    //   if (setComposerRouteState) {
-    //     setComposerRouteState(null);
-    //   }
-    //   return;
-    // }
     fetchRegions();
     // Clear subsequent fields when project_id changes
     if (!composerRouteState?.environment) {
@@ -589,13 +578,13 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         setComposerEnvData(options.composerListResponse);
         setEnvOptions(options.environmentOptions);
         if (options.environmentOptions.length > 0) {
-          if (!composerRouteState?.environment) {
-            await handleEnvChange(options.environmentOptions[0].value);
-          } else {
+          if (composerRouteState?.environment) {
             await handleEnvChange(composerRouteState?.environment);
             if (setComposerRouteState) {
               setComposerRouteState(null);
             }
+          } else {
+            await handleEnvChange(options.environmentOptions[0].value);
           }
         } else {
           setValue('environment', '');
