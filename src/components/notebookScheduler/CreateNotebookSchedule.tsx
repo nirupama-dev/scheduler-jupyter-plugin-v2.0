@@ -114,7 +114,7 @@ export const CreateNotebookSchedule = (
    * A unified state to manage all form-related data including edit mode,
    * authentication, and scheduler details.
    */
-  const [initialSchedulerDataContext, setInitialSchedulerContext] =
+  const [initialSchedulerDataContext, setInitialSchedulerDataContext] =
     useState<IInitialSchedulerContextData>({});
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
@@ -203,7 +203,7 @@ export const CreateNotebookSchedule = (
         }
 
         // 3. Update the single formState object
-        setInitialSchedulerContext({
+        setInitialSchedulerDataContext({
           credentials: credentialsData,
           editModeData: editScheduleData,
           initialDefaults: kernelSchedulerData
@@ -237,18 +237,15 @@ export const CreateNotebookSchedule = (
         initialSchedulerDataContext.editModeData?.editMode &&
         initialSchedulerDataContext.editModeData.existingScheduleData
       ) {
-        //   setValue('schedulerSelection', initialFormData.editModeData.existingScheduleData.schedulerSelection);
         return initialSchedulerDataContext.editModeData.existingScheduleData;
       }
       if (initialSchedulerDataContext.initialDefaults) {
-        //   setValue('schedulerSelection', initialFormData.initialDefaults.schedulerType);
         return getInitialFormValues(
           initialSchedulerDataContext,
           sessionContext
         );
       }
     }
-    //  return {} as CombinedCreateFormValues; // Return null or some default value if data isn't ready
   }, [isDataLoaded]);
   console.log('Initial Form Values:', initialFormValues);
 
@@ -355,7 +352,7 @@ export const CreateNotebookSchedule = (
         data.schedulerSelection === VERTEX_SCHEDULER_NAME &&
         initialSchedulerDataContext.credentials.project_id
       ) {
-        const vertexData = data as VertexSchedulerFormValues;
+        const vertexData = data;
         const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
           transformZodSchemaToVertexSchedulePayload(
             vertexData,
@@ -389,7 +386,7 @@ export const CreateNotebookSchedule = (
         }
         //composer payload creation
       } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
-        const composerData = data as ComposerSchedulerFormValues;
+        const composerData = data;
         const packagesToInstall: string[] = []; // TODO
         const composerPayload: IComposerSchedulePayload =
           transformZodSchemaToComposerSchedulePayload(
@@ -445,7 +442,6 @@ export const CreateNotebookSchedule = (
     }
   };
 
-  //return if form is not valid
   if (
     !initialSchedulerDataContext.credentials || //missing credentials
     (!initialSchedulerDataContext.initialDefaults &&
@@ -563,7 +559,11 @@ export const CreateNotebookSchedule = (
               type="submit"
               disabled={!isValid}
             >
-              <div>CREATE</div>
+              <div>
+                {initialSchedulerDataContext?.editModeData?.editMode
+                  ? 'UPDATE'
+                  : 'CREATE'}
+              </div>
             </Button>
             <Button
               variant="outlined"
