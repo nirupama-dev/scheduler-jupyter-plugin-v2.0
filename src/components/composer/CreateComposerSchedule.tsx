@@ -46,6 +46,7 @@ import { Controller, FieldErrors } from 'react-hook-form';
 import { createComposerSchema } from '../../schemas/CreateComposerSchema';
 import z from 'zod';
 import { FormInputChips } from '../common/formFields/FormInputChips';
+import { ResourceManagerServices } from '../../services/common/ResourceManger';
 import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
 
 export const CreateComposerSchedule: React.FC<
@@ -64,6 +65,9 @@ export const CreateComposerSchedule: React.FC<
   initialSchedulerDataContext
 }) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
+  const [projectOptions, setProjectOptions] = useState<ILabelValue<string>[]>(
+    []
+  );
   const [envOptions, setEnvOptions] = useState<ILabelValue<string>[]>([]);
   const [composerEnvData, setComposerEnvData] = useState<
     IComposerEnvAPIResponse[]
@@ -106,6 +110,36 @@ export const CreateComposerSchedule: React.FC<
   const composerErrors = isComposerForm
     ? (errors as FieldErrors<z.infer<typeof createComposerSchema>>)
     : {};
+
+  const fetchProjects = async () => {
+    setValue('projectId', '');
+    try {
+      setLoadingState(prev => ({ ...prev, projectId: true }));
+      const options = await ResourceManagerServices.projectAPIService();
+      setProjectOptions(options);
+      let currentProjectValue = getValues('projectId');
+
+      // If no value is currently set, try to use the default from credentials.
+      if (!currentProjectValue && credentials?.project_id) {
+        currentProjectValue = credentials.project_id;
+      }
+
+      // Validate the determined regionToSet against the list of valid regions.
+      const isProjectValid = options.some(
+        project => project.value === currentProjectValue
+      );
+      // If the project is valid, set it; otherwise, clear the field.
+      if (!isProjectValid) {
+        setValue('projectId', '');
+      } else {
+        setValue('projectId', currentProjectValue);
+      }
+    } catch (authenticationError) {
+      handleOpenLoginWidget(app);
+    } finally {
+      setLoadingState(prev => ({ ...prev, projectId: false }));
+    }
+  };
 
   // --- Fetch Regions based on selected Project ID ---
 
@@ -150,10 +184,13 @@ export const CreateComposerSchedule: React.FC<
         selectedProjectId,
         selectedRegion
       );
-      setEnvOptions(options);
+      setEnvOptions(options.environmentOptions);
+      setComposerEnvData(options.composerListResponse);
       const currentEnvValue = getValues('environment');
       if (currentEnvValue) {
-        const isEnvValid = options.some(env => env.value === currentEnvValue);
+        const isEnvValid = options.environmentOptions.some(
+          env => env.value === currentEnvValue
+        );
         if (isEnvValid) {
           setValue('environment', currentEnvValue);
         } else {
@@ -165,7 +202,7 @@ export const CreateComposerSchedule: React.FC<
     } finally {
       setLoadingState(prev => ({ ...prev, environment: false }));
     }
-  }, [selectedProjectId, selectedRegion]);
+  }, [selectedRegion]);
 
   const fetchRemoteKernelData = useCallback(async () => {
     try {
@@ -232,6 +269,10 @@ export const CreateComposerSchedule: React.FC<
       fetchRemoteKernelData();
     }
     setDefaultFormValues(getValues());
+  }, []);
+
+  useEffect(() => {
+    fetchProjects();
   }, []);
 
   /**
@@ -373,10 +414,10 @@ export const CreateComposerSchedule: React.FC<
       <div className="scheduler-form-element-container">
         <FormInputDropdown
           name="projectId"
-          label="Project ID"
+          label="Composer Project ID*"
           control={control}
           setValue={setValue}
-          options={[{ label: selectedProjectId, value: selectedProjectId }]}
+          options={projectOptions}
           loading={loadingState.projectId}
           customClass="scheduler-tag-style "
           onChangeCallback={handleProjectIdChange}
@@ -389,7 +430,7 @@ export const CreateComposerSchedule: React.FC<
       <div className="scheduler-form-element-container scheduler-input-top">
         <FormInputDropdown
           name="composerRegion"
-          label="Region"
+          label="Composer Region*"
           control={control}
           setValue={setValue}
           options={regionOptions}

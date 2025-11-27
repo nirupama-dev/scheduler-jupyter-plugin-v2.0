@@ -25,6 +25,7 @@ import {
 } from '../../../interfaces/FormInterface';
 import { ComputeServices } from '../../../services/common/Compute';
 import {
+  IComposerEnvAPIResponse,
   IDagList,
   ILoadingStateComposerListing
 } from '../../../interfaces/ComposerInterface';
@@ -43,6 +44,7 @@ import {
   GCS_PLUGIN_ID,
   LIST_COMPOSER_TABLE_HEADER,
   NO_ROWS_TO_DISPLAY,
+  PACKAGES,
   POLLING_DAG_LIST_INTERVAL,
   POLLING_IMPORT_ERROR_INTERVAL
 } from '../../../utils/Constants';
@@ -52,6 +54,7 @@ import { useNavigate } from 'react-router-dom';
 import PollingTimer from '../../../utils/PollingTimer';
 import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 import { AuthenticationError } from '../../../exceptions/AuthenticationException';
+import { ResourceManagerServices } from '../../../services/common/ResourceManger';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const schedulerContext = useSchedulerContext();
@@ -59,6 +62,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const setComposerRouteState = schedulerContext?.setComposerRouteState;
   const { control, setValue, watch } = useForm();
   const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
+  const [projectOptions, setProjectOptions] = useState<IDropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<IEnvDropDownOption[]>([]);
   const [dagList, setDagList] = useState<IDagList[]>([]);
   const data = dagList;
@@ -88,6 +92,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const [importErrorEntries, setImportErrorEntries] = useState<number>(0);
   const [importErrorPopupOpen, setImportErrorPopupOpen] =
     useState<boolean>(false);
+  const [missingPackageList, setMissingPackageList] = useState<any>([]);
+  const [composerEnvData, setComposerEnvData] = useState<
+    IComposerEnvAPIResponse[]
+  >([]);
 
   const navigate = useNavigate();
 
@@ -230,6 +238,28 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
   };
 
+  const findEnvironmentSelected = (
+    selectedEnvironment?: string,
+    composerEnvData?: IComposerEnvAPIResponse[]
+  ) => {
+    return composerEnvData?.find(
+      environment => environment.name === selectedEnvironment
+    );
+  };
+
+  const checkRequiredPackages = (env: IComposerEnvAPIResponse) => {
+    const packages_from_env = env?.pypi_packages;
+    const missingPackages = packages_from_env
+      ? PACKAGES.filter(
+          pkg => !Object.prototype.hasOwnProperty.call(packages_from_env, pkg)
+        )
+      : PACKAGES.slice(); // If packages_from_env is falsy, all are missing
+
+    if (missingPackages.length > 0) {
+      setMissingPackageList(missingPackages);
+    }
+  };
+
   const handleEnvChange = useCallback(
     async (value: string) => {
       setValue('environment', value);
@@ -240,6 +270,15 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
 
       listDagInfoAPI(value);
       handleImportErrordata(value);
+      if (value) {
+        const selectedEnvironment = findEnvironmentSelected(
+          value,
+          composerEnvData
+        );
+        if (selectedEnvironment) {
+          checkRequiredPackages(selectedEnvironment);
+        }
+      }
     },
     [selectedProjectId, selectedRegion, setValue]
   );
@@ -285,7 +324,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           dag_id,
           selectedEnv ?? '',
           selectedProjectId,
-          selectedRegion
+          selectedRegion,
+          missingPackageList
         );
       } catch (authenticationError) {
         handleOpenLoginWidget(app);
@@ -405,7 +445,6 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         const credentials = await authApi();
         if (credentials?.project_id) {
           setComposerProjectId(credentials.project_id);
-          setValue('projectId', credentials.project_id);
           if (credentials.region_id) {
             setComposerRegion(credentials.region_id);
           }
@@ -430,6 +469,46 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
   }, []);
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      if (composerProjectId) {
+        try {
+          setLoadingState(prev => ({ ...prev, projectId: true }));
+          const options = await ResourceManagerServices.projectAPIService();
+          setProjectOptions(options);
+
+          // Set the default project after options are fetched
+          if (options.length > 0) {
+            const defaultProject = composerProjectId
+              ? options.find(opt => opt.value === composerProjectId)
+              : options[0];
+            if (defaultProject) {
+              setValue('projectId', defaultProject.value);
+            }
+          }
+        } catch (error) {
+          // Handle error from the service call
+          const errorResponse = `Failed to fetch project list : ${error}`;
+          if (error instanceof AuthenticationError) {
+            handleOpenLoginWidget(app);
+          }
+
+          handleErrorToast({
+            error: errorResponse
+          });
+        } finally {
+          setLoadingState(prev => ({ ...prev, projectId: false }));
+        }
+      }
+    };
+
+    fetchProjects();
+    // Clear subsequent fields when project_id changes
+    setValue('composerRegion', '');
+    setValue('environment', '');
+    setDagList([]);
+  }, [composerProjectId, setValue]);
+
   // --- Fetch Regions based on selected Project ID ---
   useEffect(() => {
     const fetchRegions = async () => {
@@ -438,37 +517,39 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         setValue('composerRegion', '');
         return;
       }
-      try {
-        setLoadingState(prev => ({ ...prev, region: true }));
-        const options =
-          await ComputeServices.regionAPIService(composerProjectId);
-        setRegionOptions(options);
+      if (selectedProjectId) {
+        setValue('composerRegion', '');
 
-        // Set the default region after options are fetched
-        if (options.length > 0) {
-          if (!composerRouteState?.region) {
+        try {
+          setLoadingState(prev => ({ ...prev, region: true }));
+          const options =
+            await ComputeServices.regionAPIService(selectedProjectId);
+          setRegionOptions(options);
+
+          // Set the default region after options are fetched
+          if (options.length > 0) {
             const defaultRegion = composerRegion
               ? options.find(opt => opt.value === composerRegion)
               : options[0];
             if (defaultRegion) {
               setValue('composerRegion', defaultRegion.value);
             }
+          }
+        } catch (error) {
+          // Handle error from the service call
+          const errorResponse = `Failed to fetch region list : ${error}`;
+          if (error instanceof AuthenticationError) {
+            handleOpenLoginWidget(app);
           } else {
             setValue('composerRegion', composerRouteState?.region);
           }
-        }
-      } catch (error) {
-        // Handle error from the service call
-        const errorResponse = `Failed to fetch region list : ${error}`;
-        if (error instanceof AuthenticationError) {
-          handleOpenLoginWidget(app);
-        }
 
-        handleErrorToast({
-          error: errorResponse
-        });
-      } finally {
-        setLoadingState(prev => ({ ...prev, region: false }));
+          handleErrorToast({
+            error: errorResponse
+          });
+        } finally {
+          setLoadingState(prev => ({ ...prev, region: false }));
+        }
       }
     };
 
@@ -487,7 +568,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
 
     setDagList([]);
-  }, [composerProjectId, composerRegion, setValue]);
+  }, [selectedProjectId, composerProjectId, composerRegion, setValue]);
 
   useEffect(() => {
     const fetchEnvironments = async () => {
@@ -504,10 +585,12 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           composerProjectId,
           selectedRegion
         );
-        setEnvOptions(options);
-        if (options.length > 0) {
+        setEnvOptions(options.environmentOptions);
+        setComposerEnvData(options.composerListResponse);
+        setEnvOptions(options.environmentOptions);
+        if (options.environmentOptions.length > 0) {
           if (!composerRouteState?.environment) {
-            await handleEnvChange(options[0].value);
+            await handleEnvChange(options.environmentOptions[0].value);
           } else {
             await handleEnvChange(composerRouteState?.environment);
             if (setComposerRouteState) {
@@ -526,7 +609,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     };
 
     fetchEnvironments();
-  }, [composerProjectId, selectedRegion, setValue, handleEnvChange]);
+  }, [selectedRegion, setValue, handleEnvChange]);
 
   useEffect(() => {
     if (inputNotebookFilePath !== '') {
@@ -598,18 +681,17 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           <div className="scheduler-form-element-container select-panel-list-view-lay table-right-space">
             <FormInputListingDropdown
               name="projectId"
-              label="Project ID"
+              label="Composer Project ID"
               control={control}
-              options={[{ label: selectedProjectId, value: selectedProjectId }]}
+              options={projectOptions}
               setValue={setValue}
               loading={loadingState.projectId}
-              disabled={true}
             />
           </div>
           <div className="scheduler-form-element-container select-panel-list-view-lay table-right-space">
             <FormInputListingDropdown
               name="composerRegion"
-              label="Region"
+              label="Composer Region"
               control={control}
               options={regionOptions}
               setValue={setValue}

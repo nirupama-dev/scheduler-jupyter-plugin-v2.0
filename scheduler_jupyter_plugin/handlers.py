@@ -37,6 +37,7 @@ from scheduler_jupyter_plugin.controllers import (
     executor,
     iam,
     logEntries,
+    resourceManager,
     storage,
     version,
     vertex,
@@ -93,7 +94,7 @@ class CredentialsHandler(APIHandler):
         except RuntimeError as e:
             error_data = e.args[0]
             status_code = error_data.get("status", 500)
- 
+
             self.log.exception(f"Error fetching credentials from gcloud: {str(e)}")
             self.set_status(status_code)
             self.finish(json.dumps(error_data))
@@ -182,6 +183,7 @@ def setup_handlers(web_app):
         "clusterList": dataproc.ClusterListController,
         "runtimeList": dataproc.RuntimeController,
         "checkRequiredPackages": executor.CheckRequiredPackagesController,
+        "projectsList": resourceManager.ProjectsListController,
         "api/vertex/uiConfig": vertex.UIConfigController,
         "api/compute/region": compute.RegionController,
         "api/compute/network": compute.NetworkController,

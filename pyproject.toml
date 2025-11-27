@@ -37,6 +37,7 @@ dependencies = [
     "google-api-core>=2.25.1",
     "gcs-jupyter-plugin",
     "google-cloud-kms",
+    "google-cloud-resource-manager",
 ]
 dynamic = ["version", "description", "authors", "urls", "keywords"]
 

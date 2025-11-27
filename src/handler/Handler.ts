@@ -62,7 +62,10 @@ export async function requestAPI<T>(
   }
 
   if (!response.ok) {
-    throw new ServerConnection.ResponseError(response, data.message);
+    throw new ServerConnection.ResponseError(
+      response,
+      data.message || data.error
+    );
   }
 
   return data;

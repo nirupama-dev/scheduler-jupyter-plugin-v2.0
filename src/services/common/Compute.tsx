@@ -213,20 +213,20 @@ export class ComputeServices {
     projectId: string
   ): Promise<IDropdownOption[]> => {
     try {
-      const regionResponse: string[] = await requestAPI(
+      const regionResponse: any = await requestAPI(
         `api/compute/region?project_id=${projectId}`
       );
+      if (Array.isArray(regionResponse) && regionResponse.length > 0) {
+        const regionOptions: IDropdownOption[] = regionResponse.map(
+          (region: string) => ({ value: region, label: region })
+        );
+        regionOptions.sort((a, b) => a.label.localeCompare(b.label));
 
-      if (!Array.isArray(regionResponse)) {
-        throw new Error('Invalid response format for regions');
+        return regionOptions;
+      } else if (regionResponse?.error) {
+        throw new Error(regionResponse.error);
       }
-
-      const regionOptions: IDropdownOption[] = regionResponse.map(
-        (region: string) => ({ value: region, label: region })
-      );
-      regionOptions.sort((a, b) => a.label.localeCompare(b.label));
-
-      return regionOptions;
+      return [];
     } catch (error) {
       const errorResponse = `Failed to fetch region list : ${error}`;
 
