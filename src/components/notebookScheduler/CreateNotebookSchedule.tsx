@@ -163,7 +163,7 @@ export const CreateNotebookSchedule = (
                 transformVertexScheduleResponseToZodSchema(
                   fetchedData,
                   region,
-                  projectId
+                  credentialsData?.project_id || ''
                 );
             } else {
               navigate('/list/vertex', { state: { region: region } }); //TODO: redirect back to listing as no data was fetched
@@ -275,8 +275,9 @@ export const CreateNotebookSchedule = (
   useEffect(() => {
     if (initialFormValues) {
       reset(initialFormValues);
+      trigger();
     }
-  }, [initialFormValues, reset]);
+  }, [initialFormValues, reset, trigger]);
 
   // Watch for changes in schedulerSelection to reset form values accordingly
   useEffect(() => {
