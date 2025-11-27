@@ -160,7 +160,6 @@ export class ComposerServices {
           })
         );
 
-        // setServerlessDataList(transformSessionTemplateListData);
         return serverlessOptionList;
       }
       if (runtimeListResponse?.error) {
@@ -291,12 +290,12 @@ export class ComposerServices {
         }
         return true;
       }
-    } catch (reason) {
-      if (reason instanceof AuthenticationError) {
-        throw reason;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
       }
       handleErrorToast({
-        error: reason
+        error: error
       });
       return false;
     }
@@ -323,11 +322,11 @@ export class ComposerServices {
         });
       }
       return inputFilenameResponse;
-    } catch (reason) {
-      if (reason instanceof AuthenticationError) {
-        throw reason;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
       }
-      const errorResponse = `Error on POST: ${reason}`;
+      const errorResponse = `Error on POST: ${error}`;
       handleErrorToast({
         error: errorResponse
       });
@@ -363,11 +362,11 @@ export class ComposerServices {
       );
 
       return composerJobScheduleDetails;
-    } catch (reason) {
-      if (reason instanceof AuthenticationError) {
-        throw reason;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
       }
-      const errorResponse = `Error on getting schedule details.\n${reason}`;
+      const errorResponse = `Error on getting schedule details.\n${error}`;
       handleErrorToast({
         error: errorResponse
       });
@@ -675,11 +674,11 @@ export class ComposerServices {
         { signal }
       );
       return dagRunTaskLogs?.content;
-    } catch (reason) {
-      if (reason instanceof AuthenticationError) {
-        throw reason;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
       }
-      const errorResponse = `Error in listing task logs..\n${reason}`;
+      const errorResponse = `Error in listing task logs..\n${error}`;
       handleErrorToast({
         error: errorResponse
       });
@@ -702,14 +701,14 @@ export class ComposerServices {
         { signal }
       );
       return importErrors;
-    } catch (reason) {
-      if (reason instanceof AuthenticationError) {
-        throw reason;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
       }
-      if (typeof reason === 'object' && reason !== null) {
+      if (typeof error === 'object' && error !== null) {
         if (
-          reason instanceof TypeError &&
-          reason.toString().includes(ABORT_MESSAGE)
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
         ) {
           // Return nothing if the request was aborted
           return;
@@ -717,7 +716,7 @@ export class ComposerServices {
       }
 
       // Handle and display the error notification
-      const errorResponse = `Error in fetching import errors list: ${reason}`;
+      const errorResponse = `Error in fetching import errors list: ${error}`;
       if (!toast.isActive('importListError')) {
         toast.error(errorResponse, {
           ...toastifyCustomStyle,
@@ -743,10 +742,7 @@ export class ComposerServices {
       );
 
       // If a 'Bad Request' error is returned, perform the secondary API call
-      if (
-        triggerResponse?.error &&
-        triggerResponse?.error.includes('Bad Request')
-      ) {
+      if (triggerResponse?.error?.includes('Bad Request')) {
         const jsonstr = triggerResponse?.error.slice(
           triggerResponse?.error.indexOf('{'),
           triggerResponse?.error.lastIndexOf('}') + 1
@@ -754,9 +750,6 @@ export class ComposerServices {
         const errorObject = JSON.parse(jsonstr);
 
         if (errorObject?.status === HTTP_STATUS_BAD_REQUEST) {
-          // const installedPackageList: any = await requestAPI(
-          //   `checkRequiredPackages?composer_environment_name=${composerSelectedList}&region_id=${region}`
-          // );
           // Return the response from the secondary API call to the handler
           return missingPackageList;
         }
@@ -787,12 +780,12 @@ export class ComposerServices {
 
       // Otherwise, return the initial data
       return triggerResponse;
-    } catch (reason) {
-      if (reason instanceof AuthenticationError) {
-        throw reason;
+    } catch (error) {
+      if (error instanceof AuthenticationError) {
+        throw error;
       }
       // Catch network or unexpected errors
-      Notification.error(`Failed to trigger ${dagId} : ${reason}`, {
+      Notification.error(`Failed to trigger ${dagId} : ${error}`, {
         autoClose: false
       });
     }
