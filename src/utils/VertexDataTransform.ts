@@ -23,7 +23,8 @@ import {
   CRON_FOR_SCHEDULE_EVERY_MIN,
   CUSTOMER_ENCRYPTION,
   PREDEFINED_CMEK,
-  DEFAULT_TIME_ZONE
+  DEFAULT_TIME_ZONE,
+  NETWORK_URL_EXTRACTION
 } from './Constants';
 import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
 
@@ -72,6 +73,20 @@ export const transformZodSchemaToVertexSchedulePayload = (
 
   const notebookSourceUri = getGcsUri(VertexScheduleData.inputFile, bucketName);
 
+  let primaryNetwork: string | undefined = undefined;
+
+  if (VertexScheduleData.primaryNetwork) {
+    primaryNetwork = networkUrlLabelExtraction(
+      VertexScheduleData.primaryNetwork
+    );
+  }
+
+  let subNetwork: string | undefined = undefined;
+
+  if (VertexScheduleData.subNetwork) {
+    subNetwork = networkUrlLabelExtraction(VertexScheduleData.subNetwork);
+  }
+
   const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule = {
     displayName: VertexScheduleData.jobName,
     cron: combinedCronSchedule,
@@ -113,8 +128,8 @@ export const transformZodSchemaToVertexSchedulePayload = (
           },
           networkSpec: {
             enableInternetAccess: true,
-            network: VertexScheduleData.primaryNetwork ?? undefined,
-            subnetwork: VertexScheduleData.subNetwork ?? undefined
+            network: primaryNetwork ?? undefined,
+            subnetwork: subNetwork ?? undefined
           }
         },
         gcsNotebookSource: { uri: notebookSourceUri },
@@ -322,4 +337,16 @@ export const labelValueTransform = (args: string[]) => {
     : [];
 
   return transformedObject;
+};
+
+/**
+ * Extracts network label from full network url
+ * @param {string} networkUrl network url
+ * @return {string} extracted network url
+ */
+export const networkUrlLabelExtraction = (networkUrl: string) => {
+  const startIndex = networkUrl.indexOf(NETWORK_URL_EXTRACTION);
+
+  // Check if 'projects/' exists to avoid errors
+  return startIndex !== -1 ? networkUrl.substring(startIndex) : networkUrl;
 };
