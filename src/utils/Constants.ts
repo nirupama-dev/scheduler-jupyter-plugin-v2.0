@@ -412,3 +412,5 @@ export const EXECUTION_DATE_WITH_NO_DATA = 'No rows to display on';
 
 export const VERTEX_EXECUTION_HISTORY_LOGS_URL =
   'https://console.cloud.google.com/logs/query';
+
+export const NETWORK_URL_EXTRACTION = 'projects/';
