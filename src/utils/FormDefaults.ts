@@ -26,12 +26,13 @@ import {
   DEFAULT_KERNEL,
   DEFAULT_SERVICE_ACCOUNT,
   DEFAULT_TIME_ZONE,
-  DISK_TYPE_VALUE,
   KERNEL_VALUE,
   VERTEX_SCHEDULER_NAME,
   COMPOSER_SCHEDULER_NAME,
-  SCHEDULE_MODE_OPTIONS,
-  DEFAULT_ENCRYPTION_SELECTED
+  DEFAULT_ENCRYPTION_SELECTED,
+  DEFAULT_DISK_TYPE,
+  DEFAULT_SCHEDULE_MODE_OPTION,
+  DEFAULT_INTERNAL_SCHEDULE_MODE
 } from './Constants';
 import { IInitialSchedulerContextData } from '../interfaces/CommonInterface';
 import { ISessionContext } from '@jupyterlab/apputils';
@@ -99,10 +100,10 @@ const getDefaultVertexValues = (
     networkOption: DEFAULT_NETWORK_SELECTED,
     primaryNetwork: '', // Will be dynamically set by primaryNetworkSelected if 'networkInThisProject'
     subNetwork: '', // Will be dynamically set by subNetworkList[0] if 'networkInThisProject'
-    diskType: DISK_TYPE_VALUE[0].value, // First value from DISK_TYPE_VALUE array
+    diskType: DEFAULT_DISK_TYPE,
     diskSize: DEFAULT_DISK_SIZE,
-    scheduleMode: SCHEDULE_MODE_OPTIONS[0].value as ScheduleMode, // Default to first option which is 'One-time'
-    internalScheduleMode: 'cronFormat',
+    scheduleMode: DEFAULT_SCHEDULE_MODE_OPTION as ScheduleMode, // Default to first option which is 'One-time'
+    internalScheduleMode: DEFAULT_INTERNAL_SCHEDULE_MODE,
     scheduleFieldCronFormat: '',
     scheduleValueUserFriendly: '',
     startTime: undefined,

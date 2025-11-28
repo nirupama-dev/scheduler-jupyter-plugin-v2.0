@@ -111,7 +111,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
         },
         customEnvironmentSpec: {
           machineSpec: {
-            machineType: VertexScheduleData.machineType.split('(')[0].trim(),
+            machineType: VertexScheduleData.machineType,
             ...(VertexScheduleData.acceleratorType !== ''
               ? {
                   acceleratorType: VertexScheduleData.acceleratorType
@@ -124,7 +124,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
               : {})
           },
           persistentDiskSpec: {
-            diskType: VertexScheduleData.diskType.split(' ')[0], // extract valid key from the expanded full key value
+            diskType: VertexScheduleData.diskType,
             diskSizeGb: VertexScheduleData.diskSize
           },
           networkSpec: {
