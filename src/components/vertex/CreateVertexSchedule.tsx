@@ -267,6 +267,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           setValue('acceleratorType', '');
           setValue('acceleratorCount', '');
         }
+        trigger(['machineType', 'acceleratorType']);
       } catch (error) {
         if (error instanceof AuthenticationError) {
           handleOpenLoginWidget(app);
@@ -411,15 +412,23 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
       // Set default or existing value if valid, otherwise reset
       const currentPrimaryNetworkValue = getValues('primaryNetwork');
+      const editModePrimaryNetworkOption = response.find(
+        n => n.value.split('/').pop() === currentPrimaryNetworkValue
+      );
       const isValidExisting = response.some(
-        n => n.value === currentPrimaryNetworkValue
+        n => n.value.split('/').pop() === currentPrimaryNetworkValue
       );
 
-      if (!isValidExisting) {
-        setValue('primaryNetwork', ''); //primary network is optional and by default empty. it will reset to blank value if editmode had some invalid value as well.
-        console.log(
-          'Resetting primary network to empty as existing value is invalid.'
-        );
+      if (editModePrimaryNetworkOption) {
+        setValue('primaryNetwork', editModePrimaryNetworkOption?.value);
+        trigger('primaryNetwork');
+      } else {
+        if (!isValidExisting && !editScheduleData?.editMode) {
+          setValue('primaryNetwork', ''); //primary network is optional and by default empty. it will reset to blank value if editmode had some invalid value as well.
+          console.log(
+            'Resetting primary network to empty as existing value is invalid.'
+          );
+        }
       }
     } catch (error) {
       if (error instanceof AuthenticationError) {
@@ -432,7 +441,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       setLoadingState(prev => ({ ...prev, primaryNetwork: false }));
       trigger('primaryNetwork');
     }
-  }, [setValue, getValues, editScheduleData]);
+  }, [setValue, getValues, editScheduleData, trigger]);
 
   /**
    * Fetches the available sub-networks for the selected region and primary network.
@@ -468,12 +477,23 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           console.log('Fetched subnetworks:', subNetworkListResp);
           // Set default or existing value if valid, otherwise reset
           const currentSubnetworkValue = getValues('subNetwork');
+
+          const editModeSubnetworkOption = subNetworkListResp.find(
+            sn => sn.value.split('/').pop() === currentSubnetworkValue
+          );
+
           const isValidExisting = subNetworkListResp.some(
             sn => sn.value === currentSubnetworkValue
           );
 
-          if (!isValidExisting) {
-            setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
+          if (editModeSubnetworkOption) {
+            // FIX: Update the form with the FULL PATH
+            setValue('subNetwork', editModeSubnetworkOption?.value);
+            trigger('subNetwork');
+          } else {
+            if (!isValidExisting && !editScheduleData?.editMode) {
+              setValue('subNetwork', ''); //sub network is optional and by default empty. It will reset to blank value if editmode had some invalid value as well.
+            }
           }
         } catch (error) {
           if (error instanceof AuthenticationError) {

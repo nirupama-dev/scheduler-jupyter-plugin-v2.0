@@ -24,7 +24,8 @@ import {
   CUSTOMER_ENCRYPTION,
   PREDEFINED_CMEK,
   DEFAULT_TIME_ZONE,
-  NETWORK_URL_EXTRACTION
+  NETWORK_URL_EXTRACTION,
+  DEFAULT_ENCRYPTION_SELECTED
 } from './Constants';
 import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
 
@@ -283,7 +284,10 @@ export const transformVertexScheduleResponseToZodSchema = (
     serviceAccount:
       vertexScheduleData.createNotebookExecutionJobRequest?.notebookExecutionJob
         ?.serviceAccount ?? '',
-    encryptionOption: CUSTOMER_ENCRYPTION,
+    encryptionOption: vertexScheduleData.createNotebookExecutionJobRequest
+      ?.notebookExecutionJob?.encryptionSpec?.kmsKeyName
+      ? CUSTOMER_ENCRYPTION
+      : DEFAULT_ENCRYPTION_SELECTED,
     customerEncryptionType: PREDEFINED_CMEK,
     keyRing: keyRing,
     cryptoKey: cryptoKey,
