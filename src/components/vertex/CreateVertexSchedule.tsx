@@ -427,7 +427,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       }
 
       setPrimaryNetworkList([]);
-      // setValue('primaryNetwork', '');
       handleErrorToast({ error: 'Failed to fetch primary networks.' });
     } finally {
       setLoadingState(prev => ({ ...prev, primaryNetwork: false }));
@@ -721,7 +720,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const handleCloudStorageDropdownChange = useCallback(
     async (selectedOption: any | null) => {
       console.log('Selected cloud storage option:', selectedOption);
-      if (selectedOption && selectedOption.startsWith('CREATE_NEW_BUCKET::')) {
+      if (selectedOption?.startsWith('CREATE_NEW_BUCKET::')) {
         const newBucketName = selectedOption.replace('CREATE_NEW_BUCKET::', '');
         if (newBucketName.trim() !== '') {
           setNewBucketCreated(newBucketName);
@@ -1201,13 +1200,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           className="network-layout"
           options={NETWORK_OPTIONS}
           error={vertexErrors.networkOption}
-          onChange={() => {
-            // // Clear all network-related fields when network option changes
-            // setValue('primaryNetwork', '');
-            // setValue('subNetwork', '');
-            // setValue('sharedNetwork', { network: '', subnetwork: '' });
-            // trigger(['primaryNetwork', 'subNetwork', 'sharedNetwork']);
-          }}
         />
       </div>
       {/* Conditional Network Fields */}
@@ -1226,7 +1218,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               onChangeCallback={selected => {
                 console.log('Primary network selected:', selected);
                 console.log('Setting primary network to:', selected.value);
-                // setValue('primaryNetwork', selected ? selected.value : '');
                 setValue('subNetwork', ''); // Clear subnetwork when primary changes
                 trigger(['primaryNetwork', 'subNetwork']); // Trigger validation for subnetwork
               }}
@@ -1249,7 +1240,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               }
               onChangeCallback={selected => {
                 console.log('Sub network selected:', selected);
-                // setValue('subNetwork', selected ? selected.value : '');
                 trigger(['subNetwork', 'primaryNetwork']);
               }}
             />
@@ -1376,13 +1366,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               options={RUN_ON_SCHEDULE_OPTIONS}
               error={vertexErrors.internalScheduleMode}
               onChange={() => {
-                // if (watch('internalScheduleMode') === 'cronFormat') {
-                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
-                //   setValue('scheduleFieldCronFormat', '');
-                // } else {
-                //   setValue('scheduleFieldCronFormat', '');
-                //   setValue('scheduleValue', EVERY_MINUTE_CRON);
-                // }
                 trigger([
                   'scheduleFieldCronFormat',
                   'scheduleValueUserFriendly'
@@ -1404,7 +1387,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
                           field.onChange(
-                            newValue ? newValue.toISOString() : null
+                            newValue ? newValue.toISOString() : undefined
                           );
                           trigger(['startTime', 'endTime']);
                         }}
@@ -1435,7 +1418,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                         value={field.value ? dayjs(field.value) : null}
                         onChange={newValue => {
                           field.onChange(
-                            newValue ? newValue.toISOString() : null
+                            newValue ? newValue.toISOString() : undefined
                           );
                           trigger('endTime');
                         }}
