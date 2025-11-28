@@ -31,7 +31,10 @@ import { StorageServices } from '../../services/common/Storage';
 import { IamServices } from '../../services/common/Iam';
 import { ComputeServices } from '../../services/common/Compute'; // Ensure this is imported
 import { ILabelValue } from '../../interfaces/CommonInterface';
-import { createVertexSchema } from '../../schemas/CreateVertexSchema';
+import {
+  createVertexSchema,
+  VertexSchedulerFormValues
+} from '../../schemas/CreateVertexSchema';
 import { z } from 'zod';
 import { Controller, FieldErrors } from 'react-hook-form';
 import dayjs from 'dayjs';
@@ -70,7 +73,8 @@ import {
   CUSTOMER_MANAGED_RADIO_OPTIONS,
   MANUAL_CMEK,
   DEFAULT_ENCRYPTION_SELECTED,
-  CLOUD_STORAGE_BUCKET_HELPER_TEXT
+  CLOUD_STORAGE_BUCKET_HELPER_TEXT,
+  DEFAULT_DISK_TYPE
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -921,6 +925,31 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   useEffect(() => {
     setDefaultFormValues(getValues());
   }, []);
+
+  useEffect(() => {
+    const currentDiskType = getValues('diskType');
+    const isEditMode = editScheduleData?.editMode;
+
+    if (isEditMode) {
+      if (!currentDiskType && editScheduleData?.existingScheduleData) {
+        const scheduleData =
+          editScheduleData.existingScheduleData as VertexSchedulerFormValues;
+
+        const diskType = scheduleData?.diskType;
+
+        if (diskType) {
+          setValue('diskType', diskType);
+          trigger('diskType');
+        }
+      }
+    } else {
+      // If we are creating a new schedule and no value is selected, set the default
+      if (!currentDiskType && DISK_TYPE_VALUE.length > 0) {
+        setValue('diskType', DEFAULT_DISK_TYPE);
+        trigger('diskType');
+      }
+    }
+  }, [editScheduleData, setValue, getValues, trigger]);
 
   // --- Render Component UI ---
   return (

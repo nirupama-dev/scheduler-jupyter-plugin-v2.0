@@ -111,6 +111,8 @@ export const SCHEDULE_MODE_OPTIONS = [
   }
 ];
 
+export const DEFAULT_SCHEDULE_MODE_OPTION = 'runNow';
+
 export const RUN_ON_SCHEDULE_OPTIONS = [
   {
     label: 'Use UNIX cron format',
@@ -121,6 +123,8 @@ export const RUN_ON_SCHEDULE_OPTIONS = [
     value: 'userFriendly'
   }
 ];
+
+export const DEFAULT_INTERNAL_SCHEDULE_MODE = 'cronFormat';
 
 export const CORN_EXP_DOC_URL =
   'https://cloud.google.com/scheduler/docs/configuring/cron-job-schedules';
@@ -221,26 +225,24 @@ export const DEFAULT_CLOUD_STORAGE_BUCKET = {
 
 export const DISK_TYPE_VALUE: ILabelValue<string>[] = [
   {
-    label: 'pd-standard (Persistent Disk Standard',
-    value: 'pd-standard (Persistent Disk Standard'
-  },
-  {
     label: 'pd-ssd (Persistent Disk Solid state Drive)',
-    value: 'pd-ssd (Persistent Disk Solid state Drive)'
+    value: 'pd-ssd'
   },
   {
     label: 'pd-standard (Persistent Disk Hard Disk Drive)',
-    value: 'pd-standard (Persistent Disk Hard Disk Drive)'
+    value: 'pd-standard'
   },
   {
     label: 'pd-balanced (Balanced Persistent Disk)',
-    value: 'pd-balanced (Balanced Persistent Disk)'
+    value: 'pd-balanced'
   },
   {
     label: 'pd-extreme (Extreme Persistent Disk)',
-    value: 'pd-extreme (Extreme Persistent Disk)'
+    value: 'pd-extreme'
   }
 ];
+
+export const DEFAULT_DISK_TYPE = 'pd-standard';
 
 export const DEFAULT_DISK_SIZE = '100'; // Needs to be a string as diskSize is string in schema
 
