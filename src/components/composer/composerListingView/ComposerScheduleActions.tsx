@@ -47,7 +47,7 @@ export const renderActions = (
           icon={iconTrigger}
           disabled={isPaused}
           className={
-            !isPaused ? 'icon-buttons-style' : 'icon-buttons-style-disable'
+            isPaused ? 'icon-buttons-style-disable' : 'icon-buttons-style'
           }
         />
       )}

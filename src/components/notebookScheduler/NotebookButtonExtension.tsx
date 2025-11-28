@@ -20,15 +20,16 @@ import { JupyterLab } from '@jupyterlab/application';
 import {
   ISessionContext,
   IThemeManager,
-  MainAreaWidget
+  MainAreaWidget,
+  ToolbarButton,
+  showDialog,
+  Dialog
 } from '@jupyterlab/apputils';
 import { NotebookPanel, INotebookModel } from '@jupyterlab/notebook';
 import { DocumentRegistry } from '@jupyterlab/docregistry';
 import { IDisposable } from '@lumino/disposable';
-import { ToolbarButton } from '@jupyterlab/apputils';
 import { NotebookScheduler } from './NotebookScheduler';
 import { iconNotebookScheduler } from '../../utils/Icons';
-import { showDialog, Dialog } from '@jupyterlab/apputils';
 import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
 import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface';
 
@@ -36,8 +37,8 @@ export class NotebookButtonExtension
   implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
 {
   constructor(
-    private app: JupyterLab,
-    private themeManager: IThemeManager,
+    private readonly app: JupyterLab,
+    private readonly themeManager: IThemeManager,
     private schedulerButton: ToolbarButton | null // Store a reference to the button
   ) {
     this.app = app;
@@ -70,7 +71,7 @@ export class NotebookButtonExtension
   }
 
   // Pass sessionContext as an argument because `this.context` is not available in this class directly
-  private onNotebookSchedulerButtonClick = async (
+  private readonly onNotebookSchedulerButtonClick = async (
     sessionContext: ISessionContext
   ): Promise<void> => {
     // Ensure the button is present before attempting to modify it

@@ -16,7 +16,7 @@ const LoadingSpinner: React.FC<ILoaderProps> = ({
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-      <div className={messageClassName}>{message ? message : ''}</div>
+      <div className={messageClassName}>{message ?? ''}</div>
     </div>
   );
 };

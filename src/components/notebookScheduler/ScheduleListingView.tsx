@@ -11,7 +11,6 @@ import {
   RadioGroup,
   Typography
 } from '@mui/material';
-// import { ListVertexSchedule } from '../vertex/scheduleListingView/ListVertexSchedule';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 import { abortApiCall } from '../../utils/Config';

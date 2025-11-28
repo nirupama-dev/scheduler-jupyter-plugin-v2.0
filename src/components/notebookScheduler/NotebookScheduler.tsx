@@ -30,13 +30,10 @@ import { SchedulerRoutes } from '../../router/SchedulerRoutes';
 import { SchedulerWidget } from '../common/widget/SchedulerWidget';
 
 export class NotebookScheduler extends SchedulerWidget {
-  private app: JupyterLab;
-  private initialRoute: string;
-  private sessionContext?: ISessionContext | undefined | null;
-  private initialKernalSchedulerDetails?:
-    | INotebookKernalSchdulerDefaults
-    | null
-    | undefined;
+  private readonly app: JupyterLab;
+  private readonly initialRoute: string;
+  private readonly sessionContext?: ISessionContext | null;
+  private readonly initialKernalSchedulerDetails?: INotebookKernalSchdulerDefaults | null;
 
   constructor(
     themeManager: IThemeManager,

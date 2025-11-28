@@ -143,7 +143,9 @@ const ListDagTaskInstances = ({
                   <div className="accordion-row-data">
                     {taskInstance.duration}
                   </div>
-                  {taskInstance.tryNumber !== 0 ? (
+                  {taskInstance.tryNumber === 0 ? (
+                    <div className="accordion-row-data-expand-logo"></div>
+                  ) : (
                     <div className="accordion-row-data-expand-logo">
                       <ActionButton
                         title={expanded === `${index}` ? 'Collapse' : 'Expand'}
@@ -162,8 +164,6 @@ const ListDagTaskInstances = ({
                         className="icon-white logo-alignment-style-accordion"
                       />
                     </div>
-                  ) : (
-                    <div className="accordion-row-data-expand-logo"></div>
                   )}
                 </div>
 

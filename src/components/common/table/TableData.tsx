@@ -53,7 +53,7 @@ function TableData({
     };
   }, []);
 
-  const displayData = page ? page : rows;
+  const displayData = page ?? rows;
 
   return (
     <table {...getTableProps()} className="scheduler-list-table">

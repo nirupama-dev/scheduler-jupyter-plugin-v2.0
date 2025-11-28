@@ -191,7 +191,7 @@ export const rowDataList = (
           <div>
             <iconFailed.react
               tag="div"
-              title={!lastScheduledRunResponse ? 'Not started' : runResponse}
+              title={lastScheduledRunResponse ? runResponse : 'Not started'}
               className="icon-white logo-alignment-style success_icon icon-size"
             />
           </div>
@@ -213,14 +213,12 @@ export const rowDataList = (
         }
       >
         {cell.column.Header === 'Status' ? (
-          <>
-            <div className="horizontal-element-wrapper">
-              {getStatusIcon()}
-              <div className={alignIcon ? 'text-icon' : ''}>
-                {cell.render('Cell')}
-              </div>
+          <div className="horizontal-element-wrapper">
+            {getStatusIcon()}
+            <div className={alignIcon ? 'text-icon' : ''}>
+              {cell.render('Cell')}
             </div>
-          </>
+          </div>
         ) : (
           <div className="cell-width-listing">{cell.render('Cell')}</div>
         )}

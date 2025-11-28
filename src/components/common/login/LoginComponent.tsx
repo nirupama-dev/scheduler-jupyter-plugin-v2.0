@@ -27,10 +27,6 @@ export class AuthenticationWidget extends SchedulerWidget {
   }
 
   protected renderInternal(): React.ReactElement {
-    return (
-      <>
-        <LoginErrorComponent />
-      </>
-    );
+    return <LoginErrorComponent />;
   }
 }

@@ -67,33 +67,33 @@ export default function CustomDate(props: ICustomDateProps) {
     let StatusIcon = null;
 
     if (isGrey) {
-      if (!isSelected) {
-        StatusIcon = IconGreyCircle;
-      } else {
+      if (isSelected) {
         style.backgroundColor = '#7474740F';
         style.borderColor = '2px solid #747474';
+      } else {
+        StatusIcon = IconGreyCircle;
       }
     }
     if (isGreen && isRed) {
-      if (!isSelected) {
-        StatusIcon = IconOrangeCircle;
-      } else {
+      if (isSelected) {
         style.backgroundColor = '#E374000F';
         style.borderColor = '2px solid #E37400';
+      } else {
+        StatusIcon = IconOrangeCircle;
       }
     } else if (isRed) {
-      if (!isSelected) {
-        StatusIcon = IconFailedCircle;
-      } else {
+      if (isSelected) {
         style.backgroundColor = '#B3261E0F';
         style.borderColor = '2px solid #B3261E';
+      } else {
+        StatusIcon = IconFailedCircle;
       }
     } else if (isGreen || isDarkGreen) {
-      if (!isSelected) {
-        StatusIcon = IconSuccessCircle;
-      } else {
+      if (isSelected) {
         style.backgroundColor = '#1880380F';
         style.borderColor = '2px solid #188038';
+      } else {
+        StatusIcon = IconSuccessCircle;
       }
     }
 
@@ -149,9 +149,9 @@ export default function CustomDate(props: ICustomDateProps) {
         }}
         sx={{
           '&:hover': {
-            backgroundColor: !dateInfo.isSelected
-              ? '#1F1F1F0F !important'
-              : 'transparent !important',
+            backgroundColor: dateInfo.isSelected
+              ? 'transparent !important'
+              : '#1F1F1F0F !important',
             borderRadius: '50%'
           },
           '&.Mui-selected:hover': {
