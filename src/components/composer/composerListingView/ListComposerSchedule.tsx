@@ -456,13 +456,14 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     };
 
     if (
-      composerRouteState.region &&
-      composerRouteState.environment &&
-      composerRouteState.projectId
+      composerRouteState?.region &&
+      composerRouteState?.environment &&
+      composerRouteState?.projectId
     ) {
       setValue('projectId', composerRouteState.projectId);
       setComposerProjectId(composerRouteState.projectId);
       setValue('composerRegion', composerRouteState.region);
+      setComposerRegion(composerRouteState.region);
       setValue('environment', composerRouteState.environment);
     } else {
       loadInitialCredentials();
@@ -503,9 +504,13 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     };
 
     fetchProjects();
-    // Clear subsequent fields when project_id changes
-    setValue('composerRegion', '');
-    setValue('environment', '');
+
+    if (!composerRouteState?.region && !composerRouteState?.environment) {
+      // Clear subsequent fields when project_id changes
+      setValue('composerRegion', '');
+      setValue('environment', '');
+    }
+
     setDagList([]);
   }, [composerProjectId, setValue]);
 

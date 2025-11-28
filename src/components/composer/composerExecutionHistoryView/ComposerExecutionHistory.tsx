@@ -27,6 +27,7 @@ import { Box, LinearProgress } from '@mui/material';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { abortApiCall } from '../../../utils/Config';
 import dayjs from 'dayjs';
+import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 
 const ComposerExecutionHistory = ({
   abortControllers,
@@ -38,6 +39,9 @@ const ComposerExecutionHistory = ({
   const location = useLocation();
   const navigate = useNavigate();
   const { dagId, projectId, region, composerName, bucketName } = location.state;
+
+  const schedulerContext = useSchedulerContext();
+  const setComposerRouteState = schedulerContext?.setComposerRouteState;
 
   const {
     startDate,
@@ -85,6 +89,13 @@ const ComposerExecutionHistory = ({
 
   const handleBackButton = () => {
     abortApiCall(abortControllers);
+    if (setComposerRouteState) {
+      setComposerRouteState({
+        region: region,
+        projectId: projectId,
+        environment: composerName
+      });
+    }
     navigate('/list/composer');
   };
 

@@ -407,6 +407,15 @@ export class ComposerServices {
         throw error;
       }
 
+      if (typeof error === 'object' && error !== null) {
+        if (
+          error instanceof TypeError &&
+          error.toString().includes(ABORT_MESSAGE)
+        ) {
+          return;
+        }
+      }
+
       const errorResponse = `Error in listing dag runs..\n${error}`;
       handleErrorToast({
         error: errorResponse
