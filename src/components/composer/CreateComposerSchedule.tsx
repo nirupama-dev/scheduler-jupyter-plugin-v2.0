@@ -108,7 +108,6 @@ export const CreateComposerSchedule: React.FC<
   const composerErrors = isComposerForm ? errors : {};
 
   const fetchProjects = async () => {
-    setValue('projectId', '');
     try {
       setLoadingState(prev => ({ ...prev, projectId: true }));
       const options = await ResourceManagerServices.projectAPIService();
@@ -141,8 +140,6 @@ export const CreateComposerSchedule: React.FC<
 
   const fetchRegions = async () => {
     if (selectedProjectId) {
-      setValue('composerRegion', '');
-
       try {
         setLoadingState(prev => ({ ...prev, region: true }));
         const options =
@@ -160,10 +157,12 @@ export const CreateComposerSchedule: React.FC<
           region => region.value === currentRegionValue
         );
         // If the region is valid, set it; otherwise, clear the field.
-        if (isRegionValid) {
-          setValue('composerRegion', currentRegionValue);
-        } else {
+        if (!isRegionValid) {
           setValue('composerRegion', '');
+          setValue('environment', '');
+          setEnvOptions([]);
+        } else {
+          setValue('composerRegion', currentRegionValue);
         }
       } catch (authenticationError) {
         handleOpenLoginWidget(app);
