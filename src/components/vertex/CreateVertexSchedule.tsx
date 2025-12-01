@@ -923,6 +923,18 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, [customerEncryptionType, cryptoKeySelected, encryptionSelected]);
 
   useEffect(() => {
+    if (encryptionSelected === CUSTOMER_ENCRYPTION) {
+      const currentType = getValues('customerEncryptionType');
+
+      // If no radio-option is selected yet, default to Key Ring (PREDEFINED_CMEK)
+      if (!currentType) {
+        setValue('customerEncryptionType', PREDEFINED_CMEK);
+        trigger();
+      }
+    }
+  }, [encryptionSelected, setValue, getValues]);
+
+  useEffect(() => {
     setDefaultFormValues(getValues());
   }, []);
 
