@@ -31,6 +31,7 @@ import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import {
   COMPOSER_SCHEDULER_NAME,
+  FORM_LOADING_TEXT,
   INPUT_HELPER_TEXT,
   SCHEDULE_LABEL_VERTEX,
   SCHEDULER_OPTIONS,
@@ -70,6 +71,7 @@ import {
 } from '../../utils/ComposerDataTransform';
 import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
+import LoadingSpinner from '../common/loader/LoadingSpinner';
 
 /**
  * Create Notebook Schedule Parent component that renders common components
@@ -455,7 +457,15 @@ export const CreateNotebookSchedule = (
     !isDataLoaded || // initial values not loaded
     !getValues('schedulerSelection') //
   ) {
-    return <div>Loading...</div>;
+    return (
+      <div>
+        <LoadingSpinner
+          message={FORM_LOADING_TEXT}
+          iconClassName="spin-loader-custom-style"
+          parentTagClassName="main-form-loader"
+        />
+      </div>
+    );
   }
 
   return (

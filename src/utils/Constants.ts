@@ -416,3 +416,5 @@ export const VERTEX_EXECUTION_HISTORY_LOGS_URL =
   'https://console.cloud.google.com/logs/query';
 
 export const NETWORK_URL_EXTRACTION = 'projects/';
+
+export const FORM_LOADING_TEXT = 'Loading ...';
