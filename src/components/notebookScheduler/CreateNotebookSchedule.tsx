@@ -429,6 +429,7 @@ export const CreateNotebookSchedule = (
           schedulerName: SCHEDULE_LABEL_VERTEX.toLocaleLowerCase(),
           region: initialSchedulerDataContext.editModeData.region
         });
+        navigate('/list/vertex');
       } else if (setComposerRouteState && schedulerTypeForEdit === 'composer') {
         setComposerRouteState({
           schedulerName: COMPOSER_SCHEDULER_NAME,
@@ -436,8 +437,10 @@ export const CreateNotebookSchedule = (
           projectId: initialSchedulerDataContext.editModeData.projectId,
           environment: initialSchedulerDataContext.editModeData.environment
         });
+        navigate('/list/composer');
+      } else {
+        navigate('/list');
       }
-      navigate('/list');
     } else {
       (app.shell as any).activeWidget?.close();
     }
