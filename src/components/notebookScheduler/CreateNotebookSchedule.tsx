@@ -118,6 +118,7 @@ export const CreateNotebookSchedule = (
     useState<IInitialSchedulerContextData>({});
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   console.log(isDataLoaded, 'isDataLoaded');
 
   const navigate = useNavigate();
@@ -342,6 +343,7 @@ export const CreateNotebookSchedule = (
    */
   const onSubmit = async (data: CombinedCreateFormValues) => {
     try {
+      setIsFormSubmitted(true);
       console.log('On Submit');
       if (!initialSchedulerDataContext.credentials) {
         console.error('Credentials not available.');
@@ -383,8 +385,10 @@ export const CreateNotebookSchedule = (
               region: vertexData.vertexRegion
             });
           }
+          setIsFormSubmitted(false);
           navigate('/list');
         }
+        setIsFormSubmitted(false);
         //composer payload creation
       } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
         const composerData = data;
@@ -411,10 +415,13 @@ export const CreateNotebookSchedule = (
               environment: composerData.environment
             });
           }
+          setIsFormSubmitted(false);
           navigate('/list/composer');
         }
+        setIsFormSubmitted(false);
       }
     } catch (error) {
+      setIsFormSubmitted(false);
       if (error instanceof AuthenticationError) {
         handleOpenLoginWidget(app);
       }
@@ -565,8 +572,12 @@ export const CreateNotebookSchedule = (
             >
               <div>
                 {initialSchedulerDataContext?.editModeData?.editMode
-                  ? 'UPDATE'
-                  : 'CREATE'}
+                  ? isFormSubmitted
+                    ? 'UPDATING'
+                    : 'UPDATE'
+                  : isFormSubmitted
+                    ? 'CREATING'
+                    : 'CREATE'}
               </div>
             </Button>
             <Button
