@@ -47,6 +47,7 @@ export interface ICreateVertexSchedulerProps {
   editScheduleData: IEditScheduleData | null | undefined;
   clearErrors: any;
   app: JupyterFrontEnd;
+  setChildLoadingState?: (isLoading: boolean) => void;
 }
 
 export interface IMachineType {

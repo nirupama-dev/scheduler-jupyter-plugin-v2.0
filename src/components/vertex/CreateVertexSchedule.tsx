@@ -102,7 +102,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   credentials,
   editScheduleData,
   clearErrors,
-  app
+  app,
+  setChildLoadingState
   // ... other props
 }) => {
   // Local state for dropdown options (fetched dynamically)
@@ -981,6 +982,16 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
       trigger(['startTime', 'endTime']);
     }
   }, [editScheduleData, setValue, trigger]);
+
+  useEffect(() => {
+    if (setChildLoadingState) {
+      // Check if any value in the loadingState object is true
+      const isAnyLoading = Object.values(loadingState).some(
+        isLoading => isLoading
+      );
+      setChildLoadingState(isAnyLoading);
+    }
+  }, [loadingState, setChildLoadingState]);
 
   // --- Render Component UI ---
   return (

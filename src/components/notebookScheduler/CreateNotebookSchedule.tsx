@@ -120,6 +120,7 @@ export const CreateNotebookSchedule = (
     useState<IInitialSchedulerContextData>({});
 
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [isChildComponentLoading, setIsChildComponentLoading] = useState(false);
   console.log(isDataLoaded, 'isDataLoaded');
 
   const navigate = useNavigate();
@@ -548,6 +549,7 @@ export const CreateNotebookSchedule = (
               editScheduleData={initialSchedulerDataContext.editModeData}
               clearErrors={clearErrors}
               app={app}
+              setChildLoadingState={setIsChildComponentLoading}
             />
           )}
           {schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME && (
@@ -571,7 +573,7 @@ export const CreateNotebookSchedule = (
               variant="contained"
               aria-label="Create Schedule"
               type="submit"
-              disabled={!isValid}
+              disabled={!isValid || isChildComponentLoading}
             >
               <div>
                 {initialSchedulerDataContext?.editModeData?.editMode
