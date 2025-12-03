@@ -122,6 +122,8 @@ export const combinedCreateFormSchema = z
         }
       }
 
+      const isEditMode = !!vertexData.isEditMode;
+
       // Schedule field validations
       if (vertexData.scheduleMode === 'runSchedule') {
         // If both present, end > start and both in the future
@@ -136,14 +138,14 @@ export const combinedCreateFormSchema = z
               message: 'End time must be after start time.'
             });
           }
-          if (start < now) {
+          if (!isEditMode && start < now) {
             ctx.addIssue({
               path: ['startTime'],
               code: z.ZodIssueCode.custom,
               message: 'Start time must be set to a future date and time.'
             });
           }
-          if (end < now) {
+          if (!isEditMode && end < now) {
             ctx.addIssue({
               path: ['endTime'],
               code: z.ZodIssueCode.custom,

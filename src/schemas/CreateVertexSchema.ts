@@ -100,7 +100,8 @@ export const createVertexSchema = createNotebookCommonSchema.extend({
   endTime: z.string().optional(),
   maxRunCount: z.string().optional(),
   timeZone: z.string().optional(),
-  parameters: z.array(parameterSchema).optional()
+  parameters: z.array(parameterSchema).optional(),
+  isEditMode: z.boolean().optional()
 });
 
 /**

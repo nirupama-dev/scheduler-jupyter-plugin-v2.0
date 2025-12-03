@@ -963,6 +963,24 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, [editScheduleData, setValue, getValues, trigger]);
 
+  useEffect(() => {
+    if (editScheduleData?.editMode) {
+      setValue('isEditMode', true);
+    } else {
+      setValue('isEditMode', false);
+    }
+  }, [editScheduleData, setValue]);
+
+  useEffect(() => {
+    const isEdit = !!editScheduleData?.editMode;
+    setValue('isEditMode', isEdit);
+
+    // Force 'startTime' and 'emdTime to re-validate.
+    if (isEdit) {
+      trigger(['startTime', 'endTime']);
+    }
+  }, [editScheduleData, setValue, trigger]);
+
   // --- Render Component UI ---
   return (
     <div>
