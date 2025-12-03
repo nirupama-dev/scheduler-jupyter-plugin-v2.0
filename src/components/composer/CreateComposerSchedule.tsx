@@ -60,7 +60,8 @@ export const CreateComposerSchedule: React.FC<
   trigger,
   isValid,
   credentials,
-  initialSchedulerDataContext
+  initialSchedulerDataContext,
+  setChildLoadingState
 }) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
   const [projectOptions, setProjectOptions] = useState<ILabelValue<string>[]>(
@@ -400,6 +401,18 @@ export const CreateComposerSchedule: React.FC<
   console.log('is valid', isValid);
   console.log('composerErrors', composerErrors);
   console.log('getValues', getValues());
+
+  useEffect(() => {
+    // Check if any of the local loading states are true
+    const isAnyLoading = Object.values(loadingState).some(
+      isLoading => isLoading
+    );
+
+    // Update the parent
+    if (setChildLoadingState) {
+      setChildLoadingState(isAnyLoading);
+    }
+  }, [loadingState, setChildLoadingState]);
 
   return (
     <div>

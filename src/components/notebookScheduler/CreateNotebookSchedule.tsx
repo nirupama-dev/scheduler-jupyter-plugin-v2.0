@@ -565,6 +565,7 @@ export const CreateNotebookSchedule = (
               credentials={initialSchedulerDataContext.credentials}
               initialSchedulerDataContext={initialSchedulerDataContext}
               app={app}
+              setChildLoadingState={setIsChildComponentLoading}
             />
           )}
 
