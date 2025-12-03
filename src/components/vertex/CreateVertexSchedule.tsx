@@ -74,7 +74,8 @@ import {
   MANUAL_CMEK,
   DEFAULT_ENCRYPTION_SELECTED,
   CLOUD_STORAGE_BUCKET_HELPER_TEXT,
-  DEFAULT_DISK_TYPE
+  DEFAULT_DISK_TYPE,
+  DEFAULT_ERROR_LENGTH_START_AND_END_DATE
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -1529,7 +1530,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 className={
                   vertexErrors.endTime?.message ||
                   vertexErrors.startTime?.message
-                    ? 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input'
+                    ? (vertexErrors.endTime?.message?.length ?? 0) <
+                        DEFAULT_ERROR_LENGTH_START_AND_END_DATE ||
+                      (vertexErrors.startTime?.message?.length ?? 0) <
+                        DEFAULT_ERROR_LENGTH_START_AND_END_DATE
+                      ? 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input'
+                      : 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input-long'
                     : 'scheduler-form-element-container schedule-input-field scheduler-input-top'
                 }
               >
