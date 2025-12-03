@@ -1386,7 +1386,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           className="network-layout"
           options={SCHEDULE_MODE_OPTIONS.map(option => {
             const newOption: RadioOption = { ...option };
-            if (option.value === 'runNow') {
+            if (option.value !== currentScheduleMode) {
               if (editScheduleData?.editMode) {
                 newOption.disabled = true;
               }
