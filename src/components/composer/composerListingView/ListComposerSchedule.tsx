@@ -60,7 +60,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const schedulerContext = useSchedulerContext();
   const composerRouteState = schedulerContext?.composerRouteState;
   const setComposerRouteState = schedulerContext?.setComposerRouteState;
-  const { control, setValue, watch } = useForm();
+  const { control, setValue, watch, getValues } = useForm();
   const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
   const [projectOptions, setProjectOptions] = useState<IDropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<IEnvDropDownOption[]>([]);
@@ -98,6 +98,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   >([]);
 
   const navigate = useNavigate();
+
+  const composerRegionRef = useRef(composerRegion);
 
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
@@ -137,6 +139,17 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           selectedRegion,
           selectedProjectId
         );
+
+      const currentProject = getValues('projectId');
+      const currentRegion = getValues('composerRegion');
+      const currentEnv = getValues('environment');
+
+      // If any drop down field was cleared while loading, return empty list
+      if (!currentProject || !currentRegion || !currentEnv) {
+        setDagList([]);
+        return;
+      }
+
       setDagList(dagList);
       setBucketName(bucketName);
     } catch (authenticationError) {
@@ -469,141 +482,191 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   }, []);
 
   useEffect(() => {
+    let isCurrent = true;
     const fetchProjects = async () => {
       if (composerProjectId) {
         try {
-          setLoadingState(prev => ({ ...prev, projectId: true }));
-          const options = await ResourceManagerServices.projectAPIService();
-          setProjectOptions(options);
+          if (isCurrent) {
+            setLoadingState(prev => ({ ...prev, projectId: true }));
+          }
 
-          // Set the default project after options are fetched
-          if (options.length > 0) {
-            const defaultProject = composerProjectId
-              ? options.find(opt => opt.value === composerProjectId)
-              : options[0];
-            if (defaultProject) {
-              setValue('projectId', defaultProject.value);
+          const options = await ResourceManagerServices.projectAPIService();
+
+          if (isCurrent) {
+            setProjectOptions(options);
+
+            // Set the default project after options are fetched
+            if (options.length > 0) {
+              const defaultProject = composerProjectId
+                ? options.find(opt => opt.value === composerProjectId)
+                : options[0];
+              if (defaultProject) {
+                if (getValues('projectId') !== defaultProject.value) {
+                  setValue('projectId', defaultProject.value);
+                }
+              }
             }
           }
         } catch (error) {
-          // Handle error from the service call
-          const errorResponse = `Failed to fetch project list : ${error}`;
-          if (error instanceof AuthenticationError) {
-            handleOpenLoginWidget(app);
-          }
+          if (isCurrent) {
+            // Handle error from the service call
+            const errorResponse = `Failed to fetch project list : ${error}`;
+            if (error instanceof AuthenticationError) {
+              handleOpenLoginWidget(app);
+            }
 
-          handleErrorToast({
-            error: errorResponse
-          });
+            handleErrorToast({
+              error: errorResponse
+            });
+          }
         } finally {
-          setLoadingState(prev => ({ ...prev, projectId: false }));
+          if (isCurrent) {
+            setLoadingState(prev => ({ ...prev, projectId: false }));
+          }
         }
       }
     };
 
     fetchProjects();
-
-    if (!composerRouteState?.region && !composerRouteState?.environment) {
-      // Clear subsequent fields when project_id changes
-      setValue('composerRegion', '');
-      setValue('environment', '');
-    }
-
-    setDagList([]);
   }, [composerProjectId, setValue]);
 
-  // --- Fetch Regions based on selected Project ID ---
+  // Fetch Regions based on selected Project ID
   useEffect(() => {
+    let isCurrent = true;
     const fetchRegions = async () => {
-      if (!composerProjectId) {
-        setRegionOptions([]);
-        setValue('composerRegion', '');
+      if (!selectedProjectId) {
+        if (isCurrent) {
+          setLoadingState(prev => ({ ...prev, region: false }));
+          setRegionOptions([]);
+          setValue('composerRegion', '');
+        }
+
         return;
       }
-      if (selectedProjectId) {
-        setValue('composerRegion', '');
 
-        try {
-          setLoadingState(prev => ({ ...prev, region: true }));
-          const options =
-            await ComputeServices.regionAPIService(selectedProjectId);
+      try {
+        setDagList([]);
+        setLoadingState(prev => ({ ...prev, region: true }));
+
+        const options =
+          await ComputeServices.regionAPIService(selectedProjectId);
+
+        if (isCurrent) {
           setRegionOptions(options);
 
+          const regionOpted = composerRegionRef.current;
           // Set the default region after options are fetched
           if (options.length > 0) {
-            const defaultRegion = composerRegion
-              ? options.find(opt => opt.value === composerRegion)
+            const defaultRegion = regionOpted
+              ? options.find(opt => opt.value === regionOpted)
               : options[0];
             if (defaultRegion) {
               setValue('composerRegion', defaultRegion.value);
             }
+            setLoadingState(prev => ({ ...prev, region: false }));
+          } else {
+            setLoadingState(prev => ({ ...prev, region: false }));
+            setValue('composerRegion', '');
           }
-        } catch (error) {
+        }
+      } catch (error) {
+        if (isCurrent) {
           // Handle error from the service call
           const errorResponse = `Failed to fetch region list : ${error}`;
           if (error instanceof AuthenticationError) {
             handleOpenLoginWidget(app);
           } else {
-            setValue('composerRegion', composerRouteState?.region);
+            if (composerRouteState?.region) {
+              setValue('composerRegion', composerRouteState.region);
+            }
           }
 
           handleErrorToast({
             error: errorResponse
           });
-        } finally {
+          setLoadingState(prev => ({ ...prev, region: false }));
+          setRegionOptions([]);
+          setValue('composerRegion', '');
+        }
+      } finally {
+        if (isCurrent) {
           setLoadingState(prev => ({ ...prev, region: false }));
         }
       }
     };
     fetchRegions();
-    // Clear subsequent fields when project_id changes
-    if (!composerRouteState?.environment) {
-      setValue('environment', '');
-    }
 
-    setDagList([]);
-  }, [selectedProjectId, composerProjectId, composerRegion, setValue]);
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedProjectId, setValue]);
 
   useEffect(() => {
+    let isCurrent = true;
     const fetchEnvironments = async () => {
-      if (!composerProjectId || !selectedRegion) {
-        setEnvOptions([]);
-        setValue('environment', '');
-        setDagList([]);
+      if (!selectedProjectId) {
+        if (isCurrent) {
+          setLoadingState(prev => ({ ...prev, environment: false }));
+          setEnvOptions([]);
+          setValue('environment', '');
+          setDagList([]);
+          setComposerEnvData([]);
+        }
 
         return;
       }
+
+      setEnvOptions([]);
+      setValue('environment', '');
+      setDagList([]);
+
       try {
         setLoadingState(prev => ({ ...prev, environment: true }));
-        const options = await ComposerServices.listComposersAPIService(
-          composerProjectId,
-          selectedRegion
-        );
-        setEnvOptions(options.environmentOptions);
-        setComposerEnvData(options.composerListResponse);
-        setEnvOptions(options.environmentOptions);
-        if (options.environmentOptions.length > 0) {
-          if (composerRouteState?.environment) {
-            await handleEnvChange(composerRouteState?.environment);
-            if (setComposerRouteState) {
-              setComposerRouteState(null);
+        if (selectedRegion) {
+          const options = await ComposerServices.listComposersAPIService(
+            selectedProjectId,
+            selectedRegion
+          );
+
+          if (isCurrent) {
+            setEnvOptions(options.environmentOptions);
+            setComposerEnvData(options.composerListResponse);
+            if (options.environmentOptions.length > 0) {
+              if (
+                composerRouteState?.environment &&
+                composerRouteState?.region === selectedRegion
+              ) {
+                await handleEnvChange(composerRouteState?.environment);
+                setComposerRouteState?.(null);
+              } else {
+                await handleEnvChange(options.environmentOptions[0].value);
+              }
+            } else {
+              setValue('environment', '');
+              setDagList([]);
             }
-          } else {
-            await handleEnvChange(options.environmentOptions[0].value);
           }
-        } else {
-          setValue('environment', '');
-          setDagList([]);
         }
       } catch (authenticationError) {
-        handleOpenLoginWidget(app);
+        if (isCurrent) {
+          handleOpenLoginWidget(app);
+          setLoadingState(prev => ({ ...prev, environment: false }));
+          setEnvOptions([]);
+          setValue('environment', '');
+        }
       } finally {
-        setLoadingState(prev => ({ ...prev, environment: false }));
+        if (isCurrent) {
+          setLoadingState(prev => ({ ...prev, environment: false }));
+        }
       }
     };
 
     fetchEnvironments();
-  }, [selectedRegion, setValue, handleEnvChange]);
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [selectedProjectId, selectedRegion, setValue, handleEnvChange]);
 
   useEffect(() => {
     if (inputNotebookFilePath !== '') {
@@ -667,6 +730,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       handleDeletePopUp
     ]
   );
+
+  useEffect(() => {
+    composerRegionRef.current = composerRegion;
+  }, [composerRegion]);
 
   return (
     <div>
