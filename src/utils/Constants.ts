@@ -420,5 +420,3 @@ export const NETWORK_URL_EXTRACTION = 'projects/';
 export const FORM_LOADING_TEXT = 'Loading ...';
 
 export const DEFAULT_ERROR_LENGTH_START_AND_END_DATE = 39;
-
-export const LOADING_COMPOSER_DAG_TEXT = 'Loading Notebook Schedulers...';

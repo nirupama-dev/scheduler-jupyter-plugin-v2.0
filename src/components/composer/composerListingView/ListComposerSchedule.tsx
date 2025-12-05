@@ -43,7 +43,6 @@ import {
   composerEnvironmentStateList,
   GCS_PLUGIN_ID,
   LIST_COMPOSER_TABLE_HEADER,
-  LOADING_COMPOSER_DAG_TEXT,
   NO_ROWS_TO_DISPLAY,
   PACKAGES,
   POLLING_DAG_LIST_INTERVAL,
@@ -787,10 +786,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         </div>
       ) : (
         <div>
-          {(loadingState.dags ||
-            loadingState.projectId ||
-            loadingState.region ||
-            loadingState.environment) && (
+          {loadingState.dags && (
             <div className="spin-loader-main">
               <CircularProgress
                 className="spin-loader-custom-style"
@@ -798,15 +794,12 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
                 aria-label="Loading Spinner"
                 data-testid="loader"
               />
-              {LOADING_COMPOSER_DAG_TEXT}
+              Loading Notebook Schedulers
             </div>
           )}
-          {!loadingState.dags &&
-            !loadingState.projectId &&
-            !loadingState.region &&
-            !loadingState.environment && (
-              <div className="no-data-style">{NO_ROWS_TO_DISPLAY}</div>
-            )}
+          {!loadingState.dags && (
+            <div className="no-data-style">{NO_ROWS_TO_DISPLAY}</div>
+          )}
         </div>
       )}
     </div>
