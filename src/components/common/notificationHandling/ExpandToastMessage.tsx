@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * Expandable Toast Message component.
+ */
 import React, { useState, useEffect } from 'react';
 import 'react-toastify/dist/ReactToastify.css';
 import { IExpandableToastProps } from '../../../interfaces/ComposerInterface';

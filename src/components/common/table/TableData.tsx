@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Table Data component to render table rows and handle loading state.
+ */
 import { CircularProgress } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Cell, Row } from 'react-table';

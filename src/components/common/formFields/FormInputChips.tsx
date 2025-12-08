@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Component for Form Input Chips using React Hook Form and MUI.
+ */
 import React from 'react';
 import { MuiChipsInput } from 'mui-chips-input';
 import { Controller } from 'react-hook-form';

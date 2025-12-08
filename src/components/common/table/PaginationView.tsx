@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * Pagination View component for tables.
+ */
 import React from 'react';
 import { Select } from './MuiWrappedSelect';
 import { ActionButton } from '../button/ActionButton';

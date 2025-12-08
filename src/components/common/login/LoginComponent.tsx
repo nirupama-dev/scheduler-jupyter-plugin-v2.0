@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Authentication Widget component.
+ */
 import React from 'react';
 import { IThemeManager } from '@jupyterlab/apputils';
 import { SchedulerWidget } from '../widget/SchedulerWidget';

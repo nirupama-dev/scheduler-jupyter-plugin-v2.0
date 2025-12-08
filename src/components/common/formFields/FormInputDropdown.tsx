@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Component for Form Input Dropdown using React Hook Form and MUI.
+ */
 import React from 'react';
 import {
   FormControl,

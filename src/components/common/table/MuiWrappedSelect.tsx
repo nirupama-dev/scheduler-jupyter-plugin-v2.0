@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * MUI Wrapped Select component to mimic Semantic UI Select.
+ */
 import { MenuItem, Select as MuiSelect, styled } from '@mui/material';
 import React from 'react';
 import type { SelectProps } from 'semantic-ui-react';

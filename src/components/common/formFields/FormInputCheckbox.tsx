@@ -16,8 +16,7 @@
  */
 
 /**
- * Initialization data for the scheduler-jupyter-plugin extension.
- * Parent component for createVertexSchedule.tsx and CreateComposerSchedule.tsx
+ * Component for Form Input Checkbox using React Hook Form and MUI.
  */
 
 import React from 'react';

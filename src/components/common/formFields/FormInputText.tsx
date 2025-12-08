@@ -15,6 +15,10 @@
  * limitations under the License.
  */
 
+/**
+ * Component for Form Input Text using React Hook Form and MUI.
+ */
+
 import React from 'react';
 import { Controller } from 'react-hook-form';
 import TextField from '@mui/material/TextField';

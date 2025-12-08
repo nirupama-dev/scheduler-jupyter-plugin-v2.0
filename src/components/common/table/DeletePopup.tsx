@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * Delete Confirmation Popup component using MUI Dialog.
+ */
 
 import React from 'react';
 import Button from '@mui/material/Button';

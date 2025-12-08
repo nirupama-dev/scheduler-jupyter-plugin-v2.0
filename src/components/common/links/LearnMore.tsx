@@ -14,6 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+/**
+ * Learn More link component.
+ */
 import React from 'react';
 import { IPath } from '../../../interfaces/CommonInterface';
 

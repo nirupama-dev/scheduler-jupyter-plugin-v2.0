@@ -14,7 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
+/**
+ * Authentication and Login related functions.
+ */
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { requestAPI } from '../../../handler/Handler';
 import { IAuthCredentials } from '../../../interfaces/CommonInterface';

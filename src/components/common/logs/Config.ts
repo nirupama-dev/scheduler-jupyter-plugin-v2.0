@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Helper method for fetch with logging.
+ */
 import { SchedulerLoggingService } from '../../../services/common/LoggingService';
 
 /**

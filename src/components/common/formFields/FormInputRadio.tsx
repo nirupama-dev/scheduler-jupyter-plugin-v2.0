@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * Component for Form Input Radio using React Hook Form and MUI.
+ */
 import React from 'react';
 import {
   FormControl,
