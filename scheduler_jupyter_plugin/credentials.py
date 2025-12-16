@@ -22,7 +22,8 @@ import logging
 
 async def _gcp_credentials():
     """Helper method to get the project configured through gcloud"""
-    return await async_get_gcloud_config("credential.access_token")
+    # return await async_get_gcloud_config("credential.access_token")
+    return await async_run_gcloud_subcommand("auth print-access-token")
 
 
 async def _gcp_project():
