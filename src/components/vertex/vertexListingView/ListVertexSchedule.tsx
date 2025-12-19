@@ -625,7 +625,7 @@ const ListVertexSchedule = ({
       }
     };
 
-    if ('region' in vertexRouteState) {
+    if (vertexRouteState && 'region' in vertexRouteState) {
       setRegion(vertexRouteState.region);
       if (setVertexRouteState) {
         setVertexRouteState(null);
