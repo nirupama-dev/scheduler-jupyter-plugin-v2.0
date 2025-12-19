@@ -841,28 +841,40 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    */
   const listCryptoKeysAPI = async (keyRing: string) => {
     setLoadingState(prev => ({ ...prev, cryptoKeys: true }));
-    const listKeysPayload = {
-      credentials: {
-        region: credentials?.region_id,
-        projectId: credentials?.project_id,
-        accessToken: credentials?.access_token
-      },
-      keyRing
-    };
-    const cryptoKeyListResponse =
-      await VertexServices.listCryptoKeysAPIService(listKeysPayload);
-    if (
-      Array.isArray(cryptoKeyListResponse) &&
-      cryptoKeyListResponse.length > 0
-    ) {
-      setCryptoKeyList(cryptoKeyListResponse);
-      if (!editScheduleData?.editMode) {
-        setValue('cryptoKey', cryptoKeyListResponse[0].value);
-        clearErrors('cryptoKey');
+    try {
+      const listKeysPayload = {
+        credentials: {
+          region: credentials?.region_id,
+          projectId: credentials?.project_id,
+          accessToken: credentials?.access_token
+        },
+        keyRing
+      };
+      const cryptoKeyListResponse =
+        await VertexServices.listCryptoKeysAPIService(listKeysPayload);
+
+      if (getValues('keyRing') === keyRing) {
+        if (
+          Array.isArray(cryptoKeyListResponse) &&
+          cryptoKeyListResponse.length > 0
+        ) {
+          setCryptoKeyList(cryptoKeyListResponse);
+          if (!editScheduleData?.editMode) {
+            setValue('cryptoKey', cryptoKeyListResponse[0].value);
+            clearErrors('cryptoKey');
+          }
+        } else {
+          setCryptoKeyList([]);
+        }
       }
-      setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
+    } catch (error) {
+      console.error('Failed to fetch crypto keys', error);
+      setCryptoKeyList([]);
+    } finally {
+      if (getValues('keyRing') === keyRing || !getValues('keyRing')) {
+        setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
+      }
     }
-    setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
   };
 
   /**
@@ -891,6 +903,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     } else {
       setValue('cryptoKey', '');
       setCryptoKeyList([]);
+      setLoadingState(prev => ({ ...prev, cryptoKeys: false }));
     }
   }, [keyRingSelected]);
 
