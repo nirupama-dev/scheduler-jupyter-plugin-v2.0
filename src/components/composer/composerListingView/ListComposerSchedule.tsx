@@ -41,6 +41,7 @@ import DeletePopup from '../../common/table/DeletePopup';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import {
   composerEnvironmentStateList,
+  DEFAULT_LOADER_TEXT_COMPOSER_LISTING,
   GCS_PLUGIN_ID,
   LIST_COMPOSER_TABLE_HEADER,
   NO_ROWS_TO_DISPLAY,
@@ -60,7 +61,7 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const schedulerContext = useSchedulerContext();
   const composerRouteState = schedulerContext?.composerRouteState;
   const setComposerRouteState = schedulerContext?.setComposerRouteState;
-  const { control, setValue, watch } = useForm();
+  const { control, setValue, watch, getValues } = useForm();
   const [regionOptions, setRegionOptions] = useState<IDropdownOption[]>([]);
   const [projectOptions, setProjectOptions] = useState<IDropdownOption[]>([]);
   const [envOptions, setEnvOptions] = useState<IEnvDropDownOption[]>([]);
@@ -98,6 +99,8 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   >([]);
 
   const navigate = useNavigate();
+
+  const composerRegionRef = useRef(composerRegion);
 
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
@@ -137,6 +140,17 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           selectedRegion,
           selectedProjectId
         );
+
+      const currentProject = getValues('projectId');
+      const currentRegion = getValues('composerRegion');
+      const currentEnv = getValues('environment');
+
+      // If any drop down field was cleared while loading, return empty list
+      if (!currentProject || !currentRegion || !currentEnv) {
+        setDagList([]);
+        return;
+      }
+
       setDagList(dagList);
       setBucketName(bucketName);
     } catch (authenticationError) {
@@ -468,12 +482,20 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
     }
   }, []);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      if (composerProjectId) {
-        try {
+  /**
+   * Fetch Projects for the dropdown
+   * @param {boolean} isCurrentProjectId - Flag to check if the component is still mounted
+   */
+  const fetchProjects = async (isCurrentProjectId: boolean) => {
+    if (composerProjectId) {
+      try {
+        if (isCurrentProjectId) {
           setLoadingState(prev => ({ ...prev, projectId: true }));
-          const options = await ResourceManagerServices.projectAPIService();
+        }
+
+        const options = await ResourceManagerServices.projectAPIService();
+
+        if (isCurrentProjectId) {
           setProjectOptions(options);
 
           // Set the default project after options are fetched
@@ -482,10 +504,14 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
               ? options.find(opt => opt.value === composerProjectId)
               : options[0];
             if (defaultProject) {
-              setValue('projectId', defaultProject.value);
+              if (getValues('projectId') !== defaultProject.value) {
+                setValue('projectId', defaultProject.value);
+              }
             }
           }
-        } catch (error) {
+        }
+      } catch (error) {
+        if (isCurrentProjectId) {
           // Handle error from the service call
           const errorResponse = `Failed to fetch project list : ${error}`;
           if (error instanceof AuthenticationError) {
@@ -495,115 +521,171 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
           handleErrorToast({
             error: errorResponse
           });
-        } finally {
+        }
+      } finally {
+        if (isCurrentProjectId) {
           setLoadingState(prev => ({ ...prev, projectId: false }));
         }
       }
-    };
-
-    fetchProjects();
-
-    if (!composerRouteState?.region && !composerRouteState?.environment) {
-      // Clear subsequent fields when project_id changes
-      setValue('composerRegion', '');
-      setValue('environment', '');
     }
+  };
 
-    setDagList([]);
-  }, [composerProjectId, setValue]);
-
-  // --- Fetch Regions based on selected Project ID ---
-  useEffect(() => {
-    const fetchRegions = async () => {
-      if (!composerProjectId) {
+  /**
+   * Fetch Regions based on selected Project ID
+   * @param {boolean} isCurrentRegion - Flag to check if the component is still mounted
+   */
+  const fetchRegions = async (isCurrentRegion: boolean) => {
+    if (!selectedProjectId) {
+      if (isCurrentRegion) {
+        setLoadingState(prev => ({ ...prev, region: false }));
         setRegionOptions([]);
         setValue('composerRegion', '');
-        return;
       }
-      if (selectedProjectId) {
-        setValue('composerRegion', '');
 
-        try {
-          setLoadingState(prev => ({ ...prev, region: true }));
-          const options =
-            await ComputeServices.regionAPIService(selectedProjectId);
-          setRegionOptions(options);
-
-          // Set the default region after options are fetched
-          if (options.length > 0) {
-            const defaultRegion = composerRegion
-              ? options.find(opt => opt.value === composerRegion)
-              : options[0];
-            if (defaultRegion) {
-              setValue('composerRegion', defaultRegion.value);
-            }
-          }
-        } catch (error) {
-          // Handle error from the service call
-          const errorResponse = `Failed to fetch region list : ${error}`;
-          if (error instanceof AuthenticationError) {
-            handleOpenLoginWidget(app);
-          } else {
-            setValue('composerRegion', composerRouteState?.region);
-          }
-
-          handleErrorToast({
-            error: errorResponse
-          });
-        } finally {
-          setLoadingState(prev => ({ ...prev, region: false }));
-        }
-      }
-    };
-    fetchRegions();
-    // Clear subsequent fields when project_id changes
-    if (!composerRouteState?.environment) {
-      setValue('environment', '');
+      return;
     }
 
-    setDagList([]);
-  }, [selectedProjectId, composerProjectId, composerRegion, setValue]);
+    if (projectOptions.length === 0) {
+      return;
+    }
 
-  useEffect(() => {
-    const fetchEnvironments = async () => {
-      if (!composerProjectId || !selectedRegion) {
+    try {
+      setDagList([]);
+      setLoadingState(prev => ({ ...prev, region: true }));
+
+      const options = await ComputeServices.regionAPIService(selectedProjectId);
+
+      if (isCurrentRegion) {
+        setRegionOptions(options);
+
+        const regionOpted = composerRegionRef.current;
+        // Set the default region after options are fetched
+        if (options.length > 0) {
+          const defaultRegion = regionOpted
+            ? options.find(opt => opt.value === regionOpted)
+            : options[0];
+          if (defaultRegion) {
+            setValue('composerRegion', defaultRegion.value);
+          }
+          setLoadingState(prev => ({ ...prev, region: false }));
+        } else {
+          setLoadingState(prev => ({ ...prev, region: false }));
+          setValue('composerRegion', '');
+        }
+      }
+    } catch (error) {
+      if (isCurrentRegion) {
+        // Handle error from the service call
+        const errorResponse = `Failed to fetch region list : ${error}`;
+        if (error instanceof AuthenticationError) {
+          handleOpenLoginWidget(app);
+        } else {
+          if (composerRouteState?.region) {
+            setValue('composerRegion', composerRouteState.region);
+          }
+        }
+
+        handleErrorToast({
+          error: errorResponse
+        });
+        setLoadingState(prev => ({ ...prev, region: false }));
+        setRegionOptions([]);
+        setValue('composerRegion', '');
+      }
+    } finally {
+      if (isCurrentRegion) {
+        setLoadingState(prev => ({ ...prev, region: false }));
+      }
+    }
+  };
+
+  /**
+   * Fetch Environments based on selected Project ID and Region
+   * @param {boolean} isCurrentEnvironment - Flag to check if the component is still mounted
+   */
+  const fetchEnvironments = async (isCurrentEnvironment: boolean) => {
+    if (!selectedProjectId) {
+      if (isCurrentEnvironment) {
+        setLoadingState(prev => ({ ...prev, environment: false }));
         setEnvOptions([]);
         setValue('environment', '');
         setDagList([]);
-
-        return;
+        setComposerEnvData([]);
       }
-      try {
-        setLoadingState(prev => ({ ...prev, environment: true }));
+
+      return;
+    }
+
+    setEnvOptions([]);
+    setValue('environment', '');
+    setDagList([]);
+
+    try {
+      setLoadingState(prev => ({ ...prev, environment: true }));
+      if (selectedRegion) {
         const options = await ComposerServices.listComposersAPIService(
-          composerProjectId,
+          selectedProjectId,
           selectedRegion
         );
-        setEnvOptions(options.environmentOptions);
-        setComposerEnvData(options.composerListResponse);
-        setEnvOptions(options.environmentOptions);
-        if (options.environmentOptions.length > 0) {
-          if (composerRouteState?.environment) {
-            await handleEnvChange(composerRouteState?.environment);
-            if (setComposerRouteState) {
-              setComposerRouteState(null);
+
+        if (isCurrentEnvironment) {
+          setEnvOptions(options.environmentOptions);
+          setComposerEnvData(options.composerListResponse);
+          if (options.environmentOptions.length > 0) {
+            if (
+              composerRouteState?.environment &&
+              composerRouteState?.region === selectedRegion
+            ) {
+              await handleEnvChange(composerRouteState?.environment);
+              setComposerRouteState?.(null);
+            } else {
+              await handleEnvChange(options.environmentOptions[0].value);
             }
           } else {
-            await handleEnvChange(options.environmentOptions[0].value);
+            setValue('environment', '');
+            setDagList([]);
           }
-        } else {
-          setValue('environment', '');
-          setDagList([]);
         }
-      } catch (authenticationError) {
+      }
+    } catch (authenticationError) {
+      if (isCurrentEnvironment) {
         handleOpenLoginWidget(app);
-      } finally {
+        setLoadingState(prev => ({ ...prev, environment: false }));
+        setEnvOptions([]);
+        setValue('environment', '');
+      }
+    } finally {
+      if (isCurrentEnvironment) {
         setLoadingState(prev => ({ ...prev, environment: false }));
       }
-    };
+    }
+  };
 
-    fetchEnvironments();
-  }, [selectedRegion, setValue, handleEnvChange]);
+  useEffect(() => {
+    const isCurrentProjectId = true;
+
+    fetchProjects(isCurrentProjectId);
+  }, [composerProjectId, setValue]);
+
+  // Fetch Regions based on selected Project ID
+  useEffect(() => {
+    let isCurrentRegion = true;
+    fetchRegions(isCurrentRegion);
+
+    return () => {
+      isCurrentRegion = false;
+    };
+  }, [selectedProjectId, projectOptions, setValue]);
+
+  useEffect(() => {
+    let isCurrentEnvironment = true;
+
+    fetchEnvironments(isCurrentEnvironment);
+
+    return () => {
+      isCurrentEnvironment = false;
+    };
+  }, [selectedProjectId, selectedRegion, setValue, handleEnvChange]);
 
   useEffect(() => {
     if (inputNotebookFilePath !== '') {
@@ -667,6 +749,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
       handleDeletePopUp
     ]
   );
+
+  useEffect(() => {
+    composerRegionRef.current = composerRegion;
+  }, [composerRegion]);
 
   return (
     <div>
@@ -762,18 +848,21 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
             tableDataCondition={tableDataCondition}
             fromPage="Notebook Schedulers"
           />
-          {dagList.length > 50 && (
-            <PaginationView
-              pageSize={pageSize}
-              setPageSize={setPageSize}
-              pageIndex={pageIndex}
-              allData={dagList}
-              previousPage={previousPage}
-              nextPage={nextPage}
-              canPreviousPage={canPreviousPage}
-              canNextPage={canNextPage}
-            />
-          )}
+          <div className="pagination-main-content">
+            {dagList.length > 50 && (
+              <PaginationView
+                pageSize={pageSize}
+                setPageSize={setPageSize}
+                pageIndex={pageIndex}
+                allData={dagList}
+                previousPage={previousPage}
+                nextPage={nextPage}
+                canPreviousPage={canPreviousPage}
+                canNextPage={canNextPage}
+              />
+            )}
+          </div>
+
           {deletePopupOpen && (
             <DeletePopup
               onCancel={() => handleCancelDelete()}
@@ -786,7 +875,10 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
         </div>
       ) : (
         <div>
-          {loadingState.dags && (
+          {(loadingState.dags ||
+            loadingState.projectId ||
+            loadingState.region ||
+            loadingState.environment) && (
             <div className="spin-loader-main">
               <CircularProgress
                 className="spin-loader-custom-style"
@@ -794,12 +886,15 @@ export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
                 aria-label="Loading Spinner"
                 data-testid="loader"
               />
-              Loading Notebook Schedulers
+              {DEFAULT_LOADER_TEXT_COMPOSER_LISTING}
             </div>
           )}
-          {!loadingState.dags && (
-            <div className="no-data-style">{NO_ROWS_TO_DISPLAY}</div>
-          )}
+          {!loadingState.dags &&
+            !loadingState.projectId &&
+            !loadingState.region &&
+            !loadingState.environment && (
+              <div className="no-data-style">{NO_ROWS_TO_DISPLAY}</div>
+            )}
         </div>
       )}
     </div>
