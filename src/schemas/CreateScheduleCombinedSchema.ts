@@ -194,6 +194,7 @@ export const combinedCreateFormSchema = z
     } else if (commonData.schedulerSelection === 'composer') {
       // Composer specific validation
       const composerData = commonData as z.infer<typeof createComposerSchema>;
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       // Conditional validation for email based on checkboxes
       if (
         composerData.emailOnFailure ||
@@ -211,6 +212,17 @@ export const combinedCreateFormSchema = z
           });
         }
       }
+
+      // Validate format of each chip in the array
+      composerData.emailRecipients?.forEach((email, index) => {
+        if (!emailRegex.test(email)) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: `Invalid email format: ${email}`,
+            path: ['emailRecipients']
+          });
+        }
+      });
 
       // Conditional validation for "Run on Schedule" fields
       if (composerData.runOption === 'runSchedule') {

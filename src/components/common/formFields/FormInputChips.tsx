@@ -31,16 +31,18 @@ export const FormInputChips: React.FC<IFormInputChipsProps> = ({
       return null; // No error
     }
 
-    // 1. Check for Top-Level/Array Error (e.g., min(1))
-    if (error.message) {
+    if (typeof error.message === 'string') {
       return error.message;
     }
 
     // 2. Check for Item-Level/Nested Array Error (e.g., invalid email format)
     // error is an array of errors when validation fails on array items
-    if (Array.isArray(error) && error.length > 0) {
+
+    const errorArray = Array.isArray(error) ? error : Object.values(error);
+    if (errorArray.length > 0) {
       // We only need to show the first invalid email message
-      return error[0].message;
+      const firstError = errorArray[0];
+      return firstError?.message || null;
     }
 
     return null;

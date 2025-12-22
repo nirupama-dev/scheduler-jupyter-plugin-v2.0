@@ -414,6 +414,15 @@ export const CreateComposerSchedule: React.FC<
     }
   }, [loadingState, setChildLoadingState]);
 
+  // Trigger validation when any checkbox is toggled
+  useEffect(() => {
+    if (emailOnFailure || emailOnRetry || emailOnSuccess) {
+      trigger('emailRecipients');
+    } else {
+      trigger('emailRecipients');
+    }
+  }, [emailOnFailure, emailOnRetry, emailOnSuccess, trigger]);
+
   return (
     <div>
       <div className="scheduler-form-element-container">
