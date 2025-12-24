@@ -26,7 +26,7 @@ async def async_run_system_command(cmd):
     """
     with tempfile.TemporaryFile() as t:
         p = await asyncio.create_subprocess_exec(
-            cmd,
+            *cmd,
             stdin=subprocess.DEVNULL,
             stderr=sys.stderr,
             stdout=t,
