@@ -808,13 +808,13 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
    */
   const handleCronExpression = useCallback(
     (value: string) => {
-      const trimmedValue = value.trim();
+      const trimmedCronValue = value.trim();
       console.log('value cron handler', value);
-      setValue('scheduleFieldCronFormat', trimmedValue, {
+      setValue('scheduleFieldCronFormat', trimmedCronValue, {
         shouldValidate: true, // This is crucial for immediate feedback
         shouldDirty: true
       });
-      setValue('scheduleValueUserFriendly', trimmedValue);
+      setValue('scheduleValueUserFriendly', trimmedCronValue);
       trigger(['scheduleFieldCronFormat', 'scheduleValueUserFriendly']);
     },
     [setValue, trigger]
