@@ -1010,6 +1010,21 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, [loadingState, setChildLoadingState]);
 
+  useEffect(() => {
+    if (editScheduleData?.editMode && editScheduleData.existingScheduleData) {
+      const existingData =
+        editScheduleData.existingScheduleData as VertexSchedulerFormValues;
+      const existingCron = existingData?.scheduleFieldCronFormat ?? undefined;
+
+      if (existingCron !== undefined) {
+        setValue('scheduleValueUserFriendly', existingCron);
+        setValue('scheduleFieldCronFormat', existingCron);
+
+        trigger(['scheduleValueUserFriendly', 'scheduleFieldCronFormat']);
+      }
+    }
+  }, [editScheduleData, setValue, trigger]);
+
   // --- Render Component UI ---
   return (
     <div>
