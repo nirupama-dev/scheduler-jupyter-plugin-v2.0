@@ -6,7 +6,8 @@ import {
   PREDEFINED_CMEK,
   ENCRYPTION_MANUAL_KEY_SAMPLE,
   EVERY_MINUTE_CRON,
-  MANUAL_CMEK
+  MANUAL_CMEK,
+  CRON_VALIDATION_REGX
 } from '../utils/Constants';
 
 /**
@@ -172,7 +173,19 @@ export const combinedCreateFormSchema = z
               code: z.ZodIssueCode.custom,
               message: 'Schedule field is required in cron format.'
             });
+          } else if (
+            !CRON_VALIDATION_REGX.test(
+              vertexData.scheduleFieldCronFormat.trim()
+            )
+          ) {
+            ctx.addIssue({
+              path: ['scheduleFieldCronFormat'],
+              code: z.ZodIssueCode.custom,
+              message:
+                'Invalid cron expression format. Please provide a valid cron (e.g., 0 */3 * * *)'
+            });
           }
+
           if (vertexData.scheduleFieldCronFormat === EVERY_MINUTE_CRON) {
             ctx.addIssue({
               path: ['scheduleFieldCronFormat'],

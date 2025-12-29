@@ -423,3 +423,6 @@ export const DEFAULT_ERROR_LENGTH_START_AND_END_DATE = 39;
 
 export const DEFAULT_LOADER_TEXT_COMPOSER_LISTING =
   'Loading Notebook Schedulers...';
+
+export const CRON_VALIDATION_REGX =
+  /^(\*|([0-5]?\d)|(\*\/[0-5]?\d)|(\d+-\d+)) (\*|((2[0-3]|1\d|\d))|(\*\/([1-9]|1\d|2[0-3]))|(\d+-\d+)) (\*|([1-9]|1\d|2\d|3[01])|(\*\/[1-9]|1\d|2\d|3[01])|(\d+-\d+)) (\*|(1[0-2]|[1-9])|(\*\/[1-9]|1[0-2])|(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)|(\d+-\d+)) (\*|([0-6])|(\*\/[0-6])|(sun|mon|tue|wed|thu|fri|sat)|(\d+-\d+))$/i;
