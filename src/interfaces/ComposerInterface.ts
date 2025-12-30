@@ -41,6 +41,7 @@ export interface ICreateComposerSchedulerProps {
   watch: UseFormWatch<CombinedCreateFormValues>;
   setValue: UseFormSetValue<CombinedCreateFormValues>;
   setError: UseFormSetError<ComposerSchedulerFormValues>;
+  clearErrors: (name?: keyof CombinedCreateFormValues | undefined) => void;
   getValues: UseFormGetValues<CombinedCreateFormValues>;
   trigger: UseFormTrigger<CombinedCreateFormValues>;
   credentials: IAuthCredentials;
@@ -164,6 +165,7 @@ export interface ILoadingStateComposer {
   environment: boolean;
   cluster: boolean;
   serverless: boolean;
+  jobName: boolean;
 }
 
 export interface IListComposer {
