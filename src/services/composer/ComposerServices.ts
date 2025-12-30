@@ -350,7 +350,10 @@ export class ComposerServices {
         await requestAPI(serviceURL, {
           method: 'GET'
         });
-      if (composerJobScheduleDetails.error) {
+      if (
+        composerJobScheduleDetails !== null &&
+        composerJobScheduleDetails.error
+      ) {
         handleErrorToast({
           error: `Error on getting schedule details.\n${composerJobScheduleDetails.error}`
         });

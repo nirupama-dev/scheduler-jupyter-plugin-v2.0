@@ -56,6 +56,7 @@ export const CreateComposerSchedule: React.FC<
   getValues,
   watch,
   setError,
+  clearErrors,
   app,
   trigger,
   isValid,
@@ -82,7 +83,8 @@ export const CreateComposerSchedule: React.FC<
     region: false,
     environment: false,
     cluster: false,
-    serverless: false
+    serverless: false,
+    jobName: false
     // ... initialize other mandatory properties
   });
   const [defaultFormValues, setDefaultFormValues] =
@@ -99,6 +101,7 @@ export const CreateComposerSchedule: React.FC<
   // Watch for changes in form fields
   const selectedProjectId = watch('projectId');
   const selectedRegion = watch('composerRegion');
+  const selectedEnvironment = watch('environment');
   const runOption = watch('runOption');
   const emailOnFailure = watch('emailOnFailure');
   const emailOnRetry = watch('emailOnRetry');
@@ -401,6 +404,27 @@ export const CreateComposerSchedule: React.FC<
   console.log('is valid', isValid);
   console.log('composerErrors', composerErrors);
   console.log('getValues', getValues());
+
+  const jobNameUniquenessError = async () => {
+    const fetchedData = await ComposerServices.getComposerJobScheduleDetails(
+      getValues('jobName'),
+      selectedRegion,
+      selectedProjectId,
+      selectedEnvironment
+    );
+    if (fetchedData) {
+      setError('jobName', {
+        message: 'Job name must be unique for the selected environment'
+      });
+    }
+  };
+
+  useEffect(() => {
+    if (getValues('environment') && getValues('jobName')) {
+      clearErrors('jobName');
+      jobNameUniquenessError();
+    }
+  }, [selectedProjectId, selectedRegion, selectedEnvironment]);
 
   useEffect(() => {
     // Check if any of the local loading states are true
