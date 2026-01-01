@@ -337,6 +337,29 @@ export const CreateNotebookSchedule = (
     getValues
   ]);
 
+  const jobNameUniquenessError = async (
+    e: React.FocusEvent<HTMLInputElement>
+  ) => {
+    if (
+      schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME &&
+      region &&
+      projectId &&
+      environment
+    ) {
+      const fetchedData = await ComposerServices.getComposerJobScheduleDetails(
+        e.target.value,
+        region,
+        projectId,
+        environment
+      );
+      if (fetchedData) {
+        setError('jobName', {
+          message: 'Job name must be unique for the selected environment'
+        });
+      }
+    }
+  };
+
   console.log('GetValues:', getValues());
   /**
    *
@@ -493,6 +516,9 @@ export const CreateNotebookSchedule = (
               name="jobName"
               error={errors.jobName}
               disabled={initialSchedulerDataContext.editModeData?.editMode}
+              onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+                jobNameUniquenessError(e)
+              }
             />
           </div>
 
@@ -559,6 +585,7 @@ export const CreateNotebookSchedule = (
               setValue={setValue}
               watch={watch}
               setError={setError}
+              clearErrors={clearErrors}
               getValues={getValues}
               trigger={trigger}
               isValid={isValid}

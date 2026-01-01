@@ -809,7 +809,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const handleCronExpression = useCallback(
     (value: string) => {
       const trimmedCronValue = value.trim();
-      console.log('value cron handler', value);
       setValue('scheduleFieldCronFormat', trimmedCronValue, {
         shouldValidate: true, // This is crucial for immediate feedback
         shouldDirty: true
@@ -848,7 +847,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     try {
       const listKeysPayload = {
         credentials: {
-          region: credentials?.region_id,
+          region: currentRegion,
           projectId: credentials?.project_id,
           accessToken: credentials?.access_token
         },
@@ -1572,7 +1571,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                   control={control}
                   name="scheduleFieldCronFormat"
                   error={vertexErrors.scheduleFieldCronFormat}
-                  onChangeCallback={handleCronExpression}
+                  onBlurCallback={handleCronExpression}
                 />
               </div>
               <div>
