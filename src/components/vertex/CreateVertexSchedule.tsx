@@ -847,7 +847,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     try {
       const listKeysPayload = {
         credentials: {
-          region: credentials?.region_id,
+          region: currentRegion,
           projectId: credentials?.project_id,
           accessToken: credentials?.access_token
         },
