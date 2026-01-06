@@ -97,9 +97,6 @@ class Client:
                         "status": response.status,
                     }
                 )
-            elif response.status == HTTP_STATUS_FORBIDDEN:
-                resp = await response.json()
-                return resp
             elif response.status == HTTP_STATUS_NOT_FOUND:
                 raise RuntimeError(
                     {

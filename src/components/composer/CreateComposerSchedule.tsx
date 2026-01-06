@@ -201,7 +201,7 @@ export const CreateComposerSchedule: React.FC<
     } finally {
       setLoadingState(prev => ({ ...prev, environment: false }));
     }
-  }, [selectedRegion]);
+  }, [selectedProjectId, selectedRegion]);
 
   const fetchRemoteKernelData = useCallback(async () => {
     try {
@@ -300,7 +300,7 @@ export const CreateComposerSchedule: React.FC<
       setEnvOptions([]);
       setComposerEnvData([]);
     }
-  }, [selectedRegion]);
+  }, [selectedProjectId, selectedRegion]);
 
   /**
    * Effect to fetch Cluster/ Serverless data when execution mode changes.
