@@ -53,7 +53,11 @@ export const transformZodSchemaToVertexSchedulePayload = (
     combinedCronSchedule = `TZ=${VertexScheduleData.timeZone} ${combinedCronSchedule}`;
   }
 
-  const getGcsUri = (path: string, bucketName?: string): string => {
+  const getGcsUri = (
+    path: string,
+    jobName?: string,
+    bucketName?: string
+  ): string => {
     if (path.startsWith('gs://')) {
       return path;
     }
@@ -61,7 +65,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
       return path.replace('gs:', 'gs://');
     }
     if (bucketName) {
-      return `gs://${bucketName}/${path}`;
+      return `gs://${bucketName}/${jobName}/${path.split('/').pop()}`;
     }
     return 'gs://' + path;
   };
@@ -72,7 +76,11 @@ export const transformZodSchemaToVertexSchedulePayload = (
     ? outputBucketUri.split('//')[1].split('/')[0]
     : undefined;
 
-  const notebookSourceUri = getGcsUri(VertexScheduleData.inputFile, bucketName);
+  const notebookSourceUri = getGcsUri(
+    VertexScheduleData.inputFile,
+    VertexScheduleData.jobName,
+    bucketName
+  );
 
   let primaryNetwork: string | undefined = undefined;
 
@@ -160,7 +168,10 @@ export const transformZodSchemaToVertexSchedulePayload = (
     'Vertex Schedule Payload:',
     JSON.stringify(vertexPayload, null, 2)
   );
-  return vertexPayload;
+  return {
+    vertexScheduleData: vertexPayload,
+    localInputFilePath: VertexScheduleData.inputFile
+  };
 };
 
 /**

@@ -102,8 +102,6 @@ class Client:
         json_blob = bucket.blob(json_blob_name)
         json_blob.upload_from_filename(json_file_name)
 
-        return blob_name if blob_name else file_path
-
     async def create_schedule(self, job, region_id):
         api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules"
         headers = self.create_headers()
@@ -134,23 +132,15 @@ class Client:
                     {"ERROR": await response.json(), "status": response.status}
                 )
 
-    async def create_job_schedule(self, job, region_id):
-        print("job:", job)
+    async def create_job_schedule(self, data, region_id):
+        job = data["vertexScheduleData"]
+        local_input_file_path = data["localInputFilePath"]
         try:
             storage_bucket = job["createNotebookExecutionJobRequest"][
                 "notebookExecutionJob"
             ]["gcsOutputUri"].split("//")[-1]
-            gcs_notebook_source = job["createNotebookExecutionJobRequest"][
-                "notebookExecutionJob"
-            ]["gcsNotebookSource"]["uri"]
-            if "gs://" in gcs_notebook_source:
-                input_filename = gcs_notebook_source
-            elif "gs:" in gcs_notebook_source:
-                input_filename = gcs_notebook_source.replace("gs:", "gs://", 1)
-            else:
-                input_filename = gcs_notebook_source
 
-            await self.upload_to_gcs(storage_bucket, input_filename, job["displayName"])
+            await self.upload_to_gcs(storage_bucket, local_input_file_path, job["displayName"])
             res = await self.create_schedule(job, region_id)
             return res
         except Exception as e:

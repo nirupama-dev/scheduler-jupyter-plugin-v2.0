@@ -380,12 +380,14 @@ export const CreateNotebookSchedule = (
         initialSchedulerDataContext.credentials.project_id
       ) {
         const vertexData = data;
-        const vertexPayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule =
-          transformZodSchemaToVertexSchedulePayload(
-            vertexData,
-            initialSchedulerDataContext.credentials.project_id,
-            initialSchedulerDataContext.credentials.region_id || ''
-          );
+        const vertexPayload: {
+          vertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule;
+          localInputFilePath: string;
+        } = transformZodSchemaToVertexSchedulePayload(
+          vertexData,
+          initialSchedulerDataContext.credentials.project_id,
+          initialSchedulerDataContext.credentials.region_id || ''
+        );
         console.log('Vertex Payload:', vertexPayload);
 
         if (initialSchedulerDataContext.editModeData?.editMode && scheduleId) {
@@ -393,7 +395,7 @@ export const CreateNotebookSchedule = (
             await VertexServices.updateVertexNotebookJobSchedule(
               scheduleId,
               vertexData.vertexRegion,
-              vertexPayload
+              vertexPayload.vertexScheduleData
             );
         } else {
           isSaveSuccessfull =
