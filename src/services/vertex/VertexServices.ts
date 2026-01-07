@@ -695,7 +695,10 @@ export class VertexServices {
    * @param region - region to create the schedule
    */
   static readonly createVertexNotebookJobSchedule = async (
-    vertexSchedulePayload: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule,
+    vertexSchedulePayload: {
+      vertexScheduleData: aiplatform_v1.Schema$GoogleCloudAiplatformV1Schedule;
+      localInputFilePath: string;
+    },
     region: string
   ) => {
     try {
@@ -713,7 +716,7 @@ export class VertexServices {
         return false;
       } else {
         Notification.success(
-          `Job ${vertexSchedulePayload.displayName} successfully created`,
+          `Job ${vertexSchedulePayload.vertexScheduleData.displayName} successfully created`,
           {
             autoClose: false
           }
