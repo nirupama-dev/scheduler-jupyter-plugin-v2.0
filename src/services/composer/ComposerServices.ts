@@ -339,7 +339,7 @@ export class ComposerServices {
    * @param dagId - The ID of the DAG.
    */
   static readonly getComposerJobScheduleDetails = async (
-    dagId: string | undefined,
+    dagId: string | React.FocusEvent<HTMLInputElement>| undefined,
     region: string | undefined,
     projectId: string | undefined,
     environment: string | undefined
