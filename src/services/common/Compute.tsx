@@ -237,7 +237,7 @@ export class ComputeServices {
       handleErrorToast({
         error: errorResponse
       });
-      throw error;
+      return [];
     }
   };
 }
