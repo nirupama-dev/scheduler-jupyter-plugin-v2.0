@@ -610,7 +610,7 @@ export const CreateNotebookSchedule = (
               variant="contained"
               aria-label="Create Schedule"
               type="submit"
-              disabled={!isValid || isChildComponentLoading}
+              disabled={!isValid || isChildComponentLoading || isFormSubmitted}
             >
               <div>
                 {initialSchedulerDataContext?.editModeData?.editMode
