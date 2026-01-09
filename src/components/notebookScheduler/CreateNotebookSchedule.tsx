@@ -343,15 +343,15 @@ export const CreateNotebookSchedule = (
   ) => {
     if (
       schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME &&
-      region &&
-      projectId &&
-      environment
+      getValues('composerRegion') &&
+      getValues('projectId') &&
+      getValues('environment')
     ) {
       const fetchedData = await ComposerServices.getComposerJobScheduleDetails(
-        e.target.value,
-        region,
-        projectId,
-        environment
+        e,
+        getValues('composerRegion'),
+        getValues('projectId'),
+        getValues('environment')
       );
       if (fetchedData) {
         setError('jobName', {
@@ -525,7 +525,7 @@ export const CreateNotebookSchedule = (
               name="jobName"
               error={errors.jobName}
               disabled={initialSchedulerDataContext.editModeData?.editMode}
-              onBlur={(e: React.FocusEvent<HTMLInputElement>) =>
+              onBlurCallback={(e: React.FocusEvent<HTMLInputElement>) =>
                 jobNameUniquenessError(e)
               }
             />
@@ -610,7 +610,7 @@ export const CreateNotebookSchedule = (
               variant="contained"
               aria-label="Create Schedule"
               type="submit"
-              disabled={!isValid || isChildComponentLoading}
+              disabled={!isValid || isChildComponentLoading || isFormSubmitted}
             >
               <div>
                 {initialSchedulerDataContext?.editModeData?.editMode
