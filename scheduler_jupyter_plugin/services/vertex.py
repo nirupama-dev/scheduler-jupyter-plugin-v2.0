@@ -29,10 +29,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     HTTP_STATUS_NO_CONTENT,
     HTTP_STATUS_UNAUTHORIZED,
 )
-from scheduler_jupyter_plugin.models.models import (
-    DescribeBucketName,
-    DescribeUpdateVertexJob,
-)
+from scheduler_jupyter_plugin.models.models import DescribeBucketName
 
 
 class Client:
@@ -140,7 +137,9 @@ class Client:
                 "notebookExecutionJob"
             ]["gcsOutputUri"].split("//")[-1]
 
-            await self.upload_to_gcs(storage_bucket, local_input_file_path, job["displayName"])
+            await self.upload_to_gcs(
+                storage_bucket, local_input_file_path, job["displayName"]
+            )
             res = await self.create_schedule(job, region_id)
             return res
         except Exception as e:
@@ -471,76 +470,7 @@ class Client:
                 )
 
     async def update_schedule(self, region_id, schedule_id, input_data):
-        data = DescribeUpdateVertexJob(**input_data)
-        custom_environment_spec = {}
-        notebook_execution_job = {
-            "displayName": data.display_name,
-            "gcsNotebookSource": {"uri": data.gcs_notebook_source},
-            "customEnvironmentSpec": custom_environment_spec,
-            "labels": {
-                "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench",
-            },
-            "workbenchRuntime": {},
-        }
-        schedule_value = (
-            CRON_EVERY_MINUTE if data.schedule_value == "" else data.schedule_value
-        )
-        cron = (
-            schedule_value
-            if data.time_zone == "UTC"
-            else f"TZ={data.time_zone} {schedule_value}"
-        )
-        # getting list of strings from UI, the api accepts dictionary, so converting it
-        parameters = {
-            param.split(":")[0]: param.split(":")[1] for param in data.parameters
-        }
-
-        if data.kernel_name:
-            notebook_execution_job["kernelName"] = data.kernel_name
-        if data.kms_key_name:
-            notebook_execution_job["encryptionSpec"] = {"kmsKeyName": data.kms_key_name}
-        if data.service_account:
-            notebook_execution_job["serviceAccount"] = data.service_account
-        if data.cloud_storage_bucket:
-            notebook_execution_job["gcsOutputUri"] = data.cloud_storage_bucket
-        if data.parameters:
-            notebook_execution_job["parameters"] = parameters
-        if data.machine_type:
-            custom_environment_spec["machineSpec"] = {
-                "machineType": data.machine_type.split(" ", 1)[0],
-                "acceleratorType": data.accelerator_type,
-                "acceleratorCount": data.accelerator_count,
-            }
-        if data.network or data.subnetwork:
-            custom_environment_spec["networkSpec"] = {
-                "network": data.network,
-                "subnetwork": data.subnetwork,
-            }
-        if data.disk_size or data.disk_type:
-            custom_environment_spec["persistentDiskSpec"] = {
-                "diskSizeGb": data.disk_size,
-                "diskType": data.disk_type.split(" ", 1)[0],
-            }
-
-        payload = {
-            "displayName": data.display_name,
-            "maxConcurrentRunCount": "1",
-            "cron": cron,
-            "createNotebookExecutionJobRequest": {
-                "parent": f"projects/{self.project_id}/locations/{region_id}",
-                "notebookExecutionJob": notebook_execution_job,
-            },
-        }
-
-        if data.start_time:
-            payload["startTime"] = data.start_time
-        if data.end_time:
-            payload["endTime"] = data.end_time
-
-        if data.max_run_count:
-            payload["maxRunCount"] = data.max_run_count
-
-        keys = payload.keys()
+        keys = input_data.keys()
         keys_to_filter = ["displayName", "maxConcurrentRunCount"]
         filtered_keys = [
             item for item in keys if not any(key in item for key in keys_to_filter)
@@ -550,7 +480,7 @@ class Client:
 
         headers = self.create_headers()
         async with self.client_session.patch(
-            api_endpoint, headers=headers, json=payload
+            api_endpoint, headers=headers, json=input_data
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 return await response.json()
