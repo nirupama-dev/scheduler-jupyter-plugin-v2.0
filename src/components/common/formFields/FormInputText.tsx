@@ -28,7 +28,8 @@ export const FormInputText = ({
   type,
   onBlurCallback,
   disabled,
-  onChangeCallback
+  onChangeCallback,
+  isClearable = false
 }: IFormInputProps) => {
   return (
     <Controller
@@ -48,26 +49,28 @@ export const FormInputText = ({
             let valueToRHF = rawValue;
             const isNumberType = type === 'number';
 
-            // Step 1: Handle the "Clear to 0" logic
-            if (isNumberType && rawValue === '') {
-              // If the user clears it, RHF gets '0'.
-              valueToRHF = '0';
-            }
-            // Step 2: Handle the "Typing over 0" logic
-            else if (
-              isNumberType &&
-              valueToRHF.length > 1 &&
-              valueToRHF.startsWith('0')
-            ) {
-              // Remove leading zeros if not followed by a decimal point
-              if (!valueToRHF.startsWith('0.')) {
-                valueToRHF = valueToRHF.replace(/^0+/, '');
+            if (!isClearable && rawValue === '') {
+              // Step 1: Handle the "Clear to 0" logic
+              if (isNumberType && rawValue === '') {
+                // If the user clears it, RHF gets '0'.
+                valueToRHF = '0';
               }
-            }
+              // Step 2: Handle the "Typing over 0" logic
+              else if (
+                isNumberType &&
+                valueToRHF.length > 1 &&
+                valueToRHF.startsWith('0')
+              ) {
+                // Remove leading zeros if not followed by a decimal point
+                if (!valueToRHF.startsWith('0.')) {
+                  valueToRHF = valueToRHF.replace(/^0+/, '');
+                }
+              }
 
-            // Handle case where user deletes everything and then types '0'
-            if (isNumberType && valueToRHF === '') {
-              valueToRHF = '0';
+              // Handle case where user deletes everything and then types '0'
+              if (isNumberType && valueToRHF === '') {
+                valueToRHF = '0';
+              }
             }
             onChange(valueToRHF);
             if (onChangeCallback) {

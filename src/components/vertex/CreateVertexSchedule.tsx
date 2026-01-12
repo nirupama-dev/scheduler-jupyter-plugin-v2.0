@@ -1659,6 +1659,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 name="maxRunCount"
                 error={vertexErrors.maxRunCount}
                 type="number"
+                isClearable={true}
               />
             </div>
           </>
