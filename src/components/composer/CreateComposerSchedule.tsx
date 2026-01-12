@@ -33,7 +33,7 @@ import {
 } from '../../interfaces/ComposerInterface';
 import {
   allowedPeriodsCron,
-  COMPOSER_DEFAULT_SCHEDULE_VALUE,
+  DEFAULT_SCHEDULE_VALUE,
   composerEnvironmentStateListForCreate,
   EXECUTION_MODE_OPTIONS,
   PACKAGES,
@@ -90,7 +90,7 @@ export const CreateComposerSchedule: React.FC<
   const [defaultFormValues, setDefaultFormValues] =
     useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
   const lastCronValue = useRef(
-    getValues('scheduleValue') || COMPOSER_DEFAULT_SCHEDULE_VALUE
+    getValues('scheduleValue') || DEFAULT_SCHEDULE_VALUE
   ); // memory state for last cron value on run on schedule
   const timezones = Object.keys(tzdata.zones).sort();
   const timeZoneOptions: ILabelValue<string>[] = timezones.map(zone => ({
@@ -420,7 +420,11 @@ export const CreateComposerSchedule: React.FC<
   };
 
   useEffect(() => {
-    if (getValues('environment') && getValues('jobName')) {
+    if (
+      !initialSchedulerDataContext?.editModeData?.editMode &&
+      getValues('environment') &&
+      getValues('jobName')
+    ) {
       clearErrors('jobName');
       jobNameUniquenessError();
     }

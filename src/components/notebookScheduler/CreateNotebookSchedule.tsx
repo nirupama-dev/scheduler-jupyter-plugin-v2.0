@@ -342,6 +342,7 @@ export const CreateNotebookSchedule = (
     e: React.FocusEvent<HTMLInputElement>
   ) => {
     if (
+      !initialSchedulerDataContext?.editModeData?.editMode &&
       schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME &&
       getValues('composerRegion') &&
       getValues('projectId') &&
