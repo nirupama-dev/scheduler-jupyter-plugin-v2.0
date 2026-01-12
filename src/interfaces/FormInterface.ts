@@ -31,6 +31,7 @@ export interface IFormInputProps {
   type?: string;
   hostProject?: any;
   disabled?: boolean;
+  isClearable?: boolean;
 }
 
 export interface IFormInput {

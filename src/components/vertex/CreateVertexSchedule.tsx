@@ -15,7 +15,13 @@
  * limitations under the License.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react';
 import { FormInputDropdown } from '../common/formFields/FormInputDropdown';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
@@ -63,7 +69,6 @@ import {
   DEFAULT_CLOUD_STORAGE_BUCKET,
   DEFAULT_SERVICE_ACCOUNT,
   DEFAULT_DISK_SIZE,
-  EVERY_MINUTE_CRON,
   NETWORK_IN_THIS_PROJECT_VALUE,
   NETWORK_SHARED_FROM_HOST_PROJECT_VALUE,
   ENCRYPTION_TEXT,
@@ -75,7 +80,8 @@ import {
   DEFAULT_ENCRYPTION_SELECTED,
   CLOUD_STORAGE_BUCKET_HELPER_TEXT,
   DEFAULT_DISK_TYPE,
-  DEFAULT_ERROR_LENGTH_START_AND_END_DATE
+  DEFAULT_ERROR_LENGTH_START_AND_END_DATE,
+  DEFAULT_SCHEDULE_VALUE
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -146,6 +152,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const [cryptoKeyList, setCryptoKeyList] = useState<ILabelValue<string>[]>([]);
   const [defaultFormValues, setDefaultFormValues] =
     useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
+
+  const lastCronValue = useRef(
+    getValues('scheduleValueUserFriendly') || DEFAULT_SCHEDULE_VALUE
+  ); // memory state for last cron value on run on schedule
 
   // Timezones for dropdown
   const timezones: ILabelValue<string>[] = useMemo(
@@ -1009,6 +1019,16 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, [loadingState, setChildLoadingState]);
 
+  useEffect(() => {
+    if (currentInternalScheduleMode === 'userFriendly') {
+      // When switching TO 'runSchedule', restore the last known cron value
+      setValue('scheduleValueUserFriendly', lastCronValue.current);
+    } else {
+      // When switching AWAY (to 'runNow'), clear the form value
+      setValue('scheduleValueUserFriendly', '');
+    }
+  }, [currentInternalScheduleMode, setValue]);
+
   // --- Render Component UI ---
   return (
     <div>
@@ -1436,7 +1456,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 setValue('internalScheduleMode', 'userFriendly');
               }
               if (!getValues('scheduleValueUserFriendly')) {
-                setValue('scheduleValueUserFriendly', EVERY_MINUTE_CRON);
+                setValue('scheduleValueUserFriendly', lastCronValue.current);
               }
               if (!getValues('startTime')) {
                 setValue('startTime', dayjs().toISOString());
@@ -1596,6 +1616,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                     value={field.value || ''}
                     setValue={(newValue: string) => {
                       field.onChange(newValue);
+                      lastCronValue.current = newValue;
                       handleCronExpression(newValue);
                     }}
                     allowedPeriods={
@@ -1638,6 +1659,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
                 name="maxRunCount"
                 error={vertexErrors.maxRunCount}
                 type="number"
+                isClearable={true}
               />
             </div>
           </>
