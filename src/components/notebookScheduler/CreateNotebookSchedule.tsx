@@ -388,8 +388,7 @@ export const CreateNotebookSchedule = (
           localInputFilePath: string;
         } = transformZodSchemaToVertexSchedulePayload(
           vertexData,
-          initialSchedulerDataContext.credentials.project_id,
-          initialSchedulerDataContext.credentials.region_id || ''
+          initialSchedulerDataContext.credentials.project_id
         );
         console.log('Vertex Payload:', vertexPayload);
 
