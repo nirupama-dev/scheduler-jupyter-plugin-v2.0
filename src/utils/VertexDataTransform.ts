@@ -38,7 +38,7 @@ import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
  */
 export const transformZodSchemaToVertexSchedulePayload = (
   VertexScheduleData: VertexSchedulerFormValues,
-  projectId: string,
+  projectId: string
 ) => {
   console.log(
     'Vertex Schedule Data from UI:',
