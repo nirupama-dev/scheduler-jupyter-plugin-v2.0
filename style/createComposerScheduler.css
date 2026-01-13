@@ -17,3 +17,17 @@
   min-height: 36px;
   outline: none;
 }
+
+.required-packages-info {
+  margin-top: 6px;
+  margin-left: 16px;
+  font-size: 12px;
+  color: var(--jp-success-color1);
+}
+
+.required-packages-warning {
+  margin-top: 6px;
+  margin-left: 16px;
+  font-size: 12px;
+  color: var(--jp-warn-color1);
+}
