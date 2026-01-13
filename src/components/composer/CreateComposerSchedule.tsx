@@ -89,6 +89,8 @@ export const CreateComposerSchedule: React.FC<
   });
   const [defaultFormValues, setDefaultFormValues] =
     useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
+  const [packagesInstalled, setPackagesInstalled] = useState<boolean>(false);
+  const [missingPackagesList, setMissingPackagesList] = useState<string[]>([]);
   const lastCronValue = useRef(
     getValues('scheduleValue') || DEFAULT_SCHEDULE_VALUE
   ); // memory state for last cron value on run on schedule
@@ -371,14 +373,11 @@ export const CreateComposerSchedule: React.FC<
     // Here you can handle the missing packages
 
     if (missingPackages.length === 0) {
-      setError('environment', {
-        message: 'Required packages are already installed'
-      });
+      setPackagesInstalled(true);
+      setMissingPackagesList([]);
     } else {
-      const message =
-        missingPackages.join(', ') +
-        ' will get installed on creation of schedule';
-      setError('environment', { message: message });
+      setMissingPackagesList(missingPackages);
+      setPackagesInstalled(false);
     }
   };
 
@@ -525,6 +524,19 @@ export const CreateComposerSchedule: React.FC<
             );
           }}
         />
+        {selectedEnvironment && packagesInstalled && (
+          <div className="required-packages-info">
+            Required packages are already installed
+          </div>
+        )}
+        {selectedEnvironment &&
+          !packagesInstalled &&
+          missingPackagesList.length > 0 && (
+            <div className="required-packages-warning">
+              {missingPackagesList.join(', ')} will get installed on creation of
+              schedule
+            </div>
+          )}
       </div>
       <div className="create-scheduler-label block-seperation">
         Output formats
