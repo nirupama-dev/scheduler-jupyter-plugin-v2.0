@@ -38,8 +38,7 @@ import { NetworkOption, ScheduleMode } from '../types/CommonSchedulerTypes';
  */
 export const transformZodSchemaToVertexSchedulePayload = (
   VertexScheduleData: VertexSchedulerFormValues,
-  projectId: string,
-  region: string
+  projectId: string
 ) => {
   console.log(
     'Vertex Schedule Data from UI:',
@@ -153,7 +152,7 @@ export const transformZodSchemaToVertexSchedulePayload = (
     const encryptionSpec = {
       kmsKeyName: VertexScheduleData.manualKey
         ? VertexScheduleData.manualKey
-        : `projects/${projectId}/locations/${region}/keyRings/${VertexScheduleData.keyRing}/cryptoKeys/${VertexScheduleData.cryptoKey}`
+        : `projects/${projectId}/locations/${VertexScheduleData.vertexRegion}/keyRings/${VertexScheduleData.keyRing}/cryptoKeys/${VertexScheduleData.cryptoKey}`
     };
 
     if (
