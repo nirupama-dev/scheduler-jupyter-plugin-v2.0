@@ -6,9 +6,9 @@ import {
   PREDEFINED_CMEK,
   ENCRYPTION_MANUAL_KEY_SAMPLE,
   EVERY_MINUTE_CRON,
-  MANUAL_CMEK,
-  CRON_VALIDATION_REGX
+  MANUAL_CMEK
 } from '../utils/Constants';
+import { isValidCron } from 'cron-validator';
 
 /**
  * Combined schema for creating a job, either in Vertex or Composer.
@@ -174,9 +174,9 @@ export const combinedCreateFormSchema = z
               message: 'Schedule field is required in cron format.'
             });
           } else if (
-            !CRON_VALIDATION_REGX.test(
-              vertexData.scheduleFieldCronFormat.trim()
-            )
+            !isValidCron(vertexData.scheduleFieldCronFormat.trim(), {
+              alias: true
+            })
           ) {
             ctx.addIssue({
               path: ['scheduleFieldCronFormat'],
