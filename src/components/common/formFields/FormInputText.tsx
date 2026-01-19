@@ -49,27 +49,21 @@ export const FormInputText = ({
             let valueToRHF = rawValue;
             const isNumberType = type === 'number';
 
-            if (!isClearable && rawValue === '') {
-              // Step 1: Handle the "Clear to 0" logic
-              if (isNumberType && rawValue === '') {
-                // If the user clears it, RHF gets '0'.
-                valueToRHF = '0';
+            if (isNumberType) {
+              // 1. If the user clears the input completely
+              if (rawValue === '') {
+                // If isClearable is false, we default to '0', otherwise allow empty string
+                valueToRHF = isClearable ? '' : '0'; // Value to react-hook-form
               }
-              // Step 2: Handle the "Typing over 0" logic
+              // 2. If the user is typing and there is a leading zero
               else if (
-                isNumberType &&
                 valueToRHF.length > 1 &&
-                valueToRHF.startsWith('0')
+                valueToRHF.startsWith('0') &&
+                !valueToRHF.startsWith('0.')
               ) {
-                // Remove leading zeros if not followed by a decimal point
-                if (!valueToRHF.startsWith('0.')) {
-                  valueToRHF = valueToRHF.replace(/^0+/, '');
-                }
-              }
-
-              // Handle case where user deletes everything and then types '0'
-              if (isNumberType && valueToRHF === '') {
-                valueToRHF = '0';
+                // Use a regex that only strips zeros IF followed by other digits
+                // This prevents '0' from becoming '' when you type a second zero
+                valueToRHF = valueToRHF.replace(/^0+(?!$)/, '');
               }
             }
             onChange(valueToRHF);
