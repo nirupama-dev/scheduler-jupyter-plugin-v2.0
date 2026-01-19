@@ -52,16 +52,12 @@ export function SchedulerRoutes(schedulerRouteProps: ISchedulerRoutesProps) {
 
   const VertexExecutionHistory = lazy(
     () =>
-      import(
-        '../components/vertex/vertexExecutionHistoryView/VertexExecutionHistory'
-      )
+      import('../components/vertex/vertexExecutionHistoryView/VertexExecutionHistory')
   );
 
   const ComposerExecutionHistory = lazy(
     () =>
-      import(
-        '../components/composer/composerExecutionHistoryView/ComposerExecutionHistory'
-      )
+      import('../components/composer/composerExecutionHistoryView/ComposerExecutionHistory')
   );
 
   return (
