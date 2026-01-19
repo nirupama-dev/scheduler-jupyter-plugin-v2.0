@@ -181,6 +181,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const customerEncryptionType = watch('customerEncryptionType');
   const keyRingSelected = watch('keyRing');
   const cryptoKeySelected = watch('cryptoKey');
+  const scheduleFieldCronFormat = watch('scheduleFieldCronFormat');
 
   //
   const isVertexForm = currentSchedulerSelection === 'vertex';
@@ -1020,14 +1021,17 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, [loadingState, setChildLoadingState]);
 
   useEffect(() => {
-    if (currentInternalScheduleMode === 'userFriendly') {
+    if (
+      currentInternalScheduleMode === 'userFriendly' &&
+      !scheduleFieldCronFormat
+    ) {
       // When switching TO 'runSchedule', restore the last known cron value
       setValue('scheduleValueUserFriendly', lastCronValue.current);
     } else {
       // When switching AWAY (to 'runNow'), clear the form value
-      setValue('scheduleValueUserFriendly', '');
+      setValue('scheduleValueUserFriendly', scheduleFieldCronFormat);
     }
-  }, [currentInternalScheduleMode, setValue]);
+  }, [currentInternalScheduleMode, setValue, scheduleFieldCronFormat]);
 
   // --- Render Component UI ---
   return (
