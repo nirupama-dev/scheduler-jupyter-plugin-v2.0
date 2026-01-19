@@ -1,0 +1,7 @@
+# .eslintignore
+
+**/src_backup/
+**/lib/
+**/ui-tests/
+**/src/react-table-config.d.ts
+**/src/components/common/dateCalendar/mui.d.ts
