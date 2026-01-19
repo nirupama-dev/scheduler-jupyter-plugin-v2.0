@@ -33,9 +33,10 @@ import { iconNotebookScheduler } from '../../utils/Icons';
 import { getDefaultSchedulerTypeOnLoad } from '../../utils/SchedulerKernalUtil';
 import { INotebookKernalSchdulerDefaults } from '../../interfaces/CommonInterface';
 
-export class NotebookButtonExtension
-  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
-{
+export class NotebookButtonExtension implements DocumentRegistry.IWidgetExtension<
+  NotebookPanel,
+  INotebookModel
+> {
   constructor(
     private readonly app: JupyterLab,
     private readonly themeManager: IThemeManager,

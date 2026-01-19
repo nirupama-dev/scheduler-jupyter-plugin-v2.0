@@ -369,9 +369,10 @@ class NotebookButtonExtensionPoint implements IDisposable {
   }
 }
 
-export class NotebookButtonExtension
-  implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel>
-{
+export class NotebookButtonExtension implements DocumentRegistry.IWidgetExtension<
+  NotebookPanel,
+  INotebookModel
+> {
   constructor(
     private app: JupyterLab,
     private settingRegistry: ISettingRegistry,
