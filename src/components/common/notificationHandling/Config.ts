@@ -15,20 +15,20 @@
  * limitations under the License.
  */
 
-import { toast, ToastOptions } from 'react-toastify';
+import { ToastOptions } from 'react-toastify';
 
 export const toastifyCustomStyle: ToastOptions<Record<string, never>> = {
   hideProgressBar: true,
   autoClose: 600000,
   theme: 'dark',
-  position: toast.POSITION.BOTTOM_CENTER
+  position: 'bottom-center'
 };
 
 export const toastifyCustomWidth: ToastOptions<Record<string, never>> = {
   hideProgressBar: true,
   autoClose: 600000,
   theme: 'dark',
-  position: toast.POSITION.BOTTOM_CENTER,
+  position: 'bottom-center',
   style: {
     width: '150%'
   }

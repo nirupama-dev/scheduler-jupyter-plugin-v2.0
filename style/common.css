@@ -2,3 +2,16 @@
   height: 100%;
   overflow: auto;
 }
+/* stylelint-disable selector-class-pattern */
+
+/* Ensure the toast container is above JupyterLab's modals and sidebars */
+.Toastify__toast-container {
+  z-index: 20000 !important;
+}
+
+/* Ensure the width is consistent with your custom config */
+.Toastify__toast {
+  min-height: 48px;
+  font-size: 13px;
+}
+/* stylelint-enable selector-class-pattern */

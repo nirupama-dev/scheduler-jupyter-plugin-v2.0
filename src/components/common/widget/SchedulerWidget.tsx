@@ -2,6 +2,8 @@ import React from 'react';
 import { ReactWidget, IThemeManager } from '@jupyterlab/apputils';
 import { ThemeOptions, ThemeProvider, createTheme } from '@mui/material';
 import { deepmerge } from '@mui/utils';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const baseStyles: ThemeOptions = {
   components: {
@@ -122,7 +124,15 @@ export abstract class SchedulerWidget extends ReactWidget {
   protected render(): React.ReactElement {
     return (
       <ThemeProvider theme={this.isLight ? lightTheme : darkTheme}>
-        {this.renderInternal()}
+        <>
+          {this.renderInternal()}
+          <ToastContainer
+            position="bottom-center"
+            autoClose={600000}
+            hideProgressBar
+            theme={this.isLight ? 'light' : 'dark'}
+          />
+        </>
       </ThemeProvider>
     );
   }
