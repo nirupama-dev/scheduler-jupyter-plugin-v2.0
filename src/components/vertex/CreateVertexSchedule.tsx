@@ -81,7 +81,8 @@ import {
   CLOUD_STORAGE_BUCKET_HELPER_TEXT,
   DEFAULT_DISK_TYPE,
   DEFAULT_ERROR_LENGTH_START_AND_END_DATE,
-  DEFAULT_SCHEDULE_VALUE
+  DEFAULT_SCHEDULE_VALUE,
+  VERTEX_SCHEDULER_NAME
 } from '../../utils/Constants';
 
 // Interfaces & Schemas
@@ -181,7 +182,6 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const customerEncryptionType = watch('customerEncryptionType');
   const keyRingSelected = watch('keyRing');
   const cryptoKeySelected = watch('cryptoKey');
-  const scheduleFieldCronFormat = watch('scheduleFieldCronFormat');
 
   //
   const isVertexForm = currentSchedulerSelection === 'vertex';
@@ -911,6 +911,18 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     trigger('cryptoKey');
   };
 
+  /**
+   * Get existing cron expression for edit mode
+   */
+  const getExistingCron = useCallback(() => {
+    const existingData = editScheduleData?.existingScheduleData;
+    if (existingData?.schedulerSelection === VERTEX_SCHEDULER_NAME) {
+      return (existingData as VertexSchedulerFormValues)
+        .scheduleFieldCronFormat;
+    }
+    return DEFAULT_SCHEDULE_VALUE;
+  }, [editScheduleData]);
+
   useEffect(() => {
     if (keyRingSelected) {
       listCryptoKeysAPI(keyRingSelected);
@@ -1021,17 +1033,16 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   }, [loadingState, setChildLoadingState]);
 
   useEffect(() => {
-    if (
-      currentInternalScheduleMode === 'userFriendly' &&
-      !scheduleFieldCronFormat
-    ) {
-      // When switching TO 'runSchedule', restore the last known cron value
-      setValue('scheduleValueUserFriendly', lastCronValue.current);
-    } else {
-      // When switching AWAY (to 'runNow'), clear the form value
-      setValue('scheduleValueUserFriendly', scheduleFieldCronFormat);
+    const existingCron = getExistingCron();
+    if (existingCron) {
+      lastCronValue.current = existingCron;
+
+      if (!getValues('scheduleValueUserFriendly')) {
+        setValue('scheduleValueUserFriendly', existingCron);
+        setValue('scheduleFieldCronFormat', existingCron);
+      }
     }
-  }, [currentInternalScheduleMode, setValue, scheduleFieldCronFormat]);
+  }, [getExistingCron, setValue, getValues, getValues('internalScheduleMode')]);
 
   // --- Render Component UI ---
   return (
@@ -1459,9 +1470,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
               if (!getValues('internalScheduleMode')) {
                 setValue('internalScheduleMode', 'userFriendly');
               }
+
+              const cronToUse = getExistingCron() || lastCronValue.current;
+
               if (!getValues('scheduleValueUserFriendly')) {
-                setValue('scheduleValueUserFriendly', lastCronValue.current);
+                setValue('scheduleValueUserFriendly', cronToUse);
+                setValue('scheduleFieldCronFormat', cronToUse);
               }
+
               if (!getValues('startTime')) {
                 setValue('startTime', dayjs().toISOString());
               }
