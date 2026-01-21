@@ -57,7 +57,15 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
         render={({ field: { onChange, onBlur, value, ...fieldProps } }) => {
           // Get the currently selected option object
           const selectedOption =
-            options.find(option => option.value === value) || null;
+            options.find(option => {
+              // If value is just a string (ID)
+              if (typeof value === 'string') {
+                return option.value === value;
+              }
+
+              // If value is the whole object, compare by a unique ID (uuid or name)
+              return option.value?.uuid === value?.uuid;
+            }) || null;
 
           return (
             <Autocomplete
@@ -66,6 +74,17 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
               disabled={disabled}
               getOptionLabel={option => option.label ?? ''}
               value={selectedOption}
+              isOptionEqualToValue={(option, value) => {
+                // 1. If the value passed in is an object (common in some MUI setups)
+                if (typeof value === 'object') {
+                  return (
+                    (option.value as any)?.uuid === (value.value as any)?.uuid
+                  );
+                }
+
+                // 2. Standard case: value is a string or number (like your current setup)
+                return option.value === value;
+              }}
               onChange={(_, newValue) => {
                 const selectedValue = newValue ? newValue.value : '';
                 onChange(selectedValue); // RHF update

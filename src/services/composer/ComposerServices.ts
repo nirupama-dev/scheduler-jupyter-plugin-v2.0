@@ -154,9 +154,9 @@ export class ComposerServices {
       } else {
         const transformSessionTemplateListData = allSessionTemplatesData;
         const serverlessOptionList = transformSessionTemplateListData.map(
-          (obj: { serverlessName: string }) => ({
+          (obj: { serverlessName: string; serverlessData: any }) => ({
             label: obj.serverlessName,
-            value: obj.serverlessName
+            value: obj.serverlessData
           })
         );
 

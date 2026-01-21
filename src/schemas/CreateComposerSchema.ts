@@ -68,7 +68,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   outputFormatAsNotebook: z.boolean().default(true),
   parameters: z.array(parameterSchema).optional(),
   cluster: z.string().optional(),
-  serverless: z.string().optional(),
+  serverless: z.record(z.any()).optional(),
   stopClusterAfterExecution: z.boolean().optional()
 });
 

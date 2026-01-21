@@ -61,7 +61,7 @@ export interface IComposerSchedulePayload {
   local_kernel: boolean;
   output_formats: string[];
   parameters: string[];
-  serverless_name?: string;
+  serverless_name?: object;
   cluster_name?: string;
   mode_selected: string;
   schedule_value?: string;

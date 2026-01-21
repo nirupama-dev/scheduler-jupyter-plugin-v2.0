@@ -143,7 +143,7 @@ const getDefaultComposerValues = (
   emailRecipients: [], // Default for array of emails
   runOption: 'runNow',
   cluster: '',
-  serverless: '',
+  serverless: {},
   timeZone: DEFAULT_TIME_ZONE, // Browser's local time zone,
   scheduleValue: ''
 });
