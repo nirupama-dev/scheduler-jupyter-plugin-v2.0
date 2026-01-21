@@ -208,7 +208,7 @@ export const CreateComposerSchedule: React.FC<
   const fetchRemoteKernelData = useCallback(async () => {
     try {
       if (executionMode === 'cluster') {
-        setValue('serverless', '');
+        setValue('serverless', {});
         const clusterOptionsFromAPI =
           await ComposerServices.listClustersAPIService();
         setClusterOptions(clusterOptionsFromAPI);
@@ -230,7 +230,7 @@ export const CreateComposerSchedule: React.FC<
         const selectedServerlessName = serverlessOptionsFromAPI.find(
           (serverlessOption: ILabelValue<string>) =>
             initialSchedulerDataContext?.initialDefaults?.kernelDetails?.kernelDisplayName.includes(
-              serverlessOption.value
+              serverlessOption.label
             )
         );
         setValue(
@@ -590,7 +590,6 @@ export const CreateComposerSchedule: React.FC<
                 options={serverlessOptions}
                 loading={loadingState.serverless}
                 customClass="scheduler-tag-style "
-                error={composerErrors.serverless}
                 onChangeCallback={() => trigger('serverless')}
               />
             </div>
