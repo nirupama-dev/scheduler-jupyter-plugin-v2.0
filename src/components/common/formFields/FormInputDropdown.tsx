@@ -59,7 +59,9 @@ export const FormInputDropdown: React.FC<IFormInputDropdownProps> = ({
           const selectedOption =
             options.find(option => {
               // If value is just a string (ID)
-              if (typeof value === 'string') return option.value === value;
+              if (typeof value === 'string') {
+                return option.value === value;
+              }
 
               // If value is the whole object, compare by a unique ID (uuid or name)
               return option.value?.uuid === value?.uuid;
