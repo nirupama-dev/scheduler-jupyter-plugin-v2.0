@@ -1044,6 +1044,10 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     }
   }, [getExistingCron, setValue, getValues, getValues('internalScheduleMode')]);
 
+  useEffect(() => {
+    trigger(['scheduleFieldCronFormat', 'scheduleValueUserFriendly']);
+  }, [currentInternalScheduleMode]);
+
   // --- Render Component UI ---
   return (
     <div>
