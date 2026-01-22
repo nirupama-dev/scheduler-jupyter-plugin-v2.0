@@ -152,6 +152,8 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
   const [cryptoKeyList, setCryptoKeyList] = useState<ILabelValue<string>[]>([]);
   const [defaultFormValues, setDefaultFormValues] =
     useState<CombinedCreateFormValues>({} as CombinedCreateFormValues);
+  const [createNewBucketErrorResponse, setCreateNewBucketErrorResponse] =
+    useState<string | null>(null);
 
   const lastCronValue = useRef(
     getValues('scheduleValueUserFriendly') || DEFAULT_SCHEDULE_VALUE
@@ -764,7 +766,14 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           console.log('Creating new bucket:', newBucketName);
           setLoadingState(prev => ({ ...prev, cloudStorageBucket: true }));
           try {
-            await StorageServices.newCloudStorageAPIService(newBucketName);
+            const createNewBucketErrorResponse =
+              await StorageServices.newCloudStorageAPIService(newBucketName);
+            if (
+              typeof createNewBucketErrorResponse === 'string' &&
+              createNewBucketErrorResponse.length > 0
+            ) {
+              setCreateNewBucketErrorResponse(createNewBucketErrorResponse);
+            }
             // Re-fetch buckets to include the newly created one and set it
             const updatedBucketList =
               await StorageServices.cloudStorageAPIService();
@@ -785,6 +794,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         }
       } else {
         trigger('cloudStorageBucket');
+        setCreateNewBucketErrorResponse(null);
       }
     },
     [setValue, setCloudStorageList, app]
@@ -1169,9 +1179,16 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
           onChangeCallback={handleCloudStorageDropdownChange}
           disabled={isCreatingBucket}
         />
-        {isCreatingBucket && newBucketCreated && (
-          <div style={{ color: '#1976d2', marginTop: 4 }}>
-            Creating new bucket <b>{newBucketCreated}</b>...
+        {isCreatingBucket &&
+          newBucketCreated &&
+          !createNewBucketErrorResponse && (
+            <div style={{ color: '#1976d2', marginTop: 4 }}>
+              Creating new bucket <b>{newBucketCreated}</b>...
+            </div>
+          )}
+        {createNewBucketErrorResponse && (
+          <div style={{ color: '#d32f2f', marginTop: 4 }}>
+            {createNewBucketErrorResponse}
           </div>
         )}
       </div>
