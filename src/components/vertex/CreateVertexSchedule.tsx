@@ -1182,14 +1182,12 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         {isCreatingBucket &&
           newBucketCreated &&
           !createNewBucketErrorResponse && (
-            <div style={{ color: '#1976d2', marginTop: 4 }}>
+            <div className="message-info">
               Creating new bucket <b>{newBucketCreated}</b>...
             </div>
           )}
         {createNewBucketErrorResponse && (
-          <div style={{ color: '#d32f2f', marginTop: 4 }}>
-            {createNewBucketErrorResponse}
-          </div>
+          <div className="message-error">{createNewBucketErrorResponse}</div>
         )}
       </div>
       {!vertexErrors.cloudStorageBucket && (
