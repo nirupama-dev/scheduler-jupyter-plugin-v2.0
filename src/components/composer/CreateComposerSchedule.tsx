@@ -524,14 +524,19 @@ export const CreateComposerSchedule: React.FC<
             );
           }}
         />
-        {selectedEnvironment && packagesInstalled && (
-          <div className="required-packages-info">
-            Required packages are already installed
-          </div>
-        )}
+        {selectedEnvironment &&
+          packagesInstalled &&
+          selectedProjectId &&
+          selectedRegion && (
+            <div className="required-packages-info">
+              Required packages are already installed
+            </div>
+          )}
         {selectedEnvironment &&
           !packagesInstalled &&
-          missingPackagesList.length > 0 && (
+          missingPackagesList.length > 0 &&
+          selectedProjectId &&
+          selectedRegion && (
             <div className="required-packages-warning">
               {missingPackagesList.join(', ')} will get installed on creation of
               schedule
