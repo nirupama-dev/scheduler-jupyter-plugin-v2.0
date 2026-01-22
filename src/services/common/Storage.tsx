@@ -146,7 +146,9 @@ export class StorageServices {
    * @returns A Promise that resolves with `void` on successful creation.
    * It does not return data, but manages notifications.
    */
-  static async newCloudStorageAPIService(bucketName: string): Promise<void> {
+  static async newCloudStorageAPIService(
+    bucketName: string
+  ): Promise<string | void> {
     const payload = { bucket_name: bucketName };
     try {
       const createNewBucketResponse: any = await requestAPI(
@@ -163,7 +165,7 @@ export class StorageServices {
           autoClose: false
         });
       } else if (createNewBucketResponse?.error) {
-        throw new Error(createNewBucketResponse.error); // Propagate API error message
+        return createNewBucketResponse.error;
       }
     } catch (error: any) {
       if (error instanceof AuthenticationError) {
