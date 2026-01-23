@@ -933,6 +933,29 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
     return DEFAULT_SCHEDULE_VALUE;
   }, [editScheduleData]);
 
+  /**
+   *  Get dynamic class for schedule input field based on error length
+   * @returns
+   */
+  const getScheduleInputClass = () => {
+    const startMsg = vertexErrors.startTime?.message;
+    const endMsg = vertexErrors.endTime?.message;
+    const hasError = !!(startMsg || endMsg);
+
+    if (!hasError) {
+      return 'scheduler-form-element-container schedule-input-field scheduler-input-top';
+    }
+
+    // Check if either message is "long"
+    const isLongError =
+      (startMsg?.length ?? 0) >= DEFAULT_ERROR_LENGTH_START_AND_END_DATE ||
+      (endMsg?.length ?? 0) >= DEFAULT_ERROR_LENGTH_START_AND_END_DATE;
+
+    return `scheduler-form-element-container schedule-input-field scheduler-input-top ${
+      isLongError ? 'error-input-long' : 'error-input'
+    }`;
+  };
+
   useEffect(() => {
     if (keyRingSelected) {
       listCryptoKeysAPI(keyRingSelected);
@@ -1611,19 +1634,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
         {currentScheduleMode === 'runSchedule' &&
           currentInternalScheduleMode === 'cronFormat' && (
             <>
-              <div
-                className={
-                  vertexErrors.endTime?.message ||
-                  vertexErrors.startTime?.message
-                    ? (vertexErrors.endTime?.message?.length ?? 0) <
-                        DEFAULT_ERROR_LENGTH_START_AND_END_DATE ||
-                      (vertexErrors.startTime?.message?.length ?? 0) <
-                        DEFAULT_ERROR_LENGTH_START_AND_END_DATE
-                      ? 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input'
-                      : 'scheduler-form-element-container schedule-input-field scheduler-input-top error-input-long'
-                    : 'scheduler-form-element-container schedule-input-field scheduler-input-top'
-                }
-              >
+              <div className={getScheduleInputClass()}>
                 <FormInputText
                   label="Schedule*"
                   control={control}
@@ -1645,7 +1656,7 @@ export const CreateVertexSchedule: React.FC<ICreateVertexSchedulerProps> = ({
 
         {currentScheduleMode === 'runSchedule' &&
           currentInternalScheduleMode === 'userFriendly' && (
-            <div className="scheduler-input-top">
+            <div className={getScheduleInputClass()}>
               <Controller
                 name="scheduleValueUserFriendly"
                 control={control}
