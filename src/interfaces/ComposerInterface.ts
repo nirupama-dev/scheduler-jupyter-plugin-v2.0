@@ -41,7 +41,7 @@ export interface ICreateComposerSchedulerProps {
   watch: UseFormWatch<CombinedCreateFormValues>;
   setValue: UseFormSetValue<CombinedCreateFormValues>;
   setError: UseFormSetError<ComposerSchedulerFormValues>;
-  clearErrors: (name?: keyof CombinedCreateFormValues | undefined) => void;
+  clearErrors: any;
   getValues: UseFormGetValues<CombinedCreateFormValues>;
   trigger: UseFormTrigger<CombinedCreateFormValues>;
   credentials: IAuthCredentials;

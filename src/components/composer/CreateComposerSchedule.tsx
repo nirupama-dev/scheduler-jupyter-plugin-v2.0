@@ -168,7 +168,10 @@ export const CreateComposerSchedule: React.FC<
           setValue('environment', '');
           setEnvOptions([]);
         } else {
-          setValue('composerRegion', currentRegionValue);
+          setValue('composerRegion', currentRegionValue, {
+            shouldValidate: true,
+            shouldDirty: true
+          });
         }
       } catch (authenticationError) {
         handleOpenLoginWidget(app);
@@ -335,12 +338,20 @@ export const CreateComposerSchedule: React.FC<
   const handleProjectIdChange = useCallback(
     (projectValue: string) => {
       setValue('projectId', projectValue);
+      setValue('composerRegion', '');
+      setValue('environment', '');
       setRegionOptions([]);
       setEnvOptions([]);
       setComposerEnvData([]);
-      trigger(['composerRegion', 'environment', 'projectId']);
+
+      if (projectValue) {
+        clearErrors(['composerRegion']);
+        trigger(['projectId']);
+      } else {
+        trigger(['composerRegion', 'projectId', 'environment']);
+      }
     },
-    [setValue, trigger]
+    [setValue, trigger, clearErrors]
   );
 
   // Handle Region change: Clear Environment
