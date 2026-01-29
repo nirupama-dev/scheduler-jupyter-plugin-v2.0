@@ -38,6 +38,7 @@ from scheduler_jupyter_plugin.controllers import (
     iam,
     logEntries,
     resourceManager,
+    serviceUsage,
     storage,
     version,
     vertex,
@@ -209,6 +210,7 @@ def setup_handlers(web_app):
         "updatePlugin": version.UpdatePackageController,
         "api/cloudKms/listKeyRings": cloudKms.KeyRingsController,
         "api/cloudKms/listCryptoKeys": cloudKms.CryptoKeysController,
+        "api/serviceUsage/checkApiEnabled": serviceUsage.ServiceUsageController,
     }
     handlers = [(full_path(name), handler) for name, handler in handlersMap.items()]
     web_app.add_handlers(host_pattern, handlers)

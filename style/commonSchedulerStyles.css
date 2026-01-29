@@ -87,6 +87,11 @@ body[data-jp-theme-light='true'].scroll-fix-header {
   cursor: pointer;
 }
 
+.link-text-decoration {
+  text-decoration: underline;
+  color: #1976d2 !important;
+}
+
 .execution-history-left-wrapper {
   width: 400px;
   border: 1px solid var(--jp-layout-color3);

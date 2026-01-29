@@ -26,16 +26,18 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { iconLeftArrow } from '../../utils/Icons';
+import { iconError, iconLeftArrow } from '../../utils/Icons';
 import { FormInputText } from '../common/formFields/FormInputText';
 import { FormInputRadio } from '../common/formFields/FormInputRadio';
 import {
   COMPOSER_SCHEDULER_NAME,
+  COMPOSER_SERVICE_NAME,
   FORM_LOADING_TEXT,
   INPUT_HELPER_TEXT,
   SCHEDULE_LABEL_VERTEX,
   SCHEDULER_OPTIONS,
-  VERTEX_SCHEDULER_NAME
+  VERTEX_SCHEDULER_NAME,
+  VERTEX_SERVICE_NAME
 } from '../../utils/Constants';
 import { CreateVertexSchedule } from '../vertex/CreateVertexSchedule';
 import { CreateComposerSchedule } from '../composer/CreateComposerSchedule';
@@ -47,7 +49,8 @@ import {
   ICreateNotebookScheduleProps,
   INotebookKernalSchdulerDefaults,
   IEditScheduleData,
-  IInitialSchedulerContextData
+  IInitialSchedulerContextData,
+  IApiServiceEnabled
 } from '../../interfaces/CommonInterface';
 import { VertexSchedulerFormValues } from '../../schemas/CreateVertexSchema';
 import { ComposerSchedulerFormValues } from '../../schemas/CreateComposerSchema';
@@ -72,6 +75,8 @@ import {
 import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
 import LoadingSpinner from '../common/loader/LoadingSpinner';
+import { ServiceUsageServices } from '../../services/common/ServiceUsage';
+import EnableNotifyMessage from '../common/notificationHandling/EnableNotifyMessage';
 
 /**
  * Create Notebook Schedule Parent component that renders common components
@@ -122,6 +127,12 @@ export const CreateNotebookSchedule = (
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isChildComponentLoading, setIsChildComponentLoading] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [apiServiceEnabled, setApiServiceEnabled] =
+    useState<IApiServiceEnabled>({
+      enabled: true,
+      enable_url: '',
+      message: ''
+    });
   console.log(isDataLoaded, 'isDataLoaded');
 
   const navigate = useNavigate();
@@ -279,6 +290,51 @@ export const CreateNotebookSchedule = (
       trigger();
     }
   }, [initialFormValues, reset, trigger]);
+
+  const checkApiEnabled = async () => {
+    if (initialSchedulerDataContext.credentials?.project_id) {
+      const projectId = initialSchedulerDataContext?.credentials?.project_id;
+      if (schedulerSelectionSelected === VERTEX_SCHEDULER_NAME) {
+        try {
+          const apiServiceEnabled =
+            await ServiceUsageServices.checkApiEnabledService(
+              projectId,
+              VERTEX_SERVICE_NAME
+            );
+          if (!apiServiceEnabled) {
+            setApiServiceEnabled({
+              enabled: false,
+              enable_url: `https://console.developers.google.com/apis/api/${VERTEX_SERVICE_NAME}/overview?project=${projectId}`,
+              message: `Vertex AI API has not been used in project ${projectId} before or it is disabled `
+            });
+          }
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
+        }
+      } else if (schedulerSelectionSelected === COMPOSER_SCHEDULER_NAME) {
+        try {
+          const apiServiceEnabled =
+            await ServiceUsageServices.checkApiEnabledService(
+              initialSchedulerDataContext?.credentials?.project_id,
+              COMPOSER_SERVICE_NAME
+            );
+          if (!apiServiceEnabled) {
+            setApiServiceEnabled({
+              enabled: false,
+              enable_url: `https://console.developers.google.com/apis/api/${COMPOSER_SERVICE_NAME}/overview?project=${projectId}`,
+              message: `Composer API has not been used in project ${projectId} before or it is disabled `
+            });
+          }
+        } catch (authenticationError) {
+          handleOpenLoginWidget(app);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    checkApiEnabled();
+  }, [schedulerSelectionSelected, initialSchedulerDataContext.credentials]);
 
   // Watch for changes in schedulerSelection to reset form values accordingly
   useEffect(() => {
@@ -569,6 +625,19 @@ export const CreateNotebookSchedule = (
               }))}
               error={errors.schedulerSelection}
             />
+          </div>
+          <div>
+            {!apiServiceEnabled.enabled && (
+              <div className="error-key-parent enable-error-text-label">
+                <iconError.react tag="div" className="logo-alignment-style" />
+                <div className="error-key-missing">
+                  <EnableNotifyMessage
+                    message={apiServiceEnabled.message}
+                    url={apiServiceEnabled.enable_url}
+                  />
+                </div>
+              </div>
+            )}
           </div>
           {/* Conditionally render specific scheduler components */}
           {schedulerSelectionSelected === VERTEX_SCHEDULER_NAME && (

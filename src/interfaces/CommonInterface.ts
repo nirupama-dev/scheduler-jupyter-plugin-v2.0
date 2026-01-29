@@ -121,3 +121,9 @@ export interface IProjectAPIResponse {
   project_id: string;
   name: string;
 }
+
+export interface IApiServiceEnabled {
+  enabled: boolean;
+  enable_url: string;
+  message: string;
+}

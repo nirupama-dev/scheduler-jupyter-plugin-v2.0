@@ -423,3 +423,7 @@ export const DEFAULT_ERROR_LENGTH_START_AND_END_DATE = 39;
 
 export const DEFAULT_LOADER_TEXT_COMPOSER_LISTING =
   'Loading Notebook Schedulers...';
+
+export const VERTEX_SERVICE_NAME = 'aiplatform.googleapis.com';
+
+export const COMPOSER_SERVICE_NAME = 'composer.googleapis.com';
