@@ -60,6 +60,7 @@ import {
   scheduleMode,
   scheduleValueExpression,
   SECURITY_KEY,
+  SERVICE_ACCOUNT_ERROR_MESSAGE_LENGHT,
   SHARED_NETWORK_DOC_URL,
   SUBNETWORK_VERTEX_ERROR,
   VERTEX_REGIONS,
@@ -79,6 +80,7 @@ import {
 import VertexScheduleJobs from './VertexScheduleJobs';
 import { renderTimeViewClock } from '@mui/x-date-pickers';
 import { handleErrorToast } from '../../utils/ErrorUtils';
+import ExpandToastMessage from '../common/ExpandToastMessage';
 
 const CreateVertexScheduler = ({
   themeManager,
@@ -1502,7 +1504,10 @@ const CreateVertexScheduler = ({
 
           {errorMessageServiceAccount && (
             <span className="error-message-warn error-key-missing">
-              {errorMessageServiceAccount}
+              <ExpandToastMessage
+                truncateLength={SERVICE_ACCOUNT_ERROR_MESSAGE_LENGHT}
+                message={errorMessageServiceAccount}
+              />
             </span>
           )}
 

@@ -192,3 +192,5 @@ export const NO_EXECUTION_FOUND =
 
 export const EXECUTION_DATE_SELECTION_HELPER_TEXT =
   'Select a date to view schedule execution history';
+
+export const SERVICE_ACCOUNT_ERROR_MESSAGE_LENGHT = 90;
