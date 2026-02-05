@@ -212,7 +212,14 @@ export class SchedulerService {
       } else if (formattedResponse.length === undefined) {
         try {
           setComposerEnvData([]);
-          if (formattedResponse.error.code === HTTP_STATUS_FORBIDDEN) {
+          console.log(
+            'formattedResponse error list composer: ',
+            formattedResponse
+          );
+          if (
+            formattedResponse?.error?.code &&
+            formattedResponse.error.code === HTTP_STATUS_FORBIDDEN
+          ) {
             const url = formattedResponse.error.message.match(pattern);
             if (url && url.length > 0) {
               setIsApiError(true);
@@ -225,6 +232,12 @@ export class SchedulerService {
             if (setIsLoading) {
               setIsLoading(false);
             }
+          } else if (formattedResponse?.error) {
+            setApiError(
+              typeof formattedResponse.error === 'string'
+                ? formattedResponse.error
+                : JSON.stringify(formattedResponse.error)
+            );
           }
         } catch (error) {
           console.error('Error parsing error message:', error);

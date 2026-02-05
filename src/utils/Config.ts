@@ -47,15 +47,27 @@ export const checkConfig = async (
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setConfigError: React.Dispatch<React.SetStateAction<boolean>>
 ): Promise<void> => {
-  const credentials: IAuthCredentials | undefined = await authApi();
-  if (credentials) {
-    if (credentials.login_error === 1) {
-      setLoginError(true);
+  try {
+    const credentials: IAuthCredentials | undefined = await authApi();
+    if (credentials) {
+      if (credentials.login_error === 1) {
+        setLoginError(true);
+        setIsLoading(false);
+      }
+      if (credentials.config_error === 1) {
+        setConfigError(true);
+      }
       setIsLoading(false);
+    } else {
+      // FAILURE CASE: Service returned undefined (handler threw 401)
+      // This forces the UI to show the Login Component
+      setLoginError(true);
     }
-    if (credentials.config_error === 1) {
-      setConfigError(true);
-    }
+  } catch (error) {
+    // Safety net
+    console.error('Config check failed', error);
+    setLoginError(true);
+  } finally {
     setIsLoading(false);
   }
 };

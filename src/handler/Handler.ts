@@ -18,6 +18,19 @@
 import { URLExt } from '@jupyterlab/coreutils';
 import { ServerConnection } from '@jupyterlab/services';
 
+let refreshPromise: Promise<any> | null = null;
+
+const isTokenExpired = (data: any, response: Response): boolean => {
+  if (response.status === 401) return true;
+
+  const errorStr = typeof data === 'string' ? data : JSON.stringify(data);
+  return (
+    errorStr.includes('ACCESS_TOKEN_EXPIRED') ||
+    errorStr.includes('UNAUTHENTICATED') ||
+    errorStr.includes('Invalid authentication credentials')
+  );
+};
+
 /**
  * Call the API extension
  *
@@ -27,7 +40,8 @@ import { ServerConnection } from '@jupyterlab/services';
  */
 export async function requestAPI<T>(
   endPoint = '',
-  init: RequestInit = {}
+  init: RequestInit = {},
+  attemptRetry = true
 ): Promise<T> {
   // Make request to Jupyter API
   const settings = ServerConnection.makeSettings();
@@ -51,6 +65,44 @@ export async function requestAPI<T>(
       data = JSON.parse(data);
     } catch (error) {
       console.log('Not a JSON response body.', response);
+    }
+  }
+
+  console.log('Response data: ', data);
+  console.log(
+    'isTokenExpired(data, response): ',
+    isTokenExpired(data, response)
+  );
+  console.log('attemptRetry: ', attemptRetry);
+  console.log('endPoint: ', endPoint);
+  if (
+    isTokenExpired(data, response) &&
+    attemptRetry &&
+    endPoint !== 'credentials'
+  ) {
+    // Check if a refresh is already in progress
+    if (!refreshPromise) {
+      console.log('Scheduler Plugin: Token expired. Refreshing...');
+      refreshPromise = requestAPI('credentials', {}, false)
+        .then(() => {
+          // If credentials succeeds, we just return true to signal "go ahead"
+          return true;
+        })
+        .finally(() => {
+          // ALWAYS release the lock when done
+          refreshPromise = null;
+        });
+    }
+
+    try {
+      // ALL failing requests wait here for the ONE credentials call to finish
+      await refreshPromise;
+
+      // Once resolved, everyone retries their own original request
+      return await requestAPI<T>(endPoint, init, false);
+    } catch (refreshError) {
+      console.error('Scheduler Plugin: Token refresh failed.', refreshError);
+      // If refresh fails, fall through to throw the original error
     }
   }
 

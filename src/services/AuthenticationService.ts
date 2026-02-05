@@ -63,6 +63,8 @@ export class AuthenticationService {
       }
     } catch (reason) {
       console.error(`Error on GET credentials.\n${reason}`);
+      // Return undefined to signal that authentication failed
+      return undefined;
     }
   };
 }
