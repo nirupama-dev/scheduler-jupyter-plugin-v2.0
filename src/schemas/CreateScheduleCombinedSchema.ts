@@ -207,7 +207,8 @@ export const combinedCreateFormSchema = z
     } else if (commonData.schedulerSelection === 'composer') {
       // Composer specific validation
       const composerData = commonData as z.infer<typeof createComposerSchema>;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const STRICT_EMAIL_REGEX =
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       // Conditional validation for email based on checkboxes
       if (
         composerData.emailOnFailure ||
@@ -228,7 +229,7 @@ export const combinedCreateFormSchema = z
 
       // Validate format of each chip in the array
       composerData.emailRecipients?.forEach((email, index) => {
-        if (!emailRegex.test(email)) {
+        if (!STRICT_EMAIL_REGEX.test(email)) {
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: `Invalid email format: ${email}`,

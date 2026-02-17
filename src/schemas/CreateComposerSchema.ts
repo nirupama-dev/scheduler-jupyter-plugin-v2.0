@@ -24,14 +24,6 @@ import {
   parameterSchema
 } from './CreateNotebookCommonSchema';
 
-// Custom Regex Refine
-const customEmailSchema = z
-  .string()
-  .regex(
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-    'Please enter a valid email address. E.g username@domain.com'
-  );
-
 export const createComposerSchema = createNotebookCommonSchema.extend({
   schedulerSelection: z.literal('composer'), // Discriminator property
   projectId: z.string().min(1, 'Project ID is required'),
@@ -59,7 +51,7 @@ export const createComposerSchema = createNotebookCommonSchema.extend({
   emailOnFailure: z.boolean().default(false),
   emailOnRetry: z.boolean().default(false),
   emailOnSuccess: z.boolean().default(false),
-  emailRecipients: z.array(customEmailSchema).optional(),
+  emailRecipients: z.array(z.string()).optional(),
   runOption: z.enum(['runNow', 'runSchedule'], {
     errorMap: () => ({ message: 'Please select a run option' })
   }),
