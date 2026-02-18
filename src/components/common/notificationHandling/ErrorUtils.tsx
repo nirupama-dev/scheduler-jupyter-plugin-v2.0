@@ -2,7 +2,10 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import { Notification } from '@jupyterlab/apputils';
 import ExpandToastMessage from './ExpandToastMessage';
-import { toastifyCustomStyle, toastifyCustomWidth } from '../../../utils/NotificationHandlingConfig';
+import {
+  toastifyCustomStyle,
+  toastifyCustomWidth
+} from '../../../utils/NotificationHandlingConfig';
 import { IErrorMessageProps } from '../../../interfaces/FormInterface';
 import { iconError } from '../../../utils/Icons';
 

@@ -19,10 +19,7 @@ import { JupyterFrontEnd } from '@jupyterlab/application';
 import { requestAPI } from '../handler/Handler';
 import { IAuthCredentials } from '../interfaces/CommonInterface';
 import { AuthenticationService } from '../services/common/AuthenticationService';
-import {
-  OPEN_LOGIN_WIDGET_COMMAND,
-  STATUS_SUCCESS
-} from './Constants';
+import { OPEN_LOGIN_WIDGET_COMMAND, STATUS_SUCCESS } from './Constants';
 
 /**
  * Authentication function
