@@ -20,7 +20,7 @@ import { iconDownload } from '../../../utils/Icons';
 import { VertexServices } from '../../../services/vertex/VertexServices';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import { IVertexExecutionHistoryActionsProps } from '../../../interfaces/VertexInterface';
-import { handleOpenLoginWidget } from '../../common/login/Config';
+import { handleOpenLoginWidget } from '../../../utils/LoginConfig';
 import { ActionButton } from '../../common/button/ActionButton';
 
 const VertexExecutionHistoryActions = ({

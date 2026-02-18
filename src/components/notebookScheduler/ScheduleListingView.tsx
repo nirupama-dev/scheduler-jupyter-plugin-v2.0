@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
-import { abortApiCall } from '../../utils/Config';
+import { abortApiCall } from '../../utils/GeneralConfig';
 
 export const ScheduleListingView = (abortControllers: {
   abortControllers: any;

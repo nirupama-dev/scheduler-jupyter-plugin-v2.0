@@ -18,7 +18,7 @@
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useReducer } from 'react';
 import { VertexServices } from '../services/vertex/VertexServices';
-import { handleOpenLoginWidget } from '../components/common/login/Config';
+import { handleOpenLoginWidget } from '../utils/LoginConfig';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { IExecutionHistoryState } from '../interfaces/VertexInterface';
 import { VERTEX_EXECUTION_HISTORY_LOGS_URL } from '../utils/Constants';

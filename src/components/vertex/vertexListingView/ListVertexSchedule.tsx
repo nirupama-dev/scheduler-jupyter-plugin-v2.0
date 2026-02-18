@@ -28,7 +28,7 @@ import {
   SCHEDULE_LABEL_VERTEX
 } from '../../../utils/Constants';
 import { ILabelValue } from '../../../interfaces/CommonInterface';
-import { authApi, handleOpenLoginWidget } from '../../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../../../utils/LoginConfig';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import { usePagination, useTable } from 'react-table';
 import { VertexServices } from '../../../services/vertex/VertexServices';
@@ -46,7 +46,7 @@ import { renderActions } from './VertexScheduleAction';
 import { rowDataList } from './VertexListRow';
 import { useNavigate } from 'react-router-dom';
 import DeletePopup from '../../common/table/DeletePopup';
-import { abortApiCall } from '../../../utils/Config';
+import { abortApiCall } from '../../../utils/GeneralConfig';
 import { PaginationComponent } from '../../common/customPagination/PaginationComponent';
 import VertexListingInputLayout from './VertexListingInput';
 import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';

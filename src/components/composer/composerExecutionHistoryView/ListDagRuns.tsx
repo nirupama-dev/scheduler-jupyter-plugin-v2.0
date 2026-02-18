@@ -19,8 +19,7 @@ import React, { useEffect, useState } from 'react';
 import { useTable, useGlobalFilter, usePagination } from 'react-table';
 import TableData from '../../common/table/TableData';
 import { PaginationView } from '../../common/table/PaginationView';
-import { handleDebounce } from '../../../utils/Config';
-import { ICellProps } from '../../common/table/Utils';
+import { handleDebounce, ICellProps } from '../../../utils/GeneralConfig';
 import { ComposerServices } from '../../../services/composer/ComposerServices';
 import LoadingSpinner from '../../common/loader/LoadingSpinner';
 import { ActionButton } from '../../common/button/ActionButton';
@@ -28,7 +27,7 @@ import { iconDownload } from '../../../utils/Icons';
 import { IDagRunList } from '../../../interfaces/ComposerInterface';
 import { COMPOSER_EXECUTION_HISTORY_DAG_HEADER } from '../../../utils/Constants';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { handleOpenLoginWidget } from '../../common/login/Config';
+import { handleOpenLoginWidget } from '../../../utils/LoginConfig';
 import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 
 const ListDagRuns = ({

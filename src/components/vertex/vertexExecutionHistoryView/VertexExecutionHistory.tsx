@@ -24,9 +24,9 @@ import VertexScheduleRuns from '../vertexExecutionHistoryView/VertexScheduleRuns
 import { VertexServices } from '../../../services/vertex/VertexServices';
 import { IScheduleRun } from '../../../interfaces/VertexInterface';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { abortApiCall } from '../../../utils/Config';
+import { abortApiCall } from '../../../utils/GeneralConfig';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { handleOpenLoginWidget } from '../../common/login/Config';
+import { handleOpenLoginWidget } from '../../../utils/LoginConfig';
 import { SCHEDULE_LABEL_VERTEX } from '../../../utils/Constants';
 import dayjs from 'dayjs';
 

@@ -25,7 +25,7 @@ import 'react-js-cron/dist/styles.css';
 import tzdata from 'tzdata';
 import { ComputeServices } from '../../services/common/Compute';
 import { ComposerServices } from '../../services/composer/ComposerServices';
-import { handleOpenLoginWidget } from '../common/login/Config';
+import { handleOpenLoginWidget } from '../../utils/LoginConfig';
 import {
   IComposerEnvAPIResponse,
   ICreateComposerSchedulerProps,

@@ -25,7 +25,7 @@ import { SCHEDULE_LABEL_COMPOSER } from '../../../utils/Constants';
 import ExecutionHistoryHeader from '../../vertex/vertexExecutionHistoryView/VertexExecutionHistoryHeader';
 import { Box, LinearProgress } from '@mui/material';
 import { JupyterFrontEnd } from '@jupyterlab/application';
-import { abortApiCall } from '../../../utils/Config';
+import { abortApiCall } from '../../../utils/GeneralConfig';
 import dayjs from 'dayjs';
 import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 

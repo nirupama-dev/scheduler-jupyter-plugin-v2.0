@@ -94,7 +94,7 @@ import {
   ISharedNetwork
 } from '../../interfaces/VertexInterface';
 import { RadioOption } from '../../types/CommonSchedulerTypes';
-import { handleOpenLoginWidget } from '../common/login/Config';
+import { handleOpenLoginWidget } from '../../utils/LoginConfig';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
 import { CombinedCreateFormValues } from '../../schemas/CreateScheduleCombinedSchema';
 

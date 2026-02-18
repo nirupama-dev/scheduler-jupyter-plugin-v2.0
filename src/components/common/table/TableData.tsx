@@ -18,7 +18,7 @@
 import { CircularProgress } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { Cell, Row } from 'react-table';
-import { handleDebounce } from './Utils';
+import { handleDebounce } from '../../../utils/GeneralConfig';
 
 function TableData({
   getTableProps,
