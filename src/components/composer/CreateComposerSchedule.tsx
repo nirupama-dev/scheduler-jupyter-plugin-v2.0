@@ -239,9 +239,10 @@ export const CreateComposerSchedule: React.FC<
         );
         setValue(
           'serverless',
-          selectedServerlessName ? selectedServerlessName.value : ''
+          selectedServerlessName ? selectedServerlessName.value : {}
         );
       } else {
+        setValue('serverless', {});
         setClusterOptions([]);
         setServerlessOptions([]);
       }
