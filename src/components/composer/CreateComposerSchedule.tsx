@@ -62,6 +62,7 @@ export const CreateComposerSchedule: React.FC<
   isValid,
   credentials,
   initialSchedulerDataContext,
+  setPackagesToInstall,
   setChildLoadingState
 }) => {
   const [regionOptions, setRegionOptions] = useState<ILabelValue<string>[]>([]);
@@ -388,6 +389,7 @@ export const CreateComposerSchedule: React.FC<
       setMissingPackagesList([]);
     } else {
       setMissingPackagesList(missingPackages);
+      setPackagesToInstall(missingPackages);
       setPackagesInstalled(false);
     }
   };

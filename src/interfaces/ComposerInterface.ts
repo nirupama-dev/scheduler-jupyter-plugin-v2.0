@@ -48,6 +48,7 @@ export interface ICreateComposerSchedulerProps {
   isValid?: boolean;
   initialSchedulerDataContext?: IInitialSchedulerContextData | null;
   app: JupyterFrontEnd;
+  setPackagesToInstall: (packages: string[]) => void;
   setChildLoadingState?: (isLoading: boolean) => void;
 }
 

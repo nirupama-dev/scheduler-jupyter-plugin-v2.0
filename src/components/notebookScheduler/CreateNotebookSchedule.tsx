@@ -72,6 +72,7 @@ import {
 import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
 import LoadingSpinner from '../common/loader/LoadingSpinner';
+import { toast } from 'react-toastify';
 
 /**
  * Create Notebook Schedule Parent component that renders common components
@@ -122,6 +123,7 @@ export const CreateNotebookSchedule = (
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [isChildComponentLoading, setIsChildComponentLoading] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [packagesToInstall, setPackagesToInstall] = useState<string[]>([]);
   console.log(isDataLoaded, 'isDataLoaded');
 
   const navigate = useNavigate();
@@ -420,12 +422,24 @@ export const CreateNotebookSchedule = (
         //composer payload creation
       } else if (data.schedulerSelection === COMPOSER_SCHEDULER_NAME) {
         const composerData = data;
-        const packagesToInstall: string[] = []; // TODO
         const composerPayload: IComposerSchedulePayload =
           transformZodSchemaToComposerSchedulePayload(
             composerData,
             packagesToInstall
           );
+
+        if (
+          packagesToInstall.length > 0 &&
+          composerData.executionMode === 'local'
+        ) {
+          toast(
+            <LoadingSpinner message="Installing packages taking longer than usual. Scheduled job starts post installation. Please wait...." />,
+            {
+              autoClose: false,
+              closeButton: true
+            }
+          );
+        }
 
         isSaveSuccessfull =
           await ComposerServices.saveComposerNotebookJobSchedule(
@@ -602,6 +616,7 @@ export const CreateNotebookSchedule = (
               initialSchedulerDataContext={initialSchedulerDataContext}
               app={app}
               setChildLoadingState={setIsChildComponentLoading}
+              setPackagesToInstall={setPackagesToInstall}
             />
           )}
 
