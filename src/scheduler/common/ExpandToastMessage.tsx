@@ -21,12 +21,12 @@ import { IExpandableToastProps } from './SchedulerInteface';
 
 const ExpandToastMessage: React.FC<IExpandableToastProps> = ({
   message,
+  truncateLength = 50,
   ...rest
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [truncatedMessage, setTruncatedMessage] = useState('');
   const [showExpandButton, setShowExpandButton] = useState(false);
-  const truncateLength = 50; // Adjust as needed
 
   useEffect(() => {
     if (message.length > truncateLength) {
