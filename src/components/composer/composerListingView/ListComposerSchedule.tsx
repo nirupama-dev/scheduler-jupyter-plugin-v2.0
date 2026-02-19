@@ -17,7 +17,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FormInputListingDropdown } from '../../common/formFields/FormInputDropdown';
-import { authApi, handleOpenLoginWidget } from '../../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../../../utils/LoginConfig';
 import { useForm } from 'react-hook-form';
 import {
   IDropdownOption,
@@ -33,7 +33,6 @@ import { ComposerServices } from '../../../services/composer/ComposerServices';
 import { Notification } from '@jupyterlab/apputils';
 import TableData from '../../common/table/TableData';
 import { usePagination, useTable } from 'react-table';
-import { ICellProps } from '../../common/table/Utils';
 import { renderActions } from './ComposerScheduleActions';
 import { handleErrorToast } from '../../common/notificationHandling/ErrorUtils';
 import { Box, CircularProgress } from '@mui/material';
@@ -56,6 +55,7 @@ import PollingTimer from '../../../utils/PollingTimer';
 import { useSchedulerContext } from '../../../context/vertex/SchedulerContext';
 import { AuthenticationError } from '../../../exceptions/AuthenticationException';
 import { ResourceManagerServices } from '../../../services/common/ResourceManger';
+import { ICellProps } from '../../../utils/GeneralConfig';
 
 export const ListComposerSchedule = ({ app }: { app: JupyterFrontEnd }) => {
   const schedulerContext = useSchedulerContext();

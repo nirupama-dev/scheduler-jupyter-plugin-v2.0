@@ -65,7 +65,7 @@ import {
   transformVertexScheduleResponseToZodSchema,
   transformZodSchemaToVertexSchedulePayload
 } from '../../utils/VertexDataTransform';
-import { authApi, handleOpenLoginWidget } from '../common/login/Config';
+import { authApi, handleOpenLoginWidget } from '../../utils/LoginConfig';
 import {
   transformComposerScheduleDataToZodSchema,
   transformZodSchemaToComposerSchedulePayload

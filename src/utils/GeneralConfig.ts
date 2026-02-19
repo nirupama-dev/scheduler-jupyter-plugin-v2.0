@@ -25,6 +25,52 @@ export const handleDebounce = (func: any, delay: number) => {
   };
 };
 
+/***
+ * Setting API list to abort
+ * @param {any} abortControllers abortController to hold API list
+ */
+export const settingController = (abortControllers: any) => {
+  const controller = new AbortController();
+  abortControllers.current.push(controller);
+  const signal = controller.signal;
+  return signal;
+};
+
+/**
+ * Abort Api calls while moving away from page.
+ * @param {any} abortControllers API list to abort
+ */
+export const abortApiCall = (abortControllers: any) => {
+  // Accept either the ref itself or an object with .abortControllers
+  const ref = abortControllers?.current
+    ? abortControllers
+    : abortControllers?.abortControllers;
+
+  if (!ref) {
+    return;
+  }
+
+  const controllers = ref.current;
+  if (!controllers || !Array.isArray(controllers) || controllers.length === 0) {
+    return;
+  }
+
+  try {
+    controllers.forEach((controller: any) => {
+      if (controller && typeof controller.abort === 'function') {
+        controller.abort();
+      }
+    });
+  } catch {
+    return;
+  } finally {
+    // clear stored controllers
+    if (ref.current) {
+      ref.current = [];
+    }
+  }
+};
+
 export interface ICellProps {
   getCellProps: () => React.TdHTMLAttributes<HTMLTableDataCellElement>;
   value: string | any;

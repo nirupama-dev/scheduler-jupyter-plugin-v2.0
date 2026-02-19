@@ -17,7 +17,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Typography, IconButton } from '@mui/material';
-import { handleDebounce } from '../../../utils/Config';
+import { handleDebounce } from '../../../utils/GeneralConfig';
 import {
   iconDagTaskFailed,
   iconExpandLess,

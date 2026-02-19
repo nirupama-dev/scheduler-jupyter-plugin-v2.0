@@ -31,10 +31,10 @@ import {
 import { Notification } from '@jupyterlab/apputils';
 import { toast } from 'react-toastify';
 import { handleErrorToast } from '../../components/common/notificationHandling/ErrorUtils';
-import { toastifyCustomStyle } from '../../components/common/notificationHandling/Config';
+import { toastifyCustomStyle } from '../../utils/NotificationHandlingConfig';
 import { IEnvDropDownOption } from '../../interfaces/FormInterface';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
-import { settingController } from '../../utils/Config';
+import { settingController } from '../../utils/GeneralConfig';
 
 /**
  * All the API Services needed for  Cloud Composer (Jupyter Lab Notebook) Scheduler Module.

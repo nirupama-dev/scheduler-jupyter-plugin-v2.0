@@ -46,7 +46,7 @@ import {
 import { handleErrorToast as handleError } from '../../components/common/notificationHandling/ErrorUtils';
 import { aiplatform_v1 } from 'googleapis';
 
-import { settingController } from '../../utils/Config';
+import { settingController } from '../../utils/GeneralConfig';
 import { vertexScheduleRunResponseTransformation } from '../../utils/vertexExecutionHistoryTransformation';
 import path from 'path';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';

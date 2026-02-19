@@ -18,10 +18,10 @@
 import dayjs, { Dayjs } from 'dayjs';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { ComposerServices } from '../services/composer/ComposerServices';
-import { handleDebounce } from '../utils/Config';
+import { handleDebounce } from '../utils/GeneralConfig';
 import { JupyterFrontEnd } from '@jupyterlab/application';
 import { AuthenticationError } from '../exceptions/AuthenticationException';
-import { handleOpenLoginWidget } from '../components/common/login/Config';
+import { handleOpenLoginWidget } from '../utils/LoginConfig';
 
 const executionHistoryReducer = (state: any, action: any) => {
   switch (action.type) {

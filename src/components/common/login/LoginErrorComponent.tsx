@@ -17,7 +17,7 @@
 
 import React from 'react';
 import { IconsigninGoogle } from '../../../utils/Icons';
-import { login } from './Config';
+import { login } from '../../../utils/LoginConfig';
 
 const LoginErrorComponent: React.FC = () => {
   const handleLogin = async () => {
