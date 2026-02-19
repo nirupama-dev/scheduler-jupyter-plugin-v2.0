@@ -33,6 +33,7 @@ import {
   COMPOSER_SCHEDULER_NAME,
   FORM_LOADING_TEXT,
   INPUT_HELPER_TEXT,
+  PACKAGE_INSTALLATION_LOADER_TEXT,
   SCHEDULE_LABEL_VERTEX,
   SCHEDULER_OPTIONS,
   VERTEX_SCHEDULER_NAME
@@ -73,6 +74,7 @@ import { useSchedulerContext } from '../../context/vertex/SchedulerContext';
 import { AuthenticationError } from '../../exceptions/AuthenticationException';
 import LoadingSpinner from '../common/loader/LoadingSpinner';
 import { toast } from 'react-toastify';
+import { ToastWithLoader } from '../common/notificationHandling/ToastWithLoader';
 
 /**
  * Create Notebook Schedule Parent component that renders common components
@@ -432,13 +434,14 @@ export const CreateNotebookSchedule = (
           packagesToInstall.length > 0 &&
           composerData.executionMode === 'local'
         ) {
-          toast(
-            <LoadingSpinner message="Installing packages taking longer than usual. Scheduled job starts post installation. Please wait...." />,
-            {
-              autoClose: false,
-              closeButton: true
+          toast(ToastWithLoader, {
+            position: 'bottom-right',
+            autoClose: false,
+            closeButton: true,
+            data: {
+              message: PACKAGE_INSTALLATION_LOADER_TEXT
             }
-          );
+          });
         }
 
         isSaveSuccessfull =
