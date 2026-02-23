@@ -51,6 +51,9 @@ class Client:
     async def list_environments(
         self, project_id=None, region_id=None
     ) -> List[ComposerEnvironment]:
+        self.log.info(
+            f"Listing composer environments for project: {project_id} and region: {region_id}"
+        )
         environments = []
         composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
         if project_id and region_id:
@@ -63,6 +66,7 @@ class Client:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
                 if not resp:
+                    self.log.info("No environments found")
                     return environments
                 else:
                     environment = resp.get("environments", [])
@@ -86,6 +90,7 @@ class Client:
                                 pypi_packages=pypi_packages,
                             )
                         )
+                    self.log.info("Successfully fetched environments")
                     return environments
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -98,6 +103,7 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(f"Environments not found: {response.reason}")
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting composer list: {response.reason}",
@@ -114,6 +120,9 @@ class Client:
                 )
 
     async def get_environment(self, env_name) -> ComposerEnvironment:
+        self.log.info(
+            f"Getting composer environment details for environment: {env_name}"
+        )
         environment = {}
         composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
         api_endpoint = f"{composer_url}/v1/{env_name}"
@@ -123,6 +132,7 @@ class Client:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
                 if not resp:
+                    self.log.info("Environment not found")
                     return environment
                 else:
                     path = resp.get("name")
@@ -142,7 +152,7 @@ class Client:
                         metadata={"path": path},
                         pypi_packages=pypi_packages,
                     )
-
+                    self.log.info("Successfully fetched environment details")
                     return environment
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -155,9 +165,13 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_FORBIDDEN:
+                self.log.exception(
+                    f"AUTHORIZATION_ERROR: {response.reason} {await response.text()}"
+                )
                 resp = await response.json()
                 return resp
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(f"Environment not found: {response.reason}")
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting composer: {response.reason}",

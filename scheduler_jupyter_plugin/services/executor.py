@@ -49,7 +49,6 @@ from scheduler_jupyter_plugin.commons.constants import (
 from scheduler_jupyter_plugin.models.models import DescribeJob
 from scheduler_jupyter_plugin.services import airflow
 
-
 unique_id = str(uuid.uuid4().hex)
 job_id = ""
 job_name = ""
@@ -81,6 +80,7 @@ class Client:
         }
 
     async def get_bucket(self, runtime_env, project_id, region_id):
+        self.log.info("Fetching composer environment details")
         composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
         if project_id and region_id:
             api_endpoint = f"{composer_url}v1/projects/{project_id}/locations/{region_id}/environments/{runtime_env}"
@@ -91,6 +91,7 @@ class Client:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
                 gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
+                self.log.info(f"Composer bucket fetched successfully: {gcs_dag_path}")
                 return gcs_dag_path
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -103,6 +104,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Composer environment not found: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting composer bucket: {response.reason}",
@@ -110,6 +114,9 @@ class Client:
                     }
                 )
             else:
+                self.log.exception(
+                    f"Error fetching composer bucket: {response.status} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting composer bucket: {await response.json()}",
@@ -118,6 +125,7 @@ class Client:
                 )
 
     async def check_file_exists(self, bucket_name, file_path, project_id):
+        self.log.info(f"Checking if file gs://{bucket_name}/{file_path} exists")
         try:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
@@ -126,6 +134,9 @@ class Client:
             bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(file_path)
             exists = await asyncio.to_thread(blob.exists)
+            self.log.info(
+                f"File existence check completed: gs://{bucket_name}/{file_path} exists: {exists}"
+            )
             return exists
         except Exception as error:
             self.log.exception(f"Error checking file: {error}")
@@ -139,6 +150,7 @@ class Client:
         template_name=None,
         destination_dir=None,
     ):
+        self.log.info(f"Uploading file to gcs bucket: {gcs_dag_bucket}")
         try:
             credentials = oauth2.Credentials(self._access_token)
             storage_client = storage.Client(credentials=credentials, project=project_id)
@@ -166,6 +178,7 @@ class Client:
             raise IOError(str(error))
 
     async def get_cluster_details(self, cluster_name):
+        self.log.info(f"Fetching details for cluster: {cluster_name}")
         try:
             dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
             api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/regions/{self.region_id}/clusters/{cluster_name}"
@@ -174,8 +187,14 @@ class Client:
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
+                    self.log.info(
+                        f"Cluster details fetched successfully for cluster: {cluster_name}"
+                    )
                     return resp
                 else:
+                    self.log.exception(
+                        f"Error fetching cluster details for cluster {cluster_name}: {response.status} {await response.text()}"
+                    )
                     return {
                         "error": f"Failed to fetch clusters: {response.status} {await response.text()}"
                     }
@@ -185,6 +204,9 @@ class Client:
             return {"error": str(e)}
 
     async def multi_tenant_user_service_account(self, cluster_name):
+        self.log.info(
+            f"Checking if cluster {cluster_name} is multi-tenant and fetching user service account if applicable"
+        )
         cluster_data = await self.get_cluster_details(cluster_name)
         if cluster_data:
             multi_tenant = (
@@ -205,7 +227,13 @@ class Client:
                     .get(user_email, "")
                 )
                 if service_account:
+                    self.log.info(
+                        f"Multi-tenant cluster detected. User {user_email} is mapped to service account {service_account}"
+                    )
                     return service_account
+        self.log.info(
+            f"Cluster {cluster_name} is not multi-tenant or no user-service account mapping found."
+        )
         return ""
 
     async def prepare_dag(self, job, gcs_dag_bucket, dag_file, project_id, region_id):
@@ -361,6 +389,9 @@ class Client:
         return file_path
 
     async def check_package_in_env(self, composer_environment_name, region_id):
+        self.log.info(
+            f"Checking required packages in composer environment: {composer_environment_name}"
+        )
         try:
             packages = ["apache-airflow-providers-papermill", "ipykernel"]
             packages_to_install = []
@@ -417,6 +448,7 @@ class Client:
             json.dump(payload, f, indent=4)
 
     async def execute(self, input_data, project_id, region_id):
+        self.log.info("Starting job creation and execution process")
         try:
             job = DescribeJob(**input_data)
             global job_id
@@ -439,6 +471,9 @@ class Client:
                     project_id,
                 )
             if install_packages and install_packages.get("error"):
+                self.log.exception(
+                    f"Error installing required packages: {install_packages.get('error')}"
+                )
                 raise RuntimeError(install_packages)
 
             if await self.check_file_exists(
@@ -485,10 +520,15 @@ class Client:
                 gcs_dag_bucket, project_id, file_path=file_path, destination_dir="dags"
             )
             if install_packages.get("installing_packages") == "true":
+                self.log.info(
+                    "Required packages installation initiated. The DAG will be available once the installation is complete."
+                )
                 return {"status": 0, "response": "installed python packages"}
             else:
+                self.log.info("DAG uploaded successfully and ready for execution.")
                 return {"status": 0}
         except Exception as e:
+            self.log.exception(f"Error during job execution: {str(e)}")
             return {"error": str(e)}
 
     async def download_dag_output(
@@ -507,6 +547,9 @@ class Client:
         except Exception:
             return {"error": f"Invalid DAG run ID {dag_run_id}"}
 
+        self.log.info(
+            f"Attempting to download output notebook for DAG: {dag_id}, DAG Run: {dag_run_id}"
+        )
         try:
             credentials = oauth2.Credentials(self._access_token)
             storage_client = storage.Client(credentials=credentials)
@@ -532,8 +575,12 @@ class Client:
             return {"error": str(error)}
 
     async def check_required_packages(self, composer_environment_name, region_id):
+        self.log.info(
+            f"Checking required packages in composer environment: {composer_environment_name}"
+        )
         try:
             res = await self.check_package_in_env(composer_environment_name, region_id)
             return res
         except Exception as e:
+            self.log.exception(f"Error checking required packages: {str(e)}")
             return {"error": str(e)}

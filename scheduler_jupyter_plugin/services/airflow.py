@@ -99,6 +99,9 @@ class Client:
             composer_name, project_id, region_id
         )
         airflow_uri = airflow_obj.get("airflow_uri")
+        self.log.info(
+            f"Getting DAG list for environment {composer_name}, project {project_id} and region {region_id}"
+        )
         # try:
         api_endpoint = f"{airflow_uri}/api/v1/dags?tags={TAGS}"
         async with self.client_session.get(
@@ -106,6 +109,7 @@ class Client:
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
+                self.log.info("DAG list fetched successfully")
                 return resp, airflow_obj.get("bucket")
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -115,6 +119,9 @@ class Client:
                     {"AUTHENTICATION_ERROR": response.reason, "status": response.status}
                 )
             else:
+                self.log.exception(
+                    f"Error getting dag list: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting dag list: {response.reason}",
@@ -128,6 +135,9 @@ class Client:
         )
         airflow_uri = airflow_obj.get("airflow_uri")
         airflow_bucket = airflow_obj.get("bucket")
+        self.log.info(
+            f"Deleting DAG {dag_id} for environment {composer_name}, project {project_id} and region {region_id}"
+        )
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}"
             # Delete the DAG via the Airflow API if from_page is None
@@ -153,6 +163,9 @@ class Client:
             composer_name, project_id, region_id
         )
         airflow_uri = airflow_obj.get("airflow_uri")
+        self.log.info(
+            f"Updating status of DAG {dag_id} to {status} for environment {composer_name}, project {project_id} and region {region_id}"
+        )
         api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}"
 
         data = {"is_paused": status.lower() != "true"}
@@ -160,6 +173,7 @@ class Client:
             api_endpoint, json=data, headers=self.create_headers()
         ) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(f"Updated DAG {dag_id} status to {status} successfully")
                 return 0
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -190,6 +204,7 @@ class Client:
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
+                self.log.info(f"Fetched DAG runs for DAG {dag_id} successfully")
                 return resp
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -199,6 +214,9 @@ class Client:
                     {"AUTHENTICATION_ERROR": response.reason, "status": response.status}
                 )
             else:
+                self.log.exception(
+                    f"Error fetching dag run list: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error fetching dag run list: {response.reason}",
@@ -213,6 +231,7 @@ class Client:
             composer_name, project_id, region_id
         )
         airflow_uri = airflow_obj.get("airflow_uri")
+        self.log.info(f"Listing tasks for DAG run {dag_run_id} of DAG {dag_id}")
         api_endpoint = (
             f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances"
         )
@@ -221,6 +240,9 @@ class Client:
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
+                self.log.info(
+                    f"Listed tasks for DAG run {dag_run_id} of DAG {dag_id} successfully"
+                )
                 return resp
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -230,9 +252,12 @@ class Client:
                     {"AUTHENTICATION_ERROR": response.reason, "status": response.status}
                 )
             else:
+                self.log.exception(
+                    f"Error listing dag run tasks: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
-                        "ERROR": f"Error listing dag runs: {response.reason}",
+                        "ERROR": f"Error listing dag run tasks: {response.reason}",
                         "status": response.status,
                     }
                 )
@@ -251,12 +276,18 @@ class Client:
             composer_name, project_id, region_id
         )
         airflow_uri = airflow_obj.get("airflow_uri")
+        self.log.info(
+            f"Listing logs for task {task_id} of DAG run {dag_run_id} for DAG {dag_id}"
+        )
         api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns/{dag_run_id}/taskInstances/{task_id}/logs/{task_try_number}"
         async with self.client_session.get(
             api_endpoint, headers=self.create_headers()
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.text()
+                self.log.info(
+                    f"Listed logs for task {task_id} of DAG run {dag_run_id} for DAG {dag_id} successfully"
+                )
                 return {"content": resp}
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -266,6 +297,9 @@ class Client:
                     {"AUTHENTICATION_ERROR": response.reason, "status": response.status}
                 )
             else:
+                self.log.exception(
+                    f"Error listing dag run task logs: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error listing dag run task logs: {response.reason}",
@@ -274,6 +308,7 @@ class Client:
                 )
 
     async def get_dag_file(self, dag_id, bucket_name):
+        self.log.info(f"Getting DAG file for DAG {dag_id} from bucket {bucket_name}")
         file_path = f"dags/dag_{dag_id}.py"
         encoded_path = urllib.parse.quote(file_path, safe="")
         storage_url = await urls.gcp_service_url(
@@ -294,6 +329,9 @@ class Client:
                     {"AUTHENTICATION_ERROR": response.reason, "status": response.status}
                 )
             else:
+                self.log.exception(
+                    f"Error getting dag file: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting dag file: {response.reason}",
@@ -302,6 +340,9 @@ class Client:
                 )
 
     async def get_bucket(self, runtime_env, project_id, region_id):
+        self.log.info(
+            f"Getting bucket for Composer environment {runtime_env}, project {project_id} and region {region_id}"
+        )
         composer_url = await urls.gcp_service_url(COMPOSER_SERVICE_NAME)
         if project_id and region_id:
             api_endpoint = f"{composer_url}v1/projects/{project_id}/locations/{region_id}/environments/{runtime_env}"
@@ -310,6 +351,9 @@ class Client:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
                 gcs_dag_path = resp.get("storageConfig", {}).get("bucket", "")
+                self.log.info(
+                    f"Bucket for Composer environment {runtime_env} is {gcs_dag_path}"
+                )
                 return gcs_dag_path
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -322,6 +366,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Error getting composer bucket: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting composer bucket: {response.reason}",
@@ -329,6 +376,9 @@ class Client:
                     }
                 )
             else:
+                self.log.exception(
+                    f"Error getting composer bucket: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting composer bucket: {await response.json()}",
@@ -339,6 +389,9 @@ class Client:
     async def get_job_schedule(
         self, dag_id, project_id, region_id, composer_environment
     ):
+        self.log.info(
+            f"Getting job schedule for DAG {dag_id} in Composer environment {composer_environment}, project {project_id} and region {region_id}"
+        )
         try:
             # Step 1: Get the bucket name using the existing service function
             bucket_name = await self.get_bucket(
@@ -460,6 +513,7 @@ class Client:
                     "time_zone": time_zone,
                     "output_formats": output_formats,
                 }
+                self.log.info(f"Job schedule for DAG {dag_id} fetched successfully")
                 return payload
 
             else:
@@ -468,6 +522,9 @@ class Client:
             self.log.exception(f"Error downloading dag file: {str(e)}")
 
     async def get_input_file_name(self, dag_id, bucket_name):
+        self.log.info(
+            f"Getting input file name for DAG {dag_id} from bucket {bucket_name}"
+        )
         try:
             file_response = await self.get_dag_file(dag_id, bucket_name)
             content_str = file_response.decode("utf-8")
@@ -482,6 +539,7 @@ class Client:
                 payload = {
                     "input_filename": input_notebook,
                 }
+                self.log.info(f"Input file name for DAG {dag_id} fetched successfully")
                 return payload
 
             else:
@@ -494,12 +552,18 @@ class Client:
             composer, project_id, region_id
         )
         airflow_uri = airflow_obj.get("airflow_uri")
+        self.log.info(
+            f"Listing import errors for environment {composer}, project {project_id} and region {region_id}"
+        )
         api_endpoint = f"{airflow_uri}/api/v1/importErrors?order_by=-import_error_id"
         async with self.client_session.get(
             api_endpoint, headers=self.create_headers()
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
+                self.log.info(
+                    f"Import errors listed successfully for environment {composer}"
+                )
                 return resp
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -509,6 +573,9 @@ class Client:
                     {"AUTHENTICATION_ERROR": response.reason, "status": response.status}
                 )
             else:
+                self.log.exception(
+                    f"Error listing import errors: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Error listing import errors: {response.reason}",
@@ -521,6 +588,9 @@ class Client:
             composer, project_id, region_id
         )
         airflow_uri = airflow_obj.get("airflow_uri")
+        self.log.info(
+            f"Triggering DAG {dag_id} for environment {composer}, project {project_id} and region {region_id}"
+        )
         try:
             api_endpoint = f"{airflow_uri}/api/v1/dags/{dag_id}/dagRuns"
             body = {"conf": {}}
@@ -529,6 +599,9 @@ class Client:
             ) as response:
                 if response.status == HTTP_STATUS_OK:
                     resp = await response.json()
+                    self.log.info(
+                        f"DAG {dag_id} triggered successfully for environment {composer}"
+                    )
                     return resp
                 elif response.status == HTTP_STATUS_UNAUTHORIZED:
                     self.log.exception(
@@ -541,6 +614,9 @@ class Client:
                         }
                     )
                 else:
+                    self.log.exception(
+                        f"Error triggering dag: {response.reason} {await response.text()}"
+                    )
                     raise RuntimeError(
                         {
                             "ERROR": f"Error triggering dag: {response.reason}",

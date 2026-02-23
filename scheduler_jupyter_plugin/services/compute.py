@@ -51,6 +51,7 @@ class Client:
         }
 
     async def list_region(self, project_id):
+        self.log.info(f"Listing compute regions for project: {project_id}")
         try:
             regions = []
             credentials = oauth2.Credentials(token=self._access_token)
@@ -61,6 +62,7 @@ class Client:
             response = regions_client.list(request=request)
             for item in response:
                 regions.append(item.name)
+            self.log.info("Successfully fetched regions")
             return regions
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
@@ -73,6 +75,7 @@ class Client:
             return {"Error fetching regions": str(e)}
 
     async def get_network(self):
+        self.log.info("Listing compute networks list")
         try:
             networks = []
             credentials = oauth2.Credentials(token=self._access_token)
@@ -89,6 +92,7 @@ class Client:
                         preserving_proto_field_name=False,
                     )
                 )
+            self.log.info("Successfully fetched networks")
             return networks
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
@@ -98,6 +102,9 @@ class Client:
             return {"error": str(e)}
 
     async def get_subnetwork(self, region_id, network_id):
+        self.log.info(
+            f"Listing compute sub networks for region: {region_id} and network: {network_id}"
+        )
         try:
             sub_networks = []
             credentials = oauth2.Credentials(token=self._access_token)
@@ -116,6 +123,7 @@ class Client:
                             preserving_proto_field_name=False,
                         )
                     )
+            self.log.info("Successfully fetched sub networks")
             return sub_networks
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
@@ -125,6 +133,9 @@ class Client:
             return {"error": str(e)}
 
     async def get_shared_network(self, project_id, region_id):
+        self.log.info(
+            f"Listing shared compute sub networks for region: {region_id} and project: {project_id}"
+        )
         try:
             shared_networks = []
             credentials = oauth2.Credentials(token=self._access_token)
@@ -142,6 +153,7 @@ class Client:
                             preserving_proto_field_name=False,
                         )
                     )
+            self.log.info("Successfully fetched shared networks")
             return shared_networks
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
@@ -151,6 +163,7 @@ class Client:
             return {"Error fetching network shared from host": str(e)}
 
     async def get_xpn_host(self):
+        self.log.info("Getting xpn host project details")
         res = {}
         api_endpoint = f"https://compute.googleapis.com/compute/v1/projects/{self.project_id}/getXpnHost"
         headers = self.create_headers()
@@ -158,11 +171,14 @@ class Client:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
                 if not resp:
+                    self.log.info("XPN host not found")
                     return res
                 else:
                     res["name"] = resp.get("name")
+                    self.log.info("Successfully fetched xpn host project details")
                     return res
             elif response.status == HTTP_STATUS_NO_CONTENT:
+                self.log.info("No xpn host project found")
                 return res
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -175,6 +191,7 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(f"XPN host not found: {response.reason}")
                 raise RuntimeError(
                     {
                         "ERROR": f"Error getting xpn host: {response.reason}",

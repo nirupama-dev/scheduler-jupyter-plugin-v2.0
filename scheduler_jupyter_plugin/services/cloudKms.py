@@ -39,6 +39,9 @@ class Client:
         }
 
     async def list_key_rings(self, project_id, region_id):
+        self.log.info(
+            f"Listing key rings for project: {project_id} and region: {region_id}"
+        )
         try:
             key_rings = []
             cloud_kms_client = kms_v1.KeyManagementServiceAsyncClient()
@@ -49,6 +52,7 @@ class Client:
             async for item in response:
                 key_ring = item.name.rsplit("/", 1)[-1]
                 key_rings.append(key_ring)
+            self.log.info(f"Fetched key rings: {key_rings}")
             return key_rings
 
         except Exception as e:
@@ -56,6 +60,9 @@ class Client:
             return {"Error fetching key rings": str(e)}
 
     async def list_crypto_keys(self, project_id, region_id, key_ring):
+        self.log.info(
+            f"Listing crypto keys for project: {project_id}, region: {region_id}, and key ring: {key_ring}"
+        )
         try:
             crypto_keys = []
             cloud_kms_client = kms_v1.KeyManagementServiceAsyncClient()
@@ -66,6 +73,7 @@ class Client:
             async for item in response:
                 crypto_key = item.name.rsplit("/", 1)[-1]
                 crypto_keys.append(crypto_key)
+            self.log.info(f"Fetched crypto keys: {crypto_keys}")
             return crypto_keys
 
         except Exception as e:
