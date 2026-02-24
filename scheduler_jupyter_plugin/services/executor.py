@@ -404,7 +404,7 @@ class Client:
                 f"can not create schedule, error in installing the packages, error: {install_error.stderr}"
             )
             raise RuntimeError(
-                f"can not create schedule, error in installing the packages, error: {install_error.stderr}"
+                f"can not create schedule, error in installing the packages, error: {install_error}"
             )
         except Exception as e:
             self.log.exception(f"error installing {package}: {str(e)}")
