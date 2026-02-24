@@ -435,7 +435,6 @@ export const CreateNotebookSchedule = (
           composerData.executionMode === 'local'
         ) {
           toast(ToastWithLoader, {
-            position: 'bottom-right',
             autoClose: false,
             closeButton: true,
             data: {
