@@ -394,17 +394,27 @@ class Client:
             installing_packages = "false"
             if local_kernel:
                 for package in packages_to_install:
+                    gcloud_path = shutil.which("gcloud")
+                    print(f"*********Using gcloud from: {gcloud_path}")
                     self.log.info(f"{package} is not installed. Installing...")
                     installing_packages = "true"
                     sub_cmd = f"composer environments update {composer_environment_name} --location {region_id} --project {project_id} --update-pypi-package {package}"
                     await async_run_gcloud_subcommand(sub_cmd)
             return {"installing_packages": str(installing_packages)}
         except subprocess.CalledProcessError as install_error:
+            error_details = ""
+            if install_error.stderr:
+                # Decode bytes to string if necessary
+                error_details = install_error.stderr.decode('utf-8') if isinstance(install_error.stderr, bytes) else str(install_error.stderr)
+            elif install_error.output:
+                error_details = install_error.output.decode('utf-8') if isinstance(install_error.output, bytes) else str(install_error.output)
+            else:
+                error_details = str(install_error)
             self.log.exception(
-                f"can not create schedule, error in installing the packages, error: {install_error.stderr}"
+                f"can not create schedule, error in installing the packages, error: {error_details}"
             )
             raise RuntimeError(
-                f"can not create schedule, error in installing the packages, error: {install_error}"
+                f"can not create schedule, error in installing the packages, error: {error_details}"
             )
         except Exception as e:
             self.log.exception(f"error installing {package}: {str(e)}")
