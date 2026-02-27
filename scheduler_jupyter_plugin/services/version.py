@@ -35,11 +35,15 @@ class Client:
         self.client_session = client_session
 
     async def get_latest_version(self, package_name):
+        self.log.info(f"Fetching latest version for package: {package_name}")
         try:
             api_endpoint = f"https://pypi.org/pypi/{package_name}/json"
             async with self.client_session.get(api_endpoint, timeout=3) as response:
                 response.raise_for_status()
                 data = await response.json()
+                self.log.info(
+                    f"Latest version for package {package_name} is {data['info']['version']}"
+                )
                 return data["info"]["version"]
 
         except Exception as e:
@@ -47,6 +51,7 @@ class Client:
             return {"error": str(e)}
 
     async def upgrade_package(self, package_name):
+        self.log.info(f"Upgrading package: {package_name}")
         try:
             print("installing...................")
             await async_run_system_command(
@@ -57,5 +62,7 @@ class Client:
             raise e
 
     async def update_plugin(self, package_name):
+        self.log.info(f"Updating plugin with package: {package_name}")
         await self.upgrade_package(package_name)
+        self.log.info(f"Successfully updated package: {package_name}")
         return {"status": "ok"}

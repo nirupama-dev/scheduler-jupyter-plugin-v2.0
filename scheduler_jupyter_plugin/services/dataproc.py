@@ -44,6 +44,7 @@ class Client:
         }
 
     async def list_clusters(self, page_size, page_token):
+        self.log.info("Listing dataproc clusters")
         dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
         api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/regions/{self.region_id}/clusters?pageSize={page_size}&pageToken={page_token}"
         async with self.client_session.get(
@@ -51,6 +52,7 @@ class Client:
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
+                self.log.info("Successfully fetched clusters")
                 return resp
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -63,6 +65,7 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(f"Clusters not found: {response.reason}")
                 raise RuntimeError(
                     {
                         "ERROR": f"Failed to fetch clusters: {response.reason}",
@@ -70,6 +73,9 @@ class Client:
                     }
                 )
             else:
+                self.log.exception(
+                    f"Failed to fetch clusters: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Failed to fetch clusters: {await response.json()}",
@@ -78,6 +84,7 @@ class Client:
                 )
 
     async def list_runtime(self, page_size, page_token):
+        self.log.info("Listing dataproc runtimes")
         dataproc_url = await urls.gcp_service_url(DATAPROC_SERVICE_NAME)
         api_endpoint = f"{dataproc_url}/v1/projects/{self.project_id}/locations/{self.region_id}/sessionTemplates?pageSize={page_size}&pageToken={page_token}"
         async with self.client_session.get(
@@ -85,6 +92,7 @@ class Client:
         ) as response:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
+                self.log.info("Successfully fetched runtimes")
                 return resp
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -97,6 +105,7 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(f"Runtimes not found: {response.reason}")
                 raise RuntimeError(
                     {
                         "ERROR": f"Failed to fetch runtimes: {response.reason}",
@@ -104,6 +113,9 @@ class Client:
                     }
                 )
             else:
+                self.log.exception(
+                    f"Failed to fetch runtimes: {response.reason} {await response.text()}"
+                )
                 raise RuntimeError(
                     {
                         "ERROR": f"Failed to fetch runtimes: {await response.json()}",

@@ -35,6 +35,7 @@ class Client:
         self.region_id = credentials["region_id"]
 
     async def list_service_account(self):
+        self.log.info("Listing service accounts")
         try:
             credentials = oauth2.Credentials(self._access_token)
             iam_client = iam_admin_v1.IAMAsyncClient(credentials=credentials)
@@ -46,6 +47,7 @@ class Client:
             async for account in accounts:
                 account_list.append(json.loads(proto.Message.to_json(account)))
 
+            self.log.info("Successfully retrieved service accounts")
             return account_list
         except Unauthenticated as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")

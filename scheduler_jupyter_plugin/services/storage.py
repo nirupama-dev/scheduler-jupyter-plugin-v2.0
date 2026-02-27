@@ -36,6 +36,9 @@ class Client:
         self.region_id = credentials["region_id"]
 
     async def download_output(self, bucket_name, file_name, job_run_id):
+        self.log.info(
+            f"Downloading output notebook file from bucket: {bucket_name}, file: {file_name} for job run id: {job_run_id}"
+        )
         try:
             credentials = oauth2.Credentials(self._access_token)
             storage_client = storage.Client(
@@ -66,6 +69,7 @@ class Client:
             return {"error": str(error)}
 
     async def list_bucket(self):
+        self.log.info("Listing cloud storage buckets")
         try:
             cloud_storage_buckets = []
             credentials = oauth2.Credentials(self._access_token)
@@ -75,6 +79,7 @@ class Client:
             buckets = storage_client.list_buckets()
             for bucket in buckets:
                 cloud_storage_buckets.append(bucket.name)
+            self.log.info("Successfully retrieved cloud storage buckets")
             return cloud_storage_buckets
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")
@@ -84,6 +89,9 @@ class Client:
             return {"error": str(e)}
 
     async def output_file_exists(self, bucket_name, file_name, job_run_id):
+        self.log.info(
+            f"Checking if output notebook file exists in bucket: {bucket_name}, file: {file_name} for job run id: {job_run_id}"
+        )
         try:
             credentials = oauth2.Credentials(self._access_token)
             storage_client = storage.Client(
@@ -93,8 +101,14 @@ class Client:
             bucket = storage_client.bucket(bucket_name)
             blob = bucket.blob(blob_name)
             if blob.exists():
+                self.log.info(
+                    f"Output notebook file exists in bucket: {bucket_name}, file: {file_name} for job run id: {job_run_id}"
+                )
                 return "true"
             else:
+                self.log.info(
+                    f"Output notebook file does not exist in bucket: {bucket_name}, file: {file_name} for job run id: {job_run_id}"
+                )
                 return "false"
         except RefreshError as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")

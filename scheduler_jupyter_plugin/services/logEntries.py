@@ -32,6 +32,7 @@ class Client:
         self.region_id = credentials["region_id"]
 
     async def list_log_entries(self, filter_query=None):
+        self.log.info("Fetching log entries with filter")
         try:
             logs = []
             credentials = oauth2.Credentials(token=self._access_token)
@@ -62,6 +63,7 @@ class Client:
                 if log_dict.get("httpRequest"):
                     formatted_res["summary"] = log_dict["httpRequest"]["statusMessage"]
                 logs.append(formatted_res)
+            self.log.info("Successfully retrieved log entries")
             return logs
         except Unauthenticated as e:
             self.log.exception(f"AUTHENTICATION_ERROR: {str(e)}")

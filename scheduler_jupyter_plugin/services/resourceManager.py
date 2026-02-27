@@ -33,6 +33,7 @@ class Client:
         self.region_id = credentials["region_id"]
 
     async def list_gcp_projects(self):
+        self.log.info("Listing GCP projects")
         try:
             credentials = oauth2.Credentials(self._access_token)
             proj_client = resourcemanager_v3.ProjectsClient(credentials=credentials)
@@ -46,6 +47,7 @@ class Client:
                         "name": project.display_name,
                     }
                 )
+            self.log.info("Successfully retrieved GCP projects")
             return projects
 
         except RefreshError as e:

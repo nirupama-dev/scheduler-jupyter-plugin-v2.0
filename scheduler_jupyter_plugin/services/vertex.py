@@ -56,6 +56,7 @@ class Client:
         }
 
     async def create_gcs_bucket(self, bucket_name):
+        self.log.info(f"Creating GCS bucket: {bucket_name}")
         try:
             if not bucket_name:
                 raise ValueError("Bucket name cannot be empty")
@@ -64,11 +65,13 @@ class Client:
                 credentials=credentials, project=self.project_id
             )
             storage_client.create_bucket(bucket_name)
+            self.log.info(f"GCS bucket '{bucket_name}' created successfully")
         except Exception as error:
             self.log.exception(f"Error in creating Bucket: {error}")
             raise IOError(f"Error in creating Bucket: {error}")
 
     async def upload_to_gcs(self, bucket_name, file_path, job_name):
+        self.log.info(f"Uploading file {file_path} to GCS bucket {bucket_name}")
         input_notebook = file_path.split("/")[-1]
         credentials = oauth2.Credentials(self._access_token)
         storage_client = storage.Client(
@@ -98,8 +101,10 @@ class Client:
         json_blob_name = f"{job_name}/{json_file_name}"
         json_blob = bucket.blob(json_blob_name)
         json_blob.upload_from_filename(json_file_name)
+        self.log.info(f"Metadata file {json_file_name} uploaded to gcs successfully")
 
     async def create_schedule(self, job, region_id):
+        self.log.info(f"Creating schedule for job: {job.get('displayName')}")
         api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/schedules"
         headers = self.create_headers()
         payload = job
@@ -132,6 +137,9 @@ class Client:
     async def create_job_schedule(self, data, region_id):
         job = data["vertexScheduleData"]
         local_input_file_path = data["localInputFilePath"]
+        self.log.info(
+            f"Creating job schedule for job: {job.get('displayName')} with input file: {local_input_file_path}"
+        )
         try:
             storage_bucket = job["createNotebookExecutionJobRequest"][
                 "notebookExecutionJob"
@@ -141,20 +149,32 @@ class Client:
                 storage_bucket, local_input_file_path, job["displayName"]
             )
             res = await self.create_schedule(job, region_id)
+            self.log.info(
+                f"Schedule created successfully for job: {job.get('displayName')}"
+            )
             return res
         except Exception as e:
             print("error:", str(e))
+            self.log.exception(
+                f"Error creating job schedule for job: {job.get('displayName')}"
+            )
             return {"error": str(e)}
 
     async def create_new_bucket(self, input_data):
+        self.log.info(f"Creating new GCS bucket with input data: {input_data}")
         try:
             data = DescribeBucketName(**input_data)
             res = await self.create_gcs_bucket(data.bucket_name)
+            self.log.info(f"New GCS bucket created: {data.bucket_name}")
             return res
         except Exception as e:
+            self.log.exception(
+                f"Error creating new GCS bucket with input data: {input_data}"
+            )
             return {"error": str(e)}
 
     async def list_uiconfig(self, region_id):
+        self.log.info(f"Listing vertex ui config for region: {region_id}")
         uiconfig = []
         api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/ui/projects/{self.project_id}/locations/{region_id}/uiConfig"
 
@@ -163,6 +183,7 @@ class Client:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
                 if not resp:
+                    self.log.info(f"No vertex ui config found for region: {region_id}")
                     return uiconfig
                 else:
                     if (
@@ -182,6 +203,9 @@ class Client:
                                 ),
                             }
                             uiconfig.append(formatted_config)
+                    self.log.info(
+                        f"Successfully retrieved vertex ui config for region: {region_id}"
+                    )
                     return uiconfig
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -195,8 +219,12 @@ class Client:
                 )
             elif response.status == HTTP_STATUS_FORBIDDEN:
                 resp = await response.json()
+                self.log.exception(f"FORBIDDEN_ERROR: {response.reason} {resp}")
                 return resp
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Vertex UI config not found for region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -212,6 +240,7 @@ class Client:
         return get_description(cron)
 
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
+        self.log.info(f"Listing schedules for region: {region_id}")
         result = {}
 
         if next_page_token:
@@ -225,6 +254,7 @@ class Client:
             if response.status == HTTP_STATUS_OK:
                 resp = await response.json()
                 if not resp:
+                    self.log.info(f"No schedules found for region: {region_id}")
                     return result
                 else:
                     schedule_list = []
@@ -279,6 +309,9 @@ class Client:
                         schedule_list.append(formatted_schedule)
                     resp["schedules"] = schedule_list
                     result.update(resp)
+                    self.log.info(
+                        f"Successfully retrieved schedules for region: {region_id}"
+                    )
                     return result
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -292,8 +325,10 @@ class Client:
                 )
             elif response.status == HTTP_STATUS_FORBIDDEN:
                 resp = await response.json()
+                self.log.exception(f"FORBIDDEN_ERROR: {response.reason} {resp}")
                 return resp
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(f"No schedules found for region: {region_id}")
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -306,6 +341,9 @@ class Client:
                 )
 
     async def pause_schedule(self, region_id, schedule_id):
+        self.log.info(
+            f"Pausing schedule with id: {schedule_id} for region: {region_id}"
+        )
         api_endpoint = (
             f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:pause"
         )
@@ -313,8 +351,14 @@ class Client:
         headers = self.create_headers()
         async with self.client_session.post(api_endpoint, headers=headers) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} paused successfully for region: {region_id}"
+                )
                 return await response.json()
             elif response.status == HTTP_STATUS_NO_CONTENT:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} paused successfully for region: {region_id}"
+                )
                 return {"message": "Schedule paused successfully"}
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -327,6 +371,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Schedule with id: {schedule_id} not found for region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -339,6 +386,9 @@ class Client:
                 )
 
     async def resume_schedule(self, region_id, schedule_id):
+        self.log.info(
+            f"Resuming schedule with id: {schedule_id} for region: {region_id}"
+        )
         api_endpoint = (
             f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:resume"
         )
@@ -346,8 +396,14 @@ class Client:
         headers = self.create_headers()
         async with self.client_session.post(api_endpoint, headers=headers) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} resumed successfully for region: {region_id}"
+                )
                 return await response.json()
             elif response.status == HTTP_STATUS_NO_CONTENT:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} resumed successfully for region: {region_id}"
+                )
                 return {"message": "Schedule resumed successfully"}
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -360,6 +416,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Schedule with id: {schedule_id} not found for region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -372,6 +431,9 @@ class Client:
                 )
 
     async def delete_schedule(self, region_id, schedule_id):
+        self.log.info(
+            f"Deleting schedule with id: {schedule_id} for region: {region_id}"
+        )
         api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
 
         headers = self.create_headers()
@@ -379,8 +441,14 @@ class Client:
             api_endpoint, headers=headers
         ) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} deleted successfully for region: {region_id}"
+                )
                 return await response.json()
             elif response.status == HTTP_STATUS_NO_CONTENT:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} deleted successfully for region: {region_id}"
+                )
                 return {"message": "Schedule deleted successfully"}
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -393,6 +461,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Schedule with id: {schedule_id} not found for region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -405,11 +476,17 @@ class Client:
                 )
 
     async def get_schedule(self, region_id, schedule_id):
+        self.log.info(
+            f"Getting schedule with id: {schedule_id} for region: {region_id}"
+        )
         api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
 
         headers = self.create_headers()
         async with self.client_session.get(api_endpoint, headers=headers) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} retrieved successfully for region: {region_id}"
+                )
                 return await response.json()
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -422,6 +499,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Schedule with id: {schedule_id} not found for region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -435,6 +515,9 @@ class Client:
 
     async def trigger_schedule(self, region_id, schedule_id):
         data = await self.get_schedule(region_id, schedule_id)
+        self.log.info(
+            f"Triggering schedule with id: {schedule_id} for region: {region_id}"
+        )
         api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs"
 
         headers = self.create_headers()
@@ -446,6 +529,9 @@ class Client:
             api_endpoint, headers=headers, json=payload
         ) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} triggered successfully for region: {region_id}"
+                )
                 return await response.json()
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -458,6 +544,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Schedule with id: {schedule_id} not found for region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -470,6 +559,9 @@ class Client:
                 )
 
     async def update_schedule(self, region_id, schedule_id, input_data):
+        self.log.info(
+            f"Updating schedule with id: {schedule_id} for region: {region_id}"
+        )
         keys = input_data.keys()
         keys_to_filter = ["displayName", "maxConcurrentRunCount"]
         filtered_keys = [
@@ -483,6 +575,9 @@ class Client:
             api_endpoint, headers=headers, json=input_data
         ) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(
+                    f"Schedule with id: {schedule_id} updated successfully for region: {region_id}"
+                )
                 return await response.json()
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -495,6 +590,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"Schedule with id: {schedule_id} not found for region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
@@ -509,6 +607,9 @@ class Client:
     async def list_notebook_execution_jobs(
         self, region_id, schedule_id, order_by, page_size=None, start_date=None
     ):
+        self.log.info(
+            f"Listing notebook execution jobs for schedule id: {schedule_id} in region: {region_id}"
+        )
         execution_jobs = []
         if page_size:
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&pageSize={page_size}&orderBy={order_by}"
@@ -518,6 +619,9 @@ class Client:
         headers = self.create_headers()
         async with self.client_session.get(api_endpoint, headers=headers) as response:
             if response.status == HTTP_STATUS_OK:
+                self.log.info(
+                    f"Successfully retrieved notebook execution jobs for schedule id: {schedule_id} in region: {region_id}"
+                )
                 resp = await response.json()
                 if not resp:
                     return execution_jobs
@@ -534,6 +638,9 @@ class Client:
                                 execution_jobs.append(job)
                         else:
                             execution_jobs.append(job)
+                    self.log.info(
+                        f"Notebook execution jobs retrieved for schedule id: {schedule_id} in region: {region_id}"
+                    )
                     return execution_jobs
             elif response.status == HTTP_STATUS_UNAUTHORIZED:
                 self.log.exception(
@@ -546,6 +653,9 @@ class Client:
                     }
                 )
             elif response.status == HTTP_STATUS_NOT_FOUND:
+                self.log.exception(
+                    f"No notebook execution jobs found for schedule id: {schedule_id} in region: {region_id}"
+                )
                 raise RuntimeError(
                     {"ERROR": response.reason, "status": response.status}
                 )
