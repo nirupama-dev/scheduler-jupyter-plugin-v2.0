@@ -50,11 +50,15 @@ import {
   DEFAULT_DISK_MIN_SIZE,
   DEFAULT_DISK_SIZE,
   DEFAULT_ENCRYPTION_SELECTED,
+  DEFAULT_IMAGE_ENVIRONMENT,
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_SERVICE_ACCOUNT,
   DISK_TYPE_VALUE,
   everyMinuteCron,
+  IMAGE_ENVIRONMENT_CONTAINER,
+  IMAGE_ENVIRONMENT_DEFAULT,
+  IMAGE_ENVIRONMENT_VM_IMAGE,
   internalScheduleMode,
   KERNEL_VALUE,
   KEY_MESSAGE,
@@ -62,6 +66,7 @@ import {
   scheduleValueExpression,
   SECURITY_KEY,
   SHARED_NETWORK_DOC_URL,
+  SHIELDED_VM_DOC_URL,
   SUBNETWORK_VERTEX_ERROR,
   VERTEX_REGIONS,
   VERTEX_SCHEDULE
@@ -241,6 +246,21 @@ const CreateVertexScheduler = ({
   const [cryptoKeyLoading, setCryptoKeyLoading] = useState<boolean>(false);
   const [keyRingListLoading, setKeyRingListLoading] = useState<boolean>(false);
 
+  // Workbench runtime image environment selection and values (Default/VM/Container).
+  const [imageEnvironmentSelected, setImageEnvironmentSelected] =
+    useState<string>(DEFAULT_IMAGE_ENVIRONMENT);
+  const [vmImageProject, setVmImageProject] = useState<string>('');
+  const [vmImageFamily, setVmImageFamily] = useState<string>('');
+  const [customContainerRepository, setCustomContainerRepository] =
+    useState<string>('');
+  const [customContainerTag, setCustomContainerTag] = useState<string>('');
+
+  // Shielded VM options for the execution VM (all disabled by default).
+  const [enableSecureBoot, setEnableSecureBoot] = useState<boolean>(false);
+  const [enableVtpm, setEnableVtpm] = useState<boolean>(false);
+  const [enableIntegrityMonitoring, setEnableIntegrityMonitoring] =
+    useState<boolean>(false);
+
   /**
    * Changing the region value and empyting the value of machineType, accelratorType and accelratorCount
    * @param {string} value selected region
@@ -291,6 +311,26 @@ const CreateVertexScheduler = ({
   const handleDefaultDiskSize = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.value === '') {
       setDiskSize('100');
+    }
+  };
+
+  /**
+   * Handles runtime image environment selection and clears fields that are not
+   * relevant to the newly selected option.
+   * @param {React.ChangeEvent<HTMLInputElement>} event - The change event triggered by the radio button field.
+   */
+  const handleImageEnvironmentChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const newValue = event.target.value;
+    setImageEnvironmentSelected(newValue);
+    if (newValue !== IMAGE_ENVIRONMENT_VM_IMAGE) {
+      setVmImageProject('');
+      setVmImageFamily('');
+    }
+    if (newValue !== IMAGE_ENVIRONMENT_CONTAINER) {
+      setCustomContainerRepository('');
+      setCustomContainerTag('');
     }
   };
 
@@ -843,7 +883,11 @@ const CreateVertexScheduler = ({
           cryptoKeySelected === '' ||
           cryptoKeyLoading) &&
         manualKeySelected === '') ||
-      !manualValidation
+      !manualValidation ||
+      (imageEnvironmentSelected === IMAGE_ENVIRONMENT_VM_IMAGE &&
+        (vmImageProject.trim() === '' || vmImageFamily.trim() === '')) ||
+      (imageEnvironmentSelected === IMAGE_ENVIRONMENT_CONTAINER &&
+        customContainerRepository.trim() === '')
     );
   };
 
@@ -914,6 +958,22 @@ const CreateVertexScheduler = ({
           ? `projects/${projectId}/locations/${region}/keyRings/${keyRingSelected}/cryptoKeys/${cryptoKeySelected}`
           : manualKeySelected;
     }
+
+    // Workbench runtime image environment (VM image family or custom container).
+    if (imageEnvironmentSelected === IMAGE_ENVIRONMENT_VM_IMAGE) {
+      payload.vm_image_project = vmImageProject.trim();
+      payload.vm_image_family = vmImageFamily.trim();
+    } else if (imageEnvironmentSelected === IMAGE_ENVIRONMENT_CONTAINER) {
+      payload.custom_container_repository = customContainerRepository.trim();
+      if (customContainerTag.trim()) {
+        payload.custom_container_tag = customContainerTag.trim();
+      }
+    }
+
+    // Shielded VM options (only enabled ones are acted on by the backend).
+    payload.enable_secure_boot = enableSecureBoot;
+    payload.enable_vtpm = enableVtpm;
+    payload.enable_integrity_monitoring = enableIntegrityMonitoring;
 
     if (editMode) {
       await VertexServices.editVertexJobSchedulerService(
@@ -1074,6 +1134,30 @@ const CreateVertexScheduler = ({
       setDiskSize(vertexSchedulerDetails.disk_size);
       setGcsPath(vertexSchedulerDetails.gcs_notebook_source ?? '');
       setEnablePublicIp(vertexSchedulerDetails.enable_public_ip ?? true);
+
+      // Load Workbench runtime image environment.
+      if (vertexSchedulerDetails.vm_image_project) {
+        setImageEnvironmentSelected(IMAGE_ENVIRONMENT_VM_IMAGE);
+        setVmImageProject(vertexSchedulerDetails.vm_image_project);
+        setVmImageFamily(vertexSchedulerDetails.vm_image_family ?? '');
+      } else if (vertexSchedulerDetails.custom_container_repository) {
+        setImageEnvironmentSelected(IMAGE_ENVIRONMENT_CONTAINER);
+        setCustomContainerRepository(
+          vertexSchedulerDetails.custom_container_repository
+        );
+        setCustomContainerTag(
+          vertexSchedulerDetails.custom_container_tag ?? ''
+        );
+      } else {
+        setImageEnvironmentSelected(IMAGE_ENVIRONMENT_DEFAULT);
+      }
+
+      // Load Shielded VM options.
+      setEnableSecureBoot(vertexSchedulerDetails.enable_secure_boot ?? false);
+      setEnableVtpm(vertexSchedulerDetails.enable_vtpm ?? false);
+      setEnableIntegrityMonitoring(
+        vertexSchedulerDetails.enable_integrity_monitoring ?? false
+      );
 
       if ('kms_key_name' in vertexSchedulerDetails) {
         if (vertexSchedulerDetails.kms_key_name) {
@@ -1461,6 +1545,187 @@ const CreateVertexScheduler = ({
                 />
               )}
             </div>
+          </div>
+
+          <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+            Runtime image
+          </div>
+
+          <p>
+            Select the image environment for the Workbench runtime. Defaults to
+            the managed Workbench image if left unset.
+          </p>
+
+          <div className="create-scheduler-form-element panel-margin">
+            <FormControl>
+              <RadioGroup
+                aria-labelledby="image-environment-radio-buttons-group"
+                name="image-environment-radio-buttons-group"
+                value={imageEnvironmentSelected}
+                onChange={handleImageEnvironmentChange}
+                data-testid={`${imageEnvironmentSelected}-image-selected`}
+              >
+                <FormControlLabel
+                  value={IMAGE_ENVIRONMENT_DEFAULT}
+                  className="create-scheduler-label-style"
+                  control={<Radio size="small" />}
+                  label={
+                    <Typography sx={{ fontSize: 13 }}>Default image</Typography>
+                  }
+                />
+                <FormControlLabel
+                  value={IMAGE_ENVIRONMENT_VM_IMAGE}
+                  className="create-scheduler-label-style"
+                  control={<Radio size="small" />}
+                  label={
+                    <Typography sx={{ fontSize: 13 }}>
+                      Compute Engine VM image
+                    </Typography>
+                  }
+                />
+                <FormControlLabel
+                  value={IMAGE_ENVIRONMENT_CONTAINER}
+                  className="create-scheduler-label-style"
+                  control={<Radio size="small" />}
+                  label={
+                    <Typography sx={{ fontSize: 13 }}>
+                      Custom container image
+                    </Typography>
+                  }
+                />
+              </RadioGroup>
+            </FormControl>
+          </div>
+
+          {imageEnvironmentSelected === IMAGE_ENVIRONMENT_VM_IMAGE && (
+            <>
+              <div className="create-scheduler-form-element">
+                <Input
+                  className="create-scheduler-style"
+                  value={vmImageProject}
+                  onChange={e => setVmImageProject(e.target.value)}
+                  type="text"
+                  placeholder=""
+                  Label="Image project*"
+                />
+                {vmImageProject.trim() === '' && (
+                  <ErrorMessage
+                    message="Image project is required"
+                    showIcon={false}
+                  />
+                )}
+                <span className="tab-description tab-text-sub-cl">
+                  For example: cloud-notebooks-managed
+                </span>
+              </div>
+              <div className="create-scheduler-form-element">
+                <Input
+                  className="create-scheduler-style"
+                  value={vmImageFamily}
+                  onChange={e => setVmImageFamily(e.target.value)}
+                  type="text"
+                  placeholder=""
+                  Label="Image family*"
+                />
+                {vmImageFamily.trim() === '' && (
+                  <ErrorMessage
+                    message="Image family is required"
+                    showIcon={false}
+                  />
+                )}
+                <span className="tab-description tab-text-sub-cl">
+                  For example: workbench-instances-2603 (newest image in the
+                  family is used)
+                </span>
+              </div>
+            </>
+          )}
+
+          {imageEnvironmentSelected === IMAGE_ENVIRONMENT_CONTAINER && (
+            <>
+              <div className="create-scheduler-form-element">
+                <Input
+                  className="create-scheduler-style"
+                  value={customContainerRepository}
+                  onChange={e => setCustomContainerRepository(e.target.value)}
+                  type="text"
+                  placeholder=""
+                  Label="Container image repository*"
+                />
+                {customContainerRepository.trim() === '' && (
+                  <ErrorMessage
+                    message="Container image repository is required"
+                    showIcon={false}
+                  />
+                )}
+                <span className="tab-description tab-text-sub-cl">
+                  For example:
+                  us-docker.pkg.dev/workbench-images/gcr.io/workbench-container-2606
+                </span>
+              </div>
+              <div className="create-scheduler-form-element">
+                <Input
+                  className="create-scheduler-style"
+                  value={customContainerTag}
+                  onChange={e => setCustomContainerTag(e.target.value)}
+                  type="text"
+                  placeholder="latest"
+                  Label="Container image tag"
+                />
+                <span className="tab-description tab-text-sub-cl">
+                  If unset, defaults to "latest".
+                </span>
+              </div>
+            </>
+          )}
+
+          <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+            Shielded VM options
+          </div>
+
+          <p>Configure Shielded VM security options for the execution VM.</p>
+
+          <div className="create-scheduler-form-element">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={enableSecureBoot}
+                  onChange={e => setEnableSecureBoot(e.target.checked)}
+                />
+              }
+              label={
+                <Typography variant="body2">Enable Secure Boot</Typography>
+              }
+            />
+          </div>
+          <div className="create-scheduler-form-element">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={enableVtpm}
+                  onChange={e => setEnableVtpm(e.target.checked)}
+                />
+              }
+              label={<Typography variant="body2">Enable vTPM</Typography>}
+            />
+          </div>
+          <div className="create-scheduler-form-element">
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={enableIntegrityMonitoring}
+                  onChange={e => setEnableIntegrityMonitoring(e.target.checked)}
+                />
+              }
+              label={
+                <Typography variant="body2">
+                  Enable integrity monitoring
+                </Typography>
+              }
+            />
+          </div>
+          <div className="learn-more-a-tag learn-more-url">
+            <LearnMore path={SHIELDED_VM_DOC_URL} />
           </div>
 
           <div className="create-scheduler-form-element panel-margin block-seperation">

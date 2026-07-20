@@ -86,6 +86,15 @@ class DescribeVertexJob(BaseModel):
     disk_size: str = None
     kms_key_name: Optional[str] = None
     enable_public_ip: Optional[bool] = True
+    # Workbench runtime image environment (VM image family or custom container).
+    vm_image_project: Optional[str] = None
+    vm_image_family: Optional[str] = None
+    custom_container_repository: Optional[str] = None
+    custom_container_tag: Optional[str] = None
+    # Shielded VM options for the execution VM.
+    enable_secure_boot: Optional[bool] = False
+    enable_vtpm: Optional[bool] = False
+    enable_integrity_monitoring: Optional[bool] = False
 
     @classmethod
     def from_dict(cls, data):
@@ -123,6 +132,15 @@ class DescribeUpdateVertexJob(BaseModel):
     disk_size: Optional[str] = None
     kms_key_name: Optional[str] = None
     enable_public_ip: Optional[bool] = True
+    # Workbench runtime image environment (VM image family or custom container).
+    vm_image_project: Optional[str] = None
+    vm_image_family: Optional[str] = None
+    custom_container_repository: Optional[str] = None
+    custom_container_tag: Optional[str] = None
+    # Shielded VM options for the execution VM.
+    enable_secure_boot: Optional[bool] = False
+    enable_vtpm: Optional[bool] = False
+    enable_integrity_monitoring: Optional[bool] = False
 
     @classmethod
     def from_dict(cls, data):

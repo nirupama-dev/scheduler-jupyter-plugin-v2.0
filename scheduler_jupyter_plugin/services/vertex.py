@@ -102,6 +102,41 @@ class Client:
 
         return blob_name if blob_name else file_path
 
+    def _build_workbench_runtime(self, job):
+        """Builds the workbenchRuntime image environment from the job request.
+
+        Returns a dict with either a `vmImage` (project + image family, matching
+        the Workbench "latest in a family" workflow) or a `customContainerImage`
+        (repository + optional tag). When neither is set, an empty dict is
+        returned so the service uses its default managed image.
+        """
+        workbench_runtime = {}
+        if job.vm_image_project:
+            vm_image = {"project": job.vm_image_project}
+            if job.vm_image_family:
+                vm_image["family"] = job.vm_image_family
+            workbench_runtime["vmImage"] = vm_image
+        elif job.custom_container_repository:
+            container_image = {"repository": job.custom_container_repository}
+            if job.custom_container_tag:
+                container_image["tag"] = job.custom_container_tag
+            workbench_runtime["customContainerImage"] = container_image
+        return workbench_runtime
+
+    def _build_shielded_instance_config(self, job):
+        """Builds the Shielded VM config, or None when all options are disabled."""
+        if (
+            job.enable_secure_boot
+            or job.enable_vtpm
+            or job.enable_integrity_monitoring
+        ):
+            return {
+                "enableSecureBoot": job.enable_secure_boot,
+                "enableVtpm": job.enable_vtpm,
+                "enableIntegrityMonitoring": job.enable_integrity_monitoring,
+            }
+        return None
+
     async def create_schedule(self, job, file_path, bucket_name):
         try:
             schedule_value = (
@@ -123,6 +158,8 @@ class Client:
             notebook_source = (
                 file_path if "gs://" in file_path else f"gs://{bucket_name}/{file_path}"
             )
+
+            workbench_runtime = self._build_workbench_runtime(job)
 
             api_endpoint = f"https://{job.region}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{job.region}/schedules"
             headers = self.create_headers()
@@ -154,10 +191,15 @@ class Client:
                         "gcsOutputUri": job.cloud_storage_bucket,
                         "serviceAccount": job.service_account,
                         "kernelName": job.kernel_name,
-                        "workbenchRuntime": {},
+                        "workbenchRuntime": workbench_runtime,
                     },
                 },
             }
+            shielded_instance_config = self._build_shielded_instance_config(job)
+            if shielded_instance_config:
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["shieldedInstanceConfig"] = shielded_instance_config
             if job.max_run_count:
                 payload["maxRunCount"] = job.max_run_count
             if job.start_time:
@@ -487,7 +529,7 @@ class Client:
                 "labels": {
                     "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench",
                 },
-                "workbenchRuntime": {},
+                "workbenchRuntime": self._build_workbench_runtime(data),
             }
             schedule_value = (
                 "* * * * *" if data.schedule_value == "" else data.schedule_value
@@ -531,6 +573,11 @@ class Client:
                     "diskSizeGb": data.disk_size,
                     "diskType": data.disk_type.split(" ", 1)[0],
                 }
+            shielded_instance_config = self._build_shielded_instance_config(data)
+            if shielded_instance_config:
+                custom_environment_spec["shieldedInstanceConfig"] = (
+                    shielded_instance_config
+                )
 
             payload = {
                 "displayName": data.display_name,

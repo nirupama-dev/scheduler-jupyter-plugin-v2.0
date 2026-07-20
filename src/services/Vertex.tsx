@@ -688,6 +688,36 @@ export class VertexServices {
               ? true
               : false
         };
+
+        // Load Workbench runtime image environment (VM image family or container).
+        const workbenchRuntime =
+          formattedResponse.createNotebookExecutionJobRequest
+            .notebookExecutionJob.workbenchRuntime;
+        if (workbenchRuntime?.vmImage) {
+          scheduleDetails.vm_image_project = workbenchRuntime.vmImage.project;
+          scheduleDetails.vm_image_family = workbenchRuntime.vmImage.family;
+        } else if (workbenchRuntime?.customContainerImage) {
+          scheduleDetails.custom_container_repository =
+            workbenchRuntime.customContainerImage.repository;
+          if (workbenchRuntime.customContainerImage.tag) {
+            scheduleDetails.custom_container_tag =
+              workbenchRuntime.customContainerImage.tag;
+          }
+        }
+
+        // Load Shielded VM options.
+        const shieldedInstanceConfig =
+          formattedResponse.createNotebookExecutionJobRequest
+            .notebookExecutionJob.customEnvironmentSpec?.shieldedInstanceConfig;
+        if (shieldedInstanceConfig) {
+          scheduleDetails.enable_secure_boot =
+            shieldedInstanceConfig.enableSecureBoot ?? false;
+          scheduleDetails.enable_vtpm =
+            shieldedInstanceConfig.enableVtpm ?? false;
+          scheduleDetails.enable_integrity_monitoring =
+            shieldedInstanceConfig.enableIntegrityMonitoring ?? false;
+        }
+
         setCreateCompleted(false);
         setRegion(region);
 

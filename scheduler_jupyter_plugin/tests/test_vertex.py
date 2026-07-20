@@ -19,6 +19,10 @@ import aiohttp
 
 import pytest
 
+from scheduler_jupyter_plugin.models.models import (
+    DescribeUpdateVertexJob,
+    DescribeVertexJob,
+)
 from scheduler_jupyter_plugin.services import vertex
 from scheduler_jupyter_plugin.tests.mocks import (
     MockDeleteSchedulesClientSession,
@@ -291,3 +295,96 @@ class TestCreateNewBucketMethod(unittest.TestCase):
         result = await self.instance.create_new_bucket(self.input_data)
 
         self.assertEqual(result, {})
+
+
+def _make_client():
+    return vertex.Client(
+        {
+            "access_token": "mock-token",
+            "project_id": "mock-project",
+            "region_id": "mock-region",
+        },
+        MagicMock(),
+        MagicMock(),
+    )
+
+
+class TestBuildWorkbenchRuntime(unittest.TestCase):
+    def setUp(self):
+        self.client = _make_client()
+
+    def test_default_image_returns_empty(self):
+        self.assertEqual(
+            self.client._build_workbench_runtime(DescribeVertexJob()), {}
+        )
+
+    def test_vm_image_with_family(self):
+        job = DescribeVertexJob(vm_image_project="proj", vm_image_family="fam")
+        self.assertEqual(
+            self.client._build_workbench_runtime(job),
+            {"vmImage": {"project": "proj", "family": "fam"}},
+        )
+
+    def test_custom_container_with_tag(self):
+        job = DescribeVertexJob(
+            custom_container_repository="gcr.io/p/i",
+            custom_container_tag="v1",
+        )
+        self.assertEqual(
+            self.client._build_workbench_runtime(job),
+            {"customContainerImage": {"repository": "gcr.io/p/i", "tag": "v1"}},
+        )
+
+    def test_custom_container_without_tag(self):
+        job = DescribeVertexJob(custom_container_repository="gcr.io/p/i")
+        self.assertEqual(
+            self.client._build_workbench_runtime(job),
+            {"customContainerImage": {"repository": "gcr.io/p/i"}},
+        )
+
+
+class TestBuildShieldedInstanceConfig(unittest.TestCase):
+    def setUp(self):
+        self.client = _make_client()
+
+    def test_all_disabled_returns_none(self):
+        self.assertIsNone(
+            self.client._build_shielded_instance_config(DescribeVertexJob())
+        )
+
+    def test_secure_boot_only(self):
+        job = DescribeVertexJob(enable_secure_boot=True)
+        self.assertEqual(
+            self.client._build_shielded_instance_config(job),
+            {
+                "enableSecureBoot": True,
+                "enableVtpm": False,
+                "enableIntegrityMonitoring": False,
+            },
+        )
+
+    def test_all_enabled(self):
+        job = DescribeVertexJob(
+            enable_secure_boot=True,
+            enable_vtpm=True,
+            enable_integrity_monitoring=True,
+        )
+        self.assertEqual(
+            self.client._build_shielded_instance_config(job),
+            {
+                "enableSecureBoot": True,
+                "enableVtpm": True,
+                "enableIntegrityMonitoring": True,
+            },
+        )
+
+    def test_supports_update_model(self):
+        data = DescribeUpdateVertexJob(enable_vtpm=True)
+        self.assertEqual(
+            self.client._build_shielded_instance_config(data),
+            {
+                "enableSecureBoot": False,
+                "enableVtpm": True,
+                "enableIntegrityMonitoring": False,
+            },
+        )
