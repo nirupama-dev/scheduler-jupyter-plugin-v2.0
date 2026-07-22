@@ -13,6 +13,8 @@
 # limitations under the License.
 
 
+import re
+
 import aiohttp
 import json
 from cron_descriptor import get_description
@@ -25,6 +27,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
     HTTP_STATUS_NO_CONTENT,
+    REGION_ID_REGEXP,
 )
 from scheduler_jupyter_plugin.models.models import (
     DescribeVertexJob,
@@ -55,6 +58,13 @@ class Client:
             "Content-Type": CONTENT_TYPE,
             "Authorization": f"Bearer {self._access_token}",
         }
+
+    @staticmethod
+    def _validate_region_id(region_id):
+        """Validate a region ID before it is used to build a request URL."""
+        if not region_id or not re.fullmatch(REGION_ID_REGEXP, region_id):
+            raise ValueError(f"Invalid region ID: {region_id}")
+        return region_id
 
     async def create_gcs_bucket(self, bucket_name):
         try:
@@ -139,6 +149,7 @@ class Client:
 
     async def create_schedule(self, job, file_path, bucket_name):
         try:
+            self._validate_region_id(job.region)
             schedule_value = (
                 "* * * * *" if job.schedule_value == "" else job.schedule_value
             )
@@ -266,6 +277,7 @@ class Client:
 
     async def list_uiconfig(self, region_id):
         try:
+            self._validate_region_id(region_id)
             uiconfig = []
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/ui/projects/{self.project_id}/locations/{region_id}/uiConfig"
 
@@ -315,6 +327,7 @@ class Client:
 
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
         try:
+            self._validate_region_id(region_id)
             result = {}
 
             if next_page_token:
@@ -394,6 +407,7 @@ class Client:
 
     async def pause_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:pause"
             )
@@ -419,6 +433,7 @@ class Client:
 
     async def resume_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:resume"
             )
@@ -444,6 +459,7 @@ class Client:
 
     async def delete_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
             )
@@ -469,6 +485,7 @@ class Client:
 
     async def get_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
             )
@@ -492,6 +509,7 @@ class Client:
 
     async def trigger_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             data = await self.get_schedule(region_id, schedule_id)
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs"
 
@@ -520,6 +538,7 @@ class Client:
 
     async def update_schedule(self, region_id, schedule_id, input_data):
         try:
+            self._validate_region_id(region_id)
             data = DescribeUpdateVertexJob(**input_data)
             custom_environment_spec = {}
             notebook_execution_job = {
@@ -626,6 +645,7 @@ class Client:
         self, region_id, schedule_id, order_by, page_size=None, start_date=None
     ):
         try:
+            self._validate_region_id(region_id)
             execution_jobs = []
             if page_size:
                 api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&pageSize={page_size}&orderBy={order_by}"

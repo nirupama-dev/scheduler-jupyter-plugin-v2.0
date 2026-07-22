@@ -54,6 +54,9 @@ BUCKET_NAME_REGEXP = re.compile("[a-z][a-z0-9_.-]{1,61}[a-z0-9]")
 #  output file names.
 DAG_RUN_ID_REGEXP = re.compile("[a-zA-Z0-9_:\\+.-]+")
 
+# Vertex AI region ID, e.g. "us-central1".
+REGION_ID_REGEXP = re.compile("[a-z]+-[a-z]+[0-9]+")
+
 HTTP_STATUS_OK = 200
 HTTP_STATUS_NO_CONTENT = 204
 HTTP_STATUS_FORBIDDEN = 403

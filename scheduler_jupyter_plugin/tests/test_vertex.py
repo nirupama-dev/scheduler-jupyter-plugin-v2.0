@@ -42,7 +42,7 @@ from scheduler_jupyter_plugin.tests.mocks import (
 async def test_get_schedule(monkeypatch, returncode, expected_result, jp_fetch):
     monkeypatch.setattr(aiohttp, "ClientSession", MockGetScheduleClientSession)
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
     mock_schedule_id = "mock-project-id"
 
     response = await jp_fetch(
@@ -59,7 +59,7 @@ async def test_get_schedule(monkeypatch, returncode, expected_result, jp_fetch):
 async def test_resume_schedule(monkeypatch, returncode, expected_result, jp_fetch):
     monkeypatch.setattr(aiohttp, "ClientSession", MockPostClientSession)
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
     mock_schedule_id = "mock-project-id"
 
     response = await jp_fetch(
@@ -78,7 +78,7 @@ async def test_resume_schedule(monkeypatch, returncode, expected_result, jp_fetc
 async def test_pause_schedule(monkeypatch, returncode, expected_result, jp_fetch):
     monkeypatch.setattr(aiohttp, "ClientSession", MockPostClientSession)
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
     mock_schedule_id = "mock-project-id"
 
     response = await jp_fetch(
@@ -99,7 +99,7 @@ async def test_pause_schedule(monkeypatch, returncode, expected_result, jp_fetch
 async def test_delete_schedule(monkeypatch, returncode, expected_result, jp_fetch):
     monkeypatch.setattr(aiohttp, "ClientSession", MockDeleteSchedulesClientSession)
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
     mock_schedule_id = "mock-project-id"
 
     response = await jp_fetch(
@@ -134,7 +134,7 @@ async def test_delete_schedule(monkeypatch, returncode, expected_result, jp_fetc
 async def test_list_uiconfig(monkeypatch, returncode, expected_result, jp_fetch):
     monkeypatch.setattr(aiohttp, "ClientSession", MockListUIConfigClientSession)
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
 
     response = await jp_fetch(
         "scheduler-plugin",
@@ -162,7 +162,7 @@ async def test_list_notebook_execution_jobs(
         aiohttp, "ClientSession", MockListNotebookExecutionJobsClientSession
     )
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
     mock_schedule_id = "mock-project-id"
     mock_order_by = "mock-order-by"
 
@@ -208,7 +208,7 @@ async def test_list_schedules(monkeypatch, returncode, expected_result, jp_fetch
     monkeypatch.setattr(vertex.Client, "parse_schedule", mock_get_description)
     monkeypatch.setattr(aiohttp, "ClientSession", MockListSchedulesClientSession)
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
     mock_page_size = "mock-page-size"
 
     response = await jp_fetch(
@@ -230,7 +230,7 @@ async def test_trigger_schedule(monkeypatch, returncode, expected_result, jp_fet
 
     monkeypatch.setattr(aiohttp, "ClientSession", MockTriggerSchedulesClientSession)
 
-    mock_region_id = "mock-region-id"
+    mock_region_id = "us-central1"
     mock_schedule_id = "mock-project-id"
 
     response = await jp_fetch(
@@ -388,3 +388,142 @@ class TestBuildShieldedInstanceConfig(unittest.TestCase):
                 "enableIntegrityMonitoring": False,
             },
         )
+
+
+MALICIOUS_REGION_IDS = [
+    "attacker.com/",
+    "169.254.169.254/",
+    "us-central1/",
+    "us-central1/../../evil",
+    "us-central1@evil.com",
+    "us-central1.evil.com",
+    "us-central1#frag",
+    "us-central1?a=b",
+    "US-CENTRAL1",
+    "localhost",
+    "",
+]
+
+
+class TestValidateRegionId(unittest.TestCase):
+    def test_valid_regions_pass(self):
+        for region in [
+            "us-central1",
+            "us-east4",
+            "us-west1",
+            "europe-west4",
+            "europe-west12",
+            "asia-northeast1",
+            "northamerica-northeast2",
+            "southamerica-east1",
+            "australia-southeast1",
+            "me-central1",
+            "africa-south1",
+        ]:
+            self.assertEqual(vertex.Client._validate_region_id(region), region)
+
+    def test_malicious_or_malformed_regions_raise(self):
+        for region in MALICIOUS_REGION_IDS + [None, "us_central1", "uscentral1"]:
+            with self.assertRaises(ValueError):
+                vertex.Client._validate_region_id(region)
+
+
+def _spy_client():
+    client = vertex.Client(
+        {
+            "access_token": "mock-token",
+            "project_id": "mock-project",
+            "region_id": "us-central1",
+        },
+        MagicMock(),
+        MagicMock(),
+    )
+    return client, client.client_session
+
+
+def _assert_no_outbound_request(session):
+    session.get.assert_not_called()
+    session.post.assert_not_called()
+    session.delete.assert_not_called()
+    session.patch.assert_not_called()
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_list_schedules_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.list_schedules(region, "10")
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_list_uiconfig_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.list_uiconfig(region)
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_get_schedule_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.get_schedule(region, "sched-1")
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_pause_schedule_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.pause_schedule(region, "sched-1")
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_resume_schedule_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.resume_schedule(region, "sched-1")
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_delete_schedule_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.delete_schedule(region, "sched-1")
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_trigger_schedule_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.trigger_schedule(region, "sched-1")
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_update_schedule_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.update_schedule(region, "sched-1", {})
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_list_notebook_execution_jobs_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    result = await client.list_notebook_execution_jobs(region, "sched-1", "createTime")
+    assert "Invalid region ID" in str(result)
+    _assert_no_outbound_request(session)
+
+
+@pytest.mark.parametrize("region", MALICIOUS_REGION_IDS)
+async def test_create_schedule_rejects_ssrf_region(region):
+    client, session = _spy_client()
+    job = DescribeVertexJob(region=region)
+    with pytest.raises(Exception):
+        await client.create_schedule(job, "gs://bucket/in.ipynb", "bucket")
+    _assert_no_outbound_request(session)
