@@ -25,8 +25,22 @@ gcloud config set compute/region us-central1
 # Install dependencies.
 sudo apt-get update
 sudo apt-get install -y --no-install-recommends git curl
-curl -sL https://deb.nodesource.com/setup_18.x | sudo bash -
+curl -sL https://deb.nodesource.com/setup_22.x | sudo bash -
 sudo apt-get --assume-yes install python3 python3-pip nodejs python3-venv
+
+# Guard against a silent fallback to the distro's (ancient) Node.js: if the
+# NodeSource setup above fails, apt installs Ubuntu's default Node, which is too
+# old to run the JS build (e.g. rimraf's ESM bin uses top-level await). Fail
+# loudly here instead of producing a confusing build error later.
+NODE_MAJOR="$(node -v)"
+NODE_MAJOR="${NODE_MAJOR#v}"
+NODE_MAJOR="${NODE_MAJOR%%.*}"
+if [ "${NODE_MAJOR}" -lt 20 ]; then
+  echo "ERROR: Node.js v${NODE_MAJOR} installed, but >= 20 is required (expected 22)." >&2
+  echo "The NodeSource setup step above likely failed; check the log for it." >&2
+  exit 1
+fi
+echo "Using Node.js $(node -v)."
 
 # Install latest jupyter lab and build.
 python3 -m venv latest
