@@ -13,6 +13,8 @@
 # limitations under the License.
 
 
+import re
+
 import aiohttp
 import json
 from cron_descriptor import get_description
@@ -25,6 +27,7 @@ from scheduler_jupyter_plugin.commons.constants import (
     HTTP_STATUS_OK,
     HTTP_STATUS_FORBIDDEN,
     HTTP_STATUS_NO_CONTENT,
+    REGION_ID_REGEXP,
 )
 from scheduler_jupyter_plugin.models.models import (
     DescribeVertexJob,
@@ -55,6 +58,13 @@ class Client:
             "Content-Type": CONTENT_TYPE,
             "Authorization": f"Bearer {self._access_token}",
         }
+
+    @staticmethod
+    def _validate_region_id(region_id):
+        """Validate a region ID before it is used to build a request URL."""
+        if not region_id or not re.fullmatch(REGION_ID_REGEXP, region_id):
+            raise ValueError(f"Invalid region ID: {region_id}")
+        return region_id
 
     async def create_gcs_bucket(self, bucket_name):
         try:
@@ -102,8 +112,44 @@ class Client:
 
         return blob_name if blob_name else file_path
 
+    def _build_workbench_runtime(self, job):
+        """Builds the workbenchRuntime image environment from the job request.
+
+        Returns a dict with either a `vmImage` (project + image family, matching
+        the Workbench "latest in a family" workflow) or a `customContainerImage`
+        (repository + optional tag). When neither is set, an empty dict is
+        returned so the service uses its default managed image.
+        """
+        workbench_runtime = {}
+        if job.vm_image_project:
+            vm_image = {"project": job.vm_image_project}
+            if job.vm_image_family:
+                vm_image["family"] = job.vm_image_family
+            workbench_runtime["vmImage"] = vm_image
+        elif job.custom_container_repository:
+            container_image = {"repository": job.custom_container_repository}
+            if job.custom_container_tag:
+                container_image["tag"] = job.custom_container_tag
+            workbench_runtime["customContainerImage"] = container_image
+        return workbench_runtime
+
+    def _build_shielded_instance_config(self, job):
+        """Builds the Shielded VM config, or None when all options are disabled."""
+        if (
+            job.enable_secure_boot
+            or job.enable_vtpm
+            or job.enable_integrity_monitoring
+        ):
+            return {
+                "enableSecureBoot": job.enable_secure_boot,
+                "enableVtpm": job.enable_vtpm,
+                "enableIntegrityMonitoring": job.enable_integrity_monitoring,
+            }
+        return None
+
     async def create_schedule(self, job, file_path, bucket_name):
         try:
+            self._validate_region_id(job.region)
             schedule_value = (
                 "* * * * *" if job.schedule_value == "" else job.schedule_value
             )
@@ -123,6 +169,8 @@ class Client:
             notebook_source = (
                 file_path if "gs://" in file_path else f"gs://{bucket_name}/{file_path}"
             )
+
+            workbench_runtime = self._build_workbench_runtime(job)
 
             api_endpoint = f"https://{job.region}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{job.region}/schedules"
             headers = self.create_headers()
@@ -154,10 +202,15 @@ class Client:
                         "gcsOutputUri": job.cloud_storage_bucket,
                         "serviceAccount": job.service_account,
                         "kernelName": job.kernel_name,
-                        "workbenchRuntime": {},
+                        "workbenchRuntime": workbench_runtime,
                     },
                 },
             }
+            shielded_instance_config = self._build_shielded_instance_config(job)
+            if shielded_instance_config:
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
+                    "customEnvironmentSpec"
+                ]["shieldedInstanceConfig"] = shielded_instance_config
             if job.max_run_count:
                 payload["maxRunCount"] = job.max_run_count
             if job.start_time:
@@ -170,7 +223,7 @@ class Client:
                 ]["networkSpec"]["network"] = job.network
                 payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
                     "customEnvironmentSpec"
-                ]["networkSpec"]["enableInternetAccess"] = "TRUE"
+                ]["networkSpec"]["enableInternetAccess"] = "TRUE" if job.enable_public_ip else "FALSE"
             if job.subnetwork and job.network:
                 payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
                     "customEnvironmentSpec"
@@ -224,6 +277,7 @@ class Client:
 
     async def list_uiconfig(self, region_id):
         try:
+            self._validate_region_id(region_id)
             uiconfig = []
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/ui/projects/{self.project_id}/locations/{region_id}/uiConfig"
 
@@ -273,6 +327,7 @@ class Client:
 
     async def list_schedules(self, region_id, page_size=100, next_page_token=None):
         try:
+            self._validate_region_id(region_id)
             result = {}
 
             if next_page_token:
@@ -352,6 +407,7 @@ class Client:
 
     async def pause_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:pause"
             )
@@ -377,6 +433,7 @@ class Client:
 
     async def resume_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}:resume"
             )
@@ -402,6 +459,7 @@ class Client:
 
     async def delete_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
             )
@@ -427,6 +485,7 @@ class Client:
 
     async def get_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             api_endpoint = (
                 f"https://{region_id}-aiplatform.googleapis.com/v1/{schedule_id}"
             )
@@ -450,6 +509,7 @@ class Client:
 
     async def trigger_schedule(self, region_id, schedule_id):
         try:
+            self._validate_region_id(region_id)
             data = await self.get_schedule(region_id, schedule_id)
             api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs"
 
@@ -478,6 +538,7 @@ class Client:
 
     async def update_schedule(self, region_id, schedule_id, input_data):
         try:
+            self._validate_region_id(region_id)
             data = DescribeUpdateVertexJob(**input_data)
             custom_environment_spec = {}
             notebook_execution_job = {
@@ -487,7 +548,7 @@ class Client:
                 "labels": {
                     "aiplatform.googleapis.com/colab_enterprise_entry_service": "workbench",
                 },
-                "workbenchRuntime": {},
+                "workbenchRuntime": self._build_workbench_runtime(data),
             }
             schedule_value = (
                 "* * * * *" if data.schedule_value == "" else data.schedule_value
@@ -524,12 +585,18 @@ class Client:
                 custom_environment_spec["networkSpec"] = {
                     "network": data.network,
                     "subnetwork": data.subnetwork,
+                    "enableInternetAccess": "TRUE" if data.enable_public_ip else "FALSE",
                 }
             if data.disk_size or data.disk_type:
                 custom_environment_spec["persistentDiskSpec"] = {
                     "diskSizeGb": data.disk_size,
                     "diskType": data.disk_type.split(" ", 1)[0],
                 }
+            shielded_instance_config = self._build_shielded_instance_config(data)
+            if shielded_instance_config:
+                custom_environment_spec["shieldedInstanceConfig"] = (
+                    shielded_instance_config
+                )
 
             payload = {
                 "displayName": data.display_name,
@@ -578,6 +645,7 @@ class Client:
         self, region_id, schedule_id, order_by, page_size=None, start_date=None
     ):
         try:
+            self._validate_region_id(region_id)
             execution_jobs = []
             if page_size:
                 api_endpoint = f"https://{region_id}-aiplatform.googleapis.com/v1/projects/{self.project_id}/locations/{region_id}/notebookExecutionJobs?filter=schedule={schedule_id}&pageSize={page_size}&orderBy={order_by}"

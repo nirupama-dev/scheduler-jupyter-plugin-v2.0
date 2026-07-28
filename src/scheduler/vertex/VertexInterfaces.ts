@@ -54,6 +54,16 @@ export interface ICreatePayload {
   disk_size: string;
   gcs_notebook_source?: string;
   kms_key_name?: string;
+  enable_public_ip?: boolean;
+  // Workbench runtime image environment (mutually exclusive: VM image family vs container).
+  vm_image_project?: string;
+  vm_image_family?: string;
+  custom_container_repository?: string;
+  custom_container_tag?: string;
+  // Shielded VM options for the execution VM.
+  enable_secure_boot?: boolean;
+  enable_vtpm?: boolean;
+  enable_integrity_monitoring?: boolean;
 }
 export interface IVertexScheduleList {
   displayName: string;
