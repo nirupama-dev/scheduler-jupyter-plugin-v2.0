@@ -147,6 +147,21 @@ class Client:
             }
         return None
 
+    def _apply_execution_identity(self, notebook_execution_job, job):
+        """Sets the execution identity on the notebook execution job in place.
+
+        `executionUser` (end-user credentials, EUC) and `serviceAccount` are the
+        two arms of the NotebookExecutionJob `execution_identity` oneof, so only
+        one may be sent. Sending both leaves the service to pick a winner, which
+        would silently run the notebook as an identity the user did not choose.
+        `executionUser` wins when set, matching the UI where picking EUC clears
+        the service account.
+        """
+        if job.execution_user:
+            notebook_execution_job["executionUser"] = job.execution_user
+        elif job.service_account:
+            notebook_execution_job["serviceAccount"] = job.service_account
+
     async def create_schedule(self, job, file_path, bucket_name):
         try:
             self._validate_region_id(job.region)
@@ -200,12 +215,15 @@ class Client:
                         },
                         "gcsNotebookSource": {"uri": notebook_source},
                         "gcsOutputUri": job.cloud_storage_bucket,
-                        "serviceAccount": job.service_account,
                         "kernelName": job.kernel_name,
                         "workbenchRuntime": workbench_runtime,
                     },
                 },
             }
+            self._apply_execution_identity(
+                payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"],
+                job,
+            )
             shielded_instance_config = self._build_shielded_instance_config(job)
             if shielded_instance_config:
                 payload["createNotebookExecutionJobRequest"]["notebookExecutionJob"][
@@ -563,14 +581,18 @@ class Client:
                 param.split(":")[0]: param.split(":")[1] for param in data.parameters
             }
 
+            # EUC only activates when the job carries a kernel name, so losing
+            # it here would silently downgrade the schedule to the service
+            # agent. The update mask replaces the whole notebook execution job,
+            # so an absent key and an explicit null clear it alike; the create
+            # form already blocks saving without a kernel.
             if data.kernel_name:
                 notebook_execution_job["kernelName"] = data.kernel_name
             if data.kms_key_name:
                 notebook_execution_job["encryptionSpec"] = {
                     "kmsKeyName": data.kms_key_name
                 }
-            if data.service_account:
-                notebook_execution_job["serviceAccount"] = data.service_account
+            self._apply_execution_identity(notebook_execution_job, data)
             if data.cloud_storage_bucket:
                 notebook_execution_job["gcsOutputUri"] = data.cloud_storage_bucket
             if data.parameters:

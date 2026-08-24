@@ -77,7 +77,10 @@ class DescribeVertexJob(BaseModel):
     region: str = None
     cloud_storage_bucket: str = None
     parameters: Optional[List[str]] = None
+    # Execution identity. service_account and execution_user are the two arms of
+    # the NotebookExecutionJob execution_identity oneof, so exactly one is sent.
     service_account: str = None
+    execution_user: Optional[str] = None
     network: Optional[str] = None
     subnetwork: Optional[str] = None
     start_time: Optional[str] = None
@@ -122,7 +125,10 @@ class DescribeUpdateVertexJob(BaseModel):
     region: Optional[str] = None
     cloud_storage_bucket: Optional[str] = None
     parameters: Optional[List[str]] = None
+    # Execution identity. service_account and execution_user are the two arms of
+    # the NotebookExecutionJob execution_identity oneof, so exactly one is sent.
     service_account: Optional[str] = None
+    execution_user: Optional[str] = None
     network: Optional[str] = None
     subnetwork: Optional[str] = None
     start_time: Optional[str] = None

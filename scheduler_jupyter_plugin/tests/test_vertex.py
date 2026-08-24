@@ -25,6 +25,8 @@ from scheduler_jupyter_plugin.models.models import (
 )
 from scheduler_jupyter_plugin.services import vertex
 from scheduler_jupyter_plugin.tests.mocks import (
+    MockClientSession,
+    MockResponse,
     MockDeleteSchedulesClientSession,
     MockGetScheduleClientSession,
     MockListNotebookExecutionJobsClientSession,
@@ -388,6 +390,163 @@ class TestBuildShieldedInstanceConfig(unittest.TestCase):
                 "enableIntegrityMonitoring": False,
             },
         )
+
+
+class TestApplyExecutionIdentity(unittest.TestCase):
+    """service_account and execution_user are a oneof, so only one is sent."""
+
+    def setUp(self):
+        self.client = _make_client()
+
+    def _apply(self, job):
+        notebook_execution_job = {}
+        self.client._apply_execution_identity(notebook_execution_job, job)
+        return notebook_execution_job
+
+    def test_service_account_only(self):
+        job = DescribeVertexJob(service_account="sa@project.iam.gserviceaccount.com")
+        self.assertEqual(
+            self._apply(job),
+            {"serviceAccount": "sa@project.iam.gserviceaccount.com"},
+        )
+
+    def test_execution_user_only(self):
+        job = DescribeVertexJob(execution_user="user@example.com")
+        self.assertEqual(self._apply(job), {"executionUser": "user@example.com"})
+
+    def test_both_set_sends_only_execution_user(self):
+        # Sending both arms of the oneof would let the service decide which
+        # identity the notebook runs as, so the chosen one must win outright.
+        job = DescribeVertexJob(
+            service_account="sa@project.iam.gserviceaccount.com",
+            execution_user="user@example.com",
+        )
+        self.assertEqual(self._apply(job), {"executionUser": "user@example.com"})
+
+    def test_neither_set_sends_nothing(self):
+        self.assertEqual(self._apply(DescribeVertexJob()), {})
+
+    def test_supports_update_model(self):
+        data = DescribeUpdateVertexJob(execution_user="user@example.com")
+        self.assertEqual(self._apply(data), {"executionUser": "user@example.com"})
+
+
+def _payload_client():
+    return vertex.Client(
+        {
+            "access_token": "mock-token",
+            "project_id": "mock-project",
+            "region_id": "us-central1",
+        },
+        MagicMock(),
+        MockClientSession(),
+    )
+
+
+def _base_job(**overrides):
+    fields = {
+        "display_name": "test-job",
+        "machine_type": "n1-standard-2 (2 CPUs, 8 GB RAM)",
+        "kernel_name": "python3",
+        "schedule_value": "* * * * *",
+        "time_zone": "UTC",
+        "region": "us-central1",
+        "cloud_storage_bucket": "gs://bucket",
+        "parameters": [],
+        "disk_type": "pd-standard (Standard Persistent Disk)",
+        "disk_size": "100",
+    }
+    fields.update(overrides)
+    return DescribeVertexJob(**fields)
+
+
+async def _created_execution_job(job):
+    client = _payload_client()
+    result = await client.create_schedule(job, "gs://bucket/n.ipynb", "bucket")
+    return result["results"][0]["json"]["createNotebookExecutionJobRequest"][
+        "notebookExecutionJob"
+    ]
+
+
+async def test_create_schedule_sends_execution_user_for_euc():
+    notebook_execution_job = await _created_execution_job(
+        _base_job(execution_user="user@example.com")
+    )
+
+    assert notebook_execution_job["executionUser"] == "user@example.com"
+    assert "serviceAccount" not in notebook_execution_job
+    # EUC only activates when the job carries a kernel name; without it the job
+    # succeeds while silently running as the service agent instead of the user.
+    assert notebook_execution_job["kernelName"] == "python3"
+
+
+async def test_create_schedule_sends_service_account_by_default():
+    notebook_execution_job = await _created_execution_job(
+        _base_job(service_account="sa@project.iam.gserviceaccount.com")
+    )
+
+    assert (
+        notebook_execution_job["serviceAccount"]
+        == "sa@project.iam.gserviceaccount.com"
+    )
+    assert "executionUser" not in notebook_execution_job
+
+
+async def test_create_schedule_omits_notebook_execution_job_id():
+    # A client-supplied non-numeric id makes the on-VM token exchange reject the
+    # resource name, leaving an EUC job stuck in PENDING with no error surfaced.
+    notebook_execution_job = await _created_execution_job(
+        _base_job(execution_user="user@example.com")
+    )
+
+    assert "notebookExecutionJobId" not in notebook_execution_job
+
+
+class _PatchCapturingSession:
+    """Captures the body of the PATCH that update_schedule sends."""
+
+    def __init__(self):
+        self.json_body = None
+
+    def patch(self, api_endpoint, headers=None, json=None):
+        self.json_body = json
+        return MockResponse({})
+
+
+async def test_update_schedule_always_sends_kernel_name():
+    session = _PatchCapturingSession()
+    client = vertex.Client(
+        {
+            "access_token": "mock-token",
+            "project_id": "mock-project",
+            "region_id": "us-central1",
+        },
+        MagicMock(),
+        session,
+    )
+
+    await client.update_schedule(
+        "us-central1",
+        "projects/p/locations/us-central1/schedules/1",
+        {
+            "display_name": "test-job",
+            "kernel_name": "python3",
+            "schedule_value": "* * * * *",
+            "time_zone": "UTC",
+            "parameters": [],
+            "execution_user": "user@example.com",
+            "gcs_notebook_source": "gs://bucket/n.ipynb",
+        },
+    )
+
+    notebook_execution_job = session.json_body["createNotebookExecutionJobRequest"][
+        "notebookExecutionJob"
+    ]
+    # Unconditional: an edit that drops the kernel name turns an EUC schedule
+    # back into one that silently runs as the service agent.
+    assert notebook_execution_job["kernelName"] == "python3"
+    assert notebook_execution_job["executionUser"] == "user@example.com"
+    assert "serviceAccount" not in notebook_execution_job
 
 
 MALICIOUS_REGION_IDS = [
