@@ -197,6 +197,18 @@ export const DEFAULT_CONTAINER_IMAGE_TAG = 'latest';
 export const SHIELDED_VM_DOC_URL =
   'https://cloud.google.com/compute/docs/instances/modifying-shielded-vm';
 
+// Execution identity selection. These are the two arms of the
+// NotebookExecutionJob execution_identity oneof, so exactly one is ever sent.
+export const EXECUTION_IDENTITY_SERVICE_ACCOUNT = 'serviceAccount';
+export const EXECUTION_IDENTITY_USER = 'executionUser';
+export const DEFAULT_EXECUTION_IDENTITY = EXECUTION_IDENTITY_SERVICE_ACCOUNT;
+
+export const EUC_DOC_URL =
+  'https://cloud.google.com/colab/docs/run-code-adc#end-user-credentials';
+
+export const EUC_CONSENT_MESSAGE =
+  'This user has not granted consent to run notebooks with their credentials. Grant consent, then refresh this browser tab and create the schedule again.';
+
 export const INPUT_HELPER_TEXT =
   'This schedule will run a copy of this notebook in its current state. If you edit the original notebook, you must create a new schedule to run the updated version of the notebook.';
 export const NO_EXECUTION_FOUND =

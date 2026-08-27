@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { Notification } from '@jupyterlab/apputils';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
 import { toastifyCustomStyle, toastifyCustomWidth } from './Config';
+import { EUC_CONSENT_MESSAGE } from './Const';
 
 // Recursively search for a 'message' key in an object
 function findMessage(obj: any): string | undefined {
@@ -30,6 +31,25 @@ export function extractUrls(text: string): string[] {
   const urlPattern =
     /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g;
   return text.match(urlPattern) || [];
+}
+
+/**
+ * Shows the missing-consent error as a toast linking to the consent screen.
+ *
+ * Consent is granted in a separate browser tab and nothing calls back into
+ * JupyterLab, so the message tells the user to refresh before retrying.
+ * @param consentUrl - the OAuth consent URL returned by the API
+ */
+export function handleEucConsentToast(consentUrl: string) {
+  toast.error(
+    <div>
+      {EUC_CONSENT_MESSAGE}{' '}
+      <a href={consentUrl} target="_blank" rel="noopener noreferrer">
+        Grant consent
+      </a>
+    </div>,
+    toastifyCustomWidth
+  );
 }
 
 /**

@@ -39,7 +39,10 @@ export interface ICreatePayload {
   region: string;
   cloud_storage_bucket: string | null;
   parameters?: string[];
+  // Execution identity: service_account and execution_user are the two arms of
+  // the NotebookExecutionJob execution_identity oneof, so only one is ever set.
   service_account: any | undefined;
+  execution_user?: string;
   network?: any | undefined;
   subnetwork?: any | undefined;
   shared_network?: any;

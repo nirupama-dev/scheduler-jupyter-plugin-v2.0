@@ -44,7 +44,8 @@ import {
 } from '../utils/Const';
 import React, { Dispatch, SetStateAction } from 'react';
 import ExpandToastMessage from '../scheduler/common/ExpandToastMessage';
-import { handleErrorToast } from '../utils/ErrorUtils';
+import { handleErrorToast, handleEucConsentToast } from '../utils/ErrorUtils';
+import { extractEucConsentUrl } from '../utils/EucConsentError';
 
 export class VertexServices {
   static readonly machineTypeAPIService = (
@@ -122,9 +123,16 @@ export class VertexServices {
         method: 'POST'
       });
       if (data.error) {
-        handleErrorToast({
-          error: data.error
-        });
+        // A missing-consent rejection carries the OAuth URL the user needs, so
+        // link them to it instead of showing the bare error they cannot act on.
+        const consentUrl = extractEucConsentUrl(data.error);
+        if (consentUrl) {
+          handleEucConsentToast(consentUrl);
+        } else {
+          handleErrorToast({
+            error: data.error
+          });
+        }
         setCreatingVertexScheduler(false);
       } else {
         Notification.success(
@@ -172,9 +180,16 @@ export class VertexServices {
         }
       );
       if (data.error) {
-        handleErrorToast({
-          error: data.error
-        });
+        // Editing a schedule can hit the same missing-consent rejection as
+        // creating one, so it gets the same actionable link.
+        const consentUrl = extractEucConsentUrl(data.error);
+        if (consentUrl) {
+          handleEucConsentToast(consentUrl);
+        } else {
+          handleErrorToast({
+            error: data.error
+          });
+        }
         setCreatingVertexScheduler(false);
       } else {
         Notification.success(
@@ -645,6 +660,11 @@ export class VertexServices {
               formattedResponse.createNotebookExecutionJobRequest
                 .notebookExecutionJob.serviceAccount
           },
+          // Only one arm of the execution_identity oneof comes back, so this is
+          // set exactly when the schedule was created to run as a user.
+          execution_user:
+            formattedResponse.createNotebookExecutionJobRequest
+              .notebookExecutionJob.executionUser,
           network: {
             name: primaryNetwork
               ? primaryNetwork[primaryNetwork.length - 1]

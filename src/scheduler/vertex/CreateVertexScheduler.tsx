@@ -50,12 +50,16 @@ import {
   DEFAULT_DISK_MIN_SIZE,
   DEFAULT_DISK_SIZE,
   DEFAULT_ENCRYPTION_SELECTED,
+  DEFAULT_EXECUTION_IDENTITY,
   DEFAULT_IMAGE_ENVIRONMENT,
   DEFAULT_KERNEL,
   DEFAULT_MACHINE_TYPE,
   DEFAULT_SERVICE_ACCOUNT,
   DISK_TYPE_VALUE,
+  EUC_DOC_URL,
   everyMinuteCron,
+  EXECUTION_IDENTITY_SERVICE_ACCOUNT,
+  EXECUTION_IDENTITY_USER,
   IMAGE_ENVIRONMENT_CONTAINER,
   IMAGE_ENVIRONMENT_DEFAULT,
   IMAGE_ENVIRONMENT_VM_IMAGE,
@@ -255,6 +259,13 @@ const CreateVertexScheduler = ({
     useState<string>('');
   const [customContainerTag, setCustomContainerTag] = useState<string>('');
 
+  // Execution identity. The two values are the arms of the API's
+  // execution_identity oneof, so selecting one clears the other.
+  const [executionIdentity, setExecutionIdentity] = useState<string>(
+    DEFAULT_EXECUTION_IDENTITY
+  );
+  const [executionUser, setExecutionUser] = useState<string>('');
+
   // Shielded VM options for the execution VM (all disabled by default).
   const [enableSecureBoot, setEnableSecureBoot] = useState<boolean>(false);
   const [enableVtpm, setEnableVtpm] = useState<boolean>(false);
@@ -374,6 +385,27 @@ const CreateVertexScheduler = ({
       | null
   ) => {
     setServiceAccountSelected(value);
+  };
+
+  /**
+   * Handles the execution identity selection.
+   *
+   * The API models the service account and the execution user as a oneof, so
+   * the field belonging to the identity that was not chosen is cleared here.
+   * That keeps the payload unambiguous and stops a stale value from a previous
+   * selection being sent.
+   * @param {React.ChangeEvent<HTMLInputElement>} event the radio change event
+   */
+  const handleExecutionIdentityChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = event.target.value;
+    setExecutionIdentity(value);
+    if (value === EXECUTION_IDENTITY_USER) {
+      setServiceAccountSelected(null);
+    } else {
+      setExecutionUser('');
+    }
   };
 
   /**
@@ -862,7 +894,10 @@ const CreateVertexScheduler = ({
       (acceleratorType && !acceleratedCount) ||
       kernelSelected === null ||
       cloudStorage === null ||
-      serviceAccountSelected === null ||
+      // Exactly one arm of the execution_identity oneof must be filled in.
+      (executionIdentity === EXECUTION_IDENTITY_USER
+        ? executionUser.trim() === ''
+        : serviceAccountSelected === null) ||
       (networkSelected === 'networkInThisProject' &&
         subNetworkSelected &&
         (primaryNetworkSelected === null ||
@@ -926,7 +961,16 @@ const CreateVertexScheduler = ({
       max_run_count: scheduleMode === 'runNow' ? '1' : maxRuns,
       region: region,
       cloud_storage_bucket: `gs://${cloudStorage}`,
-      service_account: serviceAccountSelected?.email,
+      // Only the selected arm of the execution_identity oneof is sent; the
+      // other stays undefined so the backend never has to pick a winner.
+      service_account:
+        executionIdentity === EXECUTION_IDENTITY_USER
+          ? undefined
+          : serviceAccountSelected?.email,
+      execution_user:
+        executionIdentity === EXECUTION_IDENTITY_USER
+          ? executionUser.trim()
+          : undefined,
       network:
         networkSelected === 'networkInThisProject'
           ? editMode
@@ -1150,6 +1194,16 @@ const CreateVertexScheduler = ({
         );
       } else {
         setImageEnvironmentSelected(IMAGE_ENVIRONMENT_DEFAULT);
+      }
+
+      // Load the execution identity. Only one arm of the oneof comes back, so
+      // an execution user on the schedule means it was created with EUC.
+      if (vertexSchedulerDetails.execution_user) {
+        setExecutionIdentity(EXECUTION_IDENTITY_USER);
+        setExecutionUser(vertexSchedulerDetails.execution_user);
+      } else {
+        setExecutionIdentity(EXECUTION_IDENTITY_SERVICE_ACCOUNT);
+        setExecutionUser('');
       }
 
       // Load Shielded VM options.
@@ -1728,51 +1782,126 @@ const CreateVertexScheduler = ({
             <LearnMore path={SHIELDED_VM_DOC_URL} />
           </div>
 
-          <div className="create-scheduler-form-element panel-margin block-seperation">
-            <Autocomplete
-              className="create-scheduler-style-trigger"
-              options={serviceAccountList}
-              getOptionLabel={option => option.displayName}
-              value={
-                serviceAccountList.find(
-                  option => option.email === serviceAccountSelected?.email
-                ) || null
-              }
-              clearIcon={false}
-              loading={serviceAccountLoading}
-              onChange={(_event, val) => handleServiceAccountChange(val)}
-              renderInput={params => (
-                <TextField {...params} label="Service account*" />
-              )}
-              renderOption={(props, option) => (
-                <Box
-                  component="li"
-                  {...props}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-start'
-                  }}
-                >
-                  <Typography variant="body1">{option.displayName}</Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {option.email}
-                  </Typography>
-                </Box>
-              )}
-            />
+          <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
+            Execution identity
           </div>
-          {!serviceAccountSelected && !errorMessageServiceAccount && (
-            <ErrorMessage
-              message="Service account is required"
-              showIcon={false}
-            />
-          )}
 
-          {errorMessageServiceAccount && (
-            <span className="error-message-warn error-key-missing">
-              {errorMessageServiceAccount}
-            </span>
+          <div className="create-scheduler-form-element panel-margin">
+            <FormControl>
+              <RadioGroup
+                aria-labelledby="execution-identity-radio-buttons-group"
+                name="execution-identity-radio-buttons-group"
+                value={executionIdentity}
+                onChange={handleExecutionIdentityChange}
+                data-testid={`${executionIdentity}-selected`}
+              >
+                <FormControlLabel
+                  value={EXECUTION_IDENTITY_SERVICE_ACCOUNT}
+                  className="create-scheduler-label-style"
+                  control={<Radio size="small" />}
+                  label={
+                    <Typography sx={{ fontSize: 13 }}>
+                      Service account
+                    </Typography>
+                  }
+                />
+                <span className="sub-para tab-text-sub-cl encryption-radio">
+                  The notebook runs with the permissions of the selected service
+                  account
+                </span>
+                <FormControlLabel
+                  value={EXECUTION_IDENTITY_USER}
+                  className="create-scheduler-label-style"
+                  control={<Radio size="small" />}
+                  label={
+                    <Typography sx={{ fontSize: 13 }}>
+                      User credentials
+                    </Typography>
+                  }
+                />
+                <span className="sub-para tab-text-sub-cl encryption-radio">
+                  The notebook runs as the user below, and can only access what
+                  they can access. The user must be the account this plugin is
+                  authenticated as, and must have granted consent.
+                </span>
+              </RadioGroup>
+            </FormControl>
+          </div>
+
+          <div className="learn-more-a-tag learn-more-url">
+            <LearnMore path={EUC_DOC_URL} />
+          </div>
+
+          {executionIdentity === EXECUTION_IDENTITY_SERVICE_ACCOUNT ? (
+            <>
+              <div className="create-scheduler-form-element panel-margin block-seperation">
+                <Autocomplete
+                  className="create-scheduler-style-trigger"
+                  options={serviceAccountList}
+                  getOptionLabel={option => option.displayName}
+                  value={
+                    serviceAccountList.find(
+                      option => option.email === serviceAccountSelected?.email
+                    ) || null
+                  }
+                  clearIcon={false}
+                  loading={serviceAccountLoading}
+                  onChange={(_event, val) => handleServiceAccountChange(val)}
+                  renderInput={params => (
+                    <TextField {...params} label="Service account*" />
+                  )}
+                  renderOption={(props, option) => (
+                    <Box
+                      component="li"
+                      {...props}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-start'
+                      }}
+                    >
+                      <Typography variant="body1">
+                        {option.displayName}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        {option.email}
+                      </Typography>
+                    </Box>
+                  )}
+                />
+              </div>
+              {!serviceAccountSelected && !errorMessageServiceAccount && (
+                <ErrorMessage
+                  message="Service account is required"
+                  showIcon={false}
+                />
+              )}
+
+              {errorMessageServiceAccount && (
+                <span className="error-message-warn error-key-missing">
+                  {errorMessageServiceAccount}
+                </span>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="create-scheduler-form-element panel-margin block-seperation">
+                <Input
+                  className="create-scheduler-style"
+                  value={executionUser}
+                  onChange={e => setExecutionUser(e.target.value)}
+                  type="text"
+                  placeholder="user@example.com"
+                  Label="User email*"
+                />
+              </div>
+              {executionUser.trim() === '' && (
+                <ErrorMessage
+                  message="User email is required"
+                  showIcon={false}
+                />
+              )}
+            </>
           )}
 
           <div className="create-job-scheduler-text-para create-job-scheduler-sub-title">
